@@ -1,0 +1,6 @@
+ Volume "database_mysql_data"  Creating
+ Volume "database_mysql_data"  Created
+ Container mysql_db  Creating
+ Container mysql_db  Created
+ Container mysql_db  Starting
+ Container mysql_db  Started
