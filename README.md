@@ -11,7 +11,7 @@ Diagram and schema design for the database and information system.
 Short link: https://bit.ly/diagrams_oib
 
 ## Database Setup
-A Docker Compose MySQL instance is available to initialize the database automatically. The startup script will automatically create a `.env` file in the `database` folder if it doesn't exist, prompting you for the MySQL root password, user username, and user password. The database name is fixed to "users". The other environment variables (root password, user username, and user password) will be prompted for during script execution whereas other databases are added automatically.
+A Docker Compose MySQL instance is available to initialize the database automatically. The startup script will automatically create a `.env` file in the `database` folder if it doesn't exist, prompting you for the MySQL root password, user username, and user password. The default database name is fixed to "users_db" whereas the other other databases are added automatically with the startup scripts.
 
 To get started:
 
@@ -24,7 +24,7 @@ To get started:
 The automatically generated .env file should contain the following structure (with values provided by you during the prompt):
 ```
 MYSQL_ROOT_PASSWORD=root_password_of_your_choice
-MYSQL_DATABASE=users
+MYSQL_DATABASE=users_db
 MYSQL_USER=user_username_of_your_choice
 MYSQL_PASSWORD=user_password_of_your_choice
 ```

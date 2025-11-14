@@ -11,7 +11,7 @@ if [ ! -f .env ]; then
     read -s MYSQL_PASSWORD
 
     # Fixed MySQL database
-    MYSQL_DATABASE=users
+    MYSQL_DATABASE=users_db
 
     # Create .env file
     cat > .env << EOF

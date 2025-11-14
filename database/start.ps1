@@ -8,7 +8,7 @@ if (!(Test-Path .env)) {
     $MYSQL_PASSWORD = Read-Host "Enter the MySQL user password" -AsSecureString
 
     # Fixed MySQL database
-    $MYSQL_DATABASE = "users"
+    $MYSQL_DATABASE = "users_db"
 
     # Convert secure strings to plain text
     $rootPass = [Runtime.InteropServices.Marshal]::PtrToStringAuto([Runtime.InteropServices.Marshal]::SecureStringToBSTR($MYSQL_ROOT_PASSWORD))

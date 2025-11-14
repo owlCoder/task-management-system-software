@@ -8,7 +8,7 @@ if not exist .env (
     set /p MYSQL_USER=
     echo Enter the MySQL user password:
     set /p MYSQL_PASSWORD=
-    set MYSQL_DATABASE=users
+    set MYSQL_DATABASE=users_db
     (
         echo MYSQL_ROOT_PASSWORD=!MYSQL_ROOT_PASSWORD!
         echo MYSQL_DATABASE=!MYSQL_DATABASE!
