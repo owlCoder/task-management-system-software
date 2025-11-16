@@ -1,11 +1,10 @@
-
 DROP TABLE IF EXISTS projects_db.project_task;
 DROP TABLE IF EXISTS projects_db.project_user;
 DROP TABLE IF EXISTS projects_db.projects;
 
 CREATE TABLE IF NOT EXISTS projects_db.projects (
-  projectuuid VARCHAR(300) NOT NULL PRIMARY KEY,
-  image_file_uuid VARCHAR(300), -- file uuid
+  project_id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+  image_file_id INT, -- reference to uploaded_files_db.uploaded_files.id
   project_name VARCHAR(100) NOT NULL,
   project_description VARCHAR(100), -- We should probably allow longer descriptions
   total_weekly_hours_required INT NULL,
@@ -15,15 +14,17 @@ CREATE TABLE IF NOT EXISTS projects_db.projects (
 );
 
 CREATE TABLE IF NOT EXISTS projects_db.project_user (
-  pu_uuid VARCHAR(300) NOT NULL PRIMARY KEY,
-  projectuuid VARCHAR(300) NOT NULL,
-  userid VARCHAR(300) NOT NULL,
-  CONSTRAINT fk_pu_project FOREIGN KEY (projectuuid) REFERENCES projects_db.projects(projectuuid) ON DELETE CASCADE,
+  pu_id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+  project_id INT NOT NULL,
+  user_id INT NOT NULL,
+  CONSTRAINT fk_pu_project FOREIGN KEY (project_id) REFERENCES projects_db.projects(project_id) ON DELETE CASCADE,
+  CONSTRAINT fk_pu_user FOREIGN KEY (user_id) REFERENCES users_db.users(user_id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS projects_db.project_task (
-  pt_uuid VARCHAR(300) NOT NULL PRIMARY KEY,
-  projectuuid VARCHAR(300) NOT NULL,
-  taskuuid VARCHAR(300) NOT NULL,
-  CONSTRAINT fk_pt_project FOREIGN KEY (projectuuid) REFERENCES projects_db.projects(projectuuid) ON DELETE CASCADE,
+  pt_id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+  project_id INT NOT NULL,
+  task_id INT NOT NULL,
+  CONSTRAINT fk_pt_project FOREIGN KEY (project_id) REFERENCES projects_db.projects(project_id) ON DELETE CASCADE,
+  CONSTRAINT fk_pt_task FOREIGN KEY (task_id) REFERENCES tasks_db.tasks(task_id) ON DELETE CASCADE
 );

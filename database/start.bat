@@ -52,9 +52,6 @@ exit /b 1
 :ready
 echo Docker is ready!
 
-echo Waiting an additional 10 seconds for full Docker startup...
-timeout /t 10 /nobreak >nul
-
 set maxRetries=10
 set retryCount=0
 

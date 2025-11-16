@@ -1,30 +1,22 @@
 DROP TABLE IF EXISTS users_db.users;
+DROP TABLE IF EXISTS users_db.user_roles;
 
--- Table: users (in users_db)
+CREATE TABLE IF NOT EXISTS users_db.user_roles (
+  role_id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+  role_name VARCHAR(100) NOT NULL UNIQUE
+);
+
 CREATE TABLE IF NOT EXISTS users_db.users (
-  useruuid VARCHAR(300) NOT NULL PRIMARY KEY,
+  user_id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
   username VARCHAR(100) NOT NULL UNIQUE,
   password_hash VARCHAR(300) NOT NULL,
-  user_role VARCHAR(100) NOT NULL, 
-  -- SysAdmin, Admin, Analytics & Development Manager, Animation Worker, 
-  -- Audio & Music Stagist, Project Manager
+  user_role INT,
   email VARCHAR(100),
   is_deleted BOOLEAN NOT NULL DEFAULT FALSE,
   weekly_working_hour_sum INT NULL,
-  -- created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  -- updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  
-  -- Add this check later, when enums have been defined
-  -- CONSTRAINT chk_user_role CHECK (
-  -- user_role IN (
-  --   'SysAdmin',
-  --   'Admin',
-  --   'Analytics & Development Manager',
-  --   'Animation Worker',
-  --   'Audio & Music Stagist',
-  --   'Project Manager'
-  -- )
-  -- ),
-  CONSTRAINT chk_weekly_hours CHECK (weekly_working_hour_sum < 40 OR weekly_working_hour_sum IS NULL)
+  CONSTRAINT chk_weekly_hours CHECK (weekly_working_hour_sum < 40 OR weekly_working_hour_sum IS NULL),
+  CONSTRAINT chk_email_format CHECK (
+    email IS NULL OR email REGEXP '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$'
+  ),
+  CONSTRAINT fk_user_role FOREIGN KEY (user_role) REFERENCES users_db.user_roles(role_id)
 );
-

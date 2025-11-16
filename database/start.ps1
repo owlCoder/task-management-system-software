@@ -79,10 +79,6 @@ if ($elapsed -ge $maxWaitTime) {
     exit 1
 }
 
-# Additional wait to ensure full startup
-Write-Host "Waiting an additional 10 seconds for full Docker startup..."
-Start-Sleep -Seconds 10
-
 # Run docker compose up -d with retry if "unable to get image" error
 $maxRetries = 10
 $retryCount = 0
