@@ -2,9 +2,9 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 
-import { IGatewayService } from './Domain/services/IGatewayService';
-import { GatewayService } from './Services/GatewayService';
-import { GatewayController } from './WebAPI/GatewayController';
+import { IGatewayAuthService } from './Domain/services/IGatewayAuthService';
+import { GatewayAuthService } from './Services/GatewayAuthService';
+import { GatewayAuthController } from './WebAPI/GatewayAuthController';
 
 dotenv.config({ quiet: true });
 
@@ -23,12 +23,12 @@ app.use(cors({
 app.use(express.json());
 
 // Services
-const gatewayService: IGatewayService = new GatewayService();
+const gatewayAuthService: IGatewayAuthService = new GatewayAuthService();
 
 // WebAPI routes
-const gatewayController = new GatewayController(gatewayService);
+const gatewayAuthController = new GatewayAuthController(gatewayAuthService);
 
 // Registering routes
-app.use('/api/v1', gatewayController.getRouter());
+app.use('/api/v1', gatewayAuthController.getRouter());
 
 export default app;
