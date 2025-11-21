@@ -1,9 +1,7 @@
-import { UserRole } from "../enums/UserRole";
 
 export interface RegistrationUserDTO {
     username: string;
-    role: UserRole;
+    role: number;
     password: string;
     email: string;
-    profileImage: string;
 }

@@ -11,6 +11,7 @@ import { AuthService } from './Services/AuthService';
 import { AuthController } from './WebAPI/controllers/AuthController';
 import { ILogerService } from './Domain/services/ILogerService';
 import { LogerService } from './Services/LogerService';
+import { UserRole } from './Domain/models/UserRole';
 
 dotenv.config({ quiet: true });
 
@@ -32,9 +33,10 @@ initialize_database();
 
 // ORM Repositories
 const userRepository: Repository<User> = Db.getRepository(User);
+const userRoleRepository: Repository<UserRole> = Db.getRepository(UserRole);
 
 // Services
-const authService: IAuthService = new AuthService(userRepository);
+const authService: IAuthService = new AuthService(userRepository, userRoleRepository);
 const logerService: ILogerService = new LogerService();
 
 // WebAPI routes
