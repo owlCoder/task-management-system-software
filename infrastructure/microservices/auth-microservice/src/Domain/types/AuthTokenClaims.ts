@@ -1,5 +1,5 @@
 export type AuthTokenClaims = {
-  id: number;
+  user_id: number;
   username: string;
-  role: string;
+  role: number;
 };
