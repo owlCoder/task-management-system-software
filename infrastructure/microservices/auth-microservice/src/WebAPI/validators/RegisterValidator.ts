@@ -1,5 +1,4 @@
 import { RegistrationUserDTO } from "../../Domain/DTOs/RegistrationUserDTO";
-import { UserRole } from "../../Domain/enums/UserRole";
 
 export function validateRegistrationData(data: RegistrationUserDTO): { success: boolean; message?: string } {
   if (!data.username || data.username.trim().length < 3) {
@@ -11,8 +10,8 @@ export function validateRegistrationData(data: RegistrationUserDTO): { success: 
   if (!data.email || !data.email.includes("@")) {
     return { success: false, message: "Invalid email address" };
   }
-  if (!Object.values(UserRole).includes(data.role)) {
-    return { success: false, message: "Invalid role" };
+  if (typeof data.role !== "number" || data.role < 0) {
+    return { success: false, message: "Role must be a valid number" };
   }
   return { success: true };
 }
