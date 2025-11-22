@@ -21,20 +21,34 @@ export class GatewayAuthController {
     private async login(req: Request, res: Response): Promise<void> {
         const data: LoginUserDTO = req.body;
         const result = await this.gatewayAuthService.login(data);
-        res.status(200).json(result);
+        if(result.success){
+            res.status(200).json(result.data);
+        }
+        else{
+            res.status(result.status).json({ message: result.message });
+        }
     }
     
     private async register(req: Request, res: Response): Promise<void> {
-        console.error(req.body);
         const data: RegistrationUserDTO = req.body;
         const result = await this.gatewayAuthService.register(data);
-        res.status(200).json(result);
+        if(result.success){
+            res.status(201).json(result.data);
+        }
+        else{
+            res.status(result.status).json({ message: result.message });
+        }
     }
 
     private async verifyOtp(req: Request, res: Response): Promise<void> {
         const browserData: BrowserDataDTO = req.body;
         const result = await this.gatewayAuthService.verifyOtp(browserData);
-        res.status(200).json(result);
+        if(result.success){
+            res.status(200).json(result.data);
+        }
+        else{
+            res.status(result.status).json({ message: result.message });
+        }
     }
 
     public getRouter(): Router {
