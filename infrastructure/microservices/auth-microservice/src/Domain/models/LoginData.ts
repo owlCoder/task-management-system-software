@@ -1,5 +1,6 @@
-export type LoginData = {
-    user_id: number;
-    otp_code: string;
-    date_created: Date;
+export interface LoginData {
+  userId: number;
+  otpCode: string;
+  dateCreated: Date;
+  retryCount: number;
 }
