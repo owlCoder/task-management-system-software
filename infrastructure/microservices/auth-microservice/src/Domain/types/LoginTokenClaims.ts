@@ -1,10 +1,21 @@
 /**
  * Defines the structure of the claims contained in a login token.
- * These claims include the user ID, session ID, issued at time, and expiration time. 
+ * Either session fields are present (for OTP-required login) or user fields are present (for direct login).
  */
-export type LoginTokenClaims = {
+
+type SessionClaims = {
   user_id: number;
+  otp_required: true;
   session_id: string;
   iat: number; // Issued at
   exp: number; // Expires at
 };
+
+type UserClaims = {
+  user_id: number;
+  otp_required: false;
+  username: string;
+  role: number;
+};
+
+export type LoginTokenClaims = SessionClaims | UserClaims;

@@ -12,6 +12,9 @@ import { AuthController } from './WebAPI/controllers/AuthController';
 import { ILogerService } from './Domain/services/ILogerService';
 import { LogerService } from './Services/LogerService';
 import { UserRole } from './Domain/models/UserRole';
+import { RoleService } from './Services/RoleService';
+import { SessionService } from './Services/SessionService';
+import { EmailService } from './Services/EmailService';
 
 dotenv.config({ quiet: true });
 
@@ -29,20 +32,24 @@ app.use(cors({
 
 app.use(express.json());
 
-initialize_database();
+(async () => {
+  await initialize_database();
 
-// ORM Repositories
-const userRepository: Repository<User> = Db.getRepository(User);
-const userRoleRepository: Repository<UserRole> = Db.getRepository(UserRole);
+  // ORM Repositories
+  const userRepository: Repository<User> = Db.getRepository(User);
+  const userRoleRepository: Repository<UserRole> = Db.getRepository(UserRole);
 
-// Services
-const authService: IAuthService = new AuthService(userRepository, userRoleRepository);
-const logerService: ILogerService = new LogerService();
+  // Services
+  const emailService = new EmailService();
+  const sessionService = new SessionService();
+  const roleService = new RoleService(userRoleRepository);
+  const authService: IAuthService = new AuthService(userRepository, emailService, sessionService, roleService);
+  const logerService: ILogerService = new LogerService();
 
-// WebAPI routes
-const authController = new AuthController(authService, logerService);
+  // WebAPI routes
+  const authController = new AuthController(authService, logerService);
 
-// Registering routes
-app.use('/api/v1', authController.getRouter());
-
+  // Registering routes
+  app.use('/api/v1', authController.getRouter());
+})();
 export default app;

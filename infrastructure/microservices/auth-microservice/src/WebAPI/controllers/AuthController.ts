@@ -6,11 +6,14 @@ import { RegistrationUserDTO } from '../../Domain/DTOs/RegistrationUserDTO';
 import { validateLoginData } from '../validators/LoginValidator';
 import { validateRegistrationData } from '../validators/RegisterValidator';
 import { ILogerService } from '../../Domain/services/ILogerService';
+import { validateOtpVerificationData } from '../validators/OtpValidator';
+import { env } from 'process';
 
 export class AuthController {
   private router: Router;
   private authService: IAuthService;
   private readonly logerService: ILogerService;
+  private readonly jwtSessionExpiration: number = parseInt(env.JWT_SESSION_EXPIRATION_MINUTES || '30', 10);
 
   constructor(authService: IAuthService, logerService: ILogerService) {
     this.router = Router();
@@ -45,13 +48,25 @@ export class AuthController {
       const result = await this.authService.login(data);
 
       if (result.authenticated) {
+        if (result.userData && result.userData.otp_required === true) {
         res.status(200).json({
           success: true,
           session_id: result.userData?.session_id,
-          otp_required: true,
+          user_id: result.userData?.user_id,
           iat: result.userData?.iat,
           exp: result.userData?.exp
         });
+        } 
+        else if(result.userData && result.userData.otp_required === false)
+        {
+          const token = jwt.sign(
+          { id: result.userData?.user_id, username: result.userData?.username, role: result.userData?.role },
+          process.env.JWT_SECRET ?? "",
+          { expiresIn: `${this.jwtSessionExpiration}m` }
+        );
+
+        res.status(201).json({ success: true, message: "Login successful", token });
+        }
       } else {
         res.status(401).json({ success: false, message: "Invalid credentials!" });
       }
@@ -81,7 +96,7 @@ export class AuthController {
         const token = jwt.sign(
           { id: result.userData?.user_id, username: result.userData?.username, role: result.userData?.role },
           process.env.JWT_SECRET ?? "",
-          { expiresIn: '30m' }
+          { expiresIn: `${this.jwtSessionExpiration}m` }
         );
 
         res.status(201).json({ success: true, message: "Registration successful", token });
@@ -104,13 +119,20 @@ export class AuthController {
 
       const { user_id, session_id, otp } = req.body;
 
+      const validation = validateOtpVerificationData({ user_id, session_id }, otp);
+  
+      if (!validation.success) {
+        res.status(400).json({ success: false, message: validation.message });
+        return;
+      }
+
       // Call the auth service to verify the OTP
       const result = await this.authService.verifyOtp({ user_id, session_id }, otp);
       if (result.authenticated) {
           const token = jwt.sign(
           { id: result.userData?.user_id, username: result.userData?.username, role: result.userData?.role },
           process.env.JWT_SECRET ?? "",
-          { expiresIn: '30m' }
+          { expiresIn: `${this.jwtSessionExpiration}m` }
         );
 
         res.status(200).json({ success: true, message: "OTP verified successfully", token });
