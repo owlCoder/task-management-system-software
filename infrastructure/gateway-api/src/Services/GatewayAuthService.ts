@@ -23,7 +23,16 @@ export class GatewayAuthService implements IGatewayAuthService {
     async login(data: LoginUserDTO): Promise<Result<AuthResponseType>> {
         try {
             const response = await this.authClient.post<AuthResponseType>("/auth/login", data);
-            return { success: true, data: response.data };
+            return {
+                success: true,
+                data: {
+                    success: response.data.success,
+                    otp_required: response.data.otp_required,
+                    session: response.data.otp_required ? response.data.session : undefined,
+                    token: !response.data.otp_required ? response.data.token : undefined,
+                    message: response.data.message
+                }
+            };
         } catch(error) {
             return ErrorHandlingService.handle(error, "Auth Service");
         }
@@ -32,7 +41,14 @@ export class GatewayAuthService implements IGatewayAuthService {
     async register(data: RegistrationUserDTO): Promise<Result<AuthResponseType>> {
         try {
             const response = await this.authClient.post<AuthResponseType>("/auth/register", data);
-            return { success: true, data: response.data };
+            return { 
+                success: true, 
+                data: {
+                    success: response.data.success,
+                    token: response.data.token,
+                    message: response.data.message
+                }
+            };
         } catch(error) {
             return ErrorHandlingService.handle(error, "Auth Service");
         }
@@ -41,7 +57,14 @@ export class GatewayAuthService implements IGatewayAuthService {
     async verifyOtp(browserData: BrowserDataDTO): Promise<Result<AuthResponseType>> {
         try {
             const response = await this.authClient.post<AuthResponseType>("/auth/verify-otp", browserData);
-            return { success: true, data: response.data };
+            return {
+                success: true,
+                data: {
+                    success: response.data.success,
+                    token: response.data.token,
+                    message: response.data.message
+                }
+            };
         } catch(error) {
             return ErrorHandlingService.handle(error, "Auth Service");
         }

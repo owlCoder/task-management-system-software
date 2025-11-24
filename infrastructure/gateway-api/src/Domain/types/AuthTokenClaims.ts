@@ -4,4 +4,5 @@ export type AuthTokenClaimsType = {
   id: number;
   username: string;
   role: UserRole;
+  token: string;
 };

@@ -1,6 +1,9 @@
-import { AuthTokenClaimsType } from "./AuthTokenClaims";
+import { OtpRequestType } from "./OtpRequest";
 
 export type AuthResponseType = {
-    authenticated: boolean;
-    userData?: AuthTokenClaimsType;
-}
+    success: boolean;
+    otp_required?: boolean;
+    session?: OtpRequestType;
+    token?: string; //might change to AuthTokenClaimsType
+    message?: string;
+};
