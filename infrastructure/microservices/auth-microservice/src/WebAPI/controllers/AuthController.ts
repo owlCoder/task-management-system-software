@@ -8,6 +8,7 @@ import { validateRegistrationData } from '../validators/RegisterValidator';
 import { ILogerService } from '../../Domain/services/ILogerService';
 import { validateOtpVerificationData } from '../validators/OtpValidator';
 import { env } from 'process';
+import { BrowserData } from '../../Domain/models/BrowserData';
 
 export class AuthController {
   private router: Router;
@@ -31,6 +32,9 @@ export class AuthController {
   /**
    * POST /api/v1/auth/login
    * Authenticates a user
+   * @param {LoginUserDTO} req.body - The login data from the request body
+   * @returns {Object} JSON response with success status, session/token, and message
+   * @see {@link LoginUserDTO} for input structure
    */
   private async login(req: Request, res: Response): Promise<void> {
     try {
@@ -49,23 +53,31 @@ export class AuthController {
 
       if (result.authenticated) {
         if (result.userData && result.userData.otp_required === true) {
-        res.status(200).json({
-          success: true,
-          session_id: result.userData?.session_id,
-          user_id: result.userData?.user_id,
-          iat: result.userData?.iat,
-          exp: result.userData?.exp
-        });
-        } 
-        else if(result.userData && result.userData.otp_required === false)
-        {
+          res.status(200).json({
+            success: true,
+            otp_required: result.userData.otp_required,
+            session: {
+              session_id: result.userData?.session_id,
+              user_id: result.userData?.user_id,
+              iat: result.userData?.iat,
+              exp: result.userData?.exp
+            },
+            message: "OTP required to complete login. Please enter the code sent to your email."
+          });
+        }
+        else if (result.userData && result.userData.otp_required === false) {
           const token = jwt.sign(
-          { id: result.userData?.user_id, username: result.userData?.username, role: result.userData?.role },
-          process.env.JWT_SECRET ?? "",
-          { expiresIn: `${this.jwtSessionExpiration}m` }
-        );
+            { id: result.userData?.user_id, username: result.userData?.username, role: result.userData?.role },
+            process.env.JWT_SECRET ?? "",
+            { expiresIn: `${this.jwtSessionExpiration}m` }
+          );
 
-        res.status(201).json({ success: true, message: "Login successful", token });
+          res.status(200).json({
+            success: true,
+            otp_required: result.userData.otp_required,
+            message: "Login successful",
+            token
+          });
         }
       } else {
         res.status(401).json({ success: false, message: "Invalid credentials!" });
@@ -79,13 +91,16 @@ export class AuthController {
   /**
    * POST /api/v1/auth/register
    * Registers a new user
+   * @param {RegistrationUserDTO} req.body - The registration data from the request body
+   * @returns {Object} JSON response with success status, token, and message
+   * @see {@link RegistrationUserDTO} for input structure
    */
   private async register(req: Request, res: Response): Promise<void> {
     try {
       this.logerService.log("Registration request received");
 
       const data: RegistrationUserDTO = req.body as RegistrationUserDTO;
-      
+
       const validation = validateRegistrationData(data);
       if (!validation.success) {
         res.status(400).json({ success: false, message: validation.message });
@@ -111,7 +126,12 @@ export class AuthController {
 
   /**
    * POST /api/v1/auth/verify-otp
-   * Verify OTP code
+   * Verifies the OTP code for login completion
+   * @param {number} req.body.user_id - The user ID
+   * @param {string} req.body.session_id - The session ID from login
+   * @param {string} req.body.otp - The OTP code entered by the user
+   * @returns {Object} JSON response with success status, token, and message
+   * @see {@link BrowserData} for session data structure
    */
   private async verifyOtp(req: Request, res: Response): Promise<void> {
     try {
@@ -119,8 +139,10 @@ export class AuthController {
 
       const { user_id, session_id, otp } = req.body;
 
-      const validation = validateOtpVerificationData({ user_id, session_id }, otp);
-  
+      const data: BrowserData = { session_id, user_id };
+
+      const validation = validateOtpVerificationData(data, otp);
+
       if (!validation.success) {
         res.status(400).json({ success: false, message: validation.message });
         return;
@@ -129,7 +151,7 @@ export class AuthController {
       // Call the auth service to verify the OTP
       const result = await this.authService.verifyOtp({ user_id, session_id }, otp);
       if (result.authenticated) {
-          const token = jwt.sign(
+        const token = jwt.sign(
           { id: result.userData?.user_id, username: result.userData?.username, role: result.userData?.role },
           process.env.JWT_SECRET ?? "",
           { expiresIn: `${this.jwtSessionExpiration}m` }
