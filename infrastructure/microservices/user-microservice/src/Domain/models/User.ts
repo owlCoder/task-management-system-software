@@ -1,23 +1,30 @@
-import { Entity, PrimaryGeneratedColumn, Column } from "typeorm";
-import { UserRole } from "../enums/UserRole";
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from "typeorm";
+import { UserRole } from "./UserRole";
 
 @Entity("users")
 export class User {
   @PrimaryGeneratedColumn()
-  id!: number;
+  user_id!: number;
 
-  @Column({ type: "varchar", unique: true, length: 100 })
+  @Column({ type: "varchar", unique: true, nullable: false, length: 100 })
   username!: string;
 
-  @Column({type: "enum", enum: UserRole, default: UserRole.SELLER })
-  role!: UserRole;
+  @Column({ type: "varchar", nullable: false })
+  password_hash!: string;
 
-  @Column({ type: "varchar", length: 255 })
-  password!: string;
+  @ManyToOne(() => UserRole, (user_role) => user_role.users, {
+    nullable: false,
+  })
+  @JoinColumn({name:"user_role_id"}) //ovo poravlja naziv kolone umesto da bude user_role_user_role_id, imacemo samo user_role_id. Prvi naziv bi bio takav jer TypeORM po defaultu generise strani kljuc po formuli: 
+  // <ime_polja_u_entitetu>_<primarni_kljuc_ref_tabele>
+  user_role!: UserRole;
 
-  @Column({ type: "varchar", length: 255, unique: true })
+  @Column({ type: "varchar", length: 100, unique: true })
   email!: string;
 
-  @Column({ type: "longtext", nullable: true })
-  profileImage!: string | null;
+  @Column({ type: "boolean", nullable: false })
+  is_deleted!: boolean;
+
+  @Column({ type: "int", nullable: true })
+  weekly_working_hour_sum!: number;
 }
