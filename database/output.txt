@@ -1,2 +1,4 @@
+ Container mysql_db  Recreate
+ Container mysql_db  Recreated
  Container mysql_db  Starting
-Error response from daemon: Ports are not available: exposing port TCP 0.0.0.0:3306 -> 0.0.0.0:0: listen tcp4 0.0.0.0:3306: bind: An attempt was made to access a socket in a way forbidden by its access permissions.
+ Container mysql_db  Started

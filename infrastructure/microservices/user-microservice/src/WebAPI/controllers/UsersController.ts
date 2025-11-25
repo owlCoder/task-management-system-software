@@ -16,6 +16,7 @@ export class UsersController {
   private initializeRoutes(): void {
     this.router.get("/users", this.getAllUsers.bind(this));
     this.router.get("/users/:id", this.getUserById.bind(this));
+    this.router.post("/users", this.createUser.bind(this));
   }
 
   private async getAllUsers(req: Request, res: Response): Promise<void> {
@@ -35,6 +36,18 @@ export class UsersController {
       this.logger.log(`Fetching user with ID ${id}`);
       const user = await this.usersService.getUserById(id);
       res.status(200).json(user);
+    } catch (err) {
+      this.logger.log((err as Error).message);
+      res.status(404).json({ message: (err as Error).message });
+    }
+  }
+
+  private async createUser(req: Request, res: Response): Promise<void> {
+    try {
+      const userData = req.body;
+      this.logger.log("Creating new user");
+      const newUser = await this.usersService.createUser(userData);
+      res.status(201).json(newUser);
     } catch (err) {
       this.logger.log((err as Error).message);
       res.status(404).json({ message: (err as Error).message });

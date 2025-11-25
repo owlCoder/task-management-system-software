@@ -2,6 +2,7 @@ import "reflect-metadata";
 import { DataSource } from "typeorm";
 import dotenv from "dotenv";
 import { User } from "../Domain/models/User";
+import { UserRole } from "../Domain/models/UserRole";
 
 dotenv.config();
 
@@ -15,5 +16,5 @@ export const Db = new DataSource({
   ssl: { rejectUnauthorized: false },
   synchronize: true, // automatsko kreiranje tabela u bazi
   logging: false, // debug sql gresaka
-  entities: [User],
+  entities: [User, UserRole],
 });

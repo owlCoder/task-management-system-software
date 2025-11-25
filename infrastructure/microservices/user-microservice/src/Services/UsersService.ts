@@ -2,6 +2,8 @@ import { Repository } from "typeorm";
 import { IUsersService } from "../Domain/services/IUsersService";
 import { User } from "../Domain/models/User";
 import { UserDTO } from "../Domain/DTOs/UserDTO";
+import { UserRole } from "../Domain/models/UserRole";
+import { UserRoleDTO } from "../Domain/DTOs/UserRoleDTO";
 
 export class UsersService implements IUsersService {
   constructor(private userRepository: Repository<User>) {}
@@ -10,17 +12,68 @@ export class UsersService implements IUsersService {
    * Get all users
    */
   async getAllUsers(): Promise<UserDTO[]> {
-    const users = await this.userRepository.find();
-    return users.map(u => this.toDTO(u));
+    const users = await this.userRepository.find({ relations: ["user_role"] });
+    return users.map((u) => this.toDTO(u));
   }
 
   /**
    * Get user by ID
    */
-  async getUserById(id: number): Promise<UserDTO> {
-    const user = await this.userRepository.findOne({ where: { id } });
-    if (!user) throw new Error(`User with ID ${id} not found`);
+  async getUserById(user_id: number): Promise<UserDTO> {
+    const user = await this.userRepository.findOne({
+      where: { user_id },
+      relations: ["user_role"],
+    });
+    //relations omogucava da se uz ucitavanje User-a ucitaju i podaci iz povezane tabele UserRole
+    //Zbog ovoga nema potrebe za dodatnim upitom da bi dobili role_name
+
+    if (!user) throw new Error(`User with ID ${user_id} not found`);
     return this.toDTO(user);
+  }
+
+  /**
+   * Create new user
+   */
+
+  async createUser(user: User): Promise<UserDTO> {
+    const existingUser = await this.userRepository.findOne({
+      where: [{ username: user.username }, { email: user.email }], //na ovaj nacin proveravam da li username ili email vec postoje
+    });
+    //generise: SELECT * FROM users WHERE username = 'user.username' OR email = 'user.email'
+
+    if (existingUser) {
+      throw new Error("Username or email already exists");
+    }
+
+    const result = this.userRepository.insert(user);
+
+    const newUser = {
+      ...user,
+      user_id: (await result).identifiers[0].user_id,
+      is_deleted: (await result).generatedMaps[0].is_deleted,
+      weekly_working_hour_sum: (await result).generatedMaps[0]
+        .weekly_working_hour_sum,
+    };
+
+    return this.toDTO(newUser);
+  }
+
+  /**
+   * Logicaly delete user by ID
+   */
+
+  async deleteUserById(user_id: number): Promise<boolean> {
+    const existingUser = await this.userRepository.findOne({
+      where: { user_id },
+    });
+
+    if (!existingUser) {
+      throw new Error(`User with ID ${user_id} not found`);
+    }
+
+    const result = await this.userRepository.softDelete({ user_id });
+
+    return result.affected !== undefined && result.affected > 0; //vraca true ako je obrisan bar jedan red
   }
 
   /**
@@ -28,11 +81,11 @@ export class UsersService implements IUsersService {
    */
   private toDTO(user: User): UserDTO {
     return {
-      id: user.id,
+      user_id: user.user_id,
       username: user.username,
+      role_name: user.user_role.role_name, //uzimamo role_name jer ucitavaju objekat get funkcije
       email: user.email,
-      role: user.role,
-      profileImage: user.profileImage ?? "",
+      weekly_working_hour_sum: user.weekly_working_hour_sum,
     };
   }
 }

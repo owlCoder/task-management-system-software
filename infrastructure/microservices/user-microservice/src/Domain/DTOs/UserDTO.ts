@@ -1,7 +1,7 @@
 export interface UserDTO {
-  id: number;
+  user_id: number;
   username: string;
+  role_name: string;
   email: string;
-  role: string;
-  profileImage: string;
+  weekly_working_hour_sum: number;
 }
