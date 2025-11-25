@@ -4,6 +4,6 @@ export type AuthResponseType = {
     success: boolean;
     otp_required?: boolean;
     session?: OtpRequestType;
-    token?: string; //might change to AuthTokenClaimsType
+    token?: string;
     message?: string;
 };
