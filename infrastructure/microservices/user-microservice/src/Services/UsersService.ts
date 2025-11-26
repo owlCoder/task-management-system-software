@@ -2,8 +2,6 @@ import { Repository } from "typeorm";
 import { IUsersService } from "../Domain/services/IUsersService";
 import { User } from "../Domain/models/User";
 import { UserDTO } from "../Domain/DTOs/UserDTO";
-import { UserRole } from "../Domain/models/UserRole";
-import { UserRoleDTO } from "../Domain/DTOs/UserRoleDTO";
 
 export class UsersService implements IUsersService {
   constructor(private userRepository: Repository<User>) {}

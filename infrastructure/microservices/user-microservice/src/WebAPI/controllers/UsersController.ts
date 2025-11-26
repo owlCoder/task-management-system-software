@@ -1,12 +1,14 @@
 import { Router, Request, Response } from "express";
 import { ILogerService } from "../../Domain/services/ILogerService";
 import { IUsersService } from "../../Domain/services/IUsersService";
+import { IUserRoleService } from "../../Domain/services/IUserRoleService";
 
 export class UsersController {
   private readonly router: Router;
 
   constructor(
     private readonly usersService: IUsersService,
+    private readonly userRoleService: IUserRoleService,
     private readonly logger: ILogerService
   ) {
     this.router = Router();
@@ -19,6 +21,7 @@ export class UsersController {
     this.router.post("/users", this.createUser.bind(this));
     this.router.delete("/users/:id", this.logicalyDeleteUser.bind(this));
     this.router.put("/users/:id", this.updateUser.bind(this));
+    this.router.get("/user-roles", this.getAllUserRoles.bind(this));
   }
 
   private async getAllUsers(req: Request, res: Response): Promise<void> {
@@ -99,6 +102,18 @@ export class UsersController {
     } catch (err) {
       this.logger.log((err as Error).message);
       res.status(404).json({ message: (err as Error).message });
+    }
+  }
+
+  private async getAllUserRoles(req: Request, res: Response): Promise<void> {
+    try {
+      this.logger.log("Fetching all user roles");
+
+      const roles = await this.userRoleService.getAllUserRoles();
+      res.status(200).json(roles);
+    } catch (err) {
+      this.logger.log((err as Error).message);
+      res.status(500).json({ message: (err as Error).message });
     }
   }
 
