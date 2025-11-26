@@ -7,9 +7,18 @@ import { useNavigate } from "react-router-dom";
 
 type RegisterFormProps = {
   authAPI: IAuthAPI;
+  onSwitchToLogin?: () => void;
 };
 
-export const RegisterForm: React.FC<RegisterFormProps> = ({ authAPI }) => {
+const logoImageUrl = new URL(
+  "../../helpers/pictures/logo.png",
+  import.meta.url
+).href;
+
+export const RegisterForm: React.FC<RegisterFormProps> = ({
+  authAPI,
+  onSwitchToLogin,
+}) => {
   const [formData, setFormData] = useState<RegistrationUserDTO>({
     username: "",
     email: "",
@@ -17,35 +26,35 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ authAPI }) => {
     role: UserRole.SELLER,
     profileImage: "",
   });
+
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [error, setError] = useState<string>("");
-  const [success, setSuccess] = useState<string>("");
+  const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+
   const { login } = useAuth();
   const navigate = useNavigate();
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    setFormData({
-      ...formData,
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
+    setFormData((prev) => ({
+      ...prev,
       [e.target.name]: e.target.value,
-    });
+    }));
     setError("");
-    setSuccess("");
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-    setSuccess("");
 
-    // Validation
     if (formData.password !== confirmPassword) {
       setError("Passwords do not match.");
       return;
     }
 
     if (formData.password.length < 6) {
-      setError("Password must be at least 6 characters long.");
+      setError("Password must be at least 6 characters.");
       return;
     }
 
@@ -54,178 +63,150 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ authAPI }) => {
     try {
       const response = await authAPI.register(formData);
 
-      if (response.success) {
-        setSuccess(response.message || "Registration successful!");
-        
-        // Auto-login if token is provided
-        if (response.token) {
-          login(response.token);
-          setTimeout(() => {
-            navigate("/dashboard");
-          }, 1500);
-        }
+      if (response.success && response.token) {
+        login(response.token);
+        navigate("/dashboard");
       } else {
-        setError(response.message || "Registration failed. Please try again.");
+        setError(response.message || "Registration failed.");
       }
-    } catch (err: any) {
-      setError(err.response?.data?.message || "An error occurred. Please try again.");
+    } catch {
+      setError("An error occurred.");
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-      <div>
-        <label htmlFor="username" style={{ display: "block", marginBottom: "8px", fontSize: "14px", fontWeight: 600 }}>
-          Username
-        </label>
-        <input
-          type="text"
-          id="username"
+    <form
+      onSubmit={handleSubmit}
+      className="w-full max-w-md flex flex-col items-center gap-4 text-center"
+    >
+
+      <img
+        src={logoImageUrl}
+        alt="A2 Pictures logo"
+        className="w-28 h-28 sm:w-32 sm:h-32 object-contain mb-1"
+      />
+      {error && (
+        <div className="w-full rounded-md border border-red-400/70 bg-red-500/20 px-4 py-2 text-left text-sm text-red-100">
+          {error}
+        </div>
+      )}
+
+      <div className="w-full flex flex-col gap-4">
+        <Input
+          label="Username"
           name="username"
           value={formData.username}
           onChange={handleChange}
           placeholder="Choose a username"
-          required
-          disabled={isLoading}
         />
-      </div>
 
-      <div>
-        <label htmlFor="email" style={{ display: "block", marginBottom: "8px", fontSize: "14px", fontWeight: 600 }}>
-          Email
-        </label>
-        <input
-          type="email"
-          id="email"
+        <Input
+          label="Email"
           name="email"
+          type="email"
           value={formData.email}
           onChange={handleChange}
-          placeholder="your.email@example.com"
-          required
-          disabled={isLoading}
+          placeholder="your@email.com"
         />
-      </div>
 
-      <div>
-        <label htmlFor="role" style={{ display: "block", marginBottom: "8px", fontSize: "14px", fontWeight: 600 }}>
-          Role
-        </label>
-        <select
-          id="role"
-          name="role"
-          value={formData.role}
-          onChange={handleChange}
-          required
-          disabled={isLoading}
-        >
-          <option value={UserRole.SELLER}>Seller</option>
-          <option value={UserRole.ADMIN}>Admin</option>
-        </select>
-      </div>
+        <div className="w-full">
+          <label className="block w-[95%] mx-auto text-left text-sm font-semibold text-white/80">
+            Role
+          </label>
+          <select
+            name="role"
+            value={formData.role}
+            onChange={handleChange}
+            className="w-[85%] mx-auto mt-2 bg-transparent border-b-[3px] border-white/40 text-white py-2 outline-none"
+          >
+            <option value={UserRole.SELLER}>Seller</option>
+            <option value={UserRole.ADMIN}>Admin</option>
+          </select>
+        </div>
 
-      <div>
-        <label htmlFor="password" style={{ display: "block", marginBottom: "8px", fontSize: "14px", fontWeight: 600 }}>
-          Password
-        </label>
-        <input
-          type="password"
-          id="password"
+        <Input
+          label="Password"
           name="password"
+          type="password"
           value={formData.password}
           onChange={handleChange}
-          placeholder="Create a password (min 6 characters)"
-          required
-          disabled={isLoading}
+          placeholder="Create password"
         />
-      </div>
 
-      <div>
-        <label htmlFor="confirmPassword" style={{ display: "block", marginBottom: "8px", fontSize: "14px", fontWeight: 600 }}>
-          Confirm Password
-        </label>
-        <input
-          type="password"
-          id="confirmPassword"
-          name="confirmPassword"
-          value={confirmPassword}
-          onChange={(e) => {
-            setConfirmPassword(e.target.value);
-            setError("");
-          }}
-          placeholder="Re-enter your password"
-          required
-          disabled={isLoading}
-        />
-      </div>
+        <div className="w-full">
+          <label className="block w-[95%] mx-auto text-left text-sm font-semibold text-white/80">
+            Confirm Password
+          </label>
+          <div className="w-[95%] mx-auto mt-1 border-b-[3px] border-white/40">
+            <input
+              type="password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              placeholder="Repeat password"
+              className="w-full bg-transparent text-lg text-white placeholder:text-white/70 py-3 outline-none"
+            />
+          </div>
+        </div>
 
-      <div>
-        <label htmlFor="profileImage" style={{ display: "block", marginBottom: "8px", fontSize: "14px", fontWeight: 600 }}>
-          Profile Image URL <span style={{ color: "var(--win11-text-tertiary)", fontWeight: 400 }}>(Optional)</span>
-        </label>
-        <input
-          type="url"
-          id="profileImage"
+        <Input
+          label="Profile Image URL (optional)"
           name="profileImage"
+          type="url"
           value={formData.profileImage}
           onChange={handleChange}
-          placeholder="https://example.com/avatar.jpg"
-          disabled={isLoading}
+          placeholder="https://..."
         />
       </div>
-
-      {error && (
-        <div
-          className="card"
-          style={{
-            padding: "12px 16px",
-            backgroundColor: "rgba(196, 43, 28, 0.15)",
-            borderColor: "var(--win11-close-hover)",
-          }}
-        >
-          <div className="flex items-center gap-2">
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="var(--win11-close-hover)">
-              <path d="M8 2a6 6 0 100 12A6 6 0 008 2zm0 1a5 5 0 110 10A5 5 0 018 3zm0 2a.5.5 0 01.5.5v3a.5.5 0 01-1 0v-3A.5.5 0 018 5zm0 6a.75.75 0 110 1.5.75.75 0 010-1.5z"/>
-            </svg>
-            <span style={{ fontSize: "13px", color: "var(--win11-text-primary)" }}>{error}</span>
-          </div>
-        </div>
-      )}
-
-      {success && (
-        <div
-          className="card"
-          style={{
-            padding: "12px 16px",
-            backgroundColor: "rgba(16, 124, 16, 0.15)",
-            borderColor: "#107c10",
-          }}
-        >
-          <div className="flex items-center gap-2">
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="#107c10">
-              <path d="M8 2a6 6 0 110 12A6 6 0 018 2zm2.354 4.146a.5.5 0 010 .708l-3 3a.5.5 0 01-.708 0l-1.5-1.5a.5.5 0 11.708-.708L7 8.793l2.646-2.647a.5.5 0 01.708 0z"/>
-            </svg>
-            <span style={{ fontSize: "13px", color: "var(--win11-text-primary)" }}>{success}</span>
-          </div>
-        </div>
-      )}
 
       <button
         type="submit"
-        className="btn btn-accent"
         disabled={isLoading}
-        style={{ marginTop: "8px" }}
+        className="relative mt-4 w-52 border-2 border-white border-solid text-white uppercase tracking-[0.2em] text-sm font-bold py-3 overflow-hidden bg-transparent cursor-pointer transition-all duration-1000 group disabled:opacity-50"
       >
-        {isLoading ? (
-          <div className="flex items-center gap-2">
-            <div className="spinner" style={{ width: "16px", height: "16px", borderWidth: "2px" }}></div>
-            <span>Creating account...</span>
-          </div>
-        ) : (
-          "Register"
-        )}
+        <span className="absolute top-0 left-[-40px] h-full w-0 skew-x-[45deg] bg-white/40 transition-all duration-1000 group-hover:w-[160%]" />
+        <span className="relative z-10">
+          {isLoading ? "Registering..." : "Register"}
+        </span>
       </button>
+
+      <p className="mt-2 text-sm text-white/80">
+        You already have an account?{" "}
+        <button
+          type="button"
+          onClick={onSwitchToLogin}
+          className="font-semibold underline underline-offset-4 hover:text-blue-100"
+        >
+          Login
+        </button>
+      </p>
     </form>
   );
 };
+
+const Input = ({
+  label,
+  name,
+  type = "text",
+  value,
+  onChange,
+  placeholder,
+}: any) => (
+  <div className="w-full">
+    <label className="block w-[95%] mx-auto text-left text-sm font-semibold text-white/80">
+      {label}
+    </label>
+    <div className="w-[95%] mx-auto mt-1 border-b-[3px] border-white/40 transition-colors focus-within:border-white">
+      <input
+        type={type}
+        name={name}
+        value={value}
+        onChange={onChange}
+        placeholder={placeholder}
+        required={label.toLowerCase().includes("optional") === false}
+        className="w-full bg-transparent border-none outline-none text-base font-semibold text-white placeholder:text-white/70 py-2"
+      />
+    </div>
+  </div>
+);
