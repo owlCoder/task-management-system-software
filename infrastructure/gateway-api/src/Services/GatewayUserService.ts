@@ -6,11 +6,10 @@ import { Result } from "../Domain/types/Result";
 import { ErrorHandlingService } from "./ErrorHandlingService";
 
 export class GatewayUserService implements IGatewayUserService {
-    private readonly serviceName: string;
+    private static readonly serviceName: string = "User Service";
     private readonly userClient: AxiosInstance;
 
     constructor() {
-        this.serviceName = "User Service"
         const userBaseURL = process.env.USER_SERVICE_API;
 
         this.userClient = axios.create({
@@ -22,13 +21,13 @@ export class GatewayUserService implements IGatewayUserService {
 
     async createUser(data: RegistrationUserDTO): Promise<Result<UserDTO>> {
         try {
-            const response = await this.userClient.post<UserDTO>("users", data);
+            const response = await this.userClient.post<UserDTO>("/users", data);
             return {
                 success: true,
                 data: response.data
             }
         } catch(error) {
-            return ErrorHandlingService.handle(error, this.serviceName);
+            return ErrorHandlingService.handle(error, GatewayUserService.serviceName);
         }
     }
 
@@ -40,19 +39,44 @@ export class GatewayUserService implements IGatewayUserService {
                 data: response.data
             }
         } catch(error) {
-            return ErrorHandlingService.handle(error, this.serviceName);
+            return ErrorHandlingService.handle(error, GatewayUserService.serviceName);
         }
     }
 
     async getUsers(): Promise<Result<UserDTO[]>> {
         try{
-            const response = await this.userClient.get<UserDTO[]>("users");
+            const response = await this.userClient.get<UserDTO[]>("/users");
             return {
                 success: true,
                 data: response.data
             }
         } catch(error) {
-            return ErrorHandlingService.handle(error, this.serviceName);
+            return ErrorHandlingService.handle(error, GatewayUserService.serviceName);
         }
     }
+
+    async updateUserById(id: number, data: UserDTO): Promise<Result<UserDTO>> {
+        try {
+            const response = await this.userClient.put<UserDTO>(`/users/${id}`, data);
+            return {
+                success: true,
+                data: response.data
+            }
+        } catch(error) {
+            return ErrorHandlingService.handle(error, GatewayUserService.serviceName)
+        }
+    }
+
+    async logicallyDeleteUserById(id: number): Promise<Result<boolean>> {
+        try {
+            const response = await this.userClient.delete<boolean>(`/users/${id}`);
+            return {
+                success: true,
+                data: response.data
+            }
+        } catch(error) {
+            return ErrorHandlingService.handle(error, GatewayUserService.serviceName);
+        }
+    }
+
 }
