@@ -18,6 +18,7 @@ export class UsersController {
     this.router.get("/users/:id", this.getUserById.bind(this));
     this.router.post("/users", this.createUser.bind(this));
     this.router.delete("/users/:id", this.logicalyDeleteUser.bind(this));
+    this.router.put("/users/:id", this.updateUser.bind(this));
   }
 
   private async getAllUsers(req: Request, res: Response): Promise<void> {
@@ -75,6 +76,26 @@ export class UsersController {
           .status(200)
           .json({ message: `User with ID ${id} logically deleted` });
       }
+    } catch (err) {
+      this.logger.log((err as Error).message);
+      res.status(404).json({ message: (err as Error).message });
+    }
+  }
+
+  private async updateUser(req: Request, res: Response): Promise<void> {
+    try {
+      const id = parseInt(req.params.id, 10);
+      const userData = req.body;
+
+      const existingUser = await this.usersService.getUserById(id);
+
+      if (!existingUser) {
+        throw new Error(`User with ID ${id} not found`);
+      }
+
+      this.logger.log(`Updating user with ID ${id}`);
+      const updatedUser = await this.usersService.updateUserById(id, userData);
+      res.status(200).json(updatedUser);
     } catch (err) {
       this.logger.log((err as Error).message);
       res.status(404).json({ message: (err as Error).message });

@@ -40,7 +40,8 @@ export class UsersService implements IUsersService {
 
   async createUser(user: User): Promise<UserDTO> {
     const existingUser = await this.userRepository.findOne({
-      where: [{ username: user.username }, { email: user.email }], //na ovaj nacin proveravam da li username ili email vec postoje
+      where: [{ username: user.username }, { email: user.email }], //na ovaj nacin proveravam da li username ili email vec postoje i da li je obrisan korisnik sa tim podacima
+      //kaze onda da dupliramo podatke sto je logicno, ali da li je potrebno onda da ostavim samo bez is_deleted: false u oba slucaja?
     });
     //generise: SELECT * FROM users WHERE username = 'user.username' OR email = 'user.email'
 
@@ -83,6 +84,34 @@ export class UsersService implements IUsersService {
     //na ovaj nacin brisanje je manje vise azuriranje kolone is_deleted na true
 
     return result.affected !== undefined && result.affected > 0; //vraca true ako je obrisan bar jedan red
+  }
+
+  /**
+   * Update user by ID
+   */
+
+  async updateUserById(
+    user_id: number,
+    userData: Partial<User>
+  ): Promise<UserDTO> {
+    const existingUser = await this.userRepository.findOne({
+      where: { user_id, is_deleted: false },
+      relations: ["user_role"],
+    });
+
+    if (!existingUser) {
+      throw new Error(`User with ID ${user_id} not found`);
+    }
+
+    const updatedUser = { ...existingUser, ...userData };
+    //Spaja postojece podatke user-a sa novim podacima
+    const result = await this.userRepository.update(user_id, updatedUser);
+
+    if (result.affected === undefined || result.affected === 0) {
+      throw new Error(`User with ID ${user_id} could not be updated`);
+    }
+
+    return this.toDTO(updatedUser);
   }
 
   /**
