@@ -1,10 +1,16 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 /* ============================================
    Windows 11 Global Styles - index.css
    ============================================ */
 
+
 /* CSS Variables */
 :root {
   /* Background Colors */
+
   --win11-bg: #202020;
   --win11-mica-bg: rgba(32, 32, 32, 0.5);
   --win11-mica-bg-alt: rgba(28, 28, 28, 0.7);
