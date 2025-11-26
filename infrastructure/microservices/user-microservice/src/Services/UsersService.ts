@@ -12,7 +12,10 @@ export class UsersService implements IUsersService {
    * Get all users
    */
   async getAllUsers(): Promise<UserDTO[]> {
-    const users = await this.userRepository.find({ relations: ["user_role"] });
+    const users = await this.userRepository.find({
+      where: { is_deleted: false },
+      relations: ["user_role"],
+    });
     return users.map((u) => this.toDTO(u));
   }
 
@@ -21,7 +24,7 @@ export class UsersService implements IUsersService {
    */
   async getUserById(user_id: number): Promise<UserDTO> {
     const user = await this.userRepository.findOne({
-      where: { user_id },
+      where: { user_id, is_deleted: false },
       relations: ["user_role"],
     });
     //relations omogucava da se uz ucitavanje User-a ucitaju i podaci iz povezane tabele UserRole
@@ -62,7 +65,7 @@ export class UsersService implements IUsersService {
    * Logicaly delete user by ID
    */
 
-  async deleteUserById(user_id: number): Promise<boolean> {
+  async logicalyDeleteUserById(user_id: number): Promise<boolean> {
     const existingUser = await this.userRepository.findOne({
       where: { user_id },
     });
@@ -71,7 +74,13 @@ export class UsersService implements IUsersService {
       throw new Error(`User with ID ${user_id} not found`);
     }
 
-    const result = await this.userRepository.softDelete({ user_id });
+    // const result = await this.userRepository.softDelete({ user_id }); ne mozemo raditi soft delete jer nam je potrebna dodatna kolona deletedAt u tabeli za to
+    // a ako je dodamo nema smisla da idmamo is_deleted kolonu
+
+    const result = await this.userRepository.update(user_id, {
+      is_deleted: true,
+    });
+    //na ovaj nacin brisanje je manje vise azuriranje kolone is_deleted na true
 
     return result.affected !== undefined && result.affected > 0; //vraca true ako je obrisan bar jedan red
   }

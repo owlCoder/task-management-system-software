@@ -3,9 +3,9 @@ services:
     image: mysql:8.4
     container_name: mysql_db
     env_file:
-      - .env  # Load environment variables from .env file
+      - .env # Load environment variables from .env file
     ports:
-      - "3306:3306"
+      - "50001:3306"
     volumes:
       - mysql_data:/var/lib/mysql
       - ./docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
@@ -19,4 +19,4 @@ volumes:
 
 networks:
   mysql_network:
-    driver: bridge 
+    driver: bridge
