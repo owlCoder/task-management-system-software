@@ -8,9 +8,11 @@ import { ErrorHandlingService } from "./ErrorHandlingService";
 import { Result } from "../Domain/types/Result";
 
 export class GatewayAuthService implements IGatewayAuthService {
+    private readonly serviceName: string;
     private readonly authClient: AxiosInstance;
 
     constructor() {
+        this.serviceName = "Auth Service";
         const authBaseURL = process.env.AUTH_SERVICE_API;
 
         this.authClient = axios.create({
@@ -34,7 +36,7 @@ export class GatewayAuthService implements IGatewayAuthService {
                 }
             };
         } catch(error) {
-            return ErrorHandlingService.handle(error, "Auth Service");
+            return ErrorHandlingService.handle(error, this.serviceName);
         }
     }
     
@@ -50,7 +52,7 @@ export class GatewayAuthService implements IGatewayAuthService {
                 }
             };
         } catch(error) {
-            return ErrorHandlingService.handle(error, "Auth Service");
+            return ErrorHandlingService.handle(error, this.serviceName);
         }
     }
 
@@ -66,7 +68,7 @@ export class GatewayAuthService implements IGatewayAuthService {
                 }
             };
         } catch(error) {
-            return ErrorHandlingService.handle(error, "Auth Service");
+            return ErrorHandlingService.handle(error, this.serviceName);
         }
     }
 

@@ -34,7 +34,7 @@ export class GatewayAuthController {
             res.status(200).json(result.data);
         }
         else{
-            res.status(result.status).json({ message: result.message });
+            res.status(result.status).json({ success: false, message: result.message });
         }
     }
     
@@ -53,7 +53,7 @@ export class GatewayAuthController {
             res.status(201).json(result.data);
         }
         else{
-            res.status(result.status).json({ message: result.message });
+            res.status(result.status).json({ success: false, message: result.message });
         }
     }
 
@@ -72,7 +72,7 @@ export class GatewayAuthController {
             res.status(200).json(result.data);
         }
         else{
-            res.status(result.status).json({ message: result.message });
+            res.status(result.status).json({ success: false, message: result.message });
         }
     }
 
