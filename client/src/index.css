@@ -1,7 +1,4 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
+@import "tailwindcss";
 /* ============================================
    Windows 11 Global Styles - index.css
    ============================================ */
@@ -157,7 +154,6 @@ a:active {
 /* Buttons */
 button, .btn {
   padding: 10px 20px;
-  border: none;
   border-radius: var(--win11-radius-small);
   font-size: 14px;
   font-weight: 600;

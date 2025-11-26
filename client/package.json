@@ -17,11 +17,13 @@
     "react-router-dom": "^7.9.4"
   },
   "devDependencies": {
+    "@tailwindcss/postcss": "^4.1.17",
     "@types/react": "^19.2.2",
     "@types/react-dom": "^19.2.2",
     "@typescript-eslint/eslint-plugin": "^8.46.2",
     "@typescript-eslint/parser": "^8.46.2",
     "@vitejs/plugin-react": "^5.1.0",
+    "autoprefixer": "^10.4.22",
     "electron": "^38.4.0",
     "electron-builder": "^26.0.12",
     "eslint": "^9.38.0",
