@@ -1,25 +1,35 @@
-import { Entity, PrimaryGeneratedColumn, Column } from "typeorm";
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  ManyToOne,
+  JoinColumn,
+} from "typeorm";
+import { UserRole } from "./UserRole";
 
 @Entity("users")
 export class User {
-  @PrimaryGeneratedColumn({ name: "user_id" })
-  id!: number;
+  @PrimaryGeneratedColumn()
+  user_id!: number;
 
-  @Column({ type: "varchar", unique: true, length: 100 })
+  @Column({ type: "varchar", unique: true, nullable: false, length: 100 })
   username!: string;
 
-  @Column({ name: "password_hash", type: "varchar", length: 300 })
-  password!: string;
+  @Column({ type: "varchar", nullable: false })
+  password_hash!: string;
 
-  @Column({ name: "user_role", type: "int", default: 0 })
-  role!: number;
+  @ManyToOne(() => UserRole, (user_role) => user_role.users, {
+    nullable: false,
+  })
+  @JoinColumn({ name: "user_role_id" })
+  user_role!: UserRole;
 
   @Column({ type: "varchar", length: 100, unique: true })
   email!: string;
 
-  @Column({ type: "boolean", default: false })
+  @Column({ type: "boolean", nullable: false, default: false })
   is_deleted!: boolean;
 
-  @Column({ type: "int", nullable: true })
-  weekly_working_hour_sum!: number | null;
+  @Column({ type: "int", nullable: true, default: 0 })
+  weekly_working_hour_sum!: number;
 }

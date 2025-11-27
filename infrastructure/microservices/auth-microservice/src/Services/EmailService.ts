@@ -39,7 +39,7 @@ export class EmailService {
     const otpCode = randomInt(0, 100000000).toString().padStart(8, '0'); // Generate 8-digit OTP
 
     const dateCreated = new Date();
-    const sessionData: LoginData = { userId: user.id, otpCode: otpCode, dateCreated: dateCreated, retryCount: 0 };
+    const sessionData: LoginData = { userId: user.user_id, otpCode: otpCode, dateCreated: dateCreated, retryCount: 0 };
     const sessionId = uuidv4();
 
     // Email content
@@ -66,7 +66,7 @@ export class EmailService {
         timeout: 5000
       });
 
-      console.log(`Generated OTP for user ${user.username} with session id ${sessionId} \nOTP code for this session: ${otpCode}`);
+      // console.log(`Generated OTP for user ${user.username} with session id ${sessionId} \nOTP code for this session: ${otpCode}`);
       return [sessionData, sessionId, true];
     } catch (error) {
       console.error('Failed to send OTP email:', error);

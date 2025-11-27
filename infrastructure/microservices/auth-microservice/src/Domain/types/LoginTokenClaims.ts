@@ -15,7 +15,7 @@ type UserClaims = {
   user_id: number;
   otp_required: false;
   username: string;
-  role: number;
+  role: string;
 };
 
 export type LoginTokenClaims = SessionClaims | UserClaims;

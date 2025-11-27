@@ -1,5 +1,4 @@
 import { LoginTokenClaims } from "./LoginTokenClaims";
-import { AuthTokenClaims } from "./AuthTokenClaims";
 
 /**
  * Type representing the response of a login attempt.
