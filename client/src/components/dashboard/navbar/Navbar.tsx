@@ -5,10 +5,12 @@ import { useAuth } from "../../../hooks/useAuthHook";
 import { UserDTO } from "../../../models/users/UserDTO";
 
 type DashboardNavbarProps = {
-  userAPI: IUserAPI;
+  userAPI?: IUserAPI; // made optional
 };
 
-export const DashboardNavbar: React.FC<DashboardNavbarProps> = ({ userAPI }) => {
+export const DashboardNavbar: React.FC<DashboardNavbarProps> = ({
+  userAPI,
+}) => {
   const { user: authUser, logout, token } = useAuth();
   const [user, setUser] = useState<UserDTO | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -16,47 +18,140 @@ export const DashboardNavbar: React.FC<DashboardNavbarProps> = ({ userAPI }) => 
 
   useEffect(() => {
     const fetchUser = async () => {
-      if (authUser?.id) {
+      if (authUser?.id && userAPI) {
         try {
-          const userData = await userAPI.getUserById(token ?? "", authUser.id, );
+          const userData = await userAPI.getUserById(token ?? "", authUser.id);
           setUser(userData);
         } catch (error) {
           console.error("Failed to fetch user:", error);
         } finally {
           setIsLoading(false);
         }
+      } else {
+        // No userAPI provided or no auth user — stop loading
+        setIsLoading(false);
       }
     };
 
     fetchUser();
-  }, [authUser, userAPI]);
+  }, [authUser, userAPI, token]);
 
   const handleLogout = () => {
     logout();
     navigate("/auth");
   };
 
+  const handleLogin = () => {
+    navigate("/auth");
+  };
+
   return (
     <nav className="titlebar" style={{ height: "60px", borderRadius: 0 }}>
-      <div className="flex items-center gap-3" style={{ marginLeft: "auto" }}>
-        {isLoading ? (
-          <div className="spinner" style={{ width: "20px", height: "20px", borderWidth: "2px" }}></div>
-        ) : user ? (
-          <>
-            {/* Profile Image */}
-            {user.profileImage ? (
-              <img
-                src={user.profileImage}
-                alt={user.username}
-                style={{
-                  width: "32px",
-                  height: "32px",
-                  borderRadius: "50%",
-                  objectFit: "cover",
-                  border: "2px solid var(--win11-divider)",
-                }}
-              />
-            ) : (
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          width: "100%",
+          padding: "0 12px",
+          boxSizing: "border-box",
+        }}
+      >
+        {/* Left: App title / logo */}
+        <div className="flex items-center gap-3">
+          <span
+            style={{
+              fontSize: "16px",
+              fontWeight: 700,
+              color: "var(--win11-text-primary)",
+            }}
+          >
+            Task Management
+          </span>
+        </div>
+
+        {/* Right: user area */}
+        <div className="flex items-center gap-3">
+          {isLoading ? (
+            <div
+              className="spinner"
+              style={{ width: "20px", height: "20px", borderWidth: "2px" }}
+            ></div>
+          ) : user ? (
+            <>
+              {/* Profile Image */}
+              {user.profileImage ? (
+                <img
+                  src={user.profileImage}
+                  alt={user.username}
+                  style={{
+                    width: "32px",
+                    height: "32px",
+                    borderRadius: "50%",
+                    objectFit: "cover",
+                    border: "2px solid var(--win11-divider)",
+                  }}
+                />
+              ) : (
+                <div
+                  style={{
+                    width: "32px",
+                    height: "32px",
+                    borderRadius: "50%",
+                    background: "var(--win11-accent)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontWeight: 600,
+                    fontSize: "14px",
+                    color: "#000",
+                  }}
+                >
+                  {user.username.charAt(0).toUpperCase()}
+                </div>
+              )}
+
+              {/* User Info */}
+              <div className="flex flex-col" style={{ gap: 0 }}>
+                <span
+                  style={{
+                    fontSize: "13px",
+                    fontWeight: 600,
+                    color: "var(--win11-text-primary)",
+                  }}
+                >
+                  {user.email}
+                </span>
+                <span
+                  style={{
+                    fontSize: "11px",
+                    color: "var(--win11-text-tertiary)",
+                  }}
+                >
+                  {user.role}
+                </span>
+              </div>
+
+              {/* Logout Button */}
+              <button
+                className="btn btn-ghost"
+                onClick={handleLogout}
+                style={{ padding: "8px 16px" }}
+              >
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 16 16"
+                  fill="currentColor"
+                >
+                  <path d="M6 2v2H3v8h3v2H2V2h4zm4 3l4 3-4 3V9H6V7h4V5z" />
+                </svg>
+                Logout
+              </button>
+            </>
+          ) : (
+            // No user: show Login button (and optional placeholder avatar)
+            <>
               <div
                 style={{
                   width: "32px",
@@ -71,30 +166,22 @@ export const DashboardNavbar: React.FC<DashboardNavbarProps> = ({ userAPI }) => 
                   color: "#000",
                 }}
               >
-                {user.username.charAt(0).toUpperCase()}
+                ?
               </div>
-            )}
 
-            {/* User Info */}
-            <div className="flex flex-col" style={{ gap: 0 }}>
-              <span style={{ fontSize: "13px", fontWeight: 600, color: "var(--win11-text-primary)" }}>
-                {user.email}
-              </span>
-              <span style={{ fontSize: "11px", color: "var(--win11-text-tertiary)" }}>
-                {user.role}
-              </span>
-            </div>
-
-            {/* Logout Button */}
-            <button className="btn btn-ghost" onClick={handleLogout} style={{ padding: "8px 16px" }}>
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                <path d="M6 2v2H3v8h3v2H2V2h4zm4 3l4 3-4 3V9H6V7h4V5z"/>
-              </svg>
-              Logout
-            </button>
-          </>
-        ) : null}
+              <button
+                className="btn btn-primary cursor-pointer"
+                onClick={handleLogin}
+                style={{ padding: "8px 12px" }}
+              >
+                Login
+              </button>
+            </>
+          )}
+        </div>
       </div>
     </nav>
   );
 };
+
+export default DashboardNavbar;

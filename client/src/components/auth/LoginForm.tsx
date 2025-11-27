@@ -9,10 +9,8 @@ type LoginFormProps = {
   onSwitchToRegister?: () => void;
 };
 
-const logoImageUrl = new URL(
-  "../../helpers/pictures/logo.png",
-  import.meta.url
-).href;
+const logoImageUrl = new URL("../../helpers/pictures/logo.png", import.meta.url)
+  .href;
 
 export const LoginForm: React.FC<LoginFormProps> = ({
   authAPI,

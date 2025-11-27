@@ -1,4 +1,5 @@
 @import url("https://fonts.googleapis.com/css2?family=Questrial&family=Roboto+Serif:wght@400;700&display=swap");
+@import "tailwindcss";
 
 :root {
   --font-primary: "Questrial", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;

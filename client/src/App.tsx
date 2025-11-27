@@ -5,6 +5,7 @@ import { AuthAPI } from "./api/auth/AuthAPI";
 import { UserAPI } from "./api/users/UserAPI";
 import { IUserAPI } from "./api/users/IUserAPI";
 import ProjectsPage from "./pages/ProjectsPage";
+import MainWindow from "./pages/MainWindow";
 
 const auth_api: IAuthAPI = new AuthAPI();
 const user_api: IUserAPI = new UserAPI();
@@ -22,7 +23,8 @@ function App() {
           }
         /> */}
         <Route path="/projects" element={<ProjectsPage />} />
-        <Route path="/" element={<AuthPage authAPI={auth_api} />} />
+        <Route path="/auth" element={<AuthPage authAPI={auth_api} />} />
+        <Route path="/" element={<MainWindow />} />
       </Routes>
     </>
   );
