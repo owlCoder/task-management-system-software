@@ -73,7 +73,7 @@ export const mockProjects: ProjectDTO[] = [
   {
     id: "2",
     name: "Naziv drugog projekta",
-    description: "ajsdhausudgausxaspojoiashdosandsapjdkaoskd",
+    description: "ajsdhausudgausxaspojoiashdosandsapjdkaoskdsssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss",
     imageUrl: "https://picsum.photos/seed/proj2/800/450",
     members: [
       {
@@ -95,4 +95,5 @@ export const mockProjects: ProjectDTO[] = [
     allowedBudget: 6000,
     status: ProjectStatus.PAUSED,
   },
+  
 ];
