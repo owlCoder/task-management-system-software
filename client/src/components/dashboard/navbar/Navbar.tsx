@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { IUserAPI } from "../../../api/users/IUserAPI";
 import { useAuth } from "../../../hooks/useAuthHook";
 import { UserDTO } from "../../../models/users/UserDTO";
@@ -45,20 +45,23 @@ export const DashboardNavbar: React.FC<DashboardNavbarProps> = ({
     navigate("/auth");
   };
 
+  // Make register page and add route on it
+  const handleRegister = () => {
+    navigate("/auth");
+  };
+
   return (
-    <nav className="titlebar" style={{ height: "60px", borderRadius: 0 }}>
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          width: "100%",
-          padding: "0 12px",
-          boxSizing: "border-box",
-        }}
-      >
-        {/* Left: App title / logo */}
-        <div className="flex items-center gap-3">
+    <nav
+      className="fixed  left-0 w-full z-50 backdrop-blur-md bg-white/10"
+      style={{
+        WebkitBackdropFilter: "blur(10px)", 
+        height: "50px", 
+        display: "flex", 
+        alignItems: "center", 
+      }}
+    >
+      <div className="container mx-auto flex justify-between items-center px-4 py-2">
+        <div className="flex items-center text-white">
           <span
             style={{
               fontSize: "16px",
@@ -66,12 +69,12 @@ export const DashboardNavbar: React.FC<DashboardNavbarProps> = ({
               color: "var(--win11-text-primary)",
             }}
           >
-            Task Management
+            <Link to="/" style={{ textDecoration: "none", color: "inherit" }}>
+              Task Management
+            </Link>
           </span>
         </div>
-
-        {/* Right: user area */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-4">
           {isLoading ? (
             <div
               className="spinner"
@@ -79,7 +82,6 @@ export const DashboardNavbar: React.FC<DashboardNavbarProps> = ({
             ></div>
           ) : user ? (
             <>
-              {/* Profile Image */}
               {user.profileImage ? (
                 <img
                   src={user.profileImage}
@@ -110,8 +112,6 @@ export const DashboardNavbar: React.FC<DashboardNavbarProps> = ({
                   {user.username.charAt(0).toUpperCase()}
                 </div>
               )}
-
-              {/* User Info */}
               <div className="flex flex-col" style={{ gap: 0 }}>
                 <span
                   style={{
@@ -131,10 +131,8 @@ export const DashboardNavbar: React.FC<DashboardNavbarProps> = ({
                   {user.role}
                 </span>
               </div>
-
-              {/* Logout Button */}
               <button
-                className="btn btn-ghost"
+                className="text-white font-semibold hover:text-red-400"
                 onClick={handleLogout}
                 style={{ padding: "8px 16px" }}
               >
@@ -150,31 +148,21 @@ export const DashboardNavbar: React.FC<DashboardNavbarProps> = ({
               </button>
             </>
           ) : (
-            // No user: show Login button (and optional placeholder avatar)
             <>
-              <div
-                style={{
-                  width: "32px",
-                  height: "32px",
-                  borderRadius: "50%",
-                  background: "var(--win11-accent)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontWeight: 600,
-                  fontSize: "14px",
-                  color: "#000",
-                }}
-              >
-                ?
-              </div>
-
+              
               <button
-                className="btn btn-primary cursor-pointer"
+                className="text-white font-semibold hover:text-blue-400 cursor-pointer transition-colors duration-300"
                 onClick={handleLogin}
                 style={{ padding: "8px 12px" }}
               >
                 Login
+              </button>
+              <button
+                className="text-white font-semibold hover:text-blue-400 cursor-pointer transition-colors duration-300"
+                onClick={handleRegister}
+                style={{ padding: "8px 12px" }}
+              >
+                Register
               </button>
             </>
           )}

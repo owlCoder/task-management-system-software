@@ -14,28 +14,21 @@ const user_api: IUserAPI = new UserAPI();
 
 function App() {
   return (
-    <>
+    <div className="bg-blue-400 h-full min-h-screen">
       <Routes>
-        {/* <Route
-          path="/dashboard"
-          element={
-            <ProtectedRoute requiredRole="admin,seller">
-              <DashboardPage userAPI={user_api} anotherAPI={API} />
-            </ProtectedRoute>
-          }
-        /> */}
         <Route path="/projects" element={<ProjectsPage />} />
         <Route path="/auth" element={<AuthPage authAPI={auth_api} />} />
         <Route path="/" element={<MainWindow />} />
-        <Route path="/users" element={
-          <ProtectedRoute requiredRole="admin">
-            <UserPage />
-          </ProtectedRoute>
-        }
+        <Route
+          path="/users"
+          element={
+            <ProtectedRoute requiredRole="admin">
+              <UserPage />
+            </ProtectedRoute>
+          }
         />
-        
       </Routes>
-    </>
+    </div>
   );
 }
 
