@@ -1,6 +1,7 @@
 import axios, { AxiosInstance } from "axios";
 import { IUserAPI } from "./IUserAPI";
 import { UserDTO } from "../../models/users/UserDTO";
+import { UserCreationDTO } from "../../models/users/UserCreationDTO";
 
 export class UserAPI implements IUserAPI {
   private readonly axiosInstance: AxiosInstance;
@@ -30,7 +31,7 @@ export class UserAPI implements IUserAPI {
     ).data;
   }
 
-  async createUser(token: string, user: UserDTO): Promise<UserDTO> {
+  async createUser(token: string, user: UserCreationDTO): Promise<UserDTO> {
     return (
       await this.axiosInstance.post<UserDTO>("/users", user, {
       headers: { Authorization: `Bearer ${token}` },

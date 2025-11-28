@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import { IUserAPI } from "../../api/users/IUserAPI";
 import { UserDTO } from "../../models/users/UserDTO";
-import { RegistrationUserDTO } from "../../models/auth/RegistrationUserDTO";
+import { UserCreationDTO } from "../../models/users/UserCreationDTO";
 import { UserRole } from "../../enums/UserRole";
+
 
 type AddUserFormProps = {
   userAPI: IUserAPI;
@@ -17,12 +18,11 @@ export const AddUserForm: React.FC<AddUserFormProps> = ({
   onUserAdded,
   onClose,
 }) => {
-  const [formData, setFormData] = useState<RegistrationUserDTO>({
+  const [formData, setFormData] = useState<UserCreationDTO>({
     username: "",
     email: "",
     password: "",
-    role: UserRole.ANALYTICS_DEVELOPMENT_MANAGER,
-    profileImage: "",
+    role_name: UserRole.ANALYTICS_DEVELOPMENT_MANAGER,
   });
 
   const handleChange = (
@@ -39,15 +39,14 @@ export const AddUserForm: React.FC<AddUserFormProps> = ({
     if (!token) return;
 
     try {
-      const newUser: UserDTO = {
-        id: 0, // server će dodijeliti pravi ID
-        username: formData.username,
-        email: formData.email,
-        role: formData.role,
-        profileImage: formData.profileImage,
-      };
-      const created = await userAPI.createUser(token, newUser);
+      const created = await userAPI.createUser(token, formData);
       onUserAdded(created);
+       setFormData({
+       username: "",
+       email: "",
+       password: "",
+       role_name: UserRole.ANALYTICS_DEVELOPMENT_MANAGER,
+      });
       onClose();
     } catch (err) {
       console.error("Failed to add user:", err);
@@ -97,8 +96,8 @@ export const AddUserForm: React.FC<AddUserFormProps> = ({
         />
 
         <select
-          name="role"
-          value={formData.role}
+          name="role_name"
+          value={formData.role_name}
           onChange={handleChange}
           className="w-full px-3 py-2 rounded text-white bg-blue-900 focus:outline-none focus:ring-2 focus:ring-blue-400"
         >
@@ -109,15 +108,6 @@ export const AddUserForm: React.FC<AddUserFormProps> = ({
           <option value={UserRole.AUDIO_MUSIC_STAGIST}>Audio music stagist</option>
           <option value={UserRole.PROJECT_MANAGER}>Project manager</option>
         </select>
-
-        <input
-          type="text"
-          name="profileImage"
-          value={formData.profileImage}
-          onChange={handleChange}
-          placeholder="Profile Image URL (optional)"
-          className="w-full px-3 py-2 rounded text-white bg-blue-900 placeholder:text-white/70 focus:outline-none focus:ring-2 focus:ring-blue-400"
-        />
 
         <div className="flex gap-4 mt-4">
           <button
