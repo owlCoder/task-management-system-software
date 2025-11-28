@@ -1,8 +1,6 @@
 import React from 'react';
 
-interface NotificationTitleProps {
-  className?: string;
-}
+import { NotificationTitleProps } from '../../models/notification/NotificationTitlePropsDTO';
 
 const NotificationTitle: React.FC<NotificationTitleProps> = ({ className = "" }) => {
   return (
