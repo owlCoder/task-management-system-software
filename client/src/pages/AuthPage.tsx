@@ -2,13 +2,14 @@ import React, { useState } from "react";
 import { IAuthAPI } from "../api/auth/IAuthAPI";
 import { LoginForm } from "../components/auth/LoginForm";
 import { RegisterForm } from "../components/auth/RegisterForm";
+import Navbar from "../components/dashboard/navbar/Navbar";
 
 type AuthPageProps = {
   authAPI: IAuthAPI;
 };
 
 const backgroundImageUrl = new URL(
-  "../helpers/pictures/pozadina.png",
+  "../../public/background.png",
   import.meta.url
 ).href;
 
@@ -18,6 +19,8 @@ export const AuthPage: React.FC<AuthPageProps> = ({ authAPI }) => {
 
   
   return (
+    <>
+    <Navbar/>
     <div
       className="w-screen h-screen bg-cover bg-center bg-no-repeat flex"
       style={{ backgroundImage: `url(${backgroundImageUrl})` }}
@@ -47,5 +50,6 @@ export const AuthPage: React.FC<AuthPageProps> = ({ authAPI }) => {
         </div>
       </div>
     </div>
+    </>
   );
 };

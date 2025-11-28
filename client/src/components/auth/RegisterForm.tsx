@@ -11,7 +11,7 @@ type RegisterFormProps = {
 };
 
 const logoImageUrl = new URL(
-  "../../helpers/pictures/logo.png",
+  "../../../public/logo.png",
   import.meta.url
 ).href;
 
@@ -23,7 +23,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
     username: "",
     email: "",
     password: "",
-    role: UserRole.SELLER,
+    role: UserRole.ADMIN, // Changed to ADMIN because SELLER does not exist @knezzevic
     profileImage: "",
   });
 
@@ -121,7 +121,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
             onChange={handleChange}
             className="w-[85%] mx-auto mt-2 bg-transparent border-b-[3px] border-white/40 text-white py-2 outline-none"
           >
-            <option value={UserRole.SELLER}>Seller</option>
+            {/*<option value={UserRole.SELLER}>Seller</option> --- SELLER does not exist @knezzevic*/}
             <option value={UserRole.ADMIN}>Admin</option>
           </select>
         </div>
