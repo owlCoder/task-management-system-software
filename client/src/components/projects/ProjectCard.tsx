@@ -17,128 +17,86 @@ export const ProjectCard: React.FC<Props> = ({
   onSelect,
   onView,
 }) => {
-  const rootStyle: React.CSSProperties = {
-    width: "100%",
-    maxWidth: 320,
-    background: "var(--bg)",
-    border: `1px solid rgba(47,119,255,0.12)`,
-    borderRadius: 8,
-    overflow: "hidden",
-    display: "flex",
-    flexDirection: "column",
-    boxSizing: "border-box",
-    cursor: "pointer",
-    userSelect: "none",
-    transition: "box-shadow 180ms ease, transform 140ms ease",
-    boxShadow: selected ? "0 8px 24px rgba(47,119,255,0.08)" : "0 1px 4px rgba(0,0,0,0.04)",
-    transform: selected ? "translateY(-4px)" : undefined,
-    fontFamily: "var(--font-primary)",
+  const handleRootKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      onSelect?.(String(project.id));
+    }
   };
 
-  const innerStyle: React.CSSProperties = {
-    padding: 14,
-    display: "flex",
-    flexDirection: "column",
-    gap: 12,
+  const handleViewClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onView?.(project);
   };
 
-  const imageAreaStyle: React.CSSProperties = {
-    width: "100%",
-    height: 110,
-    borderRadius: 8,
-    overflow: "hidden",
-    background: "var(--soft-bg)",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
+  const handleViewKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      e.stopPropagation();
+      onView?.(project);
+    }
   };
 
-  const imageStyle: React.CSSProperties = {
-    width: "100%",
-    height: "100%",
-    objectFit: "cover",
-    display: "block",
-  };
-
-  const titleStyle: React.CSSProperties = {
-    margin: 0,
-    fontFamily: "var(--font-secondary)",
-    fontSize: 15,
-    fontWeight: 700,
-    color: "var(--brand)",
-  };
-
-  const descStyle: React.CSSProperties = {
-    margin: 0,
-    color: "var(--muted)",
-    fontSize: 13,
-    lineHeight: 1.3,
-    fontFamily: "var(--font-primary)",
-  };
-
-  const membersStyle: React.CSSProperties = {
-    color: "var(--muted)",
-    fontSize: 13,
-    marginTop: 6,
-    fontFamily: "var(--font-primary)",
-  };
-
-  const separatorStyle: React.CSSProperties = {
-    height: 1,
-    background: "rgba(0,0,0,0.06)",
-    width: "100%",
-  };
-
-  const actionStripStyle: React.CSSProperties = {
-    background: "var(--accent)",
-    color: "#fff",
-    textAlign: "center",
-    padding: "12px 8px",
-    fontFamily: "var(--font-secondary)",
-    fontSize: 15,
-    fontWeight: 600,
-    cursor: "default", // promenicemo
-    userSelect: "none",
-  };
+  const selectedBoxShadow = selected ? "0 12px 11px rgba(47,119,255,0.4)" : undefined;
 
   return (
     <article
-      style={rootStyle}
+      className={
+        `w-full max-w-xs bg-white border border-[rgba(47,119,255,0.12)] overflow-hidden flex flex-col box-border select-none transform transition-all duration-200 ease-out
+         cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/40
+         ${selected ? "-translate-y-1 shadow-2xl ring-2 ring-accent/30" : "hover:-translate-y-1 hover:shadow-xl"}`
+      }
       onClick={() => onSelect?.(String(project.id))}
       role="button"
       tabIndex={0}
-      aria-labelledby={`project-${project.id}-title`}
-      onKeyDown={(e) => {
-        if (e.key === "Enter" || e.key === " ") onSelect?.(String(project.id));
-      }}
+      onKeyDown={handleRootKeyDown}
+      style={{ boxShadow: selectedBoxShadow }}
     >
-      <div style={innerStyle}>
-        <div style={imageAreaStyle} aria-hidden>
+
+      <div className="p-3 flex flex-col gap-3 flex-1 min-h-0">
+        <div
+          className="w-full h-28 rounded-lg overflow-hidden flex items-center justify-center"
+          aria-hidden
+        >
           {project.imageUrl ? (
-            <img src={project.imageUrl} alt={`${project.name} cover`} style={imageStyle} />
+            <img
+              src={project.imageUrl}
+              alt={`${project.name} cover`}
+              className="w-full h-full object-cover block"
+              loading="lazy"
+            />
           ) : (
-            <div style={{ color: "var(--muted)", fontSize: 14, fontFamily: "var(--font-primary)" }}>slika</div>
+            <div className="text-muted text-sm">slika</div>
           )}
         </div>
 
-        <div>
-          <h3 id={`project-${project.id}-title`} style={titleStyle}>
+        <div className="m-[15px]">
+          <h3
+            id={`project-${project.id}-title`}
+            className="m-0 text-brand text-base md:text-lg"
+          >
             {project.name}
           </h3>
 
-          <p style={descStyle}>{project.description ?? "No description"}</p>
-
-          <div style={membersStyle}>{(project.members ?? []).length} members</div>
+          <p className="mt-2 text-muted text-sm">
+            {(project.members ?? []).length} members
+          </p>
+          
+          <p className="mt-1 text-muted text-sm leading-tight break-words whitespace-normal">
+            {project.description ?? "No description"}
+          </p>
+          
         </div>
       </div>
 
-      <div style={separatorStyle} />
-      
-      {/*Otvorice se prozor za detalje*/}
       <div
-        style={actionStripStyle}
-        aria-label={`View ${project.name} (not implemented)`}
-        role="presentation"
+        className="text-center text-base font-semibold select-none cursor-pointer flex items-center justify-center"
+        role="button"
+        tabIndex={0}
+        aria-label={`View ${project.name}`}
+        onClick={handleViewClick}
+        onKeyDown={handleViewKeyDown}
+        style={{height: 40, background: "var(--accent)", fontFamily: "var(--font-secondary)", color: "white"}}
       >
         View Project
       </div>
