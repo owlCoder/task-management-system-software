@@ -1,4 +1,8 @@
- Container mysql_db  Recreate
- Container mysql_db  Recreated
+ Network database_mysql_network  Creating
+ Network database_mysql_network  Created
+ Volume database_mysql_data  Creating
+ Volume database_mysql_data  Created
+ Container mysql_db  Creating
+ Container mysql_db  Created
  Container mysql_db  Starting
  Container mysql_db  Started
