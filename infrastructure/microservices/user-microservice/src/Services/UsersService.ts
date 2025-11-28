@@ -2,9 +2,20 @@ import { Repository } from "typeorm";
 import { IUsersService } from "../Domain/services/IUsersService";
 import { User } from "../Domain/models/User";
 import { UserDTO } from "../Domain/DTOs/UserDTO";
+import { UserCreationDTO } from "../Domain/DTOs/UserCreationDTO";
+import bcrypt from "bcryptjs";
+import { UserRole } from "../Domain/models/UserRole";
 
 export class UsersService implements IUsersService {
-  constructor(private userRepository: Repository<User>) {}
+  private readonly saltRounds: number = parseInt(
+    process.env.SALT_ROUNDS || "10",
+    10
+  );
+
+  constructor(
+    private userRepository: Repository<User>,
+    private userRolesRepository: Repository<UserRole>
+  ) {}
 
   /**
    * Get all users
@@ -36,7 +47,7 @@ export class UsersService implements IUsersService {
    * Create new user
    */
 
-  async createUser(user: User): Promise<UserDTO> {
+  async createUser(user: UserCreationDTO): Promise<UserDTO> {
     const existingUser = await this.userRepository.findOne({
       where: [{ username: user.username }, { email: user.email }], //na ovaj nacin proveravam da li username ili email vec postoje i da li je obrisan korisnik sa tim podacima
       //kaze onda da dupliramo podatke sto je logicno, ali da li je potrebno onda da ostavim samo bez is_deleted: false u oba slucaja?
@@ -47,11 +58,35 @@ export class UsersService implements IUsersService {
       throw new Error("Username or email already exists");
     }
 
-    const result = await this.userRepository.insert(user);
+    //posto dobijamo role_name:string onda pretrazujemo da li postoji taj role_name u bazi
+    const userRole: UserRole | null = await this.userRolesRepository.findOne({
+      where: { role_name: user.role_name },
+    });
+
+    if (userRole === null) {
+      throw new Error("User role does not exist");
+    }
+
+    const hashedPassword = await bcrypt.hash(
+      user.password,
+      this.saltRounds
+    );
+
+    user.password = hashedPassword;
+
+    const result = await this.userRepository.insert({
+      username: user.username,
+      password_hash: hashedPassword,
+      user_role: userRole,
+      email: user.email,
+    });
 
     const newUser = {
-      ...user,
       user_id: result.identifiers[0].user_id,
+      username: user.username,
+      password_hash: hashedPassword,
+      user_role: userRole,
+      email: user.email,
       is_deleted: result.generatedMaps[0].is_deleted,
       weekly_working_hour_sum: result.generatedMaps[0].weekly_working_hour_sum,
     };
@@ -111,6 +146,7 @@ export class UsersService implements IUsersService {
     return this.toDTO(updatedUser);
   }
 
+  //helper metode
   /**
    * Convert User entity to UserDTO
    */

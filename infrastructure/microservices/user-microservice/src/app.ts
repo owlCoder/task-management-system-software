@@ -42,7 +42,10 @@ const userRepository: Repository<User> = Db.getRepository(User);
 const userRoleRepository: Repository<UserRole> = Db.getRepository(UserRole);
 
 // Services
-const userService: IUsersService = new UsersService(userRepository);
+const userService: IUsersService = new UsersService(
+  userRepository,
+  userRoleRepository
+);
 const userRoleService: IUserRoleService = new UserRoleService(
   userRoleRepository
 );

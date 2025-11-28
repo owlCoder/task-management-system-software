@@ -17,4 +17,17 @@ export class UserRoleService implements IUserRoleService {
       role_name: r.role_name,
     }));
   }
+
+  /**
+   * Get role by role_name
+   */
+
+  async getRoleByRoleName(role_name: string): Promise<UserRoleDTO> {
+    //posto dobijamo role_name:string onda pretrazujemo da li postoji taj role_name u bazi
+    const userRole = await this.userRoleRepository.findOne({
+      where: { role_name: role_name },
+    });
+
+    return new UserRoleDTO(userRole?.user_role_id,userRole?.role_name);
+  }
 }

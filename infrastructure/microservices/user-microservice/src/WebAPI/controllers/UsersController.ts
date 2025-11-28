@@ -2,7 +2,10 @@ import { Router, Request, Response } from "express";
 import { ILogerService } from "../../Domain/services/ILogerService";
 import { IUsersService } from "../../Domain/services/IUsersService";
 import { IUserRoleService } from "../../Domain/services/IUserRoleService";
-import { UserDataUpdateValidation, UserDataValidation } from "../validation/UserDataValidation";
+import {
+  UserDataUpdateValidation,
+  UserDataValidation,
+} from "../validation/UserDataValidation";
 
 export class UsersController {
   private readonly router: Router;
@@ -57,7 +60,7 @@ export class UsersController {
   private async createUser(req: Request, res: Response): Promise<void> {
     try {
       const userData = req.body;
-
+      
       const rezultat = UserDataValidation(userData);
 
       if (rezultat.uspesno === false) {
