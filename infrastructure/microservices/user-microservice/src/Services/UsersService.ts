@@ -47,14 +47,13 @@ export class UsersService implements IUsersService {
       throw new Error("Username or email already exists");
     }
 
-    const result = this.userRepository.insert(user);
+    const result = await this.userRepository.insert(user);
 
     const newUser = {
       ...user,
-      user_id: (await result).identifiers[0].user_id,
-      is_deleted: (await result).generatedMaps[0].is_deleted,
-      weekly_working_hour_sum: (await result).generatedMaps[0]
-        .weekly_working_hour_sum,
+      user_id: result.identifiers[0].user_id,
+      is_deleted: result.generatedMaps[0].is_deleted,
+      weekly_working_hour_sum: result.generatedMaps[0].weekly_working_hour_sum,
     };
 
     return this.toDTO(newUser);
