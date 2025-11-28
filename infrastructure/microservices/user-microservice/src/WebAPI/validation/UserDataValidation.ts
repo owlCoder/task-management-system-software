@@ -8,8 +8,6 @@ export function UserDataValidation(
 ): UserValidType {
   var poruka: string = "";
 
-  console.log(UserData);
-
   // Validacija username-a
   if (!UserData.username || UserData.username.trim() === "") {
     poruka = "Username ne sme biti prazan.";
