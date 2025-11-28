@@ -67,10 +67,7 @@ export class UsersService implements IUsersService {
       throw new Error("User role does not exist");
     }
 
-    const hashedPassword = await bcrypt.hash(
-      user.password,
-      this.saltRounds
-    );
+    const hashedPassword = await bcrypt.hash(user.password, this.saltRounds);
 
     user.password = hashedPassword;
 

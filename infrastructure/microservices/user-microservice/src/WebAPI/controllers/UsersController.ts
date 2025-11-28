@@ -28,6 +28,12 @@ export class UsersController {
     this.router.get("/user-roles", this.getAllUserRoles.bind(this));
   }
 
+  /**
+   * GET /api/v1/users
+   * Get all users
+   * @returns {UserDTO[]} JSON response with success status, session/token, and message
+   * @see {@link UserDTO} for input structure
+   */
   private async getAllUsers(req: Request, res: Response): Promise<void> {
     try {
       this.logger.log("Fetching all users");
@@ -38,6 +44,13 @@ export class UsersController {
       res.status(500).json({ message: (err as Error).message });
     }
   }
+
+  /**
+   * GET /api/v1/users/:id
+   * @param {id} req.body - User id
+   * @returns {UserDTO} JSON response with success status, session/token, and message
+   * @see {@link UserDTO} for input structure
+   */
 
   private async getUserById(req: Request, res: Response): Promise<void> {
     try {
@@ -57,10 +70,17 @@ export class UsersController {
     }
   }
 
+  /**
+   * POST /api/v1/users
+   * @param {UserCreationDTO} req.body - Data for user creation
+   * @returns {UserDTO} JSON response with success status, session/token, and message
+   * @see {@link UserDTO  and UserCreationDTO} for input structure
+   */
+
   private async createUser(req: Request, res: Response): Promise<void> {
     try {
       const userData = req.body;
-      
+
       const rezultat = UserDataValidation(userData);
 
       if (rezultat.uspesno === false) {
@@ -76,6 +96,13 @@ export class UsersController {
       res.status(500).json({ message: (err as Error).message });
     }
   }
+
+  /**
+   * DELETE /api/v1/users/:id
+   * @param {id} req.body - ID of user that you want to delete
+   * @returns {message}
+   * @see {@link UserDTO  and UserCreationDTO} for input structure
+   */
 
   private async logicalyDeleteUser(req: Request, res: Response): Promise<void> {
     try {
@@ -101,6 +128,13 @@ export class UsersController {
       res.status(500).json({ message: (err as Error).message });
     }
   }
+
+  /**
+   * PUT /api/v1/users/:id
+   * @param {id and User} req.body - ID of user that you want to update, and User with new data
+   * @returns {UserDTO} - JSON format return
+   * @see {@link UserDTO  and UserCreationDTO} for input structure
+   */
 
   private async updateUser(req: Request, res: Response): Promise<void> {
     try {
@@ -128,6 +162,13 @@ export class UsersController {
       res.status(500).json({ message: (err as Error).message });
     }
   }
+
+  /**
+   * GET /api/v1//user-roles
+   * Get all roles
+   * @returns {UserRoleDTO[]} JSON response with success status, session/token, and message
+   * @see {@link UserRoleDTO} for input structure
+   * */
 
   private async getAllUserRoles(req: Request, res: Response): Promise<void> {
     try {
