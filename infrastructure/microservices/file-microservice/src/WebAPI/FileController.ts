@@ -6,6 +6,14 @@ import * as path from 'path';
 export class FileController {
   constructor(private fileService: IFileService) {}
 
+  /**
+   * POST /api/v1/files/upload
+   * Upload a new file to the system
+   * @param {File} req.file - The uploaded file (multipart/form-data)
+   * @param {number} req.body.authorId - ID of the user uploading the file
+   * @returns {UploadedFileDTO} JSON response with success status, file data, and message
+   * @see {@link CreateFileDTO} for input structure
+   */
   uploadFile = async (req: Request, res: Response): Promise<void> => {
     try {
       if (!req.file) {
@@ -46,6 +54,13 @@ export class FileController {
     }
   };
 
+  /**
+   * GET /api/v1/files/:fileId/download
+   * Download a file by its ID
+   * @param {number} req.params.fileId - ID of the file to download
+   * @returns {Buffer} File content with appropriate headers for download
+   * @see {@link FileResponseDTO} for response structure
+   */
   downloadFile = async (req: Request, res: Response): Promise<void> => {
     try {
       const fileId = parseInt(req.params.fileId);
@@ -72,6 +87,12 @@ export class FileController {
     }
   };
 
+  /**
+   * DELETE /api/v1/files/:fileId
+   * Delete a file from the system
+   * @param {number} req.params.fileId - ID of the file to delete
+   * @returns {boolean} JSON response with success status and message
+   */
   deleteFile = async (req: Request, res: Response): Promise<void> => {
     try {
       const fileId = parseInt(req.params.fileId);
@@ -96,6 +117,13 @@ export class FileController {
     }
   };
 
+  /**
+   * GET /api/v1/files/author/:authorId
+   * Get all files uploaded by a specific author
+   * @param {number} req.params.authorId - ID of the author whose files to retrieve
+   * @returns {UploadedFileDTO[]} JSON response with success status and array of file metadata
+   * @see {@link UploadedFileDTO} for response structure
+   */
   getFilesByAuthor = async (req: Request, res: Response): Promise<void> => {
     try {
       const authorId = parseInt(req.params.authorId);
@@ -120,6 +148,13 @@ export class FileController {
     }
   };
 
+  /**
+   * GET /api/v1/files/:fileId/metadata
+   * Get metadata information for a specific file
+   * @param {number} req.params.fileId - ID of the file to get metadata for
+   * @returns {UploadedFileDTO} JSON response with success status and file metadata (without file buffer)
+   * @see {@link UploadedFileDTO} for response structure
+   */
   getFileMetadata = async (req: Request, res: Response): Promise<void> => {
     try {
       const fileId = parseInt(req.params.fileId);
