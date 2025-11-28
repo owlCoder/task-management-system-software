@@ -3,6 +3,7 @@ import { useAuth } from "../../hooks/useAuthHook";
 import { IUserAPI } from "../../api/users/IUserAPI";
 import { UserDTO } from "../../models/users/UserDTO";
 import { AddUserForm } from "./AddUserForm";
+import { EditUserForm } from "./EditUserForm";
 import { UserDetail } from "./UserDetail";
 import { useNavigate } from "react-router-dom";
 
@@ -12,6 +13,7 @@ type UserListProps = {
 
 const backgroundImage = "/backgorund.png";
 const defaultProfileImage = "/user.png";
+const defaultAdminImage = "/admin.png";
 
 
 export const UserList: React.FC<UserListProps> = ({ userAPI }) => {
@@ -20,6 +22,7 @@ export const UserList: React.FC<UserListProps> = ({ userAPI }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [showAddForm, setShowAddForm] = useState(false);
   const [selectedUser, setSelectedUser] = useState<UserDTO | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -74,25 +77,47 @@ export const UserList: React.FC<UserListProps> = ({ userAPI }) => {
         }}
       >
 
-        <div className="flex flex-col gap-2 w-1/2 items-end">
+        <div className="flex flex-col gap-2 w-full items-end">
           {authUser && (
-             <div className="text-right mb-2">
-              <span className="text-white font-semibold">{authUser.username}</span>
-              <br />
-            <span className="text-blue-200 text-sm">{authUser.role}</span>
-            <button onClick={handleLogout} 
-        className="mt-1 px-3 py-1 bg-red-500 hover:bg-red-400 text-white rounded text-sm">Log out</button>
-       </div>
-        )}
+              <div className="flex justify-between items-center p-4 rounded-xl bg-blue-800/80 mb-4 shadow-md w-full">
+                  <div className="flex items-center gap-3">
+                <div
+                  className="flex-shrink-0 rounded-full overflow-hidden"
+                  style={{ width: "48px", height: "48px" }}
+                >
+                  <img
+                    src={defaultAdminImage}
+                    alt={authUser.username}
+                    style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                  />
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-white font-semibold">{authUser?.username}</span>
+                  <span className="text-blue-200 text-sm">{authUser?.role}</span>
+                </div>
+              </div>
 
-          <div
-            className="flex items-center gap-2 cursor-pointer text-white mb-2"
-            onClick={() => {setShowAddForm(true); setSelectedUser(null); }}
-          >
-            <span> + Add New User</span>
-          </div>
+              <button
+                onClick={handleLogout}
+                className="px-4 py-1 bg-red-500 hover:bg-red-400 text-white rounded-md shadow"
+              >
+                Log out
+              </button>
+              </div>
+          )}
 
-          <div className="flex flex-col gap-2 overflow-y-auto" style={{ maxHeight: "70vh" }}>
+          <div className="flex flex-col gap-4 mt-20 w-full">
+            <div className="flex items-center gap-2 cursor-pointer text-white font-medium hover:text-blue-300 transition"
+              onClick={() => {
+                setShowAddForm(true);
+                setSelectedUser(null);
+                setIsEditing(false);
+              }}
+            >
+              <span> + Add New User</span>
+            </div>
+
+            <div className="flex flex-col gap-2 overflow-y-auto" style={{ maxHeight: "70vh" }}>
             {isLoading ? (
               <p className="text-white">Loading users...</p>
             ) : (
@@ -109,6 +134,7 @@ export const UserList: React.FC<UserListProps> = ({ userAPI }) => {
                   onClick={() => {
                     setSelectedUser(u);
                     setShowAddForm(false);
+                    setIsEditing(false);
                   }}
                 >
                   <div className="flex items-center gap-3">
@@ -127,13 +153,32 @@ export const UserList: React.FC<UserListProps> = ({ userAPI }) => {
                       <span className="text-blue-200 text-xs">{u.role}</span>
                     </div>
                   </div>
-
-                  <div className="cursor-pointer text-red-500" onClick={() => handleDelete(u.id)}>
-                    Delete
-                  </div>
+                  <div className="flex gap-2">
+                      <span
+                        className="cursor-pointer text-yellow-400"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedUser(u);
+                          setIsEditing(true);
+                          setShowAddForm(false);
+                        }}
+                      >
+                        Edit
+                      </span>
+                      <span
+                        className="cursor-pointer text-red-500"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDelete(u.id);
+                        }}
+                      >
+                        Delete
+                      </span>
+                    </div>
                 </div>
               ))
             )}
+          </div>
           </div>
         </div>
 
@@ -151,16 +196,27 @@ export const UserList: React.FC<UserListProps> = ({ userAPI }) => {
           </div>
         )}
 
-        { selectedUser && (
-           <div
-            className="flex flex-col w-1/2 p-4 rounded-lg"
-            style={{
-              marginTop: "80px",
-              width: "60%",
-              minWidth: "300px",
-              maxWidth: "400px",
-            }}
-          >
+       {selectedUser && isEditing && token && (
+          <div className="flex flex-col w-1/2 p-4 rounded-lg">
+            <EditUserForm
+              userAPI={userAPI}
+              token={token}
+              existingUser={selectedUser}
+              onUserUpdated={(updatedUser) => {
+                setUsers((prev) => prev.map((u) => (u.id === updatedUser.id ? updatedUser : u)));
+                setSelectedUser(null);
+                setIsEditing(false);
+              }}
+              onClose={() => {
+                setSelectedUser(null);
+                setIsEditing(false);
+              }}
+            />
+          </div>
+        )}
+
+        {selectedUser && !isEditing && (
+          <div className="flex flex-col w-1/2 p-4 rounded-lg">
             <UserDetail user={selectedUser} onClose={() => setSelectedUser(null)} />
           </div>
         )}
