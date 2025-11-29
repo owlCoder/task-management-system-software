@@ -2,3 +2,5 @@
 .DS_Store
 database/docker-compose.yml
 database/output.txt
+infrastructure/microservices/mail-microservice/package-lock.json
+infrastructure/microservices/mail-microservice/package.json

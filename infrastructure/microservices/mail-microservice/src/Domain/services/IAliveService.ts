@@ -1,5 +1,5 @@
 import { Mail } from "../models/Mail";
 
-export interface IAuthService{
+export interface IAliveService{
     Alive():Promise<string>;
 }
