@@ -53,6 +53,7 @@ export class AuthService implements IAuthService {
         userData: {
           user_id: user.user_id,
           username: user.username,
+          email: user.email,
           role: user.user_role.role_name,
           otp_required: false
         }
@@ -67,7 +68,7 @@ export class AuthService implements IAuthService {
 
     if (existingUser) return { authenticated: false };
 
-    const validRole: UserRole | undefined = this.roleService.getRole(data.role);
+    const validRole: UserRole | undefined = this.roleService.getRole(data.role_name);
     //////////////////////////////////////////
     // Enable role restrictions in production
     //////////////////////////////////////////
@@ -97,6 +98,7 @@ export class AuthService implements IAuthService {
       userData: {
         user_id: savedUser.user_id,
         username: savedUser.username,
+        email: savedUser.email,
         role: validRole.role_name,
       },
     };
@@ -138,6 +140,7 @@ export class AuthService implements IAuthService {
       userData: {
         user_id: user.user_id,
         username: user.username,
+        email: user.email,
         role: user.user_role.role_name,
       }
     };

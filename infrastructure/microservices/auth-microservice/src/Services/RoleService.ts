@@ -2,7 +2,7 @@ import { Repository } from "typeorm";
 import { UserRole } from "../Domain/models/UserRole";
 
 export class RoleService {
-  private userRoles: ReadonlyMap<number, UserRole> = new Map();
+  private userRoles: ReadonlyMap<string, UserRole> = new Map();
   private readonly userRoleRepository: Repository<UserRole>;
 
   constructor(userRoleRepository: Repository<UserRole>) {
@@ -16,15 +16,15 @@ export class RoleService {
     });
   }
 
-  getRole(user_role_id: number): UserRole | undefined {
-    return this.userRoles.get(user_role_id);
+  getRole(user_role_name: string): UserRole | undefined { // role name instead of id
+    return this.userRoles.get(user_role_name);
   }
 
   private async refreshUserRoles(): Promise<void> {
     try {
       const roles = await this.userRoleRepository.find();
-      const newMap = new Map<number, UserRole>();
-      roles.forEach(role => newMap.set(role.user_role_id, role));
+      const newMap = new Map<string, UserRole>();
+      roles.forEach(role => newMap.set(role.role_name, role));
       this.userRoles = newMap;
     } catch (error) {
       console.error('Error refreshing user roles:', error);

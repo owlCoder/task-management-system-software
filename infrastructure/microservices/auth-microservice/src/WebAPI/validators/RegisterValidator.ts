@@ -10,7 +10,7 @@ export function validateRegistrationData(data: RegistrationUserDTO): { success: 
   if (!data.email || !data.email.includes("@")) {
     return { success: false, message: "Invalid email address" };
   }
-  if (typeof data.role !== "number" || data.role < 0) {
+  if (typeof data.role_name !== "number" || data.role_name < 0) {
     return { success: false, message: "Role must be a valid number" };
   }
   return { success: true };

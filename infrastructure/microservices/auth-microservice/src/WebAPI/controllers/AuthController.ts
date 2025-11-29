@@ -67,7 +67,7 @@ export class AuthController {
         }
         else if (result.userData && result.userData.otp_required === false) {
           const token = jwt.sign(
-            { id: result.userData?.user_id, username: result.userData?.username, role: result.userData?.role },
+            { id: result.userData?.user_id, username: result.userData?.username, email: result.userData?.email, role: result.userData?.role },
             process.env.JWT_SECRET ?? "",
             { expiresIn: `${this.jwtSessionExpiration}m` }
           );
@@ -109,7 +109,7 @@ export class AuthController {
       const result = await this.authService.register(data);
       if (result.authenticated) {
         const token = jwt.sign(
-          { id: result.userData?.user_id, username: result.userData?.username, role: result.userData?.role },
+          { id: result.userData?.user_id, username: result.userData?.username, email: result.userData?.email, role: result.userData?.role },
           process.env.JWT_SECRET ?? "",
           { expiresIn: `${this.jwtSessionExpiration}m` }
         );
@@ -152,7 +152,7 @@ export class AuthController {
       const result = await this.authService.verifyOtp({ user_id, session_id }, otp);
       if (result.authenticated) {
         const token = jwt.sign(
-          { id: result.userData?.user_id, username: result.userData?.username, role: result.userData?.role },
+          { id: result.userData?.user_id, username: result.userData?.username, email: result.userData?.email, role: result.userData?.role },
           process.env.JWT_SECRET ?? "",
           { expiresIn: `${this.jwtSessionExpiration}m` }
         );

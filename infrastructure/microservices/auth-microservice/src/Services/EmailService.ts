@@ -39,7 +39,7 @@ export class EmailService {
     const otpCode = randomInt(0, 100000000).toString().padStart(8, '0'); // Generate 8-digit OTP
 
     const dateCreated = new Date();
-    const sessionData: LoginData = { userId: user.user_id, otpCode: otpCode, dateCreated: dateCreated, retryCount: 0 };
+    const sessionData: LoginData = { userId: user.user_id, otpCode: otpCode, dateCreated: dateCreated};
     const sessionId = uuidv4();
 
     // Email content

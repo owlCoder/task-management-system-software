@@ -3,6 +3,8 @@
  * Either session fields are present (for OTP-required login) or user fields are present (for direct login).
  */
 
+import { AuthTokenClaims } from "./AuthTokenClaims";
+
 type SessionClaims = {
   user_id: number;
   otp_required: true;
@@ -11,11 +13,8 @@ type SessionClaims = {
   exp: number; // Expires at
 };
 
-type UserClaims = {
-  user_id: number;
+type UserClaims = AuthTokenClaims & {
   otp_required: false;
-  username: string;
-  role: string;
 };
 
 export type LoginTokenClaims = SessionClaims | UserClaims;
