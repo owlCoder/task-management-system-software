@@ -4,6 +4,7 @@ import { RegistrationUserDTO } from "../Domain/DTOs/RegistrationUserDTO";
 import { UserDTO } from "../Domain/DTOs/UserDTO";
 import { Result } from "../Domain/types/Result";
 import { ErrorHandlingService } from "./ErrorHandlingService";
+import { UpdateUserDTO } from "../Domain/DTOs/UpdateUserDTO";
 
 export class GatewayUserService implements IGatewayUserService {
     private static readonly serviceName: string = "User Service";
@@ -55,7 +56,7 @@ export class GatewayUserService implements IGatewayUserService {
         }
     }
 
-    async updateUserById(id: number, data: UserDTO): Promise<Result<UserDTO>> {
+    async updateUserById(id: number, data: UpdateUserDTO): Promise<Result<UserDTO>> {
         try {
             const response = await this.userClient.put<UserDTO>(`/users/${id}`, data);
             return {
