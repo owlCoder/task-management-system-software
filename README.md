@@ -10,6 +10,26 @@ Short link: https://bit.ly/jira_oib
 Diagram and schema design for the database and information system.  
 Short link: https://bit.ly/diagrams_oib
 
+## Backend Setup
+
+**⚠️⚠️⚠️ Before you begin ⚠️⚠️⚠️**  
+Create the required environment files (`.env`) inside **each microservice folder** with the correct configuration.  
+_The backend will not function correctly unless every microservice has its environment file properly set up._
+
+### 1. Start the Database
+
+- Ensure Docker is installed and running.
+- Double-click `DB_start.bat` **or** run it in the command prompt.  
+  This will navigate to the `database` folder and launch the MySQL database container.
+  [See detailed Database Setup instructions here](#database-setup)
+- To stop the database, double-click `DB_stop.bat` or run it in the command prompt.
+
+### 2. Start the Backend Microservices
+
+- After the database is running, double-click `BACKEND_start.bat` **or** run it in the command prompt.  
+  This will start all backend microservices in a new command window, with tabs as services.
+  The first tab will show in which order the services have been run.
+
 ## Database Setup
 A Docker Compose MySQL instance is available to initialize the database automatically. The startup script will automatically create a `.env` file in the `database` folder if it doesn't exist, prompting you for the MySQL root password, user username, and user password. The default database name is fixed to "users_db" whereas the other other databases are added automatically with the startup scripts.
 
