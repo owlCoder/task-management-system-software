@@ -1,0 +1,45 @@
+import express from 'express';
+import cors from 'cors';
+import "reflect-metadata";
+import { initialize_database } from './Database/InitializeConnection';
+import dotenv from 'dotenv';
+import { Repository } from 'typeorm';
+import { Db } from './Database/DbConnectionPool';
+import { Task } from './Domain/models/Task';
+import { ITaskService } from './Domain/services/ITaskService';
+import { TaskService } from './Services/TaskService';
+import { TaskController } from './WebAPI/controllers/TaskController';
+
+
+dotenv.config({ quiet: true });
+
+const app = express();
+
+// Read CORS settings from environment
+const corsOrigin = process.env.CORS_ORIGIN ?? "*";
+const corsMethods = process.env.CORS_METHODS?.split(",").map(m => m.trim()) ?? ["POST"];
+
+// Protected microservice from unauthorized access
+app.use(cors({
+  origin: corsOrigin,
+  methods: corsMethods,
+}));
+
+app.use(express.json());
+
+(async () => {
+  await initialize_database();
+
+  // ORM Repositories
+  const taskRepository: Repository<Task> = Db.getRepository(Task);
+
+  // Services
+  const taskService : ITaskService = new TaskService(taskRepository);
+
+  // WebAPI routes
+  const taskController = new TaskController(taskService);
+
+  // Registering routes
+  app.use('/api/v1', taskController.getRouter());
+})();
+export default app;

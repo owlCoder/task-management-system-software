@@ -3,16 +3,11 @@ import {
   PrimaryGeneratedColumn,
   Column,
   ManyToOne,
-  JoinColumn,
+  JoinColumn
 } from "typeorm";
 import { TaskStatus } from "../enums/task_status";
 
-@Entity("tasks", {
-  checks: [
-    { expression: `"estimated_cost" >= 0 OR "estimated_cost" IS NULL` },
-    { expression: `"total_hours_spent" >= 0` },
-  ],
-})
+@Entity("Tasks") 
 export class Task {
     @PrimaryGeneratedColumn()
     task_id!: number;
@@ -36,15 +31,3 @@ export class Task {
     @Column({ type: "int",default: 0, unique: false, nullable: true })
     total_hours_spent!: number;
 }
-/*Table tasks
-
-task_id
-project_id
-title
-task_description
-task_status (created/waiting...)
-attachment_file_uuid 
-(file_uuid)
-estimated_cost 
-total_hours_spent 
-*/
