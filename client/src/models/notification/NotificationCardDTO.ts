@@ -3,12 +3,14 @@ export interface Notification {
   content: string;
   timestamp: string;
   isRead: boolean;
-  type?: 'info' | 'warning' | 'error'; // za buduću upotrebu
-  source?: string; // npr. "Auth Service", "Project Service"
+  type?: 'info' | 'warning' | 'error';
+  source?: string;
 }
 
 export interface NotificationCardProps {
   notification: Notification;
   onClick?: (id: number) => void;
+  isSelected?: boolean;                    
+  onSelectChange?: (id: number) => void;   
   className?: string;
 }
