@@ -42,22 +42,23 @@ export const DashboardNavbar: React.FC<DashboardNavbarProps> = ({
   };
 
   const handleLogin = () => {
-    navigate("/auth");
+    console.log("Navigating to /auth");
+    navigate("/auth"); // Navigate to the login page
   };
 
-  // Make register page and add route on it
   const handleRegister = () => {
-    navigate("/auth");
+    console.log("Navigating to /register");
+    navigate("/register"); // Navigate to the register page
   };
 
   return (
     <nav
-      className="fixed  left-0 w-full z-50 backdrop-blur-md bg-white/10"
+      className="fixed left-0 w-full z-50 backdrop-blur-md bg-white/10"
       style={{
-        WebkitBackdropFilter: "blur(10px)", 
-        height: "50px", 
-        display: "flex", 
-        alignItems: "center", 
+        WebkitBackdropFilter: "blur(10px)",
+        height: "50px",
+        display: "flex",
+        alignItems: "center",
       }}
     >
       <div className="container mx-auto flex justify-between items-center px-4 py-2">
@@ -149,18 +150,15 @@ export const DashboardNavbar: React.FC<DashboardNavbarProps> = ({
             </>
           ) : (
             <>
-              
               <button
-                className="text-white font-semibold hover:text-blue-400 cursor-pointer transition-colors duration-300"
                 onClick={handleLogin}
-                style={{ padding: "8px 12px" }}
+                className="text-white font-semibold hover:text-blue-400"
               >
                 Login
               </button>
               <button
-                className="text-white font-semibold hover:text-blue-400 cursor-pointer transition-colors duration-300"
                 onClick={handleRegister}
-                style={{ padding: "8px 12px" }}
+                className="text-white font-semibold hover:text-blue-400"
               >
                 Register
               </button>
