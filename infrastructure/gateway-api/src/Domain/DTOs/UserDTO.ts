@@ -1,9 +1,9 @@
 import { UserRole } from "../enums/UserRole";
 
 export interface UserDTO {
-  id: number;
+  user_id: number;
   username: string;
+  role_name: UserRole;
   email: string;
-  role: UserRole;
-  profileImage: string;
+  weekly_working_hour_sum?: number;
 }

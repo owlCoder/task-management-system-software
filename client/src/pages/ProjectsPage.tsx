@@ -1,21 +1,35 @@
 import React, { useState } from "react";
 import ProjectCard from "../components/projects/ProjectCard";
+import ProjectDetailsModal from "../components/projects/ProjectDetailsModal";
 import { mockProjects } from "../mocks/ProjectsMock";
+import type { ProjectDTO } from "../models/project/ProjectDTO";
 
 export const ProjectsPage: React.FC = () => {
   const [projects] = useState(mockProjects);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [viewProject, setViewProject] = useState<ProjectDTO | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleSelect = (id: string) => {
-    setSelectedId((prev) => (prev === id ? null : id));
+    setSelectedId((prev) => (prev === id ?  null : id));
+  };
+
+  const handleViewProject = (project: ProjectDTO) => {
+    setViewProject(project);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setViewProject(null);
   };
 
   return (
-    <div className="px-6 sm:px-8 lg:px-12 max-w-7xl py-6 m-[15px]">
+    <div className="p-5">
       <header className="flex items-center justify-between gap-5 mb-6 flex-wrap">
         <h1
           className="m-0 text-2xl md:text-3xl"
-          style={{ fontFamily: "var(--font-secondary)" ,color: "var(--brand)"}}
+          style={{ fontFamily: "var(--font-secondary)" ,color: "var(--brand)", fontWeight: "bold"}}
         >
           Projects
         </h1>
@@ -26,14 +40,15 @@ export const ProjectsPage: React.FC = () => {
             className="inline-flex items-center justify-center gap-2 rounded-lg px-4 h-10 text-sm  focus:outline-none focus:ring-2 focus:ring-accent/30 transition-opacity duration-150"
             style={{
               background: selectedId ? "var(--brand)" : "var(--soft-bg)",
-              color: selectedId ? "white" : "var(--muted)",
-              opacity: !selectedId ? 0.5 : 1,
+              color: selectedId ?  "white" : "var(--muted)",
+              opacity: ! selectedId ? 0.5 : 1,
               pointerEvents: !selectedId ? "none" : "auto",
               fontFamily: "var(--font-primary)",
               margin: "3px",
               borderRadius: "4px",
               height: 30,
-              cursor: "pointer"
+              cursor: "pointer",
+              fontSize: "16px"
           
             }}
             aria-disabled={!selectedId}
@@ -48,17 +63,18 @@ export const ProjectsPage: React.FC = () => {
             className="inline-flex items-center justify-center gap-2 rounded-lg px-4 h-10 text-sm  focus:outline-none focus:ring-2 focus:ring-accent/30 transition-opacity duration-150"
             style={{
               background: selectedId ? "var(--brand)" : "var(--soft-bg)",
-              color: selectedId ? "white" : "var(--muted)",
-              opacity: !selectedId ? 0.5 : 1,
+              color: selectedId ?  "white" : "var(--muted)",
+              opacity: ! selectedId ? 0.5 : 1,
               pointerEvents: !selectedId ? "none" : "auto",
               fontFamily: "var(--font-primary)",
               margin: "3px",
               borderRadius: "4px",
               height: 30,
-              cursor: "pointer"
+              cursor: "pointer",
+              fontSize: "16px"
           
             }}
-            aria-disabled={!selectedId}
+            aria-disabled={!  selectedId}
             onClick={() => selectedId && alert(`Delete project ${selectedId}`)}
             title={!selectedId ? "Select a project first" : "Delete selected project"}
           >
@@ -75,7 +91,8 @@ export const ProjectsPage: React.FC = () => {
               margin: "3px",
               borderRadius: "4px",
               height: 30,
-              cursor: "pointer"
+              cursor: "pointer",
+              fontSize: "16px"
           
             }}
             onClick={() => {
@@ -89,7 +106,7 @@ export const ProjectsPage: React.FC = () => {
         </div>
       </header>
 
-      <section
+      <section 
         aria-live="polite"
         className="grid gap-[20px] [grid-template-columns:repeat(auto-fill,minmax(280px,1fr))]"
       >
@@ -99,13 +116,19 @@ export const ProjectsPage: React.FC = () => {
             project={p}
             selected={String(p.id) === selectedId}
             onSelect={(id) => handleSelect(String(id))}
-            onView={(proj) => alert(`View ${proj.name}`)}
+            onView={handleViewProject}
             onEdit={(proj) => alert(`Edit ${proj.name}`)}
-            onDelete={(proj) => alert(`Delete ${proj.name}`)}
+            onDelete={(proj) => alert(`Delete ${proj. name}`)}
             canManage={true}
           />
         ))}
       </section>
+
+      <ProjectDetailsModal
+        project={viewProject}
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+      />
     </div>
   );
 };

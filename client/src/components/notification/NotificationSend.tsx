@@ -2,7 +2,7 @@ import React from 'react';
 
 import { SendNotificationProps } from '../../models/notification/NotificationSendDTO';
 
-const SendNotification: React.FC<SendNotificationProps> = ({ 
+const NotificationSend: React.FC<SendNotificationProps> = ({ 
   onClick, 
   className = "" 
 }) => {

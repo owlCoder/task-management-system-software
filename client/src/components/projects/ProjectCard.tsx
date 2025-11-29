@@ -37,7 +37,7 @@ export const ProjectCard: React.FC<Props> = ({
     }
   };
 
-  const selectedBoxShadow = selected ? "0 12px 11px rgba(47,119,255,0.4)" : undefined;
+  const selectedBoxShadow = selected ? "0 11px 11px var(--brand)" : undefined;
 
   return (
     <article
@@ -66,7 +66,7 @@ export const ProjectCard: React.FC<Props> = ({
               loading="lazy"
             />
           ) : (
-            <div className="text-muted text-sm">slika</div>
+            <div className="text-muted text-sm">Photo</div>
           )}
         </div>
 
@@ -78,8 +78,12 @@ export const ProjectCard: React.FC<Props> = ({
             {project.name}
           </h3>
 
-          <p className="mt-2 text-muted text-sm">
-            {(project.members ?? []).length} members
+          <p className="mt-2 text-muted text-sm flex items-center gap-2">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0">
+              <circle cx="12" cy="8" r="4"/>
+              <path d="M20 21a8 8 0 1 0-16 0"/>
+            </svg> 
+            {(project.members ??   []).length} {(project.members ?? []).length === 1 ? "member" : "members"}
           </p>
           
           <p className="mt-1 text-muted text-sm leading-tight break-words whitespace-normal">

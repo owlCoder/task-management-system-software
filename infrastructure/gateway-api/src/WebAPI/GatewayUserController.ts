@@ -5,6 +5,7 @@ import { authenticate } from "../Middlewares/authentification/AuthMiddleware";
 import { authorize } from "../Middlewares/authorization/AuthorizeMiddleware";
 import { UserRole } from "../Domain/enums/UserRole";
 import { UserDTO } from "../Domain/DTOs/UserDTO";
+import { UpdateUserDTO } from "../Domain/DTOs/UpdateUserDTO";
 
 export class GatewayUserController {
     private readonly router: Router;
@@ -15,11 +16,11 @@ export class GatewayUserController {
     }
 
     private initializeRoutes() {
-        this.router.post("/users", authenticate, authorize(UserRole.Admin), this.createUser.bind(this));
-        this.router.get("/users/:id", authenticate, authorize(UserRole.Admin), this.getUserById.bind(this));
-        this.router.get("/users", authenticate, authorize(UserRole.Admin), this.getUsers.bind(this));
-        this.router.put("/users/:id", authenticate, authorize(UserRole.Admin), this.updateUserById.bind(this));
-        this.router.delete("/users/:id", authenticate, authorize(UserRole.Admin), this.logicallyDeleteUserById.bind(this));
+        this.router.post("/users", authenticate, authorize(UserRole.ADMIN), this.createUser.bind(this));
+        this.router.get("/users/:id", authenticate, authorize(UserRole.ADMIN), this.getUserById.bind(this));
+        this.router.get("/users", authenticate, authorize(UserRole.ADMIN), this.getUsers.bind(this));
+        this.router.put("/users/:id", authenticate, authorize(UserRole.ADMIN), this.updateUserById.bind(this));
+        this.router.delete("/users/:id", authenticate, authorize(UserRole.ADMIN), this.logicallyDeleteUserById.bind(this));
     }
 
     /**
@@ -79,7 +80,7 @@ export class GatewayUserController {
 
     /**
      * PUT /api/v1/users/:id
-     * @param {Request} req - the request object, containing the user data in the body as a {@link RegistrationUserDTO} and id in params.
+     * @param {Request} req - the request object, containing the user data in the body as a {@link UpdateUserDTO} and id in params.
      * @param {Response} res - the response object for the client.
      * @returns {Object}
      * - On success: A JSON object following the {@link UserDTO} structure containing the result of the update operation. 
@@ -87,7 +88,7 @@ export class GatewayUserController {
      */
     private async updateUserById(req: Request, res: Response): Promise<void> {
         const id = parseInt(req.params.id, 10);
-        const data = req.body as UserDTO;
+        const data = req.body as UpdateUserDTO;
 
         const result = await this.gatewayUserService.updateUserById(id, data);
         if(result.success){
