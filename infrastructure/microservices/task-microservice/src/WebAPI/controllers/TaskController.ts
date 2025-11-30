@@ -10,7 +10,11 @@ export class TaskController {
     }
 
     private initializeRoutes() {
-        this.router.get("/tasks/:id", this.getTaskById.bind(this));
+
+            this.router.get('/tasksM/:id', this.getTaskById.bind(this));
+            this.router.get('/projects/:projectId/tasks', this.getAllTasksForProject.bind(this));
+                        console.log("Registrujem /tasksM/:id i /projects/:projectId/tasks");
+
     }
 
     async getTaskById(req: Request, res: Response): Promise<void> {
@@ -30,6 +34,24 @@ export class TaskController {
             res.status(500).json({ message: "Internal server error" });
         }
     }
+
+    async getAllTasksForProject(req: Request, res: Response): Promise<void> {
+        try{
+            const projectId =  parseInt(req.params.projectId, 10);
+            if(isNaN(projectId)) {
+                res.status(400).json({ message: "Invalid project ID" });
+                return;
+            }
+            const result =  await this.taskService.getAllTasksForProject(projectId);
+            if(result.success) {
+                res.status(result.statusCode).json(result.data);
+                return;
+            }
+        } catch (error) {
+            res.status(500).json({ message: "Internal server error" });
+        }
+    }
+
     public getRouter(): Router {
         return this.router;
     }

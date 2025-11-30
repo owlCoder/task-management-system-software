@@ -17,7 +17,7 @@ const app = express();
 
 // Read CORS settings from environment
 const corsOrigin = process.env.CORS_ORIGIN ?? "*";
-const corsMethods = process.env.CORS_METHODS?.split(",").map(m => m.trim()) ?? ["POST"];
+const corsMethods = process.env.CORS_METHODS?.split(",").map(m => m.trim()) ?? ["GET","POST"];
 
 // Protected microservice from unauthorized access
 app.use(cors({
