@@ -6,11 +6,12 @@ import { AliveService } from "./Services/AliveService";
 
 dotenv.config();
 const app = express();
+app.use(express.json());
 
 const aliveService = new AliveService();
 const sendService = new SendService();
 const mailsController = new MailsController(sendService,aliveService);
 
-app.use("/api/v1/MailService/", mailsController.getRouther());
+app.use("/api/v1/MailService", mailsController.getRouter());
 
 export default app;

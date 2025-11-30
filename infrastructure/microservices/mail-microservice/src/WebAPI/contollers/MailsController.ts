@@ -16,8 +16,8 @@ export class MailsController {
   }
 
   private initializeRoutes(): void {
-    this.router.get("/SendMessage", this.SendMessage.bind(this));
-    this.router.get("/MailAlive", this.MailAlive.bind(this));
+    this.router.post("/SendMessage", this.SendMessage.bind(this));
+    this.router.post("/MailAlive", this.MailAlive.bind(this));
   }
 
   private async SendMessage(req: Request, res: Response): Promise<void> {
@@ -41,5 +41,5 @@ export class MailsController {
     }
   }
   
-  public getRouther() { return this.router; }
+  public getRouter() { return this.router; }
 }

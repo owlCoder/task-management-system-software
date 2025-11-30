@@ -1,0 +1,28 @@
+{
+   "name": "mail-microservice",
+   "version": "0.1.0",
+   "main": "src/index.ts",
+   "type": "commonjs",
+   "scripts": {
+   
+     "start": "ts-node src/index.ts",
+      "dev": "nodemon src/index.ts",
+      "build": "tsc",
+      "start:dist": "node dist/src/index.js",
+      "typecheck": "tsc --noEmit"
+   },
+   "dependencies": {
+      "cors": "^2.8.5",
+      "dotenv": "^17.2.3",
+      "express": "^5.1.0",
+      "node-mailjet": "^6.0.11",
+      "nodemailer": "^7.0.11",
+      "nodemon": "^3.1.11",
+      "ts-node": "^10.9.2"
+   },
+   "devDependencies": {
+      "@types/express": "^5.0.5",
+      "@types/node": "^24.10.1",
+      "@types/nodemailer": "^7.0.4"
+   }
+}
