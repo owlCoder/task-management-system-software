@@ -1,11 +1,14 @@
 import { Mail } from "../Domain/models/Mail";
 import { mailjet } from "../Domain/models/MailJet";
+import { MessageTemplate } from "../Domain/models/MessageTemplate";
 import { ISendService } from "../Domain/services/ISendService";
 
 export class SendService implements ISendService{
 
+
  async SendMessage(mail : Mail) {
   try {
+    const template = new MessageTemplate();
     const result = await mailjet
       .post("send", { version: "v3.1" })
       .request({
@@ -21,7 +24,7 @@ export class SendService implements ISendService{
               }
             ],
             Subject: mail.header,
-            HTMLPart: mail.message
+            HTMLPart: template.build(mail.message)
           }
         ]
       });

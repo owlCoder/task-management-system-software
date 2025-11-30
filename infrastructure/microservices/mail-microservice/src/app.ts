@@ -1,11 +1,11 @@
-import dotenv from "dotenv"
 import express from 'express';
 import { MailsController } from "./WebAPI/contollers/MailsController";
 import { SendService } from "./Services/SendService";
 import { AliveService } from "./Services/AliveService";
+import cors from "cors";
 
-dotenv.config();
 const app = express();
+app.use(cors());
 app.use(express.json());
 
 const aliveService = new AliveService();

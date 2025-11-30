@@ -4,9 +4,8 @@
    "main": "src/index.ts",
    "type": "commonjs",
    "scripts": {
-   
-     "start": "ts-node src/index.ts",
-      "dev": "nodemon src/index.ts",
+      "start": "ts-node src/index.ts",
+      "dev": "nodemon --watch src --exec node -r ts-node/register src/index.ts",
       "build": "tsc",
       "start:dist": "node dist/src/index.js",
       "typecheck": "tsc --noEmit"
@@ -21,6 +20,7 @@
       "ts-node": "^10.9.2"
    },
    "devDependencies": {
+      "@types/cors": "^2.8.19",
       "@types/express": "^5.0.5",
       "@types/node": "^24.10.1",
       "@types/nodemailer": "^7.0.4"
