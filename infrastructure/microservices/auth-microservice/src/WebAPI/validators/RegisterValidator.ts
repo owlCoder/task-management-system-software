@@ -1,6 +1,7 @@
 import { RegistrationUserDTO } from "../../Domain/DTOs/RegistrationUserDTO";
 
 export function validateRegistrationData(data: RegistrationUserDTO): { success: boolean; message?: string } {
+  console.log("Validating registration data:", data);
   if (!data.username || data.username.trim().length < 3) {
     return { success: false, message: "Username must be at least 3 characters long" };
   }
@@ -10,8 +11,8 @@ export function validateRegistrationData(data: RegistrationUserDTO): { success: 
   if (!data.email || !data.email.includes("@")) {
     return { success: false, message: "Invalid email address" };
   }
-  if (typeof data.role_name !== "string" || data.role_name.trim().length === 0) {
-    return { success: false, message: "Role must be a string" };
+  if (typeof data.role !== "string") {
+    return { success: false, message: "Role must be a string" + data.role };
   }
   return { success: true };
 }

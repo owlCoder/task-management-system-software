@@ -29,6 +29,7 @@ export class EmailService {
       });
       console.log('\x1b[34m[MailingService]\x1b[0m Email service connected');
       this.mailingServiceState = response.status === 200;
+      // this.mailingServiceState = true; // For testing purposes, assume always available, until mailing service healthcheck is implemented
     } catch (error) {
       console.log(`\x1b[31m[MailingService]\x1b[0m Email service is currently unavailable, retrying the connection in ${this.mailingServiceHealthCheckInterval / 1000}s.`);
       this.mailingServiceState = false;
@@ -43,7 +44,7 @@ export class EmailService {
     const sessionId = uuidv4();
 
     // Email content
-    const emailSubject = "Your OTP Code for Login";
+    const emailSubject = "Your OTP Code for Login for user " + user.username;
     const emailBody = `
       Dear ${user.username},
 
@@ -57,16 +58,23 @@ export class EmailService {
     `;
 
     try {
-      await axios.post(`${this.emailServiceUrl}/send-email`, {
-        email: user.email,
-        emailSubject: emailSubject,
-        emailBody: emailBody
-      }, {
-        headers: { 'Content-Type': 'application/json' },
-        timeout: 5000
-      });
+      await axios.post(
+        `${this.emailServiceUrl}/api/v1/MailService/SendMessage`,
+        {
+          user: user.email,
+          header: emailSubject,
+          message: emailBody
+        },
+        {
+          headers: { "Content-Type": "application/json" },
+          timeout: 5000
+        }
+      );
 
+      // console.log(`\x1b[34m[MailingService]\x1b[0m Sent OTP email to ${user.email} for user ${user.username}`);
+      // console.log(`\x1b[34m[MailingService]\x1b[0m Email content:\nSubject: ${emailSubject}\nBody: ${emailBody}`);
       // console.log(`Generated OTP for user ${user.username} with session id ${sessionId} \nOTP code for this session: ${otpCode}`);
+      
       return [sessionData, sessionId, true];
     } catch (error) {
       console.error('Failed to send OTP email:', error);
