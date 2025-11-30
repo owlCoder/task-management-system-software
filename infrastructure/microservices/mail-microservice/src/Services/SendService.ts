@@ -1,35 +1,35 @@
-import nodemailer from "nodemailer";
-import { ISendService } from "../Domain/services/ISendService";
 import { Mail } from "../Domain/models/Mail";
-
-    //TODO ovo staviti u odvojen model!
-    const transporter = nodemailer.createTransport({
-    host: process.env.MAIL_HOST!,
-    port: Number(process.env.MAIL_PORT),
-    secure: true,
-    auth: {
-        user: process.env.MAIL_USER!,
-        pass: process.env.MAIL_PASS!
-    }
-    });
+import { mailjet } from "../Domain/models/MailJet";
+import { ISendService } from "../Domain/services/ISendService";
 
 export class SendService implements ISendService{
-    async SendMessage(mail: Mail): Promise<string> {
-    try{
-        await transporter.sendMail({
-        from: '"Support"',
-        to: "markodragojevicc@gmail.com",
-        subject: "Resetovanje lozinke",
-        html: `
-        <p>Samo želim da znam dal ćeš ostati sam....:</p>
-        `
-        });
-        return "Mail sent!";
-    }
-    
-    catch{
-        return "Error";
-    }
+
+ async SendMessage(mail : Mail) {
+  try {
+    const result = await mailjet
+      .post("send", { version: "v3.1" })
+      .request({
+        Messages: [
+          {
+            From: {
+              Email: process.env.MAILJET_SENDER_EMAIL,
+              Name: process.env.MAILJET_SENDER_NAME,
+            },
+            To: [
+              {
+                Email: mail.user,
+              }
+            ],
+            Subject: mail.header,
+            HTMLPart: mail.message
+          }
+        ]
+      });
+
+    console.log("Mailjet response:", result.body);
+    return "Success";
+  } catch (error) {
+    return "Mailjet error:";
+  }
 }
-    
 }
