@@ -3,6 +3,8 @@ import { TaskStatus } from "../enums/task_status";
 export interface TaskDTO {
     task_id: number;
     project_id: number;
+    worker_id?: number;
+    project_manager_id: number;
     title: string;
     task_description: string;
     task_status: TaskStatus;

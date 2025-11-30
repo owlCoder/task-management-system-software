@@ -14,6 +14,12 @@ export class Task {
     @Column({ type: "int", unique: false, nullable: false })
     project_id!: number;
 
+    @Column({ type: "int", nullable: true })
+    worker_id!: number;
+
+    @Column({ type: "int", nullable: false })
+    project_manager_id!: number;
+
     @Column({ type: "varchar", unique: false, nullable: false, length: 100 })
     title!: string;
     

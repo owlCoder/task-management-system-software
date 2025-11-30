@@ -11,10 +11,8 @@ export class TaskController {
 
     private initializeRoutes() {
 
-            this.router.get('/tasksM/:id', this.getTaskById.bind(this));
+            this.router.get('/tasks/:id', this.getTaskById.bind(this));
             this.router.get('/projects/:projectId/tasks', this.getAllTasksForProject.bind(this));
-                        console.log("Registrujem /tasksM/:id i /projects/:projectId/tasks");
-
     }
 
     async getTaskById(req: Request, res: Response): Promise<void> {

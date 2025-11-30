@@ -13,6 +13,8 @@ export class TaskService implements ITaskService {
     {
         task_id: 1,
         project_id: 100,
+        worker_id: 5,
+        project_manager_id: 10,
         title: "Dummy task 1",
         task_description: "Opis dummy taska 1",
         task_status:   TaskStatus.IN_PROGRESS
@@ -20,6 +22,8 @@ export class TaskService implements ITaskService {
     {
         task_id: 2,
         project_id: 100,
+        worker_id: 5,
+        project_manager_id: 10,
         title: "Dummy task 2",
         task_description: "Opis dummy taska 2",
         task_status: TaskStatus.IN_PROGRESS
@@ -72,6 +76,8 @@ export class TaskService implements ITaskService {
         return {
             task_id: task.task_id,
             project_id: task.project_id,
+            worker_id: task.worker_id,
+            project_manager_id: task.project_manager_id,
             title: task.title,
             task_description: task.task_description,
             task_status: task.task_status,
