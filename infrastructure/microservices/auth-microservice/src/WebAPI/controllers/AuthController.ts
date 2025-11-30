@@ -101,6 +101,8 @@ export class AuthController {
 
       const data: RegistrationUserDTO = req.body as RegistrationUserDTO;
 
+      console.log("Registration data received:", data);
+
       const validation = validateRegistrationData(data);
       if (!validation.success) {
         res.status(400).json({ success: false, message: validation.message });

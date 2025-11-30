@@ -68,7 +68,7 @@ export class AuthService implements IAuthService {
 
     if (existingUser) return { authenticated: false };
 
-    const validRole: UserRole | undefined = this.roleService.getRole(data.role_name);
+    const validRole: UserRole | undefined = this.roleService.getRole(data.role);
     //////////////////////////////////////////
     // Enable role restrictions in production
     //////////////////////////////////////////
