@@ -2,13 +2,17 @@ import React, { useState } from 'react';
 import NotificationNavigationBar from '../components/notification/NotificationNavigationBar';
 import NotificationHeader from '../components/notification/NotificationHeader';
 import NotificationFilters from '../components/notification/NotificationFilters';
-import NotificationCard   from '../components/notification/NotificationCard';
+import NotificationCard from '../components/notification/NotificationCard';
+import NotificationSendPopUp from '../components/notification/NotificationSendPopUp';
 import type { Notification } from '../models/notification/NotificationCardDTO';
 
 const NotificationPage: React.FC = () => {
   
-  
   const [activeFilter, setActiveFilter] = useState<'all' | 'unread'>('all');
+  const [sortBy, setSortBy] = useState<'newest' | 'oldest' | 'unread' | 'read'>('newest');
+  const [selectedNotifications, setSelectedNotifications] = useState<number[]>([]);
+  const [isAllSelected, setIsAllSelected] = useState(false);
+  const [isPopUpOpen, setIsPopUpOpen] = useState(false);
 
   // trenutno koristimo samo neke mock podatke
   // kasnije ovde ce ici drugaciji nacin poziva podataka
@@ -84,11 +88,63 @@ const NotificationPage: React.FC = () => {
     notification => !notification.isRead
   ).length;
 
-// funkcija za obradu promene filtera
+  // funkcija za obradu promene filtera
   // kada korisnik izabere all ili unread
   const handleFilterChange = (filter: 'all' | 'unread') => {
     console.log(`Filter changed to: ${filter}`);
     setActiveFilter(filter);
+  };
+
+  // funkcija za promenu sort-a
+  const handleSortChange = (sort: 'newest' | 'oldest' | 'unread' | 'read') => {
+    console.log(`Sort changed to: ${sort}`);
+    setSortBy(sort);
+    // TODO: Implementirati logiku za sortiranje
+  };
+
+  // funkcija za select all
+  const handleSelectAll = () => {
+    if (isAllSelected) {
+      setSelectedNotifications([]);
+      setIsAllSelected(false);
+    } else {
+      const allIds = filteredNotifications.map(n => n.id);
+      setSelectedNotifications(allIds);
+      setIsAllSelected(true);
+    }
+  };
+
+  // funkcija za promenu selekcije pojedinačne notifikacije
+  const handleSelectChange = (id: number) => {
+    if (selectedNotifications.includes(id)) {
+      setSelectedNotifications(selectedNotifications.filter(nId => nId !== id));
+    } else {
+      setSelectedNotifications([...selectedNotifications, id]);
+    }
+  };
+
+  // funkcija za mark as read
+  const handleMarkAsRead = () => {
+    console.log(`Marking as read: ${selectedNotifications}`);
+    // TODO: Implementirati logiku za označavanje kao pročitano
+    setSelectedNotifications([]);
+    setIsAllSelected(false);
+  };
+
+  // funkcija za mark as unread
+  const handleMarkAsUnread = () => {
+    console.log(`Marking as unread: ${selectedNotifications}`);
+    // TODO: Implementirati logiku za označavanje kao nepročitano
+    setSelectedNotifications([]);
+    setIsAllSelected(false);
+  };
+
+  // funkcija za delete selected
+  const handleDeleteSelected = () => {
+    console.log(`Deleting: ${selectedNotifications}`);
+    // TODO: Implementirati logiku za brisanje
+    setSelectedNotifications([]);
+    setIsAllSelected(false);
   };
 
   // obrada klika na funkciju kada korisnik izabere neku od notifikacija
@@ -101,7 +157,14 @@ const NotificationPage: React.FC = () => {
   // funkcija za klik za slanje notifikacije '+ Send Notification' dugme 
   const handleSendNotificationClick = () => {
     console.log('Send notification button was clicked');
-    // prosiruje stranicu za slanje podataka doradi ovo
+    setIsPopUpOpen(true);
+  };
+
+  // funkcija za slanje notifikacije iz popup-a
+  const handleSendNotification = (title: string, content: string) => {
+    console.log('Sending notification:', { title, content });
+    // TODO: Implementirati API poziv za slanje notifikacije
+    setIsPopUpOpen(false);
   };
 
   return (
@@ -127,6 +190,14 @@ const NotificationPage: React.FC = () => {
             activeFilter={activeFilter}
             unreadCount={unreadCount}
             onFilterChange={handleFilterChange}
+            sortBy={sortBy}
+            onSortChange={handleSortChange}
+            isAllSelected={isAllSelected}
+            onSelectAll={handleSelectAll}
+            selectedCount={selectedNotifications.length}
+            onMarkAsRead={handleMarkAsRead}
+            onMarkAsUnread={handleMarkAsUnread}
+            onDeleteSelected={handleDeleteSelected}
           />
         </div>
 
@@ -160,6 +231,8 @@ const NotificationPage: React.FC = () => {
                 key={notification.id}
                 notification={notification}
                 onClick={handleNotificationClick}
+                isSelected={selectedNotifications.includes(notification.id)}
+                onSelectChange={handleSelectChange}
               />
             ))
 
@@ -169,10 +242,15 @@ const NotificationPage: React.FC = () => {
 
       </div>
 
+      {/* popup za slanje notifikacije */}
+      <NotificationSendPopUp
+        isOpen={isPopUpOpen}
+        onClose={() => setIsPopUpOpen(false)}
+        onSend={handleSendNotification}
+      />
+
     </div>
   );
 };
 
 export default NotificationPage;
-
-  
