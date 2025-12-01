@@ -82,7 +82,7 @@ export class GatewayFileController {
     }
 
     /**
-     * GET /api/v1/files/upload
+     * POST /api/v1/files/upload
      * @param {Request} req - the request object, containing the file and author id.
      * @param {Response} res - the response object for the client.
      * @returns {Object}
@@ -112,7 +112,7 @@ export class GatewayFileController {
     }
 
     /**
-     * GET /api/v1/files/:fileId
+     * DELETE /api/v1/files/:fileId
      * @param {Request} req - the request object, containing the id of the file in params.
      * @param {Response} res - the response object for the client.
      * @returns {Object}
