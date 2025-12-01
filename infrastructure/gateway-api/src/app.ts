@@ -8,6 +8,9 @@ import { GatewayAuthController } from './WebAPI/GatewayAuthController';
 import { GatewayUserController } from './WebAPI/GatewayUserController';
 import { IGatewayUserService } from './Domain/services/IGatewayUserService';
 import { GatewayUserService } from './Services/GatewayUserService';
+import { IGatewayFileService } from './Domain/services/IGatewayFileService';
+import { GatewayFileService } from './Services/GatewayFileService';
+import { GatewayFileController } from './WebAPI/GatewayFileController';
 
 dotenv.config({ quiet: true });
 
@@ -28,13 +31,16 @@ app.use(express.json());
 // Services
 const gatewayAuthService: IGatewayAuthService = new GatewayAuthService();
 const gatewayUserService: IGatewayUserService = new GatewayUserService();
+const gatewayFileService: IGatewayFileService = new GatewayFileService();
 
 // WebAPI routes
 const gatewayAuthController = new GatewayAuthController(gatewayAuthService);
 const gatewayUserController = new GatewayUserController(gatewayUserService);
+const gatewayFileController = new GatewayFileController(gatewayFileService);
 
 // Registering routes
 app.use('/api/v1', gatewayAuthController.getRouter());
-app.use('/api/v1', gatewayUserController.getRouter())
+app.use('/api/v1', gatewayUserController.getRouter());
+app.use('/api/v1', gatewayFileController.getRouter());
 
 export default app;
