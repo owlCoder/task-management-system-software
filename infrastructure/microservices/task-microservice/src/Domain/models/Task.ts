@@ -3,9 +3,11 @@ import {
   PrimaryGeneratedColumn,
   Column,
   ManyToOne,
-  JoinColumn
+  JoinColumn,
+  OneToMany
 } from "typeorm";
 import { TaskStatus } from "../enums/task_status";
+import { Comment } from "./Comment";
 
 @Entity("Tasks") 
 export class Task {
@@ -36,4 +38,7 @@ export class Task {
     estimated_cost!: number;
     @Column({ type: "int",default: 0, unique: false, nullable: true })
     total_hours_spent!: number;
+
+    @OneToMany(() => Comment, comment => comment.task)
+    comments!: Comment[];
 }

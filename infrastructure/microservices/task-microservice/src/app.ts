@@ -6,6 +6,7 @@ import dotenv from 'dotenv';
 import { Repository } from 'typeorm';
 import { Db } from './Database/DbConnectionPool';
 import { Task } from './Domain/models/Task';
+import { Comment } from './Domain/models/Comment';
 import { ITaskService } from './Domain/services/ITaskService';
 import { TaskService } from './Services/TaskService';
 import { TaskController } from './WebAPI/controllers/TaskController';
@@ -32,9 +33,10 @@ app.use(express.json());
 
   // ORM Repositories
   const taskRepository: Repository<Task> = Db.getRepository(Task);
+  const commentRepository: Repository<Comment> = Db.getRepository(Comment);
 
   // Services
-  const taskService : ITaskService = new TaskService(taskRepository);
+  const taskService : ITaskService = new TaskService(taskRepository,commentRepository);
 
   // WebAPI routes
   const taskController = new TaskController(taskService);

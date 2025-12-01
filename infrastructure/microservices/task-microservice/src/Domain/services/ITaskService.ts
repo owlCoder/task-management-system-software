@@ -1,8 +1,11 @@
 import { TaskDTO } from "../DTOs/TaskDTO";
 import { TaskResponse } from "../types/TaskResponse";
+import { CommentDTO } from "../DTOs/CommentDTO";
 
 export interface ITaskService {
     getTaskById(task_id: number): Promise<TaskResponse<TaskDTO>>;
     getAllTasksForProject(project_id: number) : Promise<TaskResponse<TaskDTO[]>>;
+    addComment(task_id: number, user_id: number, commentText: string): Promise<TaskResponse<CommentDTO>>;
+    getAllDummyTasksForProject() : Promise<TaskResponse<TaskDTO[]>>;
 
 }

@@ -1,4 +1,5 @@
 import { TaskStatus } from "../enums/task_status";
+import { CommentDTO } from "./CommentDTO";
 
 export interface TaskDTO {
     task_id: number;
@@ -11,4 +12,5 @@ export interface TaskDTO {
     attachment_file_uuid?: number;
     estimated_cost?: number;
     total_hours_spent?: number;
+    comments?: CommentDTO[];    
 }
