@@ -39,6 +39,6 @@ export class Task {
     @Column({ type: "int",default: 0, unique: false, nullable: true })
     total_hours_spent!: number;
 
-    @OneToMany(() => Comment, comment => comment.task)
+    @OneToMany(() => Comment, (comment) => comment.task)
     comments!: Comment[];
 }

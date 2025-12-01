@@ -3,7 +3,8 @@ import {
     PrimaryGeneratedColumn,
     Column,
     ManyToOne,
-    CreateDateColumn
+    CreateDateColumn,
+    JoinColumn
      } from "typeorm";
 import { Task } from "./Task";
 
@@ -21,6 +22,7 @@ export class Comment {
     @CreateDateColumn()
     created_at!: Date;
 
-    @ManyToOne(() => Task, task => task.comments, { onDelete: "CASCADE" })
-    task!: Task;
+    @ManyToOne(() => Task, (task) => task.comments, { onDelete: "CASCADE" })
+    @JoinColumn({ name: "task_id" })
+    task!: Task;//kolona koja se dobije je taskTaskId,tako typeorm pravi vezu izmedju tabela
 }

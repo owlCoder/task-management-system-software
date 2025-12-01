@@ -60,16 +60,10 @@ export class TaskService implements ITaskService {
     //#region  TASK METHODS
     async getAllTasksForProject(project_id: number) : Promise<TaskResponse<TaskDTO[]>>{
         try{
-            const tasks = await this.taskRepository.find({ where: { project_id } ,relations: ["comments"] });
+            //TODO: Proveriti da li korisnik ima pravo da vidi taskove za dati projekat
+            //TODO: proveriti da li projekat postoji
+            const tasks = await this.taskRepository.find({ where: { project_id } ,relations: ["comments", "comments.task"] });
             const result: TaskDTO[] = tasks.map(t => this.taskToDTO(t));
-            if(tasks.length === 0) {
-                //Vracamo dummy podatke ako nema zadataka u bazi dok smo u developmentu
-                return {
-                    success: true,
-                    statusCode: 200,
-                    data: this.dummyTasks.filter(t => t.project_id === 1)
-                };
-            }
             return {success: true, data: result, statusCode: 200};
     }catch (error) {
             return {
@@ -90,7 +84,8 @@ export class TaskService implements ITaskService {
 
     async getTaskById(task_id: number): Promise<TaskResponse<TaskDTO>> {
         try{
-            const task = await this.taskRepository.findOne({ where: { task_id } });
+            const task = await this.taskRepository.findOne({ where: { task_id },relations: ["comments", "comments.task"] });
+            console.log(task);
             if(!task ) {
                 return {
                     success: false,
@@ -102,6 +97,7 @@ export class TaskService implements ITaskService {
             return {success: true, data: result, statusCode: 200};
     }
     catch (error) {
+        console.log(error);
             return {
                 success: false,
                 statusCode: 500,
@@ -120,7 +116,8 @@ export class TaskService implements ITaskService {
             task_status: task.task_status,
             attachment_file_uuid: task.attachment_file_uuid,
             estimated_cost: task.estimated_cost,
-            total_hours_spent: task.total_hours_spent
+            total_hours_spent: task.total_hours_spent,
+            comments: task.comments ? task.comments.map(c => this.commentToDTO(c)) : []
         };
     }
     //#endregion
@@ -137,10 +134,10 @@ export class TaskService implements ITaskService {
                 return { success: false, statusCode: 400, message: "Cannot add comment to completed/not completed task" };
             }
 
-            const comment = this.commentRepository.create({
+            const comment : Comment = this.commentRepository.create({
                 user_id,
                 comment: commentText,
-                task
+                task: task
             });
 
             await this.commentRepository.save(comment);
