@@ -1,14 +1,15 @@
 # Auth Microservice
 
-**Important Note:** OTP codes are currently printed to the service terminal/console (for development) until the mailing microservice is implemented. This is a temporary measure for testing and will be replaced with proper email delivery.
 
-A lightweight authentication microservice built with Node.js, TypeScript, and Express, following SOLID principles for maintainability. It handles user authentication, OTP-based login flows, and registration, with fallback mechanisms for external service dependencies.
+**Important Note:** Email and OTP delivery are now fully implemented. If the email service is offline, user authentication will bypass OTP and issue JWT tokens directly. OTP codes are sent via email when the service is online; otherwise, login proceeds without OTP for seamless fallback.
+
+A lightweight authentication microservice built with Node.js, TypeScript, and Express, following SOLID principles for maintainability. It handles user authentication, OTP-based login flows (with email delivery), and registration, with robust fallback mechanisms for external service dependencies.
 
 ## Features
 - **User Registration**: Creates new users with role validation and password hashing.
-- **Login with OTP**: Verifies credentials, generates OTP codes, and manages sessions. Falls back to direct JWT issuance if the email service is unavailable.
-- **OTP Verification**: Validates OTP codes against stored sessions and issues JWT tokens.
-- **Health Monitoring**: Periodically checks the email service status and logs connectivity.
+- **Login with OTP**: Verifies credentials, generates OTP codes, and manages sessions. OTP codes are sent via email. If the email service is unavailable, login falls back to direct JWT issuance (no OTP required).
+- **OTP Verification**: Validates OTP codes received via email against stored sessions and issues JWT tokens.
+- **Health Monitoring**: Periodically checks the email service status and logs connectivity. Login flow adapts automatically based on email service availability.
 - **Security**: Uses bcrypt for password hashing, JWT for tokens, and in-memory session management with expiration.
 
 ## Architecture
@@ -24,9 +25,9 @@ The microservice is structured into layers for separation of concerns:
 
 ## Core HTTP Endpoints
 (Locally mounted under `/api/v1`; public endpoints may differ based on gateway configuration.)
-- `POST /auth/login` — Authenticates user credentials, checks email service health, and returns session info (OTP required) or JWT token (direct login if email down). Payload: [`LoginUserDTO`](src/Domain/DTOs/LoginUserDTO.ts).
+- `POST /auth/login` — Authenticates user credentials, checks email service health, and returns session info (OTP required if email service is online) or JWT token (direct login if email service is offline). Payload: [`LoginUserDTO`](src/Domain/DTOs/LoginUserDTO.ts).
 - `POST /auth/register` — Registers a new user and returns a JWT token. Payload: [`RegistrationUserDTO`](src/Domain/DTOs/RegistrationUserDTO.ts).
-- `POST /auth/verify-otp` — Verifies OTP code and issues a JWT token. Payload: [`BrowserData`](src/Domain/models/BrowserData.ts).
+- `POST /auth/verify-otp` — Verifies OTP code (sent via email) and issues a JWT token. Payload: [`BrowserData`](src/Domain/models/BrowserData.ts).
 
 ## Tokens and Types
 - **JWT Tokens**: Issued on successful registration, direct login (when email is down), or OTP verification. Contains claims defined in [`AuthTokenClaims`](src/Domain/types/AuthTokenClaims.ts).
@@ -36,9 +37,9 @@ The microservice is structured into layers for separation of concerns:
   - Registration/OTP Verification: [`AuthResponse`](src/Domain/types/AuthResponse.ts).
 
 ## Development Notes
-- **OTP Delivery**: Currently logs to console for testing. Integrate with the mailing microservice by updating `EmailService` to send real emails.
-- **Login Session Management**: Uses an in-memory `Map` with periodic cleanup.
-- **Health Checks**: `EmailService` performs periodic checks (every 60 seconds) and logs status in color (yellow for connected, red for unavailable). Login falls back to direct JWT if email is down.
+- **OTP Delivery**: OTP codes are now sent via email using the mailing microservice. If the email service is offline, login does not require OTP and issues JWT tokens directly.
+- **Login Session Management**: Uses an in-memory `Map` with periodic cleanup. Session management adapts to email service status for OTP or direct login.
+- **Health Checks**: `EmailService` performs periodic checks (every 60 seconds) and logs status in color (yellow for connected, red for unavailable). Login flow automatically falls back to direct JWT if email service is down (no OTP required).
 - **Testing**: Use unit tests for services (e.g., mock `EmailService` for health checks). Load-test login endpoints to verify fallback behavior.
 - **Security**: Ensure `JWT_SECRET` is strong and rotated. Monitor logs for health check failures. Never commit `.env` to version control.
 
