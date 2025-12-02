@@ -7,6 +7,12 @@ import NotificationCard from '../components/notification/NotificationCard';
 import NotificationSendPopUp from '../components/notification/NotificationSendPopUp';
 import type { Notification } from '../models/notification/NotificationCardDTO';
 
+// slika za pozadinu
+const backgroundImageUrl = new URL(
+  "../../public/background.png",
+  import.meta.url
+).href;
+
 const NotificationPage: React.FC = () => {
   
   const [activeFilter, setActiveFilter] = useState<'all' | 'unread'>('all');
@@ -169,7 +175,10 @@ const NotificationPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 flex">
+    <div 
+      className="min-h-screen w-screen bg-cover bg-center bg-no-repeat flex"
+      style={{ backgroundImage: `url(${backgroundImageUrl})` }}
+    >
       
       {/* Sidebar - Full Height */}
       <NotificationSidebar />
@@ -212,16 +221,18 @@ const NotificationPage: React.FC = () => {
             {/* Notifications List */}
             <div className="space-y-4">
               
+              {/* proverava da li postoje obavestenja za prikaz */}
               {filteredNotifications.length === 0 ? (
                 
+                /* kada nema notifikacija neka prikaze samo prazno stanje */
                 <div className="text-center py-16">
                   <div className="mb-4">
-                    <p className="text-slate-400 text-lg font-semibold">
+                    <p className="text-slate-100 text-lg font-semibold">
                       No notifications to display
                     </p>
                   </div>
                   <div>
-                    <p className="text-slate-500 text-sm">
+                    <p className="text-slate-300 text-sm">
                       {activeFilter === 'unread' 
                         ? 'You have no unread notifications' 
                         : 'No notifications available'}
@@ -231,6 +242,7 @@ const NotificationPage: React.FC = () => {
 
               ) : (
                 
+                /* prolazi kroz filtrirana obavestenja */
                 filteredNotifications.map((notification) => (
                   <NotificationCard
                     key={notification.id}
