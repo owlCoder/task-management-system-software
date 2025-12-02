@@ -7,5 +7,6 @@ export interface ITaskService {
     getAllTasksForProject(project_id: number) : Promise<TaskResponse<TaskDTO[]>>;
     addComment(task_id: number, user_id: number, commentText: string): Promise<TaskResponse<CommentDTO>>;
     getAllDummyTasksForProject() : Promise<TaskResponse<TaskDTO[]>>;
+    addTaskForProject(project_id: number, worker_id: number, project_manager_id : number, title: string, task_description: string, estimated_cost: number): Promise<TaskResponse<TaskDTO>>;
 
 }

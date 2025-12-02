@@ -11,15 +11,44 @@ export class TaskController {
 
     private initializeRoutes() {
 
-            this.router.get('/tasks/:id', this.getTaskById.bind(this));
-            this.router.get('/projects/:projectId/tasks', this.getAllTasksForProject.bind(this));
-            this.router.get('/projects/dummy-tasks', this.getAllDummyTasksForProject.bind(this));
-            this.router.post('/tasks/:id/comments', this.addCommentToTask.bind(this));
+        // TASKS
+        this.router.get('/tasks/:taskId', this.getTaskById.bind(this));
+        this.router.post('/projects/:projectId/tasks', this.addTaskForProject.bind(this));
+
+        // GET ALL TASKS FOR PROJECT
+        this.router.get('/projects/:projectId/tasks', this.getAllTasksForProject.bind(this));
+
+        // COMMENTS
+        this.router.post('/tasks/:taskId/comments', this.addCommentToTask.bind(this));
+
+        // DEV / DUMMY
+        this.router.get('/dev/dummy-tasks', this.getAllDummyTasksForProject.bind(this));
+    }
+    
+    
+    async addTaskForProject(req: Request, res: Response): Promise<void> {
+        try {
+            const projectId = parseInt(req.params.projectId, 10);
+            const { worker_id, project_manager_id, title, task_description, estimated_cost } = req.body;
+            if(isNaN(projectId)) {
+                res.status(400).json({ message: "Invalid project ID" });
+                return;
+            }
+            const result = await this.taskService.addTaskForProject(projectId, worker_id, project_manager_id, title, task_description, estimated_cost);
+            if (result.success) {
+                res.status(result.statusCode).json(result.data);
+                return;
+            }
+            res.status(result.statusCode).json({ message: result.message });
+        } catch (error) {
+            console.log(error);
+            res.status(500).json({ message: "Internal server error" });
+        }
     }
 
     async getTaskById(req: Request, res: Response): Promise<void> {
         try{
-            const taskId = parseInt(req.params.id, 10);
+            const taskId = parseInt(req.params.taskId, 10);
             if(isNaN(taskId)) {
                 res.status(400).json({ message: "Invalid task ID" });
                 return;
@@ -53,7 +82,11 @@ export class TaskController {
     }
     async addCommentToTask(req: Request, res: Response): Promise<void> {
     try {
-        const taskId = parseInt(req.params.id, 10);
+        const taskId = parseInt(req.params.taskId, 10);
+        if(isNaN(taskId)) {
+            res.status(400).json({ message: "Invalid task ID" });
+            return;
+        }
         const { user_id, comment } = req.body;
 
         const result = await this.taskService.addComment(taskId, user_id, comment);

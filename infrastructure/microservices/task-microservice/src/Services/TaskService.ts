@@ -73,6 +73,61 @@ export class TaskService implements ITaskService {
             };
         }
     }
+    async addTaskForProject(project_id: number, worker_id: number, project_manager_id : number, title: string, task_description: string, estimated_cost: number): Promise<TaskResponse<TaskDTO>> {
+        //Estimated cost mozda da se izracuna popust (cena sata radnika) * (broj sati ocekivanih za zadatak)
+        try {
+            //TODO: Proveriti da li projekat postoji
+            //TODO: Proveriti da li worker postoji i da li je dodeljen na dati projekat
+            if(!title || title.trim().length === 0) {
+                return {
+                    success: false,
+                    statusCode: 400,
+                    message: "Title is required"
+                };
+            }
+            if(!task_description || task_description.trim().length === 0) {
+                return {
+                    success: false,
+                    statusCode: 400,
+                    message: "Task description is required"
+                };
+            }
+            //Treba videti sa ostalima kako ovo da se izracuna,da li moj servis ili da to dodje kao parametar
+            if(estimated_cost < 0) {
+                return {
+                    success: false,
+                    statusCode: 400,
+                    message: "Estimated cost cannot be negative"
+                };
+            }
+
+            const newTask: Task = this.taskRepository.create({
+                project_id,
+                worker_id,
+                project_manager_id,
+                title,
+                task_description,
+                estimated_cost,
+                task_status: TaskStatus.CREATED,
+                total_hours_spent: 0
+            });
+            const savedTask = await this.taskRepository.save(newTask);
+            const result: TaskDTO = this.taskToDTO(savedTask);
+            return {
+                success: true,
+                statusCode: 201,
+                data: result
+            };
+        }
+        catch(error) {
+            console.log(error);
+            return {
+                success: false,
+                statusCode: 500,
+                message: "Internal server error"
+            };
+        }
+    }
     async getAllDummyTasksForProject() : Promise<TaskResponse<TaskDTO[]>>{
               //Vracamo dummy podatke ako nema zadataka u bazi dok smo u developmentu
                 return {
