@@ -7,7 +7,7 @@ const NotificationNavigationBar: React.FC<NotificationNavigationBarProps> = ({
   className = ""
 }) => {
   return (
-    <nav className={`bg-slate-900/60 border-b border-white/10 px-6 py-4 ${className}`}>
+    <nav className={`bg-slate-900/60 border-b border-white/10 px-6 py-4 ml-4 ${className}`}>
       <div className="flex items-center justify-between">
         
         {/* Logo */}

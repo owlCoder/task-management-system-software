@@ -15,7 +15,8 @@ const NotificationPage: React.FC = () => {
   const [isAllSelected, setIsAllSelected] = useState(false);
   const [isPopUpOpen, setIsPopUpOpen] = useState(false);
 
-  // mock podatke ostavljam iste...
+  // trenutno koristimo samo neke mock podatke
+  // kasnije ovde ce ici drugaciji nacin poziva podataka
   const allNotifications: Notification[] = [
     {
       id: 1,
@@ -75,24 +76,34 @@ const NotificationPage: React.FC = () => {
     }
   ];
 
+  // filtriraj podatke po odabranom filteru
+  // ako odaberemo unread onda ostaju neprocitane
+  // ako odaberemo sve, onda imamo sve
   const filteredNotifications = activeFilter === 'unread' 
     ? allNotifications.filter(notification => !notification.isRead)
     : allNotifications;
 
+  // prebroj totalni broj neprocitanih notifikacija
+  // brojac mali za neprocitane notifikacije
   const unreadCount = allNotifications.filter(
     notification => !notification.isRead
   ).length;
 
+  // funkcija za obradu promene filtera
+  // kada korisnik izabere all ili unread
   const handleFilterChange = (filter: 'all' | 'unread') => {
     console.log(`Filter changed to: ${filter}`);
     setActiveFilter(filter);
   };
 
+  // funkcija za promenu sort-a
   const handleSortChange = (sort: 'newest' | 'oldest' | 'unread' | 'read') => {
     console.log(`Sort changed to: ${sort}`);
     setSortBy(sort);
+    // TODO: Implementirati logiku za sortiranje
   };
 
+  // funkcija za select all
   const handleSelectAll = () => {
     if (isAllSelected) {
       setSelectedNotifications([]);
@@ -104,6 +115,7 @@ const NotificationPage: React.FC = () => {
     }
   };
 
+  // funkcija za promenu selekcije pojedinacne notifikacije
   const handleSelectChange = (id: number) => {
     if (selectedNotifications.includes(id)) {
       setSelectedNotifications(selectedNotifications.filter(nId => nId !== id));
@@ -112,52 +124,64 @@ const NotificationPage: React.FC = () => {
     }
   };
 
+  // funkcija za mark as read
   const handleMarkAsRead = () => {
     console.log(`Marking as read: ${selectedNotifications}`);
+    // TODO: Implementirati logiku za oznacavanje kao procitano
     setSelectedNotifications([]);
     setIsAllSelected(false);
   };
 
+  // funkcija za mark as unread
   const handleMarkAsUnread = () => {
     console.log(`Marking as unread: ${selectedNotifications}`);
+    // TODO: Implementirati logiku za oznacavanje kao neprocitano
     setSelectedNotifications([]);
     setIsAllSelected(false);
   };
 
+  // funkcija za delete selected
   const handleDeleteSelected = () => {
     console.log(`Deleting: ${selectedNotifications}`);
+    // TODO: Implementirati logiku za brisanje
     setSelectedNotifications([]);
     setIsAllSelected(false);
   };
 
+  // obrada klika na funkciju kada korisnik izabere neku od notifikacija
   const handleNotificationClick = (id: number) => {
     console.log(`Notification with ID ${id} was clicked`);
+    // ovde treba da se oznaci kao procitana
+    // ili da predje na stranicu sa daljim detaljima o notifikaciji
   };
 
+  // funkcija za klik za slanje notifikacije '+ Send Notification' dugme 
   const handleSendNotificationClick = () => {
     console.log('Send notification button was clicked');
     setIsPopUpOpen(true);
   };
 
+  // funkcija za slanje notifikacije iz popup-a
   const handleSendNotification = (title: string, content: string) => {
     console.log('Sending notification:', { title, content });
+    // TODO: Implementirati API poziv za slanje notifikacije
     setIsPopUpOpen(false);
   };
 
   return (
-    <div className="min-h-screen bg-slate-950">
+    <div className="min-h-screen bg-slate-950 flex">
       
-      {/* Navigation Bar */}
-      <NotificationNavigationBar 
-        username="John Doe"
-        role="Project Manager"
-      />
+      {/* Sidebar - Full Height */}
+      <NotificationSidebar />
 
-      {/* Main Layout - Sidebar + Content */}
-      <div className="flex">
+      {/* Right Side - Navigation + Content */}
+      <div className="flex-1 flex flex-col">
         
-        {/* Sidebar */}
-        <NotificationSidebar />
+        {/* Navigation Bar */}
+        <NotificationNavigationBar 
+          username="John Doe"
+          role="Project Manager"
+        />
 
         {/* Main Content */}
         <div className="flex-1">
