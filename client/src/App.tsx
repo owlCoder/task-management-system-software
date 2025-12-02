@@ -9,17 +9,21 @@ import MainWindow from "./pages/MainWindow";
 import { ProtectedRoute } from "./components/protected_route/ProtectedRoute";
 import UserPage from "./pages/UserPage";
 import { RegisterPage } from "./pages/RegisterPage";
+import NotificationPage from "./pages/NotificationPage";
+import TaskPage from "./pages/TaskPage";
 
 const auth_api: IAuthAPI = new AuthAPI();
 const user_api: IUserAPI = new UserAPI();
 
 function App() {
   return (
-    <div className="bg-blue-400 h-full min-h-screen">
+    <div className="bg-[var(--palette-deep-blue)] h-full min-h-screen">
       <Routes>
         <Route path="/projects" element={<ProjectsPage />} />
+        <Route path="/notifications" element={<NotificationPage />} />
+        <Route path="/tasks" element={<TaskPage />} />
         <Route path="/auth" element={<AuthPage authAPI={auth_api} />} />
-        <Route path="/register" element={<RegisterPage authAPI={auth_api}/>} />
+        <Route path="/register" element={<RegisterPage authAPI={auth_api} />} />
         <Route path="/" element={<MainWindow />} />
         <Route
           path="/users"

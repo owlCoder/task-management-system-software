@@ -1,10 +1,12 @@
 import React from "react";
 import Navbar from "../components/dashboard/navbar/Navbar";
+import Sidebar from "../components/dashboard/navbar/Sidebar";
 
 const MainWindow = () => {
   return (
     <>
-      <Navbar />
+      {/*<Navbar /> - uncomment when you need login and register*/}
+      <Sidebar />
     </>
   );
 };
