@@ -1,7 +1,7 @@
-import { RegistrationUserDTO } from "../DTOs/RegistrationUserDTO";
-import { UpdateUserDTO } from "../DTOs/UpdateUserDTO";
-import { UserDTO } from "../DTOs/UserDTO";
-import { Result } from "../types/Result";
+import { RegistrationUserDTO } from "../../DTOs/auth/RegistrationUserDTO";
+import { UpdateUserDTO } from "../../DTOs/user/UpdateUserDTO";
+import { UserDTO } from "../../DTOs/user/UserDTO";
+import { Result } from "../../types/common/Result";
 
 export interface IGatewayUserService {
     createUser(data: RegistrationUserDTO): Promise<Result<UserDTO>>;

@@ -1,9 +1,9 @@
 import { Request, Response, Router } from "express";
-import { LoginUserDTO } from "../Domain/DTOs/LoginUserDTO";
-import { IGatewayAuthService } from "../Domain/services/IGatewayAuthService";
-import { RegistrationUserDTO } from "../Domain/DTOs/RegistrationUserDTO";
-import { BrowserDataDTO } from "../Domain/DTOs/BrowserDataDTO";
-import { AuthResponseType } from "../Domain/types/AuthResponse";
+import { LoginUserDTO } from "../../Domain/DTOs/auth/LoginUserDTO";
+import { IGatewayAuthService } from "../../Domain/services/auth/IGatewayAuthService";
+import { RegistrationUserDTO } from "../../Domain/DTOs/auth/RegistrationUserDTO";
+import { BrowserDataDTO } from "../../Domain/DTOs/auth/BrowserDataDTO";
+import { AuthResponseType } from "../../Domain/types/auth/AuthResponse";
 
 export class GatewayAuthController {
     private readonly router: Router;

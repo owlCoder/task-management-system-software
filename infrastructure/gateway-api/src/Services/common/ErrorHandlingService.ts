@@ -1,5 +1,5 @@
 import axios, { AxiosError } from "axios";
-import { Result } from "../Domain/types/Result";
+import { Result } from "../../Domain/types/common/Result";
 
 export class ErrorHandlingService {
     static handle(error: any, serviceName?: string): Result<never> {
@@ -11,7 +11,7 @@ export class ErrorHandlingService {
                 return {
                     success: false,
                     status: 504,
-                    message: `${serviceName || 'Service'} unavailable`
+                    message: `${serviceName || 'Service'} timed out`
                 }
             }
 

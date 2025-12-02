@@ -2,15 +2,15 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 
-import { IGatewayAuthService } from './Domain/services/IGatewayAuthService';
-import { GatewayAuthService } from './Services/GatewayAuthService';
-import { GatewayAuthController } from './WebAPI/GatewayAuthController';
-import { GatewayUserController } from './WebAPI/GatewayUserController';
-import { IGatewayUserService } from './Domain/services/IGatewayUserService';
-import { GatewayUserService } from './Services/GatewayUserService';
-import { IGatewayFileService } from './Domain/services/IGatewayFileService';
-import { GatewayFileService } from './Services/GatewayFileService';
-import { GatewayFileController } from './WebAPI/GatewayFileController';
+import { IGatewayAuthService } from './Domain/services/auth/IGatewayAuthService';
+import { GatewayAuthService } from './Services/auth/GatewayAuthService';
+import { GatewayAuthController } from './WebAPI/auth/GatewayAuthController';
+import { GatewayUserController } from './WebAPI/user/GatewayUserController';
+import { IGatewayUserService } from './Domain/services/user/IGatewayUserService';
+import { GatewayUserService } from './Services/user/GatewayUserService';
+import { IGatewayFileService } from './Domain/services/file/IGatewayFileService';
+import { GatewayFileService } from './Services/file/GatewayFileService';
+import { GatewayFileController } from './WebAPI/file/GatewayFileController';
 
 dotenv.config({ quiet: true });
 

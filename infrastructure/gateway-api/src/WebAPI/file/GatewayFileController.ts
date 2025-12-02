@@ -1,8 +1,9 @@
 import { Router, Request, Response } from "express";
-import { IGatewayFileService } from "../Domain/services/IGatewayFileService";
+import { IGatewayFileService } from "../../Domain/services/file/IGatewayFileService";
 import path from "path";
 import multer, { Multer } from "multer";
-import { UploadedFileDTO } from "../Domain/DTOs/UploadedFileDTO";
+import { UploadedFileDTO } from "../../Domain/DTOs/file/UploadedFileDTO";
+import { authenticate } from "../../Middlewares/authentification/AuthMiddleware";
 
 export class GatewayFileController {
     private router: Router;
@@ -15,11 +16,11 @@ export class GatewayFileController {
     }
 
     private initializeRoutes(){
-        this.router.get("/files/download/:fileId", this.downloadFile.bind(this));
-        this.router.get("/files/author/:authorId", this.getFilesByAuthorId.bind(this));
-        this.router.get("/files/metadata/:fileId", this.getFileMetadata.bind(this));
-        this.router.post("/files/upload", this.upload.single("file"), this.uploadFile.bind(this));
-        this.router.delete("/files/:fileId", this.deleteFile.bind(this));
+        this.router.get("/files/download/:fileId", authenticate, this.downloadFile.bind(this));
+        this.router.get("/files/author/:authorId", authenticate, this.getFilesByAuthorId.bind(this));
+        this.router.get("/files/metadata/:fileId", authenticate, this.getFileMetadata.bind(this));
+        this.router.post("/files/upload", authenticate, this.upload.single("file"), this.uploadFile.bind(this));
+        this.router.delete("/files/:fileId", authenticate, this.deleteFile.bind(this));
     }
 
     /**

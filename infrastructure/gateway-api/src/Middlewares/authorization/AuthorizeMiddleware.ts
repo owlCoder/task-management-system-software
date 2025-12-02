@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { UserRole } from "../../Domain/enums/UserRole";
-import { AuthTokenClaimsType } from "../../Domain/types/AuthTokenClaims";
+import { AuthTokenClaimsType } from "../../Domain/types/auth/AuthTokenClaims";
 
 export const authorize = (...permittedRoles: UserRole[]) => {
   return (req: Request, res: Response, next: NextFunction): void => {

@@ -1,7 +1,7 @@
-import { CreateFileDTO } from "../DTOs/CreateFileDTO";
-import { DownloadFileDTO } from "../DTOs/DownloadFileDTO";
-import { UploadedFileDTO } from "../DTOs/UploadedFileDTO";
-import { Result } from "../types/Result";
+import { CreateFileDTO } from "../../DTOs/file/CreateFileDTO";
+import { DownloadFileDTO } from "../../DTOs/file/DownloadFileDTO";
+import { UploadedFileDTO } from "../../DTOs/file/UploadedFileDTO";
+import { Result } from "../../types/common/Result";
 
 export interface IGatewayFileService {
     downloadFile(fileId: number): Promise<Result<DownloadFileDTO>>;

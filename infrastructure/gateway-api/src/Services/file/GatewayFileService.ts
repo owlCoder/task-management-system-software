@@ -1,10 +1,10 @@
 import axios, { AxiosInstance } from "axios";
-import { CreateFileDTO } from "../Domain/DTOs/CreateFileDTO";
-import { DownloadFileDTO } from "../Domain/DTOs/DownloadFileDTO";
-import { UploadedFileDTO } from "../Domain/DTOs/UploadedFileDTO";
-import { IGatewayFileService } from "../Domain/services/IGatewayFileService";
-import { Result } from "../Domain/types/Result";
-import { ErrorHandlingService } from "./ErrorHandlingService";
+import { CreateFileDTO } from "../../Domain/DTOs/file/CreateFileDTO";
+import { DownloadFileDTO } from "../../Domain/DTOs/file/DownloadFileDTO";
+import { UploadedFileDTO } from "../../Domain/DTOs/file/UploadedFileDTO";
+import { IGatewayFileService } from "../../Domain/services/file/IGatewayFileService";
+import { Result } from "../../Domain/types/common/Result";
+import { ErrorHandlingService } from "../common/ErrorHandlingService";
 import { FileHandlingService } from "./FileHandlingService";
 
 export class GatewayFileService implements IGatewayFileService {

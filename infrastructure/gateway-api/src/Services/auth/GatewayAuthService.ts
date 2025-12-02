@@ -1,11 +1,11 @@
 import axios, { AxiosInstance } from "axios";
-import { LoginUserDTO } from "../Domain/DTOs/LoginUserDTO";
-import { RegistrationUserDTO } from "../Domain/DTOs/RegistrationUserDTO";
-import { IGatewayAuthService } from "../Domain/services/IGatewayAuthService";
-import { AuthResponseType } from "../Domain/types/AuthResponse";
-import { BrowserDataDTO } from "../Domain/DTOs/BrowserDataDTO";
-import { ErrorHandlingService } from "./ErrorHandlingService";
-import { Result } from "../Domain/types/Result";
+import { LoginUserDTO } from "../../Domain/DTOs/auth/LoginUserDTO";
+import { RegistrationUserDTO } from "../../Domain/DTOs/auth/RegistrationUserDTO";
+import { IGatewayAuthService } from "../../Domain/services/auth/IGatewayAuthService";
+import { AuthResponseType } from "../../Domain/types/auth/AuthResponse";
+import { BrowserDataDTO } from "../../Domain/DTOs/auth/BrowserDataDTO";
+import { ErrorHandlingService } from "../common/ErrorHandlingService";
+import { Result } from "../../Domain/types/common/Result";
 
 export class GatewayAuthService implements IGatewayAuthService {
     private static readonly serviceName: string = "Auth Service";

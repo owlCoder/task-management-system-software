@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
-import { AuthTokenClaimsType } from "../../Domain/types/AuthTokenClaims";
+import { AuthTokenClaimsType } from "../../Domain/types/auth/AuthTokenClaims";
 
 declare global {
   namespace Express {

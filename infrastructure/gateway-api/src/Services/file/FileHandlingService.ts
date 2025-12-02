@@ -1,5 +1,5 @@
-import { CreateFileDTO } from "../Domain/DTOs/CreateFileDTO";
-import { DownloadFileDTO } from "../Domain/DTOs/DownloadFileDTO";
+import { CreateFileDTO } from "../../Domain/DTOs/file/CreateFileDTO";
+import { DownloadFileDTO } from "../../Domain/DTOs/file/DownloadFileDTO";
 
 export class FileHandlingService {
     static generateFormData(fileData: CreateFileDTO): FormData {

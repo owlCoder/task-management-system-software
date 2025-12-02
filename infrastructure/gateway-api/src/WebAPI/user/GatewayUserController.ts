@@ -1,11 +1,11 @@
 import { Request, Response, Router } from "express";
-import { RegistrationUserDTO } from "../Domain/DTOs/RegistrationUserDTO";
-import { IGatewayUserService } from "../Domain/services/IGatewayUserService";
-import { authenticate } from "../Middlewares/authentification/AuthMiddleware";
-import { authorize } from "../Middlewares/authorization/AuthorizeMiddleware";
-import { UserRole } from "../Domain/enums/UserRole";
-import { UserDTO } from "../Domain/DTOs/UserDTO";
-import { UpdateUserDTO } from "../Domain/DTOs/UpdateUserDTO";
+import { RegistrationUserDTO } from "../../Domain/DTOs/auth/RegistrationUserDTO";
+import { IGatewayUserService } from "../../Domain/services/user/IGatewayUserService";
+import { authenticate } from "../../Middlewares/authentification/AuthMiddleware";
+import { authorize } from "../../Middlewares/authorization/AuthorizeMiddleware";
+import { UserRole } from "../../Domain/enums/UserRole";
+import { UserDTO } from "../../Domain/DTOs/user/UserDTO";
+import { UpdateUserDTO } from "../../Domain/DTOs/user/UpdateUserDTO";
 
 export class GatewayUserController {
     private readonly router: Router;
