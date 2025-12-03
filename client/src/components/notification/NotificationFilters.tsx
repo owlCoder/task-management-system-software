@@ -40,9 +40,9 @@ const NotificationFilters: React.FC<NotificationFiltersProps> = ({
       <div className="flex gap-3">
         <button
           onClick={() => onFilterChange('all')}
-          className={`px-6 py-2 rounded-lg font-semibold text-sm transition ${
+          className={`px-6 py-2 rounded-lg font-semibold text-sm transition cursor-pointer ${
             activeFilter === 'all'
-              ? 'bg-slate-700 text-slate-100 border border-white/20'
+              ? 'bg-sky-500 text-white border border-sky-400'
               : 'bg-slate-900/50 text-slate-400 border border-white/10 hover:border-white/20 hover:text-slate-300'
           }`}
         >
@@ -51,9 +51,9 @@ const NotificationFilters: React.FC<NotificationFiltersProps> = ({
         
         <button
           onClick={() => onFilterChange('unread')}
-          className={`px-6 py-2 rounded-lg font-semibold text-sm transition flex items-center gap-2 ${
+          className={`px-6 py-2 rounded-lg font-semibold text-sm transition flex items-center gap-2 cursor-pointer ${
             activeFilter === 'unread'
-              ? 'bg-slate-700 text-slate-100 border border-white/20'
+              ? 'bg-sky-500 text-white border border-sky-400'
               : 'bg-slate-900/50 text-slate-400 border border-white/10 hover:border-white/20 hover:text-slate-300'
           }`}
         >
@@ -73,7 +73,7 @@ const NotificationFilters: React.FC<NotificationFiltersProps> = ({
         <div className="relative">
           <button
             onClick={() => setIsSortDropdownOpen(!isSortDropdownOpen)}
-            className="px-5 py-2 rounded-lg font-semibold text-sm bg-slate-900/50 text-slate-400 border border-white/10 hover:border-white/20 hover:text-slate-300 transition flex items-center gap-2"
+            className="px-5 py-2 rounded-lg font-semibold text-sm bg-slate-900/50 text-slate-400 border border-white/10 hover:border-white/20 hover:text-slate-300 transition flex items-center gap-2 cursor-pointer"
           >
             <svg 
               className="w-4 h-4" 
@@ -111,7 +111,7 @@ const NotificationFilters: React.FC<NotificationFiltersProps> = ({
                 <button
                   key={option.value}
                   onClick={() => handleSortSelect(option.value)}
-                  className={`w-full px-4 py-2 text-left text-sm font-medium transition hover:bg-slate-700 first:rounded-t-lg last:rounded-b-lg ${
+                  className={`w-full px-4 py-2 text-left text-sm font-medium transition hover:bg-slate-700 first:rounded-t-lg last:rounded-b-lg cursor-pointer ${
                     sortBy === option.value
                       ? 'text-blue-400 bg-slate-700/50'
                       : 'text-slate-300'
@@ -127,14 +127,13 @@ const NotificationFilters: React.FC<NotificationFiltersProps> = ({
         {/* select all checkbox */}
         <button
           onClick={onSelectAll}
-          className="px-5 py-2 rounded-lg font-semibold text-sm bg-slate-900/50 text-slate-400 border border-white/10 hover:border-white/20 hover:text-slate-300 transition flex items-center gap-2"
+          className="px-5 py-2 rounded-lg font-semibold text-sm bg-slate-900/50 text-slate-400 border border-white/10 hover:border-white/20 hover:text-slate-300 transition flex items-center gap-2 cursor-pointer"
         >
           <input
             type="checkbox"
             checked={isAllSelected}
-            onChange={() => {}}
-            className="w-4 h-4 rounded border-white/20 bg-slate-800 text-blue-500 focus:ring-blue-500 focus:ring-offset-0 cursor-pointer"
-            onClick={(e) => e.stopPropagation()}
+            readOnly
+            className="w-4 h-4 rounded border-white/20 bg-slate-800 text-blue-500 focus:ring-blue-500 focus:ring-offset-0 cursor-pointer pointer-events-none"
           />
           Select All
         </button>
@@ -145,7 +144,7 @@ const NotificationFilters: React.FC<NotificationFiltersProps> = ({
           disabled={selectedCount === 0}
           className={`px-5 py-2 rounded-lg font-semibold text-sm transition flex items-center gap-2 ${
             selectedCount > 0
-              ? 'bg-blue-600 text-white hover:bg-blue-700 border border-blue-500'
+              ? 'bg-blue-600 text-white hover:bg-blue-700 border border-blue-500 cursor-pointer'
               : 'bg-slate-900/50 text-slate-600 border border-white/10 cursor-not-allowed'
           }`}
         >
@@ -171,7 +170,7 @@ const NotificationFilters: React.FC<NotificationFiltersProps> = ({
           disabled={selectedCount === 0}
           className={`px-5 py-2 rounded-lg font-semibold text-sm transition flex items-center gap-2 ${
             selectedCount > 0
-              ? 'bg-amber-600 text-white hover:bg-amber-700 border border-amber-500'
+              ? 'bg-amber-600 text-white hover:bg-amber-700 border border-amber-500 cursor-pointer'
               : 'bg-slate-900/50 text-slate-600 border border-white/10 cursor-not-allowed'
           }`}
         >
@@ -197,7 +196,7 @@ const NotificationFilters: React.FC<NotificationFiltersProps> = ({
           disabled={selectedCount === 0}
           className={`px-5 py-2 rounded-lg font-semibold text-sm transition flex items-center gap-2 ${
             selectedCount > 0
-              ? 'bg-rose-600 text-white hover:bg-rose-700 border border-rose-500'
+              ? 'bg-rose-600 text-white hover:bg-rose-700 border border-rose-500 cursor-pointer'
               : 'bg-slate-900/50 text-slate-600 border border-white/10 cursor-not-allowed'
           }`}
         >

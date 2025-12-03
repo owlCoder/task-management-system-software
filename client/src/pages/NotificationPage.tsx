@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import DashboardNavbar from '../components/dashboard/navbar/Navbar';
-import Sidebar from '..//components/dashboard/navbar/Sidebar'
+import Sidebar from '../components/dashboard/navbar/Sidebar';
 import NotificationHeader from '../components/notification/NotificationHeader';
 import NotificationFilters from '../components/notification/NotificationFilters';
 import NotificationCard from '../components/notification/NotificationCard';
@@ -180,20 +180,24 @@ const NotificationPage: React.FC = () => {
       style={{ backgroundImage: `url(${backgroundImageUrl})` }}
     >
       
-      {/* Dashboard Navbar - Fixed na vrhu */}
-      <DashboardNavbar />
-
-      {/* Main Layout - Sidebar + Content */}
-      <div className="flex pt-[50px]">
-        
-        {/* Sidebar - Full Height */}
+      {/* Sidebar - Fixed na levoj strani */}
+      <div className="fixed left-0 top-0 h-screen z-40">
         <Sidebar 
           username="John Doe"
           role="Project Manager"
         />
+      </div>
 
-        {/* Main Content */}
-        <div className="flex-1">
+      {/* Main Content Area - sa margin-left za sidebar + padding levo za razmak */}
+      <div className="ml-48 pl-8">
+        
+        {/* Dashboard Navbar - Fixed na vrhu */}
+        <div className="fixed top-0 z-50" style={{ left: '224px', right: 0 }}>
+          <DashboardNavbar />
+        </div>
+
+        {/* Content - sa padding-om od navbar-a */}
+        <div className="pt-[50px]">
           <div className="max-w-7xl mx-auto px-6 py-8">
             
             {/* Header */}
@@ -218,43 +222,48 @@ const NotificationPage: React.FC = () => {
               />
             </div>
 
-            {/* Notifications List */}
-            <div className="space-y-4">
-              
-              {/* proverava da li postoje obavestenja za prikaz */}
-              {filteredNotifications.length === 0 ? (
+            {/* Notifications Container - Scrollable Box */}
+            <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-6 shadow-lg">
+              <div 
+                className="space-y-4 overflow-y-auto pr-2"
+                style={{ maxHeight: 'calc(100vh - 300px)' }}
+              >
                 
-                /* kada nema notifikacija neka prikaze samo prazno stanje */
-                <div className="text-center py-16">
-                  <div className="mb-4">
-                    <p className="text-slate-100 text-lg font-semibold">
-                      No notifications to display
-                    </p>
+                {/* proverava da li postoje obavestenja za prikaz */}
+                {filteredNotifications.length === 0 ? (
+                  
+                  /* kada nema notifikacija neka prikaze samo prazno stanje */
+                  <div className="text-center py-16">
+                    <div className="mb-4">
+                      <p className="text-slate-100 text-lg font-semibold">
+                        No notifications to display
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-slate-300 text-sm">
+                        {activeFilter === 'unread' 
+                          ? 'You have no unread notifications' 
+                          : 'No notifications available'}
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-slate-300 text-sm">
-                      {activeFilter === 'unread' 
-                        ? 'You have no unread notifications' 
-                        : 'No notifications available'}
-                    </p>
-                  </div>
-                </div>
 
-              ) : (
-                
-                /* prolazi kroz filtrirana obavestenja */
-                filteredNotifications.map((notification) => (
-                  <NotificationCard
-                    key={notification.id}
-                    notification={notification}
-                    onClick={handleNotificationClick}
-                    isSelected={selectedNotifications.includes(notification.id)}
-                    onSelectChange={handleSelectChange}
-                  />
-                ))
+                ) : (
+                  
+                  /* prolazi kroz filtrirana obavestenja */
+                  filteredNotifications.map((notification) => (
+                    <NotificationCard
+                      key={notification.id}
+                      notification={notification}
+                      onClick={handleNotificationClick}
+                      isSelected={selectedNotifications.includes(notification.id)}
+                      onSelectChange={handleSelectChange}
+                    />
+                  ))
 
-              )}
+                )}
 
+              </div>
             </div>
 
           </div>

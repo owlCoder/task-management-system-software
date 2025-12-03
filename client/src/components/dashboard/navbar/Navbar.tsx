@@ -49,7 +49,7 @@ export const DashboardNavbar: React.FC<DashboardNavbarProps> = ({
 
   return (
     <nav
-      className="fixed left-0 w-full z-50 backdrop-blur-md bg-white/10"
+      className="w-full backdrop-blur-md bg-white/10"
       style={{
         WebkitBackdropFilter: "blur(10px)",
         height: "50px",
@@ -129,7 +129,7 @@ export const DashboardNavbar: React.FC<DashboardNavbarProps> = ({
                 </span>
               </div>
               <button
-                className="text-white font-semibold hover:text-red-400"
+                className="text-white font-semibold hover:text-red-400 cursor-pointer"
                 onClick={handleLogout}
                 style={{ padding: "8px 16px" }}
               >
@@ -148,13 +148,13 @@ export const DashboardNavbar: React.FC<DashboardNavbarProps> = ({
             <>
               <button
                 onClick={handleLogin}
-                className="text-white font-semibold hover:text-blue-400"
+                className="text-white font-semibold hover:text-blue-400 cursor-pointer"
               >
                 Login
               </button>
               <button
                 onClick={handleRegister}
-                className="text-white font-semibold hover:text-blue-400"
+                className="text-white font-semibold hover:text-blue-400 cursor-pointer"
               >
                 Register
               </button>
