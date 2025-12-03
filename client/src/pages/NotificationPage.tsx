@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import NotificationNavigationBar from '../components/notification/NotificationNavigationBar';
-import NotificationSidebar from '../components/notification/NotificationSidebar';
+import DashboardNavbar from '../components/dashboard/navbar/Navbar';
+import Sidebar from '..//components/dashboard/navbar/Sidebar'
 import NotificationHeader from '../components/notification/NotificationHeader';
 import NotificationFilters from '../components/notification/NotificationFilters';
 import NotificationCard from '../components/notification/NotificationCard';
@@ -176,18 +176,18 @@ const NotificationPage: React.FC = () => {
 
   return (
     <div 
-      className="min-h-screen w-screen bg-cover bg-center bg-no-repeat flex"
+      className="min-h-screen w-screen bg-cover bg-center bg-no-repeat"
       style={{ backgroundImage: `url(${backgroundImageUrl})` }}
     >
       
-      {/* Sidebar - Full Height */}
-      <NotificationSidebar />
+      {/* Dashboard Navbar - Fixed na vrhu */}
+      <DashboardNavbar />
 
-      {/* Right Side - Navigation + Content */}
-      <div className="flex-1 flex flex-col">
+      {/* Main Layout - Sidebar + Content */}
+      <div className="flex pt-[50px]">
         
-        {/* Navigation Bar */}
-        <NotificationNavigationBar 
+        {/* Sidebar - Full Height */}
+        <Sidebar 
           username="John Doe"
           role="Project Manager"
         />
