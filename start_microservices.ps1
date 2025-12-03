@@ -3,31 +3,6 @@ $services = @()
 $services += Get-ChildItem -Path "infrastructure" -Directory | Where-Object { Test-Path "$($_.FullName)\package.json" }
 $services += Get-ChildItem -Path "infrastructure/microservices" -Directory | Where-Object { Test-Path "$($_.FullName)\package.json" }
 
-
-function Get-WindowsTerminalWindowHandles {
-
-    $handles = New-Object System.Collections.Generic.List[long]
-    $callback = [Tms.WindowHelper+EnumWindowsProc]{
-        param([IntPtr]$hWnd, [IntPtr]$lParam)
-
-        if (-not [Tms.WindowHelper]::IsWindowVisible($hWnd)) {
-            return $true
-        }
-
-        $classNameBuffer = New-Object System.Text.StringBuilder 256
-        $className = $classNameBuffer.ToString()
-
-        if ($className -eq "CASCADIA_HOSTING_WINDOW_CLASS") {
-            $handles.Add($hWnd.ToInt64()) | Out-Null
-        }
-
-        return $true
-    }
-
-    [Tms.WindowHelper]::EnumWindows($callback, [IntPtr]::Zero) | Out-Null
-    return $handles.ToArray()
-}
-
 # Build Windows Terminal command with multiple tabs
 $wtCommand = ""
 $serviceList = ""
@@ -64,8 +39,6 @@ $existingTerminalProcessIds = @(
     Select-Object -ExpandProperty Id
 )
 
-# Capture currently open Windows Terminal window handles so we can detect newly created windows
-$existingTerminalWindowHandles = Get-WindowsTerminalWindowHandles
 
 # Track existing Node.js/npm processes so we can kill residue we spawn
 $existingNodeProcessIds = @(
