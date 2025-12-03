@@ -1,13 +1,7 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import logoImageUrl from "../../../../public/logo.png";
-
-interface SidebarProps {
-  username?: string;
-  role?: string;
-  profileImage?: string;
-  className?: string;
-}
+import type { SidebarProps } from "../../../models/dashboard/navbar/SidebarPropsDTO";
 
 const Sidebar: React.FC<SidebarProps> = ({
   username = "Username",
@@ -15,7 +9,7 @@ const Sidebar: React.FC<SidebarProps> = ({
   profileImage,
   className = "",
 }) => {
-  const [logoError, setLogoError] = useState(false);
+  const [logoError, setLogoError] = useState(false);  // KOJA JE POENTA logoError - ukoloni ga visak je
 
   return (
     <aside

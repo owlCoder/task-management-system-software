@@ -1,12 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { IUserAPI } from "../../../api/users/IUserAPI";
 import { useAuth } from "../../../hooks/useAuthHook";
 import { UserDTO } from "../../../models/users/UserDTO";
-
-type DashboardNavbarProps = {
-  userAPI?: IUserAPI; // made optional
-};
+import { DashboardNavbarProps } from "../../../types/DashboardNavbarType";
 
 export const DashboardNavbar: React.FC<DashboardNavbarProps> = ({
   userAPI,

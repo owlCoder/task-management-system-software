@@ -1,8 +1,6 @@
 import React from 'react';
 
-interface NotificationSidebarProps {
-  className?: string;
-}
+import type { NotificationSidebarProps } from '../../models/notification/NotificationSidebarDTO';
 
 const NotificationSidebar: React.FC<NotificationSidebarProps> = ({ 
   className = "" 
