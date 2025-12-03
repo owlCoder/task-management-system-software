@@ -1,30 +1,104 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Sidebar from "../components/dashboard/navbar/Sidebar";
+import TaskListItem from "../components/task/TaskListItem";
+import { TaskDTO } from "../models/task/TaskDTO";
+import { TaskAPI } from "../api/task/TaskAPI";
+import CreateTaskModal from "../components/task/CreateTaskModal";
 
-const TaskPage: React.FC = () => {
+interface TaskListPageProps {
+  projectId: string;
+  token: string;
+}
+
+const TaskPage: React.FC<TaskListPageProps> = ({ projectId, token }) => {
+  const [tasks, setTasks] = useState<TaskDTO[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [open, setOpen] = useState(false);
+
+  const api = new TaskAPI(import.meta.env.VITE_GATEWAY_URL, token);
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const data = await api.getTasksByProject(projectId);
+        setTasks(data);
+      } catch (err) {
+        console.error("Failed to fetch tasks", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    load();
+  }, [projectId]);
+
+  if (loading) {
+    return <div className="text-white p-6">Loading tasks...</div>;
+  }
+
   return (
     <div className="flex min-h-screen">
       <Sidebar />
 
-      <main className="flex-1 p-6">
-        <header className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl md:text-3xl font-bold text-white">Tasks</h1>
+      <main className="flex-1 p-6 flex items-start justify-center">
+        <div className="w-full max-w-4xl">
+          <header className="flex items-center justify-between mb-6">
+            <h1 className="text-3xl md:text-4xl font-bold text-white">Tasks</h1>
 
-          <div className="flex gap-2">
-            <button
-              type="button"
-              className="inline-flex items-center justify-center gap-2 rounded-lg px-4 h-10 text-sm bg-brand text-white"
-            >
-              Create Task
-            </button>
-          </div>
-        </header>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                className="
+                group
+                w-[140px] h-[50px]
+                rounded-[3em]
+                flex items-center justify-center gap-[12px]
+                bg-white
+                transition-all duration-500
+                hover:bg-gradient-to-t hover:from-[var(--palette-medium-blue)] hover:to-[var(--palette-deep-blue)]
+                border border-white/15 shadow-lg
+                hover:-translate-y-1
+                cursor-pointer
+              "
+                onClick={() => setOpen(true)}
+              >
+                <svg
+                  className="w-5 h-5 text-[var(--palette-deep-blue)] group-hover:text-white transform transition-transform duration-300 group-hover:scale-110"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  aria-hidden="true"
+                >
+                  <path d="M10,21.236,6.755,14.745.264,11.5,6.755,8.255,10,1.764l3.245,6.491L19.736,11.5l-6.491,3.245ZM18,21l1.5,3L21,21l3-1.5L21,18l-1.5-3L18,18l-3,1.5ZM19.333,4.667,20.5,7l1.167-2.333L24,3.5,21.667,2.333,20.5,0,19.333,2.333,17,3.5Z" />
+                </svg>
 
-        <section className="bg-white/5 rounded-lg p-6 min-h-[360px] text-white/80">
-          <p className="mb-4">Task Page — under construction.</p>
+                <span className="font-semibold bg-gradient-to-t from-[var(--palette-medium-blue)] to-[var(--palette-deep-blue)] bg-clip-text text-transparent group-hover:text-white transition-colors duration-300 text-base">
+                  Create Task
+                </span>
+              </button>
 
-          {/* Add your tasks list / components here */}
-        </section>
+              <CreateTaskModal
+                open={open}
+                onClose={() => setOpen(false)}
+                projectId={projectId}
+                token={token}
+              />
+            </div>
+          </header>
+
+          <section className="bg-white/5 backdrop-blur-xl rounded-2xl p-6 shadow-lg border border-white/10 min-h-[320px]">
+            {tasks.length === 0 ? (
+              <div className="flex items-center justify-center h-40 text-white/60 text-lg">
+                No tasks found.
+              </div>
+            ) : (
+              <div className="flex flex-col gap-3">
+                {tasks.map((task) => (
+                  <TaskListItem key={task.task_id} task={task} />
+                ))}
+              </div>
+            )}
+          </section>
+        </div>
       </main>
     </div>
   );

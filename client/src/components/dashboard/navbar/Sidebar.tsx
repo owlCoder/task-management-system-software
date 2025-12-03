@@ -19,7 +19,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 
   return (
     <aside
-      className={`w-48 min-h-screen bg-white/10 backdrop-blur-xl border-r border-white/20 shadow-[4px_0_25px_rgba(0,0,0,0.25)] p-4 flex flex-col justify-between rounded-xl overflow-hidden ${className}`}
+      className={`w-48 min-h-screen bg-white/10 backdrop-blur-xl border-r border-white/20 shadow-[4px_0_25px_rgba(0,0,0,0.25)] p-4 flex flex-col justify-between rounded-tr-xl rounded-br-xl overflow-hidden ${className}`}
     >
       {/* Top: Logo */}
       <div className="pt-4 pb-4 flex items-center justify-center">
@@ -60,7 +60,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 
         <Link
           to="/notifications"
-          className="w-full px-4 py-3 rounded-lg text-sm font-semibold bg-white/20 text-white border border-white/30 transition text-center"
+          className="w-full px-4 py-3 rounded-lg text-sm font-semibold text-white/80 bg-white/5 border border-white/10 hover:border-white/30 hover:text-white hover:bg-white/10 transition text-center"
         >
           Notifications
         </Link>

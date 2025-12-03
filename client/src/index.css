@@ -5,7 +5,8 @@
   --font-primary: "Questrial", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --font-secondary: "Roboto Serif", serif;
 
-  --palette-deep-blue: #1726B8;
+  --palette-deep-blue: #0356a4;
+  /*--palette-deep-blue: #0e1c97 ; old color, must think what is better*/
   --palette-medium-blue: #2F77FF;
   --palette-cyan: #8BE9FF;
   --palette-pale: #EAF6FF;
