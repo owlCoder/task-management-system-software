@@ -15,13 +15,18 @@ import TaskPage from "./pages/TaskPage";
 const auth_api: IAuthAPI = new AuthAPI();
 const user_api: IUserAPI = new UserAPI();
 
+const backgroundImageUrl = new URL("../public/bg.jpg", import.meta.url).href;
+
 function App() {
   return (
-    <div className="bg-[var(--palette-deep-blue)] h-full min-h-screen">
+    <div
+      className="h-full min-h-screen bg-cover bg-center"
+      style={{ backgroundImage: `url(${backgroundImageUrl})` }}
+    >
       <Routes>
         <Route path="/projects" element={<ProjectsPage />} />
         <Route path="/notifications" element={<NotificationPage />} />
-        <Route path="/tasks" element={<TaskPage />} />
+        <Route path="/tasks" element={<TaskPage projectId={""} token={""} />} />
         <Route path="/auth" element={<AuthPage authAPI={auth_api} />} />
         <Route path="/register" element={<RegisterPage authAPI={auth_api} />} />
         <Route path="/" element={<MainWindow />} />
