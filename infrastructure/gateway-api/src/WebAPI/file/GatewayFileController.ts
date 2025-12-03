@@ -92,7 +92,7 @@ export class GatewayFileController {
      */
     private async uploadFile(req: Request, res: Response): Promise<void> {
         const file = req.file;
-        const { authorId } = req.body;
+        const authorId = parseInt(req.body?.authorId);
         const fileExtension = path.extname(req.file?.originalname ?? "");
         const fileType = req.file?.mimetype;
 
@@ -100,7 +100,7 @@ export class GatewayFileController {
             originalFileName: req.file?.originalname ?? "",
             fileType: fileType ?? "",
             fileExtension: fileExtension,
-            authorId: parseInt(authorId),
+            authorId: authorId,
             fileBuffer: file?.buffer
         })
 
