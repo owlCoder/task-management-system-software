@@ -1,6 +1,6 @@
 import { UserRole } from "../../enums/UserRole";
 export interface UserDTO {
-  id: number;
+  user_id: number;
   username: string;
   email: string;
   role: UserRole;

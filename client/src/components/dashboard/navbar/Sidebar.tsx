@@ -58,6 +58,13 @@ const Sidebar: React.FC<SidebarProps> = ({
         >
           Notifications
         </Link>
+
+        <Link
+          to="/users"
+          className="w-full px-4 py-3 rounded-lg text-sm font-semibold text-white/80 bg-white/5 border border-white/10 hover:border-white/30 hover:text-white hover:bg-white/10 transition text-center"
+        > 
+          Users
+        </Link>
       </nav>
 
       {/* Bottom: User info */}

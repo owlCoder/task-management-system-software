@@ -11,18 +11,16 @@ type UserListProps = {
   userAPI: IUserAPI;
 };
 
-const backgroundImage = "/backgorund.png";
 const defaultProfileImage = "/user.png";
 const defaultAdminImage = "/admin.png";
-
 
 export const UserList: React.FC<UserListProps> = ({ userAPI }) => {
   const { user: authUser, token, logout } = useAuth();
   const [users, setUsers] = useState<UserDTO[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [showAddForm, setShowAddForm] = useState(false);
   const [selectedUser, setSelectedUser] = useState<UserDTO | null>(null);
   const [isEditing, setIsEditing] = useState(false);
+  const [showAddForm, setShowAddForm] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -43,8 +41,8 @@ export const UserList: React.FC<UserListProps> = ({ userAPI }) => {
   const handleDelete = async (id: number) => {
     if (!token) return;
     try {
-      await userAPI.deleteUser(token, id);
-      setUsers((prev) => prev.filter((u) => u.id !== id));
+      await userAPI.logicalyDeleteUserById(token, id);
+      setUsers((prev) => prev.filter((u) => u.user_id !== id));
     } catch (err) {
       console.error("Failed to delete user:", err);
     }
@@ -56,168 +54,141 @@ export const UserList: React.FC<UserListProps> = ({ userAPI }) => {
   };
 
   return (
-    <div
-      className="w-full min-h-screen flex justify-center items-start p-6"
-      style={{
-        backgroundImage: `url(${backgroundImage})`,
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        backdropFilter: "blur(6px)",
-        minHeight: "100vh",
-      }}
-    >
-      
-      <div
-        className="flex flex-row p-6 rounded-xl gap-4"
-        style={{
-          backgroundColor: "rgba(5, 15, 40, 0.9)",
-          width: "100%",
-          maxWidth: "900px",
-          minHeight: "80vh",
-        }}
-      >
-
-        <div className="flex flex-col gap-2 w-full items-end">
+    <div className="flex min-h-screen bg-transparent">
+      <div className="flex-1 flex flex-col">
+        <header className="flex justify-between items-center px-6 py-4 bg-white/10 backdrop-blur-xl shadow-md">
+          <h1 className="text-2xl font-bold text-white">Users</h1>
           {authUser && (
-              <div className="flex justify-between items-center p-4 rounded-xl bg-blue-800/80 mb-4 shadow-md w-full">
-                  <div className="flex items-center gap-3">
-                <div
-                  className="flex-shrink-0 rounded-full overflow-hidden"
-                  style={{ width: "48px", height: "48px" }}
-                >
-                  <img
-                    src={defaultAdminImage}
-                    alt={authUser.username}
-                    style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                  />
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-white font-semibold">{authUser?.username}</span>
-                  <span className="text-blue-200 text-sm">{authUser?.role}</span>
-                </div>
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-full overflow-hidden flex-shrink-0 border-2 border-gray-300">
+                <img
+                  src={defaultAdminImage}
+                  alt={authUser.username}
+                  className="w-full h-full object-cover"
+                />
               </div>
-
+              <div className="flex flex-col text-right">
+                <span className="font-semibold text-white">{authUser.username}</span>
+                <span className="text-xs text-white/70">{authUser.role}</span>
+              </div>
               <button
                 onClick={handleLogout}
-                className="px-4 py-1 bg-red-500 hover:bg-red-400 text-white rounded-md shadow"
+                className="ml-4 px-3 py-1 bg-red-500 text-white rounded-md hover:bg-red-400 transition"
               >
                 Log out
               </button>
-              </div>
-          )}
-
-          <div className="flex flex-col gap-4 mt-20 w-full">
-            <div className="flex items-center gap-2 cursor-pointer text-white font-medium hover:text-blue-300 transition"
-              onClick={() => {
-                setShowAddForm(true);
-                setSelectedUser(null);
-                setIsEditing(false);
-              }}
-            >
-              <span> + Add New User</span>
             </div>
+          )}
+        </header>
 
-            <div className="flex flex-col gap-2 overflow-y-auto" style={{ maxHeight: "70vh" }}>
-            {isLoading ? (
-              <p className="text-white">Loading users...</p>
-            ) : (
-              users.map((u) => (
-                <div
-                  key={u.id}
-                  className="flex items-center justify-between px-3 rounded-lg"
-                  style={{
-                    backgroundColor: "rgba(30, 60, 120, 0.85)",
-                    height: "60px",
-                    width: "50vw",
-                    borderRadius: "8px",
-                  }}
-                  onClick={() => {
-                    setSelectedUser(u);
-                    setShowAddForm(false);
-                    setIsEditing(false);
-                  }}
-                >
-                  <div className="flex items-center gap-3">
-                    <div
-                      className="flex-shrink-0 rounded-full overflow-hidden"
-                      style={{ width: "48px", height: "48px" }}
-                    >
-                      <img
-                        src={u.profileImage || defaultProfileImage}
-                        alt={u.username}
-                        style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                      />
-                    </div>
-                    <div className="flex flex-col justify-center gap-0.5">
-                      <span className="text-white font-semibold text-sm">{u.username}</span>
-                      <span className="text-blue-200 text-xs">{u.role}</span>
-                    </div>
-                  </div>
-                  <div className="flex gap-2">
-                      <span
-                        className="cursor-pointer text-yellow-400"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setSelectedUser(u);
-                          setIsEditing(true);
-                          setShowAddForm(false);
-                        }}
-                      >
-                        Edit
-                      </span>
-                      <span
-                        className="cursor-pointer text-red-500"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDelete(u.id);
-                        }}
-                      >
-                        Delete
-                      </span>
-                    </div>
-                </div>
-              ))
-            )}
-          </div>
-          </div>
+        <div className="flex justify-end px-6 py-4">
+          <button
+            className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-400 transition"
+            onClick={() => {
+              setShowAddForm(true);
+              setSelectedUser(null);
+              setIsEditing(false);
+            }}
+          >
+            + Add New User
+          </button>
         </div>
 
+        <main className="p-6 max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 justify-items-center">
+          {isLoading ? (
+            <p className="text-white/70 col-span-full">Loading users...</p>
+          ) : (
+            users.map((u) => (
+              <div
+                key={u.user_id}
+                className="w-64 flex flex-col items-center p-6 rounded-2xl border border-white/20 
+                           bg-white/10 backdrop-blur-sm shadow-lg hover:shadow-2xl transform transition-all duration-200 hover:-translate-y-1
+                           cursor-pointer"
+                onClick={() => {
+                  setSelectedUser(u);
+                  setShowAddForm(false);
+                  setIsEditing(false);
+                }}
+              >
+                <div className="w-24 h-24 rounded-full overflow-hidden mb-4 border-2 border-white/20 shadow-sm">
+                  <img
+                    src={u.profileImage || defaultProfileImage}
+                    alt={u.username}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+
+                <span className="font-semibold text-white text-lg text-center">{u.username}</span>
+                <span className="text-sm text-white/70 mb-4 text-center">{u.role}</span>
+
+                <div className="flex gap-3 mt-auto">
+                  <span
+                    className="text-yellow-300 font-semibold text-sm hover:text-yellow-200 cursor-pointer"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedUser(u);
+                      setIsEditing(true);
+                      setShowAddForm(false);
+                    }}
+                  >
+                    Edit
+                  </span>
+                  <span
+                    className="text-red-500 hover:text-red-400 text-sm cursor-pointer"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDelete(u.user_id);
+                    }}
+                  >
+                    Delete
+                  </span>
+                </div>
+              </div>
+            ))
+          )}
+        </main>
+
         {showAddForm && token && (
-          <div
-            className="flex flex-col w-1/2 p-4 rounded-lg bg-blue-900"
-            style={{ marginTop: "80px", width: "60%",  minWidth: "300px", maxWidth: "400px", }} 
-          >
-            <AddUserForm
-              userAPI={userAPI}
-              token={token}
-              onUserAdded={(newUser) => setUsers((prev) => [...prev, newUser])}
-              onClose={() => setShowAddForm(false)}
-            />
+          <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50">
+            <div className="transform translate-x-8 w-full max-w-md">
+              <AddUserForm
+                userAPI={userAPI}
+                token={token}
+                onUserAdded={(newUser) => setUsers((prev) => [...prev, newUser])}
+                onClose={() => setShowAddForm(false)}
+              />
+            </div>
           </div>
         )}
 
-       {selectedUser && isEditing && token && (
-          <div className="flex flex-col w-1/2 p-4 rounded-lg">
-            <EditUserForm
-              userAPI={userAPI}
-              token={token}
-              existingUser={selectedUser}
-              onUserUpdated={(updatedUser) => {
-                setUsers((prev) => prev.map((u) => (u.id === updatedUser.id ? updatedUser : u)));
-                setSelectedUser(null);
-                setIsEditing(false);
-              }}
-              onClose={() => {
-                setSelectedUser(null);
-                setIsEditing(false);
-              }}
-            />
+        {selectedUser && isEditing && token && (
+          <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50">
+            <div className="transform translate-x-8 w-full max-w-md">
+              <EditUserForm
+                userAPI={userAPI}
+                token={token}
+                existingUser={selectedUser}
+                onUserUpdated={(updatedUser) => {
+                  setUsers((prev) =>
+                    prev.map((u) => (u.user_id === updatedUser.user_id ? updatedUser : u))
+                  );
+                  setSelectedUser(null);
+                  setIsEditing(false);
+                }}
+                onClose={() => {
+                  setSelectedUser(null);
+                  setIsEditing(false);
+                }}
+              />
+            </div>
           </div>
         )}
 
         {selectedUser && !isEditing && (
-          <div className="flex flex-col w-1/2 p-4 rounded-lg">
-            <UserDetail user={selectedUser} onClose={() => setSelectedUser(null)} />
+          <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50">
+            <div className="transform translate-x-8 w-full max-w-md">
+              <UserDetail user={selectedUser} onClose={() => setSelectedUser(null)} />
+            </div>
           </div>
         )}
       </div>

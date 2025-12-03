@@ -2,6 +2,7 @@ import axios, { AxiosInstance } from "axios";
 import { IUserAPI } from "./IUserAPI";
 import { UserDTO } from "../../models/users/UserDTO";
 import { UserCreationDTO } from "../../models/users/UserCreationDTO";
+import { UserUpdateDTO } from "../../models/users/UserUpdateDTO";
 
 export class UserAPI implements IUserAPI {
   private readonly axiosInstance: AxiosInstance;
@@ -38,15 +39,16 @@ export class UserAPI implements IUserAPI {
     })).data;
   }
 
-  async deleteUser(token: string, id: number): Promise<void> {
-    await this.axiosInstance.delete(`/users/${id}`, {
+  async logicalyDeleteUserById(token: string, user_id: number): Promise<boolean> {
+    return (
+      await this.axiosInstance.delete<boolean>(`/users/${user_id}`, {
       headers: { Authorization: `Bearer ${token}`},
-    });
+    })).data;
   }
 
-  async updateUser(token: string, id: number, user: Partial<UserDTO>): Promise<UserDTO> {
+  async updateUserById(token: string, newUserData: UserUpdateDTO): Promise<UserDTO> {
     return (
-      await this.axiosInstance.put<UserDTO>(`/users/${id}`, user, {
+      await this.axiosInstance.put<UserDTO>(`/users/${newUserData.user_id}}`, newUserData, {
       headers: { Authorization: `Bearer ${token}`},
     })).data;
   }
