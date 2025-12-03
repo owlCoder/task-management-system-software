@@ -5,6 +5,7 @@ import { UserDTO } from "../Domain/DTOs/UserDTO";
 import { UserCreationDTO } from "../Domain/DTOs/UserCreationDTO";
 import bcrypt from "bcryptjs";
 import { UserRole } from "../Domain/models/UserRole";
+import { UserUpdateDTO } from "../Domain/DTOs/UserUpdateDTO";
 
 export class UsersService implements IUsersService {
   private readonly saltRounds: number = parseInt(
@@ -119,10 +120,9 @@ export class UsersService implements IUsersService {
    * Update user by ID
    */
 
-  async updateUserById(
-    user_id: number,
-    userData: Partial<User>
-  ): Promise<UserDTO> {
+  async updateUserById(newUserData: UserUpdateDTO): Promise<UserDTO> {
+    const user_id = newUserData.user_id;
+
     const existingUser = await this.userRepository.findOne({
       where: { user_id, is_deleted: false },
       relations: ["user_role"],
@@ -132,15 +132,30 @@ export class UsersService implements IUsersService {
       throw new Error(`User with ID ${user_id} not found`);
     }
 
-    const updatedUser = { ...existingUser, ...userData };
+    if (newUserData.new_password != undefined) {
+      const hashedPassword = await bcrypt.hash(
+        newUserData.new_password,
+        this.saltRounds
+      );
+      newUserData.password = hashedPassword;
+    }
+
+    //const updatedUser = { ...existingUser, ...newUserData };
+    existingUser.password_hash = newUserData.password;
+    existingUser.email = newUserData.email;
+    existingUser.user_role = newUserData.role_name;
+    if (newUserData.weekly_working_hour_sum) {
+      existingUser.weekly_working_hour_sum =
+        newUserData.weekly_working_hour_sum;
+    }
     //Spaja postojece podatke user-a sa novim podacima
-    const result = await this.userRepository.update(user_id, updatedUser);
+    const result = await this.userRepository.update(user_id, existingUser);
 
     if (result.affected === undefined || result.affected === 0) {
       throw new Error(`User with ID ${user_id} could not be updated`);
     }
 
-    return this.toDTO(updatedUser);
+    return this.toDTO(existingUser);
   }
 
   //helper metode

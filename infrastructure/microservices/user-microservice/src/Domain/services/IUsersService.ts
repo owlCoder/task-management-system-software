@@ -1,5 +1,6 @@
 import { UserCreationDTO } from "../DTOs/UserCreationDTO";
 import { UserDTO } from "../DTOs/UserDTO";
+import { UserUpdateDTO } from "../DTOs/UserUpdateDTO";
 import { User } from "../models/User";
 
 export interface IUsersService {
@@ -7,5 +8,5 @@ export interface IUsersService {
   getUserById(id: number): Promise<UserDTO>;
   createUser(user: UserCreationDTO): Promise<UserDTO>;
   logicalyDeleteUserById(user_id: number): Promise<boolean>;
-  updateUserById(user_id: number, userData: Partial<User>): Promise<UserDTO>;
+  updateUserById(newUserData: UserUpdateDTO): Promise<UserDTO>;
 }
