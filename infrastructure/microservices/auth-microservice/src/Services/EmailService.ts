@@ -31,7 +31,7 @@ export class EmailService {
       this.mailingServiceState = response.status === 200;
       // this.mailingServiceState = true; // For testing purposes, assume always available, until mailing service healthcheck is implemented
     } catch (error) {
-      console.log(`\x1b[31m[MailingService]\x1b[0m Email service is currently unavailable, retrying the connection in ${this.mailingServiceHealthCheckInterval / 1000}s.`);
+      // console.log(`\x1b[31m[MailingService]\x1b[0m Email service is currently unavailable, retrying the connection in ${this.mailingServiceHealthCheckInterval / 1000}s.`);
       this.mailingServiceState = false;
     }
   }
@@ -46,15 +46,18 @@ export class EmailService {
     // Email content
     const emailSubject = "Your OTP Code for Login for user " + user.username;
     const emailBody = `
-      Dear ${user.username},
+      <p>Dear ${user.username},</p>
 
-      You have requested to log in to your account. Please use the following One-Time Password (OTP) to complete the verification process:
+      <p>
+        You have requested to log in to your account. Please use the following One-Time Password (OTP)
+        to complete the verification process:
+      </p>
 
-      OTP Code: ${otpCode}
+      <p><strong>OTP Code:</strong> ${otpCode}</p>
 
-      This code is valid for ${this.loginSessionExpirationMinutes} minutes. Do not share it with anyone.
+      <p>This code is valid for ${this.loginSessionExpirationMinutes} minutes. Do not share it with anyone.</p>
 
-      If you did not request this, please ignore this email or contact support.
+      <p>If you did not request this, please ignore this email or contact support.</p>
     `;
 
     try {
@@ -74,7 +77,7 @@ export class EmailService {
       // console.log(`\x1b[34m[MailingService]\x1b[0m Sent OTP email to ${user.email} for user ${user.username}`);
       // console.log(`\x1b[34m[MailingService]\x1b[0m Email content:\nSubject: ${emailSubject}\nBody: ${emailBody}`);
       // console.log(`Generated OTP for user ${user.username} with session id ${sessionId} \nOTP code for this session: ${otpCode}`);
-      
+
       return [sessionData, sessionId, true];
     } catch (error) {
       console.error('Failed to send OTP email:', error);
