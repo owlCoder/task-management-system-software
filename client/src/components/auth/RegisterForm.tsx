@@ -1,33 +1,30 @@
 import React, { useState } from "react";
 import { IAuthAPI } from "../../api/auth/IAuthAPI";
 import { RegistrationUserDTO } from "../../models/auth/RegistrationUserDTO";
-import { UserRole } from "../../enums/UserRole";
 import { useAuth } from "../../hooks/useAuthHook";
 import { useNavigate } from "react-router-dom";
+import { UserRole } from "../../enums/UserRole";
 
 type RegisterFormProps = {
   authAPI: IAuthAPI;
   onSwitchToLogin?: () => void;
 };
 
-const logoImageUrl = new URL(
-  "../../../public/logo.png",
-  import.meta.url
-).href;
-
 export const RegisterForm: React.FC<RegisterFormProps> = ({
   authAPI,
   onSwitchToLogin,
 }) => {
-  const [formData, setFormData] = useState<RegistrationUserDTO>({
+
+  // 🔥 OVO JE ISPRAVAN STATE
+  const [formData, setFormData] = useState<any>({
     username: "",
     email: "",
     password: "",
-    role: UserRole.ADMIN, // Changed to ADMIN because SELLER does not exist @knezzevic
-    profileImage: "",
+    confirmPassword: "",
+    role: UserRole.ANIMATION_WORKER,
+    profileImage: "", // DTO ga zahteva
   });
 
-  const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
@@ -37,176 +34,147 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
-    setFormData((prev) => ({
+    const { name, value } = e.target;
+    setFormData((prev: any) => ({
       ...prev,
-      [e.target.name]: e.target.value,
+      [name]: name === "role" ? (value as UserRole) : value,
     }));
-    setError("");
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-
-    if (formData.password !== confirmPassword) {
-      setError("Passwords do not match.");
-      return;
-    }
-
-    if (formData.password.length < 6) {
-      setError("Password must be at least 6 characters.");
-      return;
-    }
-
     setIsLoading(true);
 
-    try {
-      const response = await authAPI.register(formData);
+    // 🔥 VALIDACIJA ZA POTVRDU LOZINKE
+    if (formData.password !== formData.confirmPassword) {
+      setError("Passwords do not match.");
+      setIsLoading(false);
+      return;
+    }
 
-      if (response.success && response.token) {
-        login(response.token);
-        navigate("/dashboard");
-      } else {
-        setError(response.message || "Registration failed.");
-      }
-    } catch {
-      setError("An error occurred.");
+    try {
+      const sendData: RegistrationUserDTO = {
+        username: formData.username,
+        email: formData.email,
+        password: formData.password,
+        role: formData.role,
+        profileImage: "", // šaljemo jer je required
+      };
+
+      const res = await authAPI.register(sendData);
+      login(res.token ?? "");
+      navigate("/");
+    } catch (err: any) {
+      setError(
+        err.response?.data?.message ||
+          "Došlo je do greške prilikom registracije."
+      );
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="w-full max-w-md flex flex-col items-center gap-4 text-center"
-    >
+    <form className="w-full" onSubmit={handleSubmit}>
+      <h2 className="text-3xl text-white font-bold mb-8 text-center">
+        Register
+      </h2>
 
-      <img
-        src={logoImageUrl}
-        alt="A2 Pictures logo"
-        className="w-28 h-28 sm:w-32 sm:h-32 object-contain mb-1"
-      />
-      {error && (
-        <div className="w-full rounded-md border border-red-400/70 bg-red-500/20 px-4 py-2 text-left text-sm text-red-100">
-          {error}
-        </div>
-      )}
-
-      <div className="w-full flex flex-col gap-4">
-        <Input
-          label="Username"
+      {/* USERNAME */}
+      <div className="w-full mb-6">
+        <label className="block w-[95%] mx-auto text-left text-sm font-semibold text-white/80">
+          Username
+        </label>
+        <input
           name="username"
           value={formData.username}
           onChange={handleChange}
-          placeholder="Choose a username"
-        />
-
-        <Input
-          label="Email"
-          name="email"
-          type="email"
-          value={formData.email}
-          onChange={handleChange}
-          placeholder="your@email.com"
-        />
-
-        <div className="w-full">
-          <label className="block w-[95%] mx-auto text-left text-sm font-semibold text-white/80">
-            Role
-          </label>
-          <select
-            name="role"
-            value={formData.role}
-            onChange={handleChange}
-            className="w-[85%] mx-auto mt-2 bg-transparent border-b-[3px] border-white/40 text-white py-2 outline-none"
-          >
-            {/*<option value={UserRole.SELLER}>Seller</option> --- SELLER does not exist @knezzevic*/}
-            <option value={UserRole.ADMIN}>Admin</option>
-          </select>
-        </div>
-
-        <Input
-          label="Password"
-          name="password"
-          type="password"
-          value={formData.password}
-          onChange={handleChange}
-          placeholder="Create password"
-        />
-
-        <div className="w-full">
-          <label className="block w-[95%] mx-auto text-left text-sm font-semibold text-white/80">
-            Confirm Password
-          </label>
-          <div className="w-[95%] mx-auto mt-1 border-b-[3px] border-white/40">
-            <input
-              type="password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              placeholder="Repeat password"
-              className="w-full bg-transparent text-lg text-white placeholder:text-white/70 py-3 outline-none"
-            />
-          </div>
-        </div>
-
-        <Input
-          label="Profile Image URL (optional)"
-          name="profileImage"
-          type="url"
-          value={formData.profileImage}
-          onChange={handleChange}
-          placeholder="https://..."
+          type="text"
+          className="w-[95%] mx-auto bg-transparent border-b-[3px] border-white/40 text-white py-2 outline-none"
         />
       </div>
+
+      {/* EMAIL */}
+      <div className="w-full mb-6">
+        <label className="block w-[95%] mx-auto text-left text-sm font-semibold text-white/80">
+          Email
+        </label>
+        <input
+          name="email"
+          value={formData.email}
+          onChange={handleChange}
+          type="email"
+          className="w-[95%] mx-auto bg-transparent border-b-[3px] border-white/40 text-white py-2 outline-none"
+        />
+      </div>
+
+      {/* PASSWORD */}
+      <div className="w-full mb-6">
+        <label className="block w-[95%] mx-auto text-left text-sm font-semibold text-white/80">
+          Password
+        </label>
+        <input
+          name="password"
+          value={formData.password}
+          onChange={handleChange}
+          type="password"
+          className="w-[95%] mx-auto bg-transparent border-b-[3px] border-white/40 text-white py-2 outline-none"
+        />
+      </div>
+
+      {/* CONFIRM PASSWORD — ISPRAVLJENO */}
+      <div className="w-full mb-6">
+        <label className="block w-[95%] mx-auto text-left text-sm font-semibold text-white/80">
+          Confirm Password
+        </label>
+        <input
+          name="confirmPassword"
+          value={formData.confirmPassword}
+          onChange={handleChange}
+          type="password"
+          className="w-[95%] mx-auto bg-transparent border-b-[3px] border-white/40 text-white py-2 outline-none"
+        />
+      </div>
+
+      {/* ROLE */}
+      <div className="w-full mb-6">
+        <label className="block w-[95%] mx-auto text-left text-sm font-semibold text-white/80">
+          Role
+        </label>
+        <select
+          name="role"
+          value={formData.role}
+          onChange={handleChange}
+          className="w-[95%] mx-auto mt-2 bg-transparent border-b-[3px] border-white/40 text-white py-2 outline-none"
+        >
+          {Object.values(UserRole).map((role) => (
+            <option key={role} value={role} className="text-black">
+              {role}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {error && <p className="text-red-400 text-center text-sm">{error}</p>}
 
       <button
         type="submit"
         disabled={isLoading}
-        className="relative mt-4 w-52 border-2 border-white border-solid text-white uppercase tracking-[0.2em] text-sm font-bold py-3 overflow-hidden bg-transparent cursor-pointer transition-all duration-1000 group disabled:opacity-50"
+        className="mt-6 w-[95%] mx-auto block py-2 rounded-md bg-white/90 text-black font-semibold hover:bg-white"
       >
-        <span className="absolute top-0 left-[-40px] h-full w-0 skew-x-[45deg] bg-white/40 transition-all duration-1000 group-hover:w-[160%]" />
-        <span className="relative z-10">
-          {isLoading ? "Registering..." : "Register"}
-        </span>
+        {isLoading ? "Loading..." : "Register"}
       </button>
 
-      <p className="mt-2 text-sm text-white/80">
-        You already have an account?{" "}
-        <button
-          type="button"
+      <p className="mt-4 text-center text-white/70 text-sm">
+        Već imate nalog?{" "}
+        <span
+          className="text-white font-bold cursor-pointer"
           onClick={onSwitchToLogin}
-          className="font-semibold underline underline-offset-4 hover:text-blue-100"
         >
           Login
-        </button>
+        </span>
       </p>
     </form>
   );
 };
-
-const Input = ({
-  label,
-  name,
-  type = "text",
-  value,
-  onChange,
-  placeholder,
-}: any) => (
-  <div className="w-full">
-    <label className="block w-[95%] mx-auto text-left text-sm font-semibold text-white/80">
-      {label}
-    </label>
-    <div className="w-[95%] mx-auto mt-1 border-b-[3px] border-white/40 transition-colors focus-within:border-white">
-      <input
-        type={type}
-        name={name}
-        value={value}
-        onChange={onChange}
-        placeholder={placeholder}
-        required={label.toLowerCase().includes("optional") === false}
-        className="w-full bg-transparent border-none outline-none text-base font-semibold text-white placeholder:text-white/70 py-2"
-      />
-    </div>
-  </div>
-);
