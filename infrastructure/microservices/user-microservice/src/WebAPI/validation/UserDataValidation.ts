@@ -10,26 +10,26 @@ export function UserDataValidation(
 
   // Validacija username-a
   if (!UserData.username || UserData.username.trim() === "") {
-    poruka = "Username ne sme biti prazan.";
+    poruka = "Username must not be empty.";
   } else if (UserData.username.length < 3) {
-    poruka = "Username mora imati najmanje 3 karaktera.";
+    poruka = "Username must be longer than 3 characters";
   } else if (UserData.username.length > 15) {
-    poruka = "Username ne sme imati više od 15 karaktera.";
+    poruka = "Username must be shorter than 15 characters";
   }
 
   // Validacija password-a
   if (!UserData.password || UserData.password.trim() === "") {
-    poruka = "Password ne sme biti prazan.";
+    poruka = "Password must not be empty.";
   } else if (UserData.password.length < 3) {
-    poruka = "Password mora imati najmanje 3 karaktera.";
+    poruka = "Password must be longer than 3 characters";
   }
 
   //Validacija email-a
   if (
     UserData.email &&
-    UserData.email.match("[a-zA-Z0-9]+@[a-z]+.com") === null
+    UserData.email.match("[a-zA-Z0-9]+@[a-z]+.[a-z]+") === null
   ) {
-    poruka = "Niste uneli email u dobrom formatu!";
+    poruka = "You did not enter an email in the correct format!";
   }
 
   return {
@@ -45,19 +45,19 @@ export function UserDataUpdateValidation(
 
   // Validacija username-a
   if (!UserData.username || UserData.username.trim() === "") {
-    poruka = "Username ne sme biti prazan.";
+    poruka = "Username must not be empty.";
   } else if (UserData.username.length < 3) {
-    poruka = "Username mora imati najmanje 3 karaktera.";
+    poruka = "Username must be longer than 3 characters";
   } else if (UserData.username.length > 15) {
-    poruka = "Username ne sme imati više od 15 karaktera.";
+    poruka = "Username must be shorter than 15 characters";
   }
 
   //Validacija email-a
   if (
     UserData.email &&
-    UserData.email.match("[a-zA-Z0-9]+@[a-z]+.com") === null
+    UserData.email.match("[a-zA-Z0-9]+@[a-z]+.[a-z]+") === null
   ) {
-    poruka = "Niste uneli email u dobrom formatu!";
+    poruka = "You did not enter an email in the correct format!";
   }
 
   return {

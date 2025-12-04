@@ -8,5 +8,8 @@ export interface IUsersService {
   getUserById(id: number): Promise<UserDTO>;
   createUser(user: UserCreationDTO): Promise<UserDTO>;
   logicalyDeleteUserById(user_id: number): Promise<boolean>;
-  updateUserById(newUserData: UserUpdateDTO): Promise<UserDTO>;
+  updateUserById(
+    user_id: number,
+    updateUserData: UserUpdateDTO
+  ): Promise<UserDTO>;
 }

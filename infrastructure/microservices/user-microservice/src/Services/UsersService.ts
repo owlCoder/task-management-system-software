@@ -120,9 +120,10 @@ export class UsersService implements IUsersService {
    * Update user by ID
    */
 
-  async updateUserById(newUserData: UserUpdateDTO): Promise<UserDTO> {
-    const user_id = newUserData.user_id;
-
+  async updateUserById(
+    user_id: number,
+    updateUserData: UserUpdateDTO
+  ): Promise<UserDTO> {
     const existingUser = await this.userRepository.findOne({
       where: { user_id, is_deleted: false },
       relations: ["user_role"],
@@ -132,22 +133,40 @@ export class UsersService implements IUsersService {
       throw new Error(`User with ID ${user_id} not found`);
     }
 
-    if (newUserData.new_password != undefined) {
-      const hashedPassword = await bcrypt.hash(
-        newUserData.new_password,
-        this.saltRounds
+    const alreadyExist = await this.userRepository.findOne({
+      where: [
+        { username: updateUserData.username },
+        { email: updateUserData.email },
+      ], //na ovaj nacin proveravam da li username ili email vec postoje i da li je obrisan korisnik sa tim podacima
+      //kaze onda da dupliramo podatke sto je logicno, ali da li je potrebno onda da ostavim samo bez is_deleted: false u oba slucaja?
+    });
+
+    if (alreadyExist !== null) {
+      throw new Error(
+        `User with username: ${updateUserData.username} or email: ${updateUserData.email} already exist`
       );
-      newUserData.password = hashedPassword;
     }
 
-    //const updatedUser = { ...existingUser, ...newUserData };
-    existingUser.password_hash = newUserData.password;
-    existingUser.email = newUserData.email;
-    existingUser.user_role = newUserData.role_name;
-    if (newUserData.weekly_working_hour_sum) {
-      existingUser.weekly_working_hour_sum =
-        newUserData.weekly_working_hour_sum;
+    if (updateUserData.password) {
+      existingUser.password_hash = await bcrypt.hash(
+        updateUserData.password,
+        this.saltRounds
+      );
     }
+
+    existingUser.email = updateUserData.email;
+    existingUser.username = updateUserData.username;
+
+    if (existingUser.user_role.role_name !== updateUserData.role_name) {
+      const userRole: UserRole | null = await this.userRolesRepository.findOne({
+        where: { role_name: updateUserData.role_name },
+      });
+
+      if (userRole) {
+        existingUser.user_role = userRole;
+      }
+    }
+
     //Spaja postojece podatke user-a sa novim podacima
     const result = await this.userRepository.update(user_id, existingUser);
 

@@ -155,7 +155,7 @@ export class UsersController {
       }
 
       this.logger.log(`Updating user with ID ${id}`);
-      const updatedUser = await this.usersService.updateUserById(userData);
+      const updatedUser = await this.usersService.updateUserById(id, userData);
       res.status(200).json(updatedUser);
     } catch (err) {
       this.logger.log((err as Error).message);
