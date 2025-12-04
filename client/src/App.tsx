@@ -11,6 +11,7 @@ import UserPage from "./pages/UserPage";
 import { RegisterPage } from "./pages/RegisterPage";
 import NotificationPage from "./pages/NotificationPage";
 import TaskPage from "./pages/TaskPage";
+import { FilePage } from "./pages/FilePage";
 
 const auth_api: IAuthAPI = new AuthAPI();
 const user_api: IUserAPI = new UserAPI();
@@ -29,6 +30,7 @@ function App() {
         <Route path="/tasks" element={<TaskPage projectId={""} token={""} />} />
         <Route path="/auth" element={<AuthPage authAPI={auth_api} />} />
         <Route path="/register" element={<RegisterPage authAPI={auth_api} />} />
+        <Route path="/files" element={<FilePage/>} />
         <Route path="/" element={<MainWindow />} />
         <Route
           path="/users"
