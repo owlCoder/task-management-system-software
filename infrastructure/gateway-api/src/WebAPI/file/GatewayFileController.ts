@@ -93,16 +93,17 @@ export class GatewayFileController {
     private async uploadFile(req: Request, res: Response): Promise<void> {
         const file = req.file;
         const authorId = parseInt(req.body?.authorId);
-        const fileExtension = path.extname(req.file?.originalname ?? "");
-        const fileType = req.file?.mimetype;
+        const originalFileName = req.file?.originalname ?? "";
+        const fileExtension = path.extname(originalFileName);
+        const fileType = req.file?.mimetype ?? "";
 
         const result = await this.gatewayFileService.uploadFile({
-            originalFileName: req.file?.originalname ?? "",
-            fileType: fileType ?? "",
+            originalFileName: originalFileName,
+            fileType: fileType,
             fileExtension: fileExtension,
             authorId: authorId,
             fileBuffer: file?.buffer
-        })
+        });
 
         if(result.success){
             res.status(201).json(result.data);

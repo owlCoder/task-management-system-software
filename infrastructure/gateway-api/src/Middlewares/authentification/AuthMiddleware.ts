@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 import { AuthTokenClaimsType } from "../../Domain/types/auth/AuthTokenClaims";
+import { logger } from "../../Utils/Logger/Logger";
 
 declare global {
   namespace Express {
@@ -18,6 +19,14 @@ export const authenticate = (
   const authHeader = req.headers.authorization;
 
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    logger.warn({
+        service: "Gateway",
+        code: "AUTHENTICATION_ERR",
+        method: req.method,
+        url: req.url,
+        ip: req.ip
+    }, "Token is missing");
+
     res.status(401).json({ success: false, message: "Token is missing!" });
     return;
   }
@@ -31,8 +40,17 @@ export const authenticate = (
     ) as AuthTokenClaimsType;
 
     req.user = decoded;
+
     next();
   } catch (err) {
+    logger.warn({
+        service: "Gateway",
+        code: "AUTHENTICATION_ERR",
+        method: req.method,
+        url: req.url,
+        ip: req.ip
+    }, "Invalid token provided");
+
     res.status(401).json({ success: false, message: "Invalid token provided!" });
   }
 };

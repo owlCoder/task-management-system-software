@@ -11,6 +11,12 @@ import { GatewayUserService } from './Services/user/GatewayUserService';
 import { IGatewayFileService } from './Domain/services/file/IGatewayFileService';
 import { GatewayFileService } from './Services/file/GatewayFileService';
 import { GatewayFileController } from './WebAPI/file/GatewayFileController';
+import { requestLogger } from './Middlewares/logger/LoggingMiddleware';
+import { IErrorHandlingService } from './Domain/services/common/IErrorHandlingService';
+import { ErrorHandlingService } from './Services/common/ErrorHandlingService';
+import { ILoggerService } from './Domain/services/common/ILoggerService';
+import { LoggerService } from './Services/common/LoggerService';
+import { logger } from './Utils/Logger/Logger';
 
 dotenv.config({ quiet: true });
 
@@ -28,10 +34,14 @@ app.use(cors({
 
 app.use(express.json());
 
+app.use(requestLogger);
+
 // Services
-const gatewayAuthService: IGatewayAuthService = new GatewayAuthService();
-const gatewayUserService: IGatewayUserService = new GatewayUserService();
-const gatewayFileService: IGatewayFileService = new GatewayFileService();
+const loggerService: ILoggerService = new LoggerService(logger);
+const errorHandlingService: IErrorHandlingService = new ErrorHandlingService(loggerService);
+const gatewayAuthService: IGatewayAuthService = new GatewayAuthService(errorHandlingService, loggerService);
+const gatewayUserService: IGatewayUserService = new GatewayUserService(errorHandlingService, loggerService);
+const gatewayFileService: IGatewayFileService = new GatewayFileService(errorHandlingService, loggerService);
 
 // WebAPI routes
 const gatewayAuthController = new GatewayAuthController(gatewayAuthService);

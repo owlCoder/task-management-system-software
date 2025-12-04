@@ -4,14 +4,17 @@ import { DownloadFileDTO } from "../../Domain/DTOs/file/DownloadFileDTO";
 import { UploadedFileDTO } from "../../Domain/DTOs/file/UploadedFileDTO";
 import { IGatewayFileService } from "../../Domain/services/file/IGatewayFileService";
 import { Result } from "../../Domain/types/common/Result";
-import { ErrorHandlingService } from "../common/ErrorHandlingService";
-import { FileHandlingService } from "./FileHandlingService";
+import { IErrorHandlingService } from "../../Domain/services/common/IErrorHandlingService";
+import { ILoggerService } from "../../Domain/services/common/ILoggerService";
+import { HTTP_METHODS } from "../../Constants/common/HttpMethods";
+import { FILE_ROUTES } from "../../Constants/routes/file/FileRoutes";
+import { extractDownloadDTOFromResponse, generateFormData } from "../../Utils/File/FileUtils";
 
 export class GatewayFileService implements IGatewayFileService {
     private static readonly serviceName: string = "File Service";
     private readonly fileClient: AxiosInstance;
     
-    constructor(){
+    constructor(private readonly errorHandlingService: IErrorHandlingService, private readonly loggerService: ILoggerService){
         const fileBaseURL = process.env.FILE_SERVICE_API;
         
         this.fileClient = axios.create({
@@ -22,70 +25,86 @@ export class GatewayFileService implements IGatewayFileService {
 
     async downloadFile(fileId: number): Promise<Result<DownloadFileDTO>> {
         try {
-            const response = await this.fileClient.get(`/files/download/${fileId}`, {
+            const response = await this.fileClient.get(FILE_ROUTES.DOWNLOAD(fileId), {
                 responseType: "arraybuffer"
             });
-            const downloadFile = FileHandlingService.extractFromResponse(response);
+            const downloadFile = extractDownloadDTOFromResponse(response);
 
             return {
                 success: true,
                 data: downloadFile
             };
         } catch(error){
-            return ErrorHandlingService.handle(error, GatewayFileService.serviceName);
+            return this.errorHandlingService.handle(error, GatewayFileService.serviceName, HTTP_METHODS.GET, FILE_ROUTES.DOWNLOAD(fileId));
         }
     }
 
     async getFilesByAuthorId(authorId: number): Promise<Result<UploadedFileDTO[]>> {
         try {
-            const response = await this.fileClient.get<UploadedFileDTO[]>(`/files/author/${authorId}`);
+            const response = await this.fileClient.get<UploadedFileDTO[]>(FILE_ROUTES.GET_BY_AUTHOR(authorId));
 
             return {
                 success: true,
                 data: response.data
             };
         } catch(error) {
-            return ErrorHandlingService.handle(error, GatewayFileService.serviceName);
+            return this.errorHandlingService.handle(error, GatewayFileService.serviceName, HTTP_METHODS.GET, FILE_ROUTES.GET_BY_AUTHOR(authorId));
         }
     }
 
     async getFileMetadata(fileId: number): Promise<Result<UploadedFileDTO>> {
         try {
-            const response = await this.fileClient.get<UploadedFileDTO>(`/files/metadata/${fileId}`);
+            const response = await this.fileClient.get<UploadedFileDTO>(FILE_ROUTES.METADATA(fileId));
 
             return {
                 success: true,
                 data: response.data
             };
         } catch(error){
-            return ErrorHandlingService.handle(error, GatewayFileService.serviceName);
+            return this.errorHandlingService.handle(error, GatewayFileService.serviceName, HTTP_METHODS.GET, FILE_ROUTES.METADATA(fileId));
         }
     }
 
     async uploadFile(fileData: CreateFileDTO): Promise<Result<UploadedFileDTO>> {
         try{
-            const formData = FileHandlingService.generateFormData(fileData);
-            const response = await this.fileClient.post<UploadedFileDTO>("/files/upload", formData);
+            const formData = generateFormData(fileData);
+            const response = await this.fileClient.post<UploadedFileDTO>(FILE_ROUTES.UPLOAD, formData);
+
+            this.loggerService.info(
+                GatewayFileService.serviceName, 
+                'FILE_UPLOADED',
+                FILE_ROUTES.UPLOAD, 
+                HTTP_METHODS.POST, 
+                `File uploaded: ${fileData.originalFileName} by author with id ${fileData.authorId}`
+            );
 
             return {
                 success: true,
                 data: response.data
             };
         } catch(error) {
-            return ErrorHandlingService.handle(error, GatewayFileService.serviceName);
+            return this.errorHandlingService.handle(error, GatewayFileService.serviceName, HTTP_METHODS.POST, FILE_ROUTES.UPLOAD);
         }
     }
 
     async deleteFile(fileId: number): Promise<Result<boolean>> {
         try {
-            const response = await this.fileClient.delete<boolean>(`/files/${fileId}`);
+            const response = await this.fileClient.delete<boolean>(FILE_ROUTES.DELETE(fileId));
+
+            this.loggerService.info(
+                GatewayFileService.serviceName, 
+                'FILE_DELETED',
+                FILE_ROUTES.DELETE(fileId), 
+                HTTP_METHODS.DELETE, 
+                `File with id ${fileId} deleted`
+            );
 
             return {
                 success: true,
                 data: response.data
             };
         } catch(error) {
-            return ErrorHandlingService.handle(error, GatewayFileService.serviceName)
+            return this.errorHandlingService.handle(error, GatewayFileService.serviceName, HTTP_METHODS.DELETE, FILE_ROUTES.DELETE(fileId))
         }
     }
 
