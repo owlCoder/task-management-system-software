@@ -6,8 +6,8 @@ INSERT INTO users_db.user_roles (role_name) VALUES
   ('Audio & Music Stagist'),
   ('Animation Worker');
   
-  -- INSERT INTO users_db.users (username, password_hash, user_role, email, is_deleted, weekly_working_hour_sum) 
-  -- VALUES ('sysadmin', '$2b$10$pWZUArmH0en/D8scIGgMfeEwDo88NPXv/4FE97GeA42TfZ3M0.GTu', 1, 'sa@a.a', 0, NULL);
+  --INSERT INTO users_db.users (username, password_hash, user_role, email, is_deleted, weekly_working_hour_sum) 
+  --VALUES ('sysadmin', '$2b$10$pWZUArmH0en/D8scIGgMfeEwDo88NPXv/4FE97GeA42TfZ3M0.GTu', 1, 'sa@a.a', 0, NULL);
 
   -- INSERT INTO users_db.users (username, password_hash, user_role, email, is_deleted, weekly_working_hour_sum) 
   -- VALUES ('admin', '$2b$10$pWZUArmH0en/D8scIGgMfeEwDo88NPXv/4FE97GeA42TfZ3M0.GTu', 2, 'a@a.a', 0, NULL);
