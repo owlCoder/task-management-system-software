@@ -87,7 +87,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
       <button
         type="submit"
         disabled={isLoading}
-        className="mt-6 w-[95%] mx-auto block py-2 rounded-md bg-white/90 text-black font-semibold hover:bg-white"
+        className="mt-6 w-[95%] mx-auto py-2 rounded-md bg-white/90 text-black font-semibold hover:bg-white"
       >
         {isLoading ? "Loading..." : "Login"}
       </button>
