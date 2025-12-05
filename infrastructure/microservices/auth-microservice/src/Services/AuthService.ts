@@ -30,6 +30,8 @@ export class AuthService implements IAuthService {
     });
     if (!user) return { authenticated: false };
 
+    if (user.is_deleted) return { authenticated: false };
+
     const passwordMatches = await bcrypt.compare(data.password, user.password_hash);
     if (!passwordMatches) return { authenticated: false };
 
@@ -110,6 +112,8 @@ export class AuthService implements IAuthService {
       relations: ["user_role"],
     });
     if (!user) return { authenticated: false };
+
+    if (user.is_deleted) return { authenticated: false };
 
     const sessionId = browserData.session_id;
     if (!sessionId) return { authenticated: false };    
