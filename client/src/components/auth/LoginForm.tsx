@@ -3,6 +3,7 @@ import { IAuthAPI } from "../../api/auth/IAuthAPI";
 import { LoginUserDTO } from "../../models/auth/LoginUserDTO";
 import { useAuth } from "../../hooks/useAuthHook";
 import { useNavigate } from "react-router-dom";
+import logoImage from "../../../public/logo.png";
 
 type LoginFormProps = {
   authAPI: IAuthAPI;
@@ -36,11 +37,11 @@ export const LoginForm: React.FC<LoginFormProps> = ({
     try {
       const res = await authAPI.login(formData);
       login(res.token ?? "");
-      navigate("/");
+      navigate("/mainwindow");
     } catch (err: any) {
       setError(
         err.response?.data?.message ||
-          "Došlo je do greške prilikom prijave."
+          "There was an error during login. Please try again."
       );
     } finally {
       setIsLoading(false);
@@ -49,7 +50,11 @@ export const LoginForm: React.FC<LoginFormProps> = ({
 
   return (
     <form className="w-full" onSubmit={handleSubmit}>
-      <h2 className="text-3xl text-white font-bold mb-8 text-center">Login</h2>
+      <img
+        src={logoImage}
+        alt="Logo"
+        className="w-50 mx-auto mb-8 select-none"
+      />
 
       <div className="w-full mb-6">
         <label className="block w-[95%] mx-auto text-left text-sm font-semibold text-white/80">
@@ -88,7 +93,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
       </button>
 
       <p className="mt-4 text-center text-white/70 text-sm">
-        Nemate nalog?{" "}
+        Don't have an account?{" "}
         <span
           className="text-white font-bold cursor-pointer"
           onClick={onSwitchToRegister}

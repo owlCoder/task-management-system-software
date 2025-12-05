@@ -31,7 +31,8 @@ function App() {
         <Route path="/auth" element={<AuthPage authAPI={auth_api} />} />
         <Route path="/register" element={<RegisterPage authAPI={auth_api} />} />
         <Route path="/files" element={<FilePage/>} />
-        <Route path="/" element={<MainWindow />} />
+        <Route path="/mainwindow" element={<MainWindow />} />
+        <Route path="/" element={<AuthPage authAPI={auth_api} />} />
         <Route
           path="/users"
           element={

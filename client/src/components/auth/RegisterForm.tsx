@@ -4,6 +4,7 @@ import { RegistrationUserDTO } from "../../models/auth/RegistrationUserDTO";
 import { useAuth } from "../../hooks/useAuthHook";
 import { useNavigate } from "react-router-dom";
 import { UserRole } from "../../enums/UserRole";
+import logoImage from "../../../public/logo.png";
 
 type RegisterFormProps = {
   authAPI: IAuthAPI;
@@ -15,14 +16,14 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
   onSwitchToLogin,
 }) => {
 
-  // 🔥 OVO JE ISPRAVAN STATE
+  
   const [formData, setFormData] = useState<any>({
     username: "",
     email: "",
     password: "",
     confirmPassword: "",
     role: UserRole.ANIMATION_WORKER,
-    profileImage: "", // DTO ga zahteva
+    profileImage: "", 
   });
 
   const [error, setError] = useState("");
@@ -46,7 +47,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
     setError("");
     setIsLoading(true);
 
-    // 🔥 VALIDACIJA ZA POTVRDU LOZINKE
+  
     if (formData.password !== formData.confirmPassword) {
       setError("Passwords do not match.");
       setIsLoading(false);
@@ -59,7 +60,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
         email: formData.email,
         password: formData.password,
         role: formData.role,
-        profileImage: "", // šaljemo jer je required
+        profileImage: "", 
       };
 
       const res = await authAPI.register(sendData);
@@ -68,7 +69,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
     } catch (err: any) {
       setError(
         err.response?.data?.message ||
-          "Došlo je do greške prilikom registracije."
+          "There was an error during registration. Please try again."
       );
     } finally {
       setIsLoading(false);
@@ -77,11 +78,13 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
 
   return (
     <form className="w-full" onSubmit={handleSubmit}>
-      <h2 className="text-3xl text-white font-bold mb-8 text-center">
-        Register
-      </h2>
+      <img
+        src={logoImage}
+        alt="Logo"
+        className="w-50 mx-auto mb-8 select-none"
+      />
 
-      {/* USERNAME */}
+      
       <div className="w-full mb-6">
         <label className="block w-[95%] mx-auto text-left text-sm font-semibold text-white/80">
           Username
@@ -95,7 +98,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
         />
       </div>
 
-      {/* EMAIL */}
+      
       <div className="w-full mb-6">
         <label className="block w-[95%] mx-auto text-left text-sm font-semibold text-white/80">
           Email
@@ -109,7 +112,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
         />
       </div>
 
-      {/* PASSWORD */}
+     
       <div className="w-full mb-6">
         <label className="block w-[95%] mx-auto text-left text-sm font-semibold text-white/80">
           Password
@@ -123,7 +126,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
         />
       </div>
 
-      {/* CONFIRM PASSWORD — ISPRAVLJENO */}
+      
       <div className="w-full mb-6">
         <label className="block w-[95%] mx-auto text-left text-sm font-semibold text-white/80">
           Confirm Password
@@ -137,7 +140,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
         />
       </div>
 
-      {/* ROLE */}
+     
       <div className="w-full mb-6">
         <label className="block w-[95%] mx-auto text-left text-sm font-semibold text-white/80">
           Role
@@ -167,7 +170,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
       </button>
 
       <p className="mt-4 text-center text-white/70 text-sm">
-        Već imate nalog?{" "}
+        Already have an account?{" "}
         <span
           className="text-white font-bold cursor-pointer"
           onClick={onSwitchToLogin}
