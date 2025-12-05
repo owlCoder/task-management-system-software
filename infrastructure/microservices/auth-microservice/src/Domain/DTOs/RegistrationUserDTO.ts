@@ -1,6 +1,6 @@
 export interface RegistrationUserDTO {
     username: string;
-    role: string; // full role name like in db
+    role: string;
     password: string;
     email: string;
 }
