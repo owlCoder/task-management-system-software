@@ -11,7 +11,7 @@ import { GatewayUserService } from './Services/user/GatewayUserService';
 import { IGatewayFileService } from './Domain/services/file/IGatewayFileService';
 import { GatewayFileService } from './Services/file/GatewayFileService';
 import { GatewayFileController } from './WebAPI/file/GatewayFileController';
-import { requestLogger } from './Middlewares/logger/LoggingMiddleware';
+import { logTraffic } from './Middlewares/logger/LoggingMiddleware';
 import { IErrorHandlingService } from './Domain/services/common/IErrorHandlingService';
 import { ErrorHandlingService } from './Services/common/ErrorHandlingService';
 import { ILoggerService } from './Domain/services/common/ILoggerService';
@@ -34,7 +34,7 @@ app.use(cors({
 
 app.use(express.json());
 
-app.use(requestLogger);
+app.use(logTraffic);
 
 // Services
 const loggerService: ILoggerService = new LoggerService(logger);

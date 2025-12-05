@@ -1,6 +1,5 @@
 import axios, { AxiosError } from "axios";
 import { Result } from "../../Domain/types/common/Result";
-import { logger } from "../../Utils/Logger/Logger";
 import { IErrorHandlingService } from "../../Domain/services/common/IErrorHandlingService";
 import { ILoggerService } from "../../Domain/services/common/ILoggerService";
 
