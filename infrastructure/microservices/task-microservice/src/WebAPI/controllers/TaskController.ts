@@ -1,10 +1,13 @@
 import { Router,Request,Response } from "express";
 import { ITaskService } from "../../Domain/services/ITaskService";
+import { ICommentService } from "../../Domain/services/ICommentService";
 
 export class TaskController {
     private readonly router: Router;
 
-    constructor(private taskService: ITaskService) {
+    constructor(private taskService: ITaskService,
+                private commentService : ICommentService
+    ) {
         this.router = Router();
         this.initializeRoutes();
     }
@@ -89,7 +92,7 @@ export class TaskController {
         }
         const { user_id, comment } = req.body;
 
-        const result = await this.taskService.addComment(taskId, user_id, comment);
+        const result = await this.commentService.addComment(taskId, user_id, comment);
         if (result.success) {
             res.status(result.statusCode).json(result.data);
             return;

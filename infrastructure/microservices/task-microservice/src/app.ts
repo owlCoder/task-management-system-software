@@ -8,8 +8,10 @@ import { Db } from './Database/DbConnectionPool';
 import { Task } from './Domain/models/Task';
 import { Comment } from './Domain/models/Comment';
 import { ITaskService } from './Domain/services/ITaskService';
-import { TaskService } from './Services/TaskService';
+import { TaskService } from './Services/Services/TaskService';
 import { TaskController } from './WebAPI/controllers/TaskController';
+import { ICommentService } from './Domain/services/ICommentService';
+import { CommentService } from './Services/Services/CommentServices';
 
 
 dotenv.config({ quiet: true });
@@ -36,10 +38,11 @@ app.use(express.json());
   const commentRepository: Repository<Comment> = Db.getRepository(Comment);
 
   // Services
-  const taskService : ITaskService = new TaskService(taskRepository,commentRepository);
+  const taskService : ITaskService = new TaskService(taskRepository);
+  const commentService : ICommentService = new CommentService(taskRepository,commentRepository);
 
   // WebAPI routes
-  const taskController = new TaskController(taskService);
+  const taskController = new TaskController(taskService,commentService);
 
   // Registering routes
   app.use('/api/v1', taskController.getRouter());

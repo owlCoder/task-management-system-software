@@ -1,16 +1,16 @@
 import { Repository } from "typeorm";
-import { TaskDTO } from "../Domain/DTOs/TaskDTO";
-import { ITaskService } from "../Domain/services/ITaskService";
-import { Task } from "../Domain/models/Task";   
-import { TaskResponse } from "../Domain/types/TaskResponse";
-import { TaskStatus } from "../Domain/enums/task_status";
-import { CommentDTO } from "../Domain/DTOs/CommentDTO";
-import { Comment } from "../Domain/models/Comment";
+import { TaskDTO } from "../../Domain/DTOs/TaskDTO";
+import { ITaskService } from "../../Domain/services/ITaskService";
+import { Task } from "../../Domain/models/Task";   
+import { TaskResponse } from "../../Domain/types/TaskResponse";
+import { TaskStatus } from "../../Domain/enums/task_status";
+import { CommentDTO } from "../../Domain/DTOs/CommentDTO";
+import { Comment } from "../../Domain/models/Comment";
+import { taskToDTO,commentToDTO } from "../Mappers/dtoMappers"
 export class TaskService implements ITaskService {
 
     constructor(
         private readonly taskRepository: Repository<Task>,
-        private readonly commentRepository: Repository<Comment>
     ) {}
 //#region Dummy data for development
 
@@ -63,7 +63,7 @@ export class TaskService implements ITaskService {
             //TODO: Proveriti da li korisnik ima pravo da vidi taskove za dati projekat
             //TODO: proveriti da li projekat postoji
             const tasks = await this.taskRepository.find({ where: { project_id } ,relations: ["comments", "comments.task"] });
-            const result: TaskDTO[] = tasks.map(t => this.taskToDTO(t));
+            const result: TaskDTO[] = tasks.map(t => taskToDTO(t));
             return {success: true, data: result, statusCode: 200};
     }catch (error) {
             return {
@@ -112,7 +112,7 @@ export class TaskService implements ITaskService {
                 total_hours_spent: 0
             });
             const savedTask = await this.taskRepository.save(newTask);
-            const result: TaskDTO = this.taskToDTO(savedTask);
+            const result: TaskDTO = taskToDTO(savedTask);
             return {
                 success: true,
                 statusCode: 201,
@@ -148,7 +148,7 @@ export class TaskService implements ITaskService {
                     message: `Task with id ${task_id} not found`
                 };
             }
-                    const result: TaskDTO = this.taskToDTO(task);
+                    const result: TaskDTO = taskToDTO(task);
             return {success: true, data: result, statusCode: 200};
     }
     catch (error) {
@@ -160,58 +160,7 @@ export class TaskService implements ITaskService {
             };
         }
     }
-    taskToDTO(task: Task): TaskDTO {
-        return {
-            task_id: task.task_id,
-            project_id: task.project_id,
-            worker_id: task.worker_id,
-            project_manager_id: task.project_manager_id,
-            title: task.title,
-            task_description: task.task_description,
-            task_status: task.task_status,
-            attachment_file_uuid: task.attachment_file_uuid,
-            estimated_cost: task.estimated_cost,
-            total_hours_spent: task.total_hours_spent,
-            comments: task.comments ? task.comments.map(c => this.commentToDTO(c)) : []
-        };
-    }
+
     //#endregion
-//#region comment methods
-
-    async addComment(task_id: number, user_id: number, commentText: string): Promise<TaskResponse<CommentDTO>> {
-        try {
-            const task = await this.taskRepository.findOne({ where: { task_id } });
-            if (!task) {
-                return { success: false, statusCode: 404, message: "Task not found" };
-            }
-
-            if (task.task_status === TaskStatus.COMPLETED || task.task_status === TaskStatus.NOT_COMPLETED) {
-                return { success: false, statusCode: 400, message: "Cannot add comment to completed/not completed task" };
-            }
-
-            const comment : Comment = this.commentRepository.create({
-                user_id,
-                comment: commentText,
-                task: task
-            });
-
-            await this.commentRepository.save(comment);
-
-            return { success: true, statusCode: 201, data: this.commentToDTO(comment) };
-        } catch (error) {
-            return { success: false, statusCode: 500, message: "Internal server error" };
-        }
-    }
-
-    private commentToDTO(comment: Comment): CommentDTO {
-        return {
-            comment_id: comment.comment_id,
-            user_id: comment.user_id,
-            comment: comment.comment,
-            task_id: comment.task.task_id,
-            created_at: comment.created_at
-        };
-    }
-//#endregion
 }
 
