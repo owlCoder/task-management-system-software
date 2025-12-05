@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { logger } from "../../Utils/Logger/Logger";
 
-export function requestLogger(req: Request, res: Response, next: NextFunction) {
+export function logTraffic(req: Request, res: Response, next: NextFunction) {
     logger.info({
         service: "Gateway",
         method: req.method,
