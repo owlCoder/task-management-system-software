@@ -1,6 +1,5 @@
 import { Notification } from '../models/Notification';
 
-
 export interface INotificationRepository {
   
   // CRUD 
