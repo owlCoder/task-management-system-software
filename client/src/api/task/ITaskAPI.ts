@@ -8,4 +8,5 @@ export interface ITaskAPI {
   createTask(payload: CreateTaskDTO): Promise<TaskDTO>;
   updateTask(taskId: string, payload: UpdateTaskDTO): Promise<TaskDTO>;
   deleteTask(taskId: string): Promise<void>;
+  uploadFile(taskId: string, file : File) : Promise<void>;
 }

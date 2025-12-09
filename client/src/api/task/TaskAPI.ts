@@ -57,4 +57,18 @@ export class TaskAPI implements ITaskAPI {
       headers: this.headers,
     });
   }
+
+ async uploadFile(taskId: string, file: File): Promise<void> {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  await fetch(`${this.baseUrl}/task/${taskId}/file`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${this.token}`,
+    },
+    body: formData
+  });
+}
+
 }
