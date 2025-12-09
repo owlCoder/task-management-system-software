@@ -1,54 +1,43 @@
-import express from "express";
-import cors from "cors";
+import express, { Application, Request, Response } from "express";
 import "reflect-metadata";
-//import { initialize_database } from "./Database/InitializeConnection";
-//import dotenv from "dotenv";  // resi problem skini npm i .dotenv nece iz nekog razloga ?
-//import { Repository } from "typeorm";
+import { createNotificationRoutes } from "./WebAPI/routes";
+import { INotificationService } from "./Domain/services/INotificationService";
+import { corsMiddleware } from "./Middleware/CorsMiddleware";
+import { loggerMiddleware } from "./Middleware/LoggerMiddleware";
+import { notFoundHandler, errorHandler } from "./Middleware/ErrorMiddleware";
 
-//dotenv.config({ quiet: true });
+export const createApp = (notificationService: INotificationService): Application => {
+  
+  const app: Application = express();
 
-const app = express();
+  // MIDDLEWARE
+  app.use(corsMiddleware);                          // CORS zastita
+  app.use(express.json());                          // JSON parser
+  app.use(express.urlencoded({ extended: true })); // URL encoded parser
+  app.use(loggerMiddleware);                        // request logger
 
-// Read CORS settings from environment
-const corsOrigin = process.env.CORS_ORIGIN ?? "*";
-const corsMethods = process.env.CORS_METHODS?.split(",").map((m) =>
-  m.trim()
-) ?? ["POST"];
+  // ROUTES
+   // Health Check Route
+   // GET /health - Provera da li je server aktivan
+  app.get("/health", (req: Request, res: Response) => {
+    res.status(200).json({
+      status: "OK",
+      service: process.env.SERVICE_NAME || "Notification Service",
+      version: process.env.SERVICE_VERSION || "1.0.0",
+      timestamp: new Date().toISOString(),
+    });
+  });
 
-// Protected microservice from unauthorized access
-app.use(
-  cors({
-    origin: corsOrigin,
-    methods: corsMethods,
-  })
-);
+   // notification routes
+   // sve rute su pod /api prefiksom
+  const notificationRoutes = createNotificationRoutes(notificationService);
+  app.use("/api", notificationRoutes);
 
+  // ERROR HANDLING
+  app.use(notFoundHandler);  // 404 handler
+  app.use(errorHandler);     // global error handler
 
-app.use(express.json());
+  return app;
+};
 
-/*
-initialize_database();
-
-// ORM Repositories
-const userRepository: Repository<User> = Db.getRepository(User);
-const userRoleRepository: Repository<UserRole> = Db.getRepository(UserRole);
-
-// Services
-const userService: IUsersService = new UsersService(userRepository);
-const userRoleService: IUserRoleService = new UserRoleService(
-  userRoleRepository
-);
-const logerService: ILogerService = new LogerService();
-
-// WebAPI routes
-const userController = new UsersController(
-  userService,
-  userRoleService,
-  logerService
-);
-*/
-
-// Registering routes
-//app.use("/api/v1", userController.getRouter());
-
-export default app;
+export default createApp;
