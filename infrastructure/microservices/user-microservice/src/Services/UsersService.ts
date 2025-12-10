@@ -6,6 +6,7 @@ import { UserCreationDTO } from "../Domain/DTOs/UserCreationDTO";
 import bcrypt from "bcryptjs";
 import { UserRole } from "../Domain/models/UserRole";
 import { UserUpdateDTO } from "../Domain/DTOs/UserUpdateDTO";
+import { toDTO } from "../Helpers/toUserDto";
 
 export class UsersService implements IUsersService {
   private readonly saltRounds: number = parseInt(
@@ -26,7 +27,7 @@ export class UsersService implements IUsersService {
       where: { is_deleted: false },
       relations: ["user_role"],
     });
-    return users.map((u) => this.toDTO(u));
+    return users.map((u) => toDTO(u));
   }
 
   /**
@@ -41,7 +42,7 @@ export class UsersService implements IUsersService {
     //Zbog ovoga nema potrebe za dodatnim upitom da bi dobili role_name
 
     if (!user) throw new Error(`User with ID ${user_id} not found`);
-    return this.toDTO(user);
+    return toDTO(user);
   }
 
   /**
@@ -89,7 +90,7 @@ export class UsersService implements IUsersService {
       weekly_working_hour_sum: result.generatedMaps[0].weekly_working_hour_sum,
     };
 
-    return this.toDTO(newUser);
+    return toDTO(newUser);
   }
 
   /**
@@ -174,20 +175,6 @@ export class UsersService implements IUsersService {
       throw new Error(`User with ID ${user_id} could not be updated`);
     }
 
-    return this.toDTO(existingUser);
-  }
-
-  //helper metode
-  /**
-   * Convert User entity to UserDTO
-   */
-  private toDTO(user: User): UserDTO {
-    return {
-      user_id: user.user_id,
-      username: user.username,
-      role_name: user.user_role.role_name, //uzimamo role_name jer ucitavaju objekat get funkcije
-      email: user.email,
-      weekly_working_hour_sum: user.weekly_working_hour_sum,
-    };
+    return toDTO(existingUser);
   }
 }
