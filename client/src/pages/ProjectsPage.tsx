@@ -79,11 +79,9 @@ export const ProjectsPage: React.FC = () => {
   };
 
   return (
-    // Make a horizontal layout: sidebar + main content
     <div className="flex min-h-screen">
       <Sidebar />
 
-      {/* Main content grows to fill remaining space */}
       <div className="flex-1 p-5">
         <header className="flex items-center justify-between gap-5 mb-6 flex-wrap">
           <h1

@@ -10,4 +10,7 @@ export type ProjectDTO = {
   totalWeeklyHours?: number;
   allowedBudget?: number;
   status?: ProjectStatus;
+  numberOfSprints?: number;     
+  sprintDuration?: number;
+  startDate?: string; 
 };

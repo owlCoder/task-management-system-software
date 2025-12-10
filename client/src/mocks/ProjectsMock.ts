@@ -16,7 +16,7 @@ export const mockProjects: ProjectDTO[] = [
         hoursPerWeek: 10,
         role: UserRole.PROJECT_MANAGER,
         user: {
-          id: 101,
+          user_id: 101,
           username: "mila",
           email: "mila@example.com",
           role: UserRole.PROJECT_MANAGER,
@@ -30,7 +30,7 @@ export const mockProjects: ProjectDTO[] = [
         hoursPerWeek: 20,
         role: UserRole.ANIMATION_WORKER,
         user: {
-          id: 102,
+          user_id: 102,
           username: "ivan",
           email: "ivan@example.com",
           role: UserRole.ANIMATION_WORKER,
@@ -44,7 +44,7 @@ export const mockProjects: ProjectDTO[] = [
         hoursPerWeek: 20,
         role: UserRole.ANIMATION_WORKER,
         user: {
-          id: 102,
+          user_id: 102,
           username: "ivan",
           email: "ivan@example.com",
           role: UserRole.ANIMATION_WORKER,
@@ -58,7 +58,7 @@ export const mockProjects: ProjectDTO[] = [
         hoursPerWeek: 20,
         role: UserRole.ANIMATION_WORKER,
         user: {
-          id: 102,
+          user_id: 102,
           username: "ivan",
           email: "ivan@example.com",
           role: UserRole.ANIMATION_WORKER,
@@ -69,6 +69,9 @@ export const mockProjects: ProjectDTO[] = [
     totalWeeklyHours: 30,
     allowedBudget: 12000,
     status: ProjectStatus.ACTIVE,
+    numberOfSprints:2,   
+    sprintDuration:4,
+    startDate : "2024-06-01"
   },
   {
     id: "2",
@@ -83,7 +86,7 @@ export const mockProjects: ProjectDTO[] = [
         hoursPerWeek: 30,
         role: UserRole.AUDIO_MUSIC_STAGIST,
         user: {
-          id: 103,
+          user_id: 103,
           username: "jelena",
           email: "jelena@example.com",
           role: UserRole.AUDIO_MUSIC_STAGIST,
@@ -94,6 +97,10 @@ export const mockProjects: ProjectDTO[] = [
     totalWeeklyHours: 30,
     allowedBudget: 6000,
     status: ProjectStatus.PAUSED,
+    
+    numberOfSprints:3,   
+    sprintDuration:7,
+    startDate : "2024-07-01"
   },
   
 ];

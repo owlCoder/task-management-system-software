@@ -154,8 +154,55 @@ export const ProjectDetailsModal: React.FC<Props> = ({
             </h3>
             <p className="text-base text-gray-700 font-mono break-all" style={{ fontFamily: "var(--font-primary)" }}>{project.id}</p>
           </div>
-        </div>
 
+          <div className="mb-4">
+            <h3
+              className="text-sm font-semibold text-gray-500 uppercase mb-1"
+              style={{ fontFamily: "var(--font-primary)" }}
+            >
+              Number of Sprints
+            </h3>
+            <p
+              className="text-base text-gray-700 font-mono break-all"
+              style={{ fontFamily: "var(--font-primary)" }}
+            >
+              {project.numberOfSprints ?? "Not set"}
+            </p>
+          </div>
+
+          <div className="mb-4">
+            <h3
+              className="text-sm font-semibold text-gray-500 uppercase mb-1"
+              style={{ fontFamily: "var(--font-primary)" }}
+            >
+              Sprint Duration (days)
+            </h3>
+            <p
+              className="text-base text-gray-700 font-mono break-all"
+              style={{ fontFamily: "var(--font-primary)" }}
+            >
+              {project.sprintDuration ?? "Not set"}
+            </p>
+          </div>
+
+          <div className="mb-4">
+            <h3
+              className="text-sm font-semibold text-gray-500 uppercase mb-1"
+              style={{ fontFamily: "var(--font-primary)" }}
+            >
+              Start Date
+            </h3>
+            <p
+              className="text-base text-gray-700 font-mono break-all"
+              style={{ fontFamily: "var(--font-primary)" }}
+            >
+              {project.startDate
+                ? new Date(project.startDate).toLocaleDateString()
+                : "Not set"}
+            </p>
+          </div>
+
+        </div>
 
         <div className="px-6 py-4 border-t border-gray-200 flex justify-center gap-3 flex-shrink-0 items-center">
             <button

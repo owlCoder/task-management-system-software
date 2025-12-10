@@ -19,6 +19,9 @@ export const CreateProjectModal: React.FC<Props> = ({
     imageUrl: "",
     totalWeeklyHours: 0,
     allowedBudget: 0,
+    numberOfSprints: 0,
+    sprintDuration: 0,
+    startDate: "",
   });
   const [selectedMembers, setSelectedMembers] = useState<number[]>([]);
 
@@ -26,6 +29,8 @@ export const CreateProjectModal: React.FC<Props> = ({
     name: "",
     totalWeeklyHours: "",
     allowedBudget: "",
+    numberOfSprints: "",
+    sprintDuration: "",
   });
 
   if (!isOpen) return null;
@@ -55,6 +60,8 @@ export const CreateProjectModal: React.FC<Props> = ({
       name: "",
       totalWeeklyHours: "",
       allowedBudget: "",
+      numberOfSprints: "",
+      sprintDuration: "",
     };
 
     if (!formData.name.  trim()) {
@@ -68,9 +75,22 @@ export const CreateProjectModal: React.FC<Props> = ({
     if (formData.allowedBudget <= 0) {
       newErrors. allowedBudget = "Budget must be positive";
     }
+    if (formData.numberOfSprints <= 0) {
+      newErrors.numberOfSprints = "Number of sprints must be positive";
+    }
+
+    if (formData.sprintDuration <= 0) {
+      newErrors.sprintDuration = "Sprint duration must be positive";
+    }
 
     setErrors(newErrors);
-    return ! newErrors.name && !newErrors.totalWeeklyHours && !newErrors.allowedBudget;
+    return (
+              !newErrors.name &&
+              !newErrors.totalWeeklyHours &&
+              !newErrors.allowedBudget &&
+              !newErrors.numberOfSprints &&
+              !newErrors.sprintDuration
+            );
   };
 
   const handleSubmit = () => {
@@ -93,7 +113,10 @@ export const CreateProjectModal: React.FC<Props> = ({
         imageUrl: formData.imageUrl || undefined,
         totalWeeklyHours: formData.totalWeeklyHours,
         allowedBudget: formData. allowedBudget,
-        members: members as any, 
+        members: members as any,
+        numberOfSprints: formData.numberOfSprints,
+        sprintDuration: formData.sprintDuration,
+        startDate: formData.startDate,
       });
       handleClose();
     }
@@ -106,12 +129,17 @@ export const CreateProjectModal: React.FC<Props> = ({
       imageUrl: "",
       totalWeeklyHours: 0,
       allowedBudget: 0,
+      numberOfSprints: 0,
+      sprintDuration: 0,
+      startDate: "",
     });
     setSelectedMembers([]);
     setErrors({
       name: "",
       totalWeeklyHours: "",
       allowedBudget: "",
+      numberOfSprints: "",
+      sprintDuration: "",
     });
     onClose();
   };
@@ -258,6 +286,7 @@ export const CreateProjectModal: React.FC<Props> = ({
               <p className="mt-1 text-sm text-red-600">{errors.allowedBudget}</p>
             )}
           </div>
+          
 
           <div className="mb-4">
             <label
@@ -304,6 +333,76 @@ export const CreateProjectModal: React.FC<Props> = ({
                 })}
               </div>
             )}
+          </div>
+          
+          <div className="mb-4">
+            <label
+              htmlFor="project-sprints"
+              className="block text-sm font-semibold text-gray-500 uppercase mb-2"
+              style={{ fontFamily: "var(--font-primary)" }}
+            >
+              Number of Sprints *
+            </label>
+            <input
+              id="project-sprints"
+              type="number"
+              min="1"
+              value={formData.numberOfSprints}
+              onChange={(e) =>
+                setFormData({ ...formData, numberOfSprints: Number(e.target.value) })
+              }
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent/30"
+              style={{ fontFamily: "var(--font-primary)" }}
+              placeholder="0"
+            />
+            {errors.numberOfSprints && (
+              <p className="mt-1 text-sm text-red-600">{errors.numberOfSprints}</p>
+            )}
+          </div>
+
+          <div className="mb-4">
+            <label
+              htmlFor="project-sprint-duration"
+              className="block text-sm font-semibold text-gray-500 uppercase mb-2"
+              style={{ fontFamily: "var(--font-primary)" }}
+            >
+              Sprint Duration (days) *
+            </label>
+            <input
+              id="project-sprint-duration"
+              type="number"
+              min="1"
+              value={formData.sprintDuration}
+              onChange={(e) =>
+                setFormData({ ...formData, sprintDuration: Number(e.target.value) })
+              }
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent/30"
+              style={{ fontFamily: "var(--font-primary)" }}
+              placeholder="14"
+            />
+            {errors.sprintDuration && (
+              <p className="mt-1 text-sm text-red-600">{errors.sprintDuration}</p>
+            )}
+          </div>
+
+          <div className="mb-4">
+            <label
+              htmlFor="project-start-date"
+              className="block text-sm font-semibold text-gray-500 uppercase mb-2"
+              style={{ fontFamily: "var(--font-primary)" }}
+            >
+              Start Date
+            </label>
+            <input
+              id="project-start-date"
+              type="date"
+              value={formData.startDate}
+              onChange={(e) =>
+                setFormData({ ...formData, startDate: e.target.value })
+              }
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent/30"
+              style={{ fontFamily: "var(--font-primary)" }}
+            />
           </div>
         </div>
 
