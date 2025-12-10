@@ -1,15 +1,16 @@
 import "reflect-metadata";
 import dotenv from "dotenv";
 
-// Učitaj .env fajl PRVO!
 dotenv.config();
 
+import { createServer } from "http";
 import { DataSource } from "typeorm";
 import { createApp } from "./app";
 import { Notification } from "./Domain/models/Notification";
 import { NotificationRepository } from "./Service/NotificationRepository";
 import { NotificationService } from "./Service/NotificationService";
 import { NotificationMapper } from "./Service/NotificationMapper";
+import { SocketService } from "./WebSocket/SocketService";
 
 // ENVIRONMENT VARIABLES
 const PORT = process.env.PORT || 6432;
@@ -27,7 +28,7 @@ const AppDataSource = new DataSource({
   username: DB_USERNAME,
   password: DB_PASSWORD,
   database: DB_DATABASE,
-  synchronize: true, // Auto-kreira tabele (SAMO za development!)
+  synchronize: true,
   logging: process.env.NODE_ENV === "development",
   entities: [Notification],
   migrations: [],
@@ -62,15 +63,25 @@ const startServer = async () => {
     // 6. Kreiraj Express aplikaciju (injektuj NotificationService)
     const app = createApp(notificationService);
 
-    // 7. Pokreni server
-    app.listen(PORT, () => {
+    // 7. Kreiraj HTTP server (za Socket.IO)
+    const httpServer = createServer(app);
+
+    // 8. Inicijalizuj Socket.IO
+    const socketService = new SocketService(httpServer);
+
+    // 9. Injektuj SocketService u NotificationService
+    notificationService.setSocketService(socketService);
+
+    // 10. Pokreni server
+    httpServer.listen(PORT, () => {
       console.log("\x1b[32m╔════════════════════════════════════════╗\x1b[0m");
       console.log("\x1b[32m║    Notification Service Started    ║\x1b[0m");
       console.log("\x1b[32m╚════════════════════════════════════════╝\x1b[0m");
-      console.log(`\x1b[36m Server:\x1b[0m       http://localhost:${PORT}`);
-      console.log(`\x1b[36m Health Check:\x1b[0m http://localhost:${PORT}/health`);
-      console.log(`\x1b[36m API Endpoint:\x1b[0m http://localhost:${PORT}/api/notifications`);
-      console.log(`\x1b[33m  Environment:\x1b[0m  ${process.env.NODE_ENV || "development"}`);
+      console.log(`\x1b[36m📡 Server:\x1b[0m       http://localhost:${PORT}`);
+      console.log(`\x1b[36m🏥 Health Check:\x1b[0m http://localhost:${PORT}/health`);
+      console.log(`\x1b[36m📬 API Endpoint:\x1b[0m http://localhost:${PORT}/api/notifications`);
+      console.log(`\x1b[36m🔌 WebSocket:\x1b[0m    ws://localhost:${PORT}`);
+      console.log(`\x1b[33m⚙️  Environment:\x1b[0m  ${process.env.NODE_ENV || "development"}`);
       console.log("\x1b[32m════════════════════════════════════════\x1b[0m\n");
     });
 

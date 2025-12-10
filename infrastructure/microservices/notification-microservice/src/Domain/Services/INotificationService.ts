@@ -23,4 +23,7 @@ export interface INotificationService {
   
   // counter
   getUnreadCount(userId: number): Promise<number>;
+  
+  // WebSocket support
+  setSocketService(socketService: any): void;
 }
