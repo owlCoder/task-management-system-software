@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { NotificationController } from '../Controllers/NotificationController';
+import { NotificationController } from './controllers/NotificationController';
 import { INotificationService } from '../Domain/services/INotificationService';
 
 /**

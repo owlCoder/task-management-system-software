@@ -1,15 +1,15 @@
 import "reflect-metadata";
+import dotenv from "dotenv";
+
+// Učitaj .env fajl PRVO!
+dotenv.config();
+
 import { DataSource } from "typeorm";
 import { createApp } from "./app";
 import { Notification } from "./Domain/models/Notification";
-import { NotificationRepository } from "./Services/NotificationRepository";
-import { NotificationService } from "./Services/NotificationService";
-import { NotificationMapper } from "./Services/NotificationMapper";
-
-/**
- * Server Entry Point
- * Pokrece TypeORM konekciju i Express server
- */
+import { NotificationRepository } from "./Service/NotificationRepository";
+import { NotificationService } from "./Service/NotificationService";
+import { NotificationMapper } from "./Service/NotificationMapper";
 
 // ENVIRONMENT VARIABLES
 const PORT = process.env.PORT || 6432;

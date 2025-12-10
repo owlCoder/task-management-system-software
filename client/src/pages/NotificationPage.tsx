@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import DashboardNavbar from '../components/dashboard/navbar/Navbar';
 import Sidebar from '../components/dashboard/navbar/Sidebar';
 import NotificationHeader from '../components/notification/NotificationHeader';
@@ -6,12 +6,16 @@ import NotificationFilters from '../components/notification/NotificationFilters'
 import NotificationCard from '../components/notification/NotificationCard';
 import NotificationSendPopUp from '../components/notification/NotificationSendPopUp';
 import type { Notification } from '../models/notification/NotificationCardDTO';
+import { notificationAPI } from '../api/notification/NotificationAPI';
 
-// slika za pozadinu
+/*
 const backgroundImageUrl = new URL(
   "../../public/background.png",
   import.meta.url
 ).href;
+*/
+
+const backgroundImageUrl = "/background.png";
 
 const NotificationPage: React.FC = () => {
   
@@ -20,83 +24,47 @@ const NotificationPage: React.FC = () => {
   const [selectedNotifications, setSelectedNotifications] = useState<number[]>([]);
   const [isAllSelected, setIsAllSelected] = useState(false);
   const [isPopUpOpen, setIsPopUpOpen] = useState(false);
+  
+  // STATE ZA NOTIFIKACIJE IZ BACKEND-A
+  const [allNotifications, setAllNotifications] = useState<Notification[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // trenutno koristimo samo neke mock podatke
-  // kasnije ovde ce ici drugaciji nacin poziva podataka
-  const allNotifications: Notification[] = [
-    {
-      id: 1,
-      content: "Content of notification 1",
-      timestamp: "18/11/2025, 22:50",
-      isRead: false,
-      type: 'info'
-    },
-    {
-      id: 2,
-      content: "Content of notification 2",
-      timestamp: "18/11/2025, 23:50",
-      isRead: false,
-      type: 'warning'
-    },
-    {
-      id: 3,
-      content: "Content of notification 3",
-      timestamp: "19/11/2025, 00:50",
-      isRead: true,
-      type: 'error'
-    },
-    {
-      id: 4,
-      content: "Content of notification 4",
-      timestamp: "19/11/2025, 01:50",
-      isRead: true,
-      type: 'info'
-    },
-    {
-      id: 5,
-      content: "Content of notification 5",
-      timestamp: "19/11/2025, 02:50",
-      isRead: false,
-      type: 'warning'
-    },
-    {
-      id: 6,
-      content: "Content of notification 6",
-      timestamp: "19/11/2025, 03:50",
-      isRead: true,
-      type: 'info'
-    },
-    {
-      id: 7,
-      content: "Content of notification 7",
-      timestamp: "19/11/2025, 04:50",
-      isRead: false,
-      type: 'error'
-    },
-    {
-      id: 8,
-      content: "Content of notification 8",
-      timestamp: "19/11/2025, 05:50",
-      isRead: true,
-      type: 'warning'
+  // TODO: Zamijeniti sa pravim userId-em iz auth contexta
+  const currentUserId = 1;
+
+  // UČITAJ NOTIFIKACIJE SA BACKEND-A
+  useEffect(() => {
+    loadNotifications();
+  }, []);
+
+  const loadNotifications = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const notifications = await notificationAPI.getNotificationsByUserId(currentUserId);
+      setAllNotifications(notifications);
+      
+    } catch (err) {
+      console.error('Error loading notifications:', err);
+      setError('Failed to load notifications');
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
 
   // filtriraj podatke po odabranom filteru
-  // ako odaberemo unread onda ostaju neprocitane
-  // ako odaberemo sve, onda imamo sve
   const filteredNotifications = activeFilter === 'unread' 
     ? allNotifications.filter(notification => !notification.isRead)
     : allNotifications;
 
   // prebroj totalni broj neprocitanih notifikacija
-  // brojac mali za neprocitane notifikacije
   const unreadCount = allNotifications.filter(
     notification => !notification.isRead
   ).length;
 
   // funkcija za obradu promene filtera
-  // kada korisnik izabere all ili unread
   const handleFilterChange = (filter: 'all' | 'unread') => {
     console.log(`Filter changed to: ${filter}`);
     setActiveFilter(filter);
@@ -131,34 +99,83 @@ const NotificationPage: React.FC = () => {
   };
 
   // funkcija za mark as read
-  const handleMarkAsRead = () => {
-    console.log(`Marking as read: ${selectedNotifications}`);
-    // TODO: Implementirati logiku za oznacavanje kao procitano
-    setSelectedNotifications([]);
-    setIsAllSelected(false);
+  const handleMarkAsRead = async () => {
+    try {
+      console.log(`Marking as read: ${selectedNotifications}`);
+      
+      await notificationAPI.markMultipleAsRead(selectedNotifications);
+      
+      // Ažuriraj lokalni state
+      setAllNotifications(allNotifications.map(n => 
+        selectedNotifications.includes(n.id) ? { ...n, isRead: true } : n
+      ));
+      
+      setSelectedNotifications([]);
+      setIsAllSelected(false);
+      
+    } catch (err) {
+      console.error('Error marking as read:', err);
+      alert('Failed to mark notifications as read');
+    }
   };
 
   // funkcija za mark as unread
-  const handleMarkAsUnread = () => {
-    console.log(`Marking as unread: ${selectedNotifications}`);
-    // TODO: Implementirati logiku za oznacavanje kao neprocitano
-    setSelectedNotifications([]);
-    setIsAllSelected(false);
+  const handleMarkAsUnread = async () => {
+    try {
+      console.log(`Marking as unread: ${selectedNotifications}`);
+      
+      await notificationAPI.markMultipleAsUnread(selectedNotifications);
+      
+      // Ažuriraj lokalni state
+      setAllNotifications(allNotifications.map(n => 
+        selectedNotifications.includes(n.id) ? { ...n, isRead: false } : n
+      ));
+      
+      setSelectedNotifications([]);
+      setIsAllSelected(false);
+      
+    } catch (err) {
+      console.error('Error marking as unread:', err);
+      alert('Failed to mark notifications as unread');
+    }
   };
 
   // funkcija za delete selected
-  const handleDeleteSelected = () => {
-    console.log(`Deleting: ${selectedNotifications}`);
-    // TODO: Implementirati logiku za brisanje
-    setSelectedNotifications([]);
-    setIsAllSelected(false);
+  const handleDeleteSelected = async () => {
+    try {
+      console.log(`Deleting: ${selectedNotifications}`);
+      
+      await notificationAPI.deleteMultipleNotifications(selectedNotifications);
+      
+      // Ukloni obrisane notifikacije iz state-a
+      setAllNotifications(allNotifications.filter(n => 
+        !selectedNotifications.includes(n.id)
+      ));
+      
+      setSelectedNotifications([]);
+      setIsAllSelected(false);
+      
+    } catch (err) {
+      console.error('Error deleting notifications:', err);
+      alert('Failed to delete notifications');
+    }
   };
 
   // obrada klika na funkciju kada korisnik izabere neku od notifikacija
-  const handleNotificationClick = (id: number) => {
-    console.log(`Notification with ID ${id} was clicked`);
-    // ovde treba da se oznaci kao procitana
-    // ili da predje na stranicu sa daljim detaljima o notifikaciji
+  const handleNotificationClick = async (id: number) => {
+    try {
+      console.log(`Notification with ID ${id} was clicked`);
+      
+      await notificationAPI.markAsRead(id);
+      
+      // Ažuriraj lokalni state
+      setAllNotifications(allNotifications.map(n => 
+        n.id === id ? { ...n, isRead: true } : n
+      ));
+      
+    } catch (err) {
+      console.error('Error marking notification as read:', err);
+    }
   };
 
   // funkcija za klik za slanje notifikacije '+ Send Notification' dugme 
@@ -168,11 +185,53 @@ const NotificationPage: React.FC = () => {
   };
 
   // funkcija za slanje notifikacije iz popup-a
-  const handleSendNotification = (title: string, content: string) => {
-    console.log('Sending notification:', { title, content });
-    // TODO: Implementirati API poziv za slanje notifikacije
-    setIsPopUpOpen(false);
+  const handleSendNotification = async (title: string, content: string) => {
+    try {
+      console.log('Sending notification:', { title, content });
+      
+      await notificationAPI.createNotification({
+        title,
+        content,
+        type: 'info',
+        userId: currentUserId,
+      });
+      
+      // Reload notifikacije
+      await loadNotifications();
+      
+      setIsPopUpOpen(false);
+      
+    } catch (err) {
+      console.error('Error sending notification:', err);
+      alert('Failed to send notification');
+    }
   };
+
+  // LOADING STATE
+  if (loading) {
+    return (
+      <div className="min-h-screen w-screen flex items-center justify-center bg-slate-900">
+        <p className="text-white text-xl">Loading notifications...</p>
+      </div>
+    );
+  }
+
+  // ERROR STATE
+  if (error) {
+    return (
+      <div className="min-h-screen w-screen flex items-center justify-center bg-slate-900">
+        <div className="text-center">
+          <p className="text-red-500 text-xl mb-4">{error}</p>
+          <button 
+            onClick={loadNotifications}
+            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div 
@@ -180,7 +239,6 @@ const NotificationPage: React.FC = () => {
       style={{ backgroundImage: `url(${backgroundImageUrl})` }}
     >
       
-      {/* Sidebar - Fixed na levoj strani */}
       <div className="fixed left-0 top-0 h-screen z-40">
         <Sidebar 
           username="John Doe"
@@ -188,24 +246,19 @@ const NotificationPage: React.FC = () => {
         />
       </div>
 
-      {/* Main Content Area - sa margin-left za sidebar + padding levo za razmak */}
       <div className="ml-48 pl-8">
         
-        {/* Dashboard Navbar - Fixed na vrhu */}
         <div className="fixed top-0 z-50" style={{ left: '224px', right: 0 }}>
           <DashboardNavbar />
         </div>
 
-        {/* Content - sa padding-om od navbar-a */}
         <div className="pt-[50px]">
           <div className="max-w-7xl mx-auto px-6 py-8">
             
-            {/* Header */}
             <NotificationHeader 
               onSendClick={handleSendNotificationClick}
             />
 
-            {/* Filters */}
             <div className="mb-6">
               <NotificationFilters
                 activeFilter={activeFilter}
@@ -222,17 +275,14 @@ const NotificationPage: React.FC = () => {
               />
             </div>
 
-            {/* Notifications Container - Scrollable Box */}
             <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-6 shadow-lg">
               <div 
                 className="space-y-4 overflow-y-auto pr-2"
                 style={{ maxHeight: 'calc(100vh - 300px)' }}
               >
                 
-                {/* proverava da li postoje obavestenja za prikaz */}
                 {filteredNotifications.length === 0 ? (
                   
-                  /* kada nema notifikacija neka prikaze samo prazno stanje */
                   <div className="text-center py-16">
                     <div className="mb-4">
                       <p className="text-slate-100 text-lg font-semibold">
@@ -250,7 +300,6 @@ const NotificationPage: React.FC = () => {
 
                 ) : (
                   
-                  /* prolazi kroz filtrirana obavestenja */
                   filteredNotifications.map((notification) => (
                     <NotificationCard
                       key={notification.id}
@@ -271,7 +320,6 @@ const NotificationPage: React.FC = () => {
 
       </div>
 
-      {/* Popup */}
       <NotificationSendPopUp
         isOpen={isPopUpOpen}
         onClose={() => setIsPopUpOpen(false)}
