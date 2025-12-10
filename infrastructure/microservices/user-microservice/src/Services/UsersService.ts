@@ -134,7 +134,7 @@ export class UsersService implements IUsersService {
       throw new Error(`User with ID ${user_id} not found`);
     }
 
-    const alreadyExist = await this.userRepository.findOne({
+    const alreadyExist = await this.userRepository.count({
       where: [
         { username: updateUserData.username },
         { email: updateUserData.email },
@@ -142,7 +142,7 @@ export class UsersService implements IUsersService {
       //kaze onda da dupliramo podatke sto je logicno, ali da li je potrebno onda da ostavim samo bez is_deleted: false u oba slucaja?
     });
 
-    if (alreadyExist !== null) {
+    if (alreadyExist > 0) {
       throw new Error(
         `User with username: ${updateUserData.username} or email: ${updateUserData.email} already exist`
       );
