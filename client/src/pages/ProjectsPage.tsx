@@ -6,6 +6,7 @@ import { mockProjects } from "../mocks/ProjectsMock";
 import type { ProjectDTO } from "../models/project/ProjectDTO";
 import Sidebar from "../components/dashboard/navbar/Sidebar";
 import { projectAPI } from "../api/project/ProjectAPI";
+import { EditProjectModal } from "../components/projects/EditProjectModal";
 
 export const ProjectsPage: React.FC = () => {
   const [projects, setProjects] = useState(mockProjects);
@@ -13,6 +14,9 @@ export const ProjectsPage: React.FC = () => {
   const [viewProject, setViewProject] = useState<ProjectDTO | null>(null);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [projectToEdit, setProjectToEdit] = useState<ProjectDTO | null>(null);
+
 
   useEffect(() => {
     projectAPI.getAllProjects().then(setProjects);
@@ -40,6 +44,23 @@ export const ProjectsPage: React.FC = () => {
   const handleCloseCreateModal = () => {
     setIsCreateModalOpen(false);
   };
+  
+   const handleOpenEditModalClick = () => {
+    if (!selectedId) return;
+    const project = projects.find((p) => p.id === selectedId);
+    if (!project) return;
+    handleOpenEditModal(project);
+  };
+
+  const handleOpenEditModal = (project: ProjectDTO) => {
+    setProjectToEdit(project);
+    setIsEditModalOpen(true);
+  };
+
+  const handleCloseEditModal = () => {
+    setIsEditModalOpen(false);
+    setProjectToEdit(null);
+  };
 
   const handleCreateProject = async (newProject: Omit<ProjectDTO, "id">) => {
     await projectAPI.createProject(newProject as ProjectDTO);
@@ -65,18 +86,13 @@ export const ProjectsPage: React.FC = () => {
     }
   };
 
-  const handleEdit = async () => {
-    if (!selectedId) return;
-    const project = projects.find((p) => p.id === selectedId);
-    if (!project) return;
-    const newName = prompt("Enter new name for project:", project.name);
-    if (!newName) return;
-
-    await projectAPI.updateProject(selectedId, { name: newName });
-    const updated = await projectAPI.getAllProjects();
-    setProjects(updated);
-    alert(`Project renamed to "${newName}"`);
-  };
+  const handleUpdateProject = async (updatedProject: ProjectDTO) => {
+  await projectAPI.updateProject(updatedProject.id, updatedProject);
+  const updated = await projectAPI.getAllProjects();
+  setProjects(updated);
+  setIsEditModalOpen(false);
+  alert(`Project "${updatedProject.name}" updated successfully!`);
+};
 
   return (
     <div className="flex min-h-screen">
@@ -112,7 +128,7 @@ export const ProjectsPage: React.FC = () => {
               fontSize: "16px",
               }}
               aria-disabled={!selectedId}
-              onClick={handleEdit}
+              onClick={handleOpenEditModalClick}
               title={!selectedId ? "Select a project first" : "Edit selected project"}
             >
               Edit Project
@@ -187,6 +203,13 @@ export const ProjectsPage: React.FC = () => {
           isOpen={isCreateModalOpen}
           onClose={handleCloseCreateModal}
           onSave={handleCreateProject}
+        />
+
+        <EditProjectModal
+          project={projectToEdit}
+          isOpen={isEditModalOpen}
+          onClose={handleCloseEditModal}
+          onSave={handleUpdateProject}
         />
       </div>
     </div>
