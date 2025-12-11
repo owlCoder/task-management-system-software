@@ -12,6 +12,7 @@ import { EmailService } from "./EmailService";
 import { SessionService } from "./SessionService";
 import { RoleService } from "./RoleService";
 import { ILogerService } from "../Domain/services/ILogerService";
+import { SeverityEnum } from "../Domain/enums/SeverityEnum";
 
 export class AuthService implements IAuthService {
   private readonly saltRounds: number = parseInt(process.env.SALT_ROUNDS || "10", 10);
@@ -33,9 +34,7 @@ export class AuthService implements IAuthService {
       where: { username: data.username },
       relations: ["user_role"],
     });
-    if (!user) return { authenticated: false };
-
-    if (user.is_deleted) return { authenticated: false };
+    if (!user || user.is_deleted) return { authenticated: false };
 
     const passwordMatches = await bcrypt.compare(data.password, user.password_hash);
     if (!passwordMatches) return { authenticated: false };
@@ -111,38 +110,60 @@ export class AuthService implements IAuthService {
     };
   }
 
+  async resendOtp(browserData: BrowserData): Promise<LoginResponseType> {
+    const user = await this.userRepository.findOne({
+      where: { user_id: browserData.user_id },
+      relations: ["user_role"],
+    });
+    if (!user || user.is_deleted) return { authenticated: false };    
+    const session = this.validateSession(browserData.session_id, browserData.user_id);
+    if (!session) return { authenticated: false };
+    if (this.emailService.isAvailable) {
+      const [newSessionData, newSessionId, success] = await this.emailService.sendOTPCode(user);
+      if (!success || !newSessionData) return { authenticated: false };
+      this.sessionService.deleteSession(browserData.session_id); // Invalidate old session to prevent reuse
+      this.sessionService.setSession(newSessionId, newSessionData);
+
+      return {
+        authenticated: true,
+        userData: {
+          user_id: user.user_id,
+          session_id: newSessionId,
+          otp_required: true,
+          iat: Math.floor(newSessionData.dateCreated.getTime() / 1000),
+          exp: Math.floor(newSessionData.dateCreated.getTime() / 1000) + this.loginSessionExpirationMinutes * 60,
+        },
+      };
+    }
+    else {
+        return {
+        authenticated: true,
+        userData: {
+          user_id: user.user_id,
+          username: user.username,
+          email: user.email,
+          role: user.user_role.role_name,
+          otp_required: false
+        }
+      };
+    }
+  }
+
   async verifyOtp(browserData: BrowserData, otp: string): Promise<AuthResponseType> {
     const user = await this.userRepository.findOne({
       where: { user_id: browserData.user_id },
       relations: ["user_role"],
     });
-    if (!user) return { authenticated: false };
+    if (!user || user.is_deleted) return { authenticated: false };
 
-    if (user.is_deleted) return { authenticated: false };
-
-    const sessionId = browserData.session_id;
-    if (!sessionId) return { authenticated: false };    
-    const session = this.sessionService.getSession(sessionId);
+    const session = this.validateSession(browserData.session_id, browserData.user_id);
     if (!session) return { authenticated: false };
-
-    const nowMs = Date.now();
-    const expired = (nowMs - session.dateCreated.getTime()) > (this.loginSessionExpirationMinutes * 60 * 1000);
-
-    if (expired) {
-      this.sessionService.deleteSession(sessionId);
-      return { authenticated: false };
-    }
-
-    if (session.userId.toString() !== browserData.user_id.toString()) {
-      this.sessionService.deleteSession(sessionId);
-      return { authenticated: false };
-    }
 
     if (session.otpCode !== otp) {
       return { authenticated: false };
     }
 
-    this.sessionService.deleteSession(sessionId);
+    this.sessionService.deleteSession(browserData.session_id);
 
     return {
       authenticated: true,
@@ -153,5 +174,21 @@ export class AuthService implements IAuthService {
         role: user.user_role.role_name,
       }
     };
+  }
+
+  private validateSession(sessionId: string, userId: number): any {
+    if (!sessionId) return null;
+    const session = this.sessionService.getSession(sessionId);
+    if (!session) return null;
+
+    const nowMs = Date.now();
+    const expired = (nowMs - session.dateCreated.getTime()) > (this.loginSessionExpirationMinutes * 60 * 1000);
+
+    if (expired || session.userId !== userId) {
+      this.sessionService.deleteSession(sessionId);
+      return null;
+    }
+
+    return session;
   }
 }

@@ -28,6 +28,7 @@ export class AuthController {
     this.router.post('/auth/login', this.login.bind(this));
     this.router.post('/auth/register', this.register.bind(this));
     this.router.post('/auth/verify-otp', this.verifyOtp.bind(this));
+    this.router.post('/auth/resend-otp', this.resendOtp.bind(this));
   }
 
   /**
@@ -161,6 +162,53 @@ export class AuthController {
         res.status(200).json({ success: true, message: "OTP verified successfully", token });
       } else {
         res.status(401).json({ success: false, message: "Invalid OTP" });
+      }
+    } catch (error) {
+      this.logerService.log(SeverityEnum.ERROR, error as string)
+      res.status(500).json({ success: false, message: "Server error" });
+    }
+  }
+
+  public async resendOtp(req: Request, res: Response): Promise<void> {
+    try {
+      this.logerService.log(SeverityEnum.INFO, "OTP resend request received");
+      const { user_id, session_id } = req.body;
+      const data: BrowserData = { session_id, user_id };
+      // if (!validation.success) {
+      //   res.status(400).json({ success: false, message: validation.message });
+      //   return;
+      // }
+      const result = await this.authService.resendOtp(data);
+      if (result.authenticated) {
+        if (result.userData && result.userData.otp_required === true) {
+          res.status(200).json({
+            success: true,
+            otp_required: result.userData.otp_required,
+            session: {
+              session_id: result.userData?.session_id,
+              user_id: result.userData?.user_id,
+              iat: result.userData?.iat,
+              exp: result.userData?.exp
+            },
+            message: "OTP has been resent. Please check your email."
+          });
+        }
+        else if (result.userData && result.userData.otp_required === false) {
+          const token = jwt.sign(
+            { id: result.userData?.user_id, username: result.userData?.username, email: result.userData?.email, role: result.userData?.role },
+            process.env.JWT_SECRET ?? "",
+            { expiresIn: `${this.jwtSessionExpiration}m` }
+          );
+
+          res.status(200).json({
+            success: true,
+            otp_required: result.userData.otp_required,
+            message: "Mailing service is currently offline. Login successful",
+            token
+          });
+        }
+      } else {
+        res.status(401).json({ success: false, message: "Invalid credentials!" });
       }
     } catch (error) {
       this.logerService.log(SeverityEnum.ERROR, error as string)

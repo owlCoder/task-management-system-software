@@ -9,7 +9,7 @@ export class LogerService implements ILogerService {
     }
 
     async log(severity: SeverityEnum, message: string): Promise<boolean> {
-        console.log(`${severity}[${this.service}@0.1] ${message}\x1b[0m`);
+        console.log(`${severity}[${this.service}] ${message}\x1b[0m`);
         return true;
     }
 }

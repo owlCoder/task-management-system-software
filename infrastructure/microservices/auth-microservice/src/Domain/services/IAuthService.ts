@@ -8,4 +8,5 @@ export interface IAuthService {
   login(data: LoginUserDTO): Promise<LoginResponseType>;
   verifyOtp(browserData: BrowserData, otp: string): Promise<AuthResponseType>;
   register(data: RegistrationUserDTO): Promise<AuthResponseType>;
+  resendOtp(browserData: BrowserData): Promise<LoginResponseType>;
 }
