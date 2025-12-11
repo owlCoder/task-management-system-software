@@ -2,6 +2,7 @@ import { Router, Request, Response } from "express";
 import { ISendService } from "../../Domain/services/ISendService";
 import { IAliveService } from "../../Domain/services/IAliveService";
 import { Mail } from "../../Domain/models/Mail";
+import { MailValidator } from "../validators/MailValidator";
 
 
 export class MailsController {
@@ -24,9 +25,12 @@ export class MailsController {
     try {
       const mailData = req.body as Mail;
       
-      //Validaciju dodati naknadno
+      const result = MailValidator.validate(mailData);
+      if(result===true)
+        await this.SendService.SendMessage(mailData);
+      else
+        res.status(400).json({ message :"Problem with mail parameters (sender, header od body!"});
 
-      await this.SendService.SendMessage(mailData)
       res.status(200).json();
     } catch (err) {
       res.status(500).json({ message: (err as Error).message });
