@@ -35,7 +35,11 @@ export class MailsController {
 
   private async MailAlive(req: Request, res: Response): Promise<void> {
     try {
+      const result = await this.AliveService.Alive();
+      if(result===true)
       res.status(200).json();
+      else
+      res.status(500).json({message: "cannot connect to server!"});
     } catch (err) {
       res.status(500).json({ message: (err as Error).message });
     }
