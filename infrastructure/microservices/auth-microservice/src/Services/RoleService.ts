@@ -1,11 +1,15 @@
 import { Repository } from "typeorm";
 import { UserRole } from "../Domain/models/UserRole";
+import { ILogerService } from "../Domain/services/ILogerService";
+import { SeverityEnum } from "../Domain/enums/SeverityEnum";
 
 export class RoleService {
   private userRoles: ReadonlyMap<string, UserRole> = new Map();
   private readonly userRoleRepository: Repository<UserRole>;
+  private readonly logger: ILogerService;
 
-  constructor(userRoleRepository: Repository<UserRole>) {
+  constructor(userRoleRepository: Repository<UserRole>, logger: ILogerService) {
+    this.logger = logger;
     this.userRoleRepository = userRoleRepository;
     // Initialize roles synchronously
     this.refreshUserRoles().then(() => {
@@ -27,7 +31,7 @@ export class RoleService {
       roles.forEach(role => newMap.set(role.role_name, role));
       this.userRoles = newMap;
     } catch (error) {
-      console.error('Error refreshing user roles:', error);
+      this.logger.log(SeverityEnum.ERROR, `Error refreshing user roles: ${error}`);
     }
   }
 }

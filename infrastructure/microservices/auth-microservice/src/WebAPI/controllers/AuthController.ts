@@ -6,6 +6,7 @@ import { RegistrationUserDTO } from '../../Domain/DTOs/RegistrationUserDTO';
 import { validateLoginData } from '../validators/LoginValidator';
 import { validateRegistrationData } from '../validators/RegisterValidator';
 import { ILogerService } from '../../Domain/services/ILogerService';
+import { SeverityEnum } from '../../Domain/enums/SeverityEnum';
 import { validateOtpVerificationData } from '../validators/OtpValidator';
 import { env } from 'process';
 import { BrowserData } from '../../Domain/models/BrowserData';
@@ -38,7 +39,7 @@ export class AuthController {
    */
   private async login(req: Request, res: Response): Promise<void> {
     try {
-      this.logerService.log("Login request received");
+      this.logerService.log(SeverityEnum.INFO, "Login request received");
 
       const data: LoginUserDTO = req.body as LoginUserDTO;
 
@@ -83,7 +84,7 @@ export class AuthController {
         res.status(401).json({ success: false, message: "Invalid credentials!" });
       }
     } catch (error) {
-      this.logerService.log(error as string)
+      this.logerService.log(SeverityEnum.ERROR, error as string)
       res.status(500).json({ success: false, message: "Server error" });
     }
   }
@@ -97,7 +98,7 @@ export class AuthController {
    */
   private async register(req: Request, res: Response): Promise<void> {
     try {
-      this.logerService.log("Registration request received");
+      this.logerService.log(SeverityEnum.INFO, "Registration request received");
 
       const data: RegistrationUserDTO = req.body as RegistrationUserDTO;
 
@@ -119,7 +120,7 @@ export class AuthController {
         res.status(400).json({ success: false, message: "Registration failed. Username or email may already exist." });
       }
     } catch (error) {
-      this.logerService.log(error as string)
+      this.logerService.log(SeverityEnum.ERROR, error as string)
       res.status(500).json({ success: false, message: "Server error" });
     }
   }
@@ -135,7 +136,7 @@ export class AuthController {
    */
   private async verifyOtp(req: Request, res: Response): Promise<void> {
     try {
-      this.logerService.log("OTP verification request received");
+      this.logerService.log(SeverityEnum.INFO, "OTP verification request received");
 
       const { user_id, session_id, otp } = req.body;
 
@@ -162,7 +163,7 @@ export class AuthController {
         res.status(401).json({ success: false, message: "Invalid OTP" });
       }
     } catch (error) {
-      this.logerService.log(error as string)
+      this.logerService.log(SeverityEnum.ERROR, error as string)
       res.status(500).json({ success: false, message: "Server error" });
     }
   }

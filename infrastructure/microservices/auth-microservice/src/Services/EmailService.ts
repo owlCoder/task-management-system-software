@@ -3,14 +3,18 @@ import { User } from "../Domain/models/User";
 import { LoginData } from "../Domain/models/LoginData";
 import { v4 as uuidv4 } from 'uuid';
 import { randomInt } from "crypto";
+import { ILogerService } from "../Domain/services/ILogerService";
+import { SeverityEnum } from "../Domain/enums/SeverityEnum";
 
 export class EmailService {
   private readonly emailServiceUrl: string = `${process.env.MAIL_SERVICE_HOST || 'http://localhost'}:${process.env.MAIL_SERVICE_PORT || '6245'}`;
   private readonly loginSessionExpirationMinutes: number = parseInt(process.env.LOGIN_SESSION_EXPIRATION_MINUTES || "5", 10);
   private readonly mailingServiceHealthCheckInterval: number = 60000;
   private mailingServiceState: boolean = false;
+  private readonly logger: ILogerService;
 
-  constructor() {
+  constructor(logger: ILogerService) {
+    this.logger = logger;
     // Start periodic health check (every 60 seconds; adjust as needed)
     setInterval(() => this.checkEmailServiceHealth(), this.mailingServiceHealthCheckInterval);
     // Initial check
@@ -27,7 +31,7 @@ export class EmailService {
         timeout: 2000,
         headers: { 'Content-Type': 'application/json' }
       });
-      console.log('\x1b[34m[MailingService]\x1b[0m Email service connected');
+      this.logger.log(SeverityEnum.INFO, 'Email service connected');
       this.mailingServiceState = response.status === 200;
       // this.mailingServiceState = true; // For testing purposes, assume always available, until mailing service healthcheck is implemented
     } catch (error) {
@@ -80,7 +84,7 @@ export class EmailService {
 
       return [sessionData, sessionId, true];
     } catch (error) {
-      console.error('Failed to send OTP email:', error);
+      this.logger.log(SeverityEnum.ERROR, `Failed to send OTP email: ${error}`);
       return [null, "", false];
     }
   }

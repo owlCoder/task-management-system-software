@@ -1,12 +1,15 @@
+import { LoggingServiceEnum } from "../Domain/enums/LoggingServiceEnum";
 import { ILogerService } from "../Domain/services/ILogerService";
+import { SeverityEnum } from "../Domain/enums/SeverityEnum";
 
 export class LogerService implements ILogerService {
-    constructor() {
-        console.log(`\x1b[35m[Logger@1.45.4]\x1b[0m Service started`);
+    private readonly service: LoggingServiceEnum;
+    constructor(service: LoggingServiceEnum) {
+        this.service = service;
     }
 
-    async log(message: string): Promise<boolean> {
-        console.log(`\x1b[35m[Logger@1.45.4]\x1b[0m ${message}`);
+    async log(severity: SeverityEnum, message: string): Promise<boolean> {
+        console.log(`${severity}[${this.service}@0.1] ${message}\x1b[0m`);
         return true;
     }
 }

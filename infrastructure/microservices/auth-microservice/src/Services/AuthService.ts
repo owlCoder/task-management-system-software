@@ -11,17 +11,22 @@ import { UserRole } from "../Domain/models/UserRole";
 import { EmailService } from "./EmailService";
 import { SessionService } from "./SessionService";
 import { RoleService } from "./RoleService";
+import { ILogerService } from "../Domain/services/ILogerService";
 
 export class AuthService implements IAuthService {
   private readonly saltRounds: number = parseInt(process.env.SALT_ROUNDS || "10", 10);
   private readonly loginSessionExpirationMinutes: number = parseInt(process.env.LOGIN_SESSION_EXPIRATION_MINUTES || "5", 10);
+  private readonly logger: ILogerService;
 
   constructor(
     private userRepository: Repository<User>,
     private emailService: EmailService,
     private sessionService: SessionService,
-    private roleService: RoleService
-  ) { }
+    private roleService: RoleService,
+    logger: ILogerService
+  ) {
+    this.logger = logger;
+  }
 
   async login(data: LoginUserDTO): Promise<LoginResponseType> {
     const user = await this.userRepository.findOne({

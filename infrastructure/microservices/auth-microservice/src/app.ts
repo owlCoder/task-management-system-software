@@ -11,6 +11,7 @@ import { AuthService } from './Services/AuthService';
 import { AuthController } from './WebAPI/controllers/AuthController';
 import { ILogerService } from './Domain/services/ILogerService';
 import { LogerService } from './Services/LogerService';
+import { LoggingServiceEnum } from './Domain/enums/LoggingServiceEnum';
 import { UserRole } from './Domain/models/UserRole';
 import { RoleService } from './Services/RoleService';
 import { SessionService } from './Services/SessionService';
@@ -40,11 +41,16 @@ app.use(express.json());
   const userRoleRepository: Repository<UserRole> = Db.getRepository(UserRole);
 
   // Services
-  const emailService = new EmailService();
-  const sessionService = new SessionService();
-  const roleService = new RoleService(userRoleRepository);
-  const authService: IAuthService = new AuthService(userRepository, emailService, sessionService, roleService);
-  const logerService: ILogerService = new LogerService();
+  const authLogger = new LogerService(LoggingServiceEnum.AUTH_SERVICE);
+  const emailLogger = new LogerService(LoggingServiceEnum.NOTIFICATION_SERVICE);
+  const roleLogger = new LogerService(LoggingServiceEnum.ROLE_SERVICE);
+  const sessionLogger = new LogerService(LoggingServiceEnum.SESSION_SERVICE);
+
+  const emailService = new EmailService(emailLogger);
+  const sessionService = new SessionService(sessionLogger);
+  const roleService = new RoleService(userRoleRepository, roleLogger);
+  const authService: IAuthService = new AuthService(userRepository, emailService, sessionService, roleService, authLogger);
+  const logerService: ILogerService = new LogerService(LoggingServiceEnum.APP_SERVICE);
 
   // WebAPI routes
   const authController = new AuthController(authService, logerService);
