@@ -7,6 +7,7 @@ import NotificationCard from '../components/notification/NotificationCard';
 import NotificationSendPopUp from '../components/notification/NotificationSendPopUp';
 import type { Notification } from '../models/notification/NotificationCardDTO';
 import { notificationAPI } from '../api/notification/NotificationAPI';
+import { socketManager } from '../api/notification/SocketManager';
 
 /*
 const backgroundImageUrl = new URL(
@@ -33,9 +34,16 @@ const NotificationPage: React.FC = () => {
   // TODO: Zamijeniti sa pravim userId-em iz auth contexta
   const currentUserId = 1;
 
-  // UČITAJ NOTIFIKACIJE SA BACKEND-A
+  // UCITAJ NOTIFIKACIJE SA BACKEND-A I KONEKTUJ WEBSOCKET
   useEffect(() => {
     loadNotifications();
+    setupWebSocket();
+
+    // Cleanup na unmount
+    return () => {
+      socketManager.leaveUserRoom(currentUserId);
+      socketManager.disconnect();
+    };
   }, []);
 
   const loadNotifications = async () => {
@@ -52,6 +60,64 @@ const NotificationPage: React.FC = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const setupWebSocket = () => {
+    // Konektuj WebSocket
+    socketManager.connect();
+
+    // Pridruži se user room-u
+    socketManager.joinUserRoom(currentUserId);
+
+    // NOTIFICATION CREATED - Nova notifikacija
+    socketManager.onNotificationCreated((notification: Notification) => {
+      console.log('🔔 New notification received:', notification);
+      setAllNotifications(prev => [notification, ...prev]);
+    });
+
+    // NOTIFICATION DELETED - Obrisana notifikacija
+    socketManager.onNotificationDeleted((data: { id: number }) => {
+      console.log('🗑️ Notification deleted:', data.id);
+      setAllNotifications(prev => prev.filter(n => n.id !== data.id));
+    });
+
+    // NOTIFICATION MARKED READ - Označena kao pročitana
+    socketManager.onNotificationMarkedRead((notification: Notification) => {
+      console.log('✅ Notification marked as read:', notification.id);
+      setAllNotifications(prev => 
+        prev.map(n => n.id === notification.id ? { ...n, isRead: true } : n)
+      );
+    });
+
+    // NOTIFICATION MARKED UNREAD - Označena kao nepročitana
+    socketManager.onNotificationMarkedUnread((notification: Notification) => {
+      console.log('📭 Notification marked as unread:', notification.id);
+      setAllNotifications(prev => 
+        prev.map(n => n.id === notification.id ? { ...n, isRead: false } : n)
+      );
+    });
+
+    // BULK DELETED - Više notifikacija obrisano
+    socketManager.onNotificationsBulkDeleted((data: { ids: number[] }) => {
+      console.log('🗑️ Bulk delete:', data.ids);
+      setAllNotifications(prev => prev.filter(n => !data.ids.includes(n.id)));
+    });
+
+    // BULK MARKED READ - Više notifikacija označeno kao pročitano
+    socketManager.onNotificationsBulkMarkedRead((data: { ids: number[] }) => {
+      console.log('✅ Bulk marked as read:', data.ids);
+      setAllNotifications(prev => 
+        prev.map(n => data.ids.includes(n.id) ? { ...n, isRead: true } : n)
+      );
+    });
+
+    // BULK MARKED UNREAD - Više notifikacija označeno kao nepročitano
+    socketManager.onNotificationsBulkMarkedUnread((data: { ids: number[] }) => {
+      console.log('📭 Bulk marked as unread:', data.ids);
+      setAllNotifications(prev => 
+        prev.map(n => data.ids.includes(n.id) ? { ...n, isRead: false } : n)
+      );
+    });
   };
 
   // filtriraj podatke po odabranom filteru
@@ -102,10 +168,10 @@ const NotificationPage: React.FC = () => {
   const handleMarkAsRead = async () => {
     try {
       console.log(`Marking as read: ${selectedNotifications}`);
-      
       await notificationAPI.markMultipleAsRead(selectedNotifications);
       
-      // Ažuriraj lokalni state
+      // WebSocket će automatski ažurirati state!
+      // Ali ažuriraj odmah za bolji UX
       setAllNotifications(allNotifications.map(n => 
         selectedNotifications.includes(n.id) ? { ...n, isRead: true } : n
       ));
@@ -123,10 +189,9 @@ const NotificationPage: React.FC = () => {
   const handleMarkAsUnread = async () => {
     try {
       console.log(`Marking as unread: ${selectedNotifications}`);
-      
       await notificationAPI.markMultipleAsUnread(selectedNotifications);
       
-      // Ažuriraj lokalni state
+      // WebSocket će automatski ažurirati state!
       setAllNotifications(allNotifications.map(n => 
         selectedNotifications.includes(n.id) ? { ...n, isRead: false } : n
       ));
@@ -144,10 +209,9 @@ const NotificationPage: React.FC = () => {
   const handleDeleteSelected = async () => {
     try {
       console.log(`Deleting: ${selectedNotifications}`);
-      
       await notificationAPI.deleteMultipleNotifications(selectedNotifications);
       
-      // Ukloni obrisane notifikacije iz state-a
+      // WebSocket će automatski ažurirati state!
       setAllNotifications(allNotifications.filter(n => 
         !selectedNotifications.includes(n.id)
       ));
@@ -165,10 +229,9 @@ const NotificationPage: React.FC = () => {
   const handleNotificationClick = async (id: number) => {
     try {
       console.log(`Notification with ID ${id} was clicked`);
-      
       await notificationAPI.markAsRead(id);
       
-      // Ažuriraj lokalni state
+      // WebSocket će automatski ažurirati state!
       setAllNotifications(allNotifications.map(n => 
         n.id === id ? { ...n, isRead: true } : n
       ));
@@ -196,8 +259,8 @@ const NotificationPage: React.FC = () => {
         userId: currentUserId,
       });
       
-      // Reload notifikacije
-      await loadNotifications();
+      // WebSocket će automatski dodati novu notifikaciju!
+      // Ne treba reload
       
       setIsPopUpOpen(false);
       
