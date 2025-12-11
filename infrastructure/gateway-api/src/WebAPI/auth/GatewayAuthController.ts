@@ -4,6 +4,7 @@ import { IGatewayAuthService } from "../../Domain/services/auth/IGatewayAuthServ
 import { RegistrationUserDTO } from "../../Domain/DTOs/auth/RegistrationUserDTO";
 import { BrowserDataDTO } from "../../Domain/DTOs/auth/BrowserDataDTO";
 import { AuthResponseType } from "../../Domain/types/auth/AuthResponse";
+import { OTPVerificationDTO } from "../../Domain/DTOs/auth/OTPVerificationDTO";
 
 export class GatewayAuthController {
     private readonly router: Router;
@@ -17,6 +18,7 @@ export class GatewayAuthController {
         this.router.post("/login", this.login.bind(this));
         this.router.post("/register", this.register.bind(this));
         this.router.post("/verify-otp", this.verifyOtp.bind(this));
+        this.router.post("/resend-otp", this.resendOtp.bind(this));
     }
 
     /**
@@ -35,7 +37,7 @@ export class GatewayAuthController {
             res.status(200).json(result.data);
             return;
         }
-        res.status(result.status).json({ success: false, message: result.message });
+        res.status(result.status).json({ message: result.message });
     }
     
     /**
@@ -54,26 +56,45 @@ export class GatewayAuthController {
             res.status(201).json(result.data);
             return;
         }
-        res.status(result.status).json({ success: false, message: result.message });
+        res.status(result.status).json({ message: result.message });
     }
 
     /**
      * POST /api/v1/verify-otp
-     * @param {Request} req - the request object, containing the OTP data in the body as a {@link BrowserDataDTO}.
+     * @param {Request} req - the request object, containing the session and otp data in the body as a {@link OTPVerificationDTO}.
      * @param {Response} res the response object for the client.
      * @returns {Object}
      * - On success: A JSON object following the {@link AuthResponseType} structure containing the result of the otp verification attempt.
      * - On failure: A JSON object with an error message and a HTTP status code indicating the failure.
      */
     private async verifyOtp(req: Request, res: Response): Promise<void> {
-        const browserData = req.body as BrowserDataDTO;
+        const browserData = req.body as OTPVerificationDTO;
 
         const result = await this.gatewayAuthService.verifyOtp(browserData);
         if(result.success){
             res.status(200).json(result.data);
             return;
         }
-        res.status(result.status).json({ success: false, message: result.message });
+        res.status(result.status).json({ message: result.message });
+    }
+
+    /**
+     * POST /api/v1/resend-otp
+     * @param {Request} req - the request object, containing the session data in the body as a {@link BrowserDataDTO}.
+     * @param {Response} res - the response object for the client.
+     * @returns {Object}
+     * - On success: A JSON object following the {@link AuthResponseType} structure containing the result of the otp-resend attempt. 
+     * - On failure: A JSON object with an error message and a HTTP status code indicating the failure.
+     */
+    private async resendOtp(req: Request, res: Response): Promise<void> {
+        const browserData = req.body as BrowserDataDTO
+
+        const result = await this.gatewayAuthService.resendOtp(browserData);
+        if(result.success){
+            res.status(200).json(result.data);
+            return;
+        }
+        res.status(result.status).json({ message: result.message });
     }
 
     public getRouter(): Router {

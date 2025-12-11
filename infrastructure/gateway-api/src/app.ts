@@ -23,7 +23,7 @@ dotenv.config({ quiet: true });
 const app = express();
 
 // Read CORS settings from environment
-const corsOrigin = process.env.CORS_ORIGIN ?? "*";
+const corsOrigin = process.env.CORS_ORIGIN?.split(",").map(m => m.trim()) ?? "*";
 const corsMethods = process.env.CORS_METHODS?.split(",").map(m => m.trim()) ?? ["POST"];
 
 // Protected microservice from unauthorized access
@@ -39,9 +39,9 @@ app.use(logTraffic);
 // Services
 const loggerService: ILoggerService = new LoggerService(logger);
 const errorHandlingService: IErrorHandlingService = new ErrorHandlingService(loggerService);
-const gatewayAuthService: IGatewayAuthService = new GatewayAuthService(errorHandlingService, loggerService);
-const gatewayUserService: IGatewayUserService = new GatewayUserService(errorHandlingService, loggerService);
-const gatewayFileService: IGatewayFileService = new GatewayFileService(errorHandlingService, loggerService);
+const gatewayAuthService: IGatewayAuthService = new GatewayAuthService(errorHandlingService);
+const gatewayUserService: IGatewayUserService = new GatewayUserService(errorHandlingService);
+const gatewayFileService: IGatewayFileService = new GatewayFileService(errorHandlingService);
 
 // WebAPI routes
 const gatewayAuthController = new GatewayAuthController(gatewayAuthService);

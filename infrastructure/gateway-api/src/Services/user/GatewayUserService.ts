@@ -5,7 +5,6 @@ import { UserDTO } from "../../Domain/DTOs/user/UserDTO";
 import { Result } from "../../Domain/types/common/Result";
 import { UpdateUserDTO } from "../../Domain/DTOs/user/UpdateUserDTO";
 import { IErrorHandlingService } from "../../Domain/services/common/IErrorHandlingService";
-import { ILoggerService } from "../../Domain/services/common/ILoggerService";
 import { USER_ROUTES } from "../../Constants/routes/user/UserRoutes";
 import { HTTP_METHODS } from "../../Constants/common/HttpMethods";
 
@@ -13,7 +12,7 @@ export class GatewayUserService implements IGatewayUserService {
     private static readonly serviceName: string = "User Service";
     private readonly userClient: AxiosInstance;
 
-    constructor(private readonly errorHandlingService: IErrorHandlingService, private readonly loggerService: ILoggerService) {
+    constructor(private readonly errorHandlingService: IErrorHandlingService) {
         const userBaseURL = process.env.USER_SERVICE_API;
 
         this.userClient = axios.create({
@@ -27,14 +26,6 @@ export class GatewayUserService implements IGatewayUserService {
         try {
             const response = await this.userClient.post<UserDTO>(USER_ROUTES.CREATE, data);
 
-            this.loggerService.info(
-                GatewayUserService.serviceName, 
-                'USER_CREATED',
-                USER_ROUTES.CREATE, 
-                HTTP_METHODS.POST, 
-                `User created: ${data.username}`
-            );
-
             return {
                 success: true,
                 data: response.data
@@ -47,6 +38,7 @@ export class GatewayUserService implements IGatewayUserService {
     async getUserById(id: number): Promise<Result<UserDTO>> {
         try {
             const response = await this.userClient.get<UserDTO>(USER_ROUTES.GET_BY_ID(id));
+
             return {
                 success: true,
                 data: response.data
@@ -59,6 +51,7 @@ export class GatewayUserService implements IGatewayUserService {
     async getUsers(): Promise<Result<UserDTO[]>> {
         try{
             const response = await this.userClient.get<UserDTO[]>(USER_ROUTES.GET_ALL);
+            
             return {
                 success: true,
                 data: response.data
@@ -72,14 +65,6 @@ export class GatewayUserService implements IGatewayUserService {
         try {
             const response = await this.userClient.put<UserDTO>(USER_ROUTES.UPDATE(id), data);
 
-            this.loggerService.info(
-                GatewayUserService.serviceName, 
-                'USER_UPDATED',
-                USER_ROUTES.UPDATE(id), 
-                HTTP_METHODS.PUT, 
-                `User with id ${id} updated`
-            );
-
             return {
                 success: true,
                 data: response.data
@@ -92,14 +77,6 @@ export class GatewayUserService implements IGatewayUserService {
     async logicallyDeleteUserById(id: number): Promise<Result<boolean>> {
         try {
             const response = await this.userClient.delete<boolean>(USER_ROUTES.DELETE(id));
-
-            this.loggerService.info(
-                GatewayUserService.serviceName, 
-                'USER_DELETED',
-                USER_ROUTES.DELETE(id), 
-                HTTP_METHODS.DELETE, 
-                `User with id ${id} deleted`
-            );
 
             return {
                 success: true,

@@ -41,7 +41,7 @@ export class GatewayFileController {
             res.send(result.data.fileBuffer);
             return;
         }
-        res.status(result.status).json({ success: false, message: result.message });
+        res.status(result.status).json({ message: result.message });
     }
 
     /**
@@ -60,7 +60,7 @@ export class GatewayFileController {
             res.status(200).json(result.data);
             return;
         }
-        res.status(result.status).json({ success: false, message: result.message });
+        res.status(result.status).json({ message: result.message });
     }
 
     /**
@@ -79,7 +79,7 @@ export class GatewayFileController {
             res.status(200).json(result.data);
             return;
         }
-        res.status(result.status).json({ success: false, message: result.message });
+        res.status(result.status).json({ message: result.message });
     }
 
     /**
@@ -109,7 +109,7 @@ export class GatewayFileController {
             res.status(201).json(result.data);
             return;
         }
-        res.status(result.status).json({ success: false, message: result.message});
+        res.status(result.status).json({ message: result.message});
 
     }
 
@@ -129,7 +129,7 @@ export class GatewayFileController {
             res.status(204).send();
             return;
         }
-        res.status(result.status).json({ success: false, message: result.message });
+        res.status(result.status).json({ message: result.message });
     }
 
     public getRouter(): Router {

@@ -19,7 +19,7 @@ export class LoggerService implements ILoggerService {
     private log(level: 'info' | 'warn' | 'error', service: string, code: string, url: string, method: string, msg: string): void {
         this.logger[level]({
             service: service || 'Unknown Service',
-            code: code || 'Unknown Code',
+            code: code || 'UNKNOWN',
             url: url || 'Unknown URL',
             method: method || 'UNKNOWN'
         }, msg || "No message provided");

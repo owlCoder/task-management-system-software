@@ -5,7 +5,6 @@ import { UploadedFileDTO } from "../../Domain/DTOs/file/UploadedFileDTO";
 import { IGatewayFileService } from "../../Domain/services/file/IGatewayFileService";
 import { Result } from "../../Domain/types/common/Result";
 import { IErrorHandlingService } from "../../Domain/services/common/IErrorHandlingService";
-import { ILoggerService } from "../../Domain/services/common/ILoggerService";
 import { HTTP_METHODS } from "../../Constants/common/HttpMethods";
 import { FILE_ROUTES } from "../../Constants/routes/file/FileRoutes";
 import { extractDownloadDTOFromResponse, generateFormData } from "../../Utils/File/FileUtils";
@@ -14,7 +13,7 @@ export class GatewayFileService implements IGatewayFileService {
     private static readonly serviceName: string = "File Service";
     private readonly fileClient: AxiosInstance;
     
-    constructor(private readonly errorHandlingService: IErrorHandlingService, private readonly loggerService: ILoggerService){
+    constructor(private readonly errorHandlingService: IErrorHandlingService){
         const fileBaseURL = process.env.FILE_SERVICE_API;
         
         this.fileClient = axios.create({
@@ -70,14 +69,6 @@ export class GatewayFileService implements IGatewayFileService {
             const formData = generateFormData(fileData);
             const response = await this.fileClient.post<UploadedFileDTO>(FILE_ROUTES.UPLOAD, formData);
 
-            this.loggerService.info(
-                GatewayFileService.serviceName, 
-                'FILE_UPLOADED',
-                FILE_ROUTES.UPLOAD, 
-                HTTP_METHODS.POST, 
-                `File uploaded: ${fileData.originalFileName} by author with id ${fileData.authorId}`
-            );
-
             return {
                 success: true,
                 data: response.data
@@ -90,14 +81,6 @@ export class GatewayFileService implements IGatewayFileService {
     async deleteFile(fileId: number): Promise<Result<boolean>> {
         try {
             const response = await this.fileClient.delete<boolean>(FILE_ROUTES.DELETE(fileId));
-
-            this.loggerService.info(
-                GatewayFileService.serviceName, 
-                'FILE_DELETED',
-                FILE_ROUTES.DELETE(fileId), 
-                HTTP_METHODS.DELETE, 
-                `File with id ${fileId} deleted`
-            );
 
             return {
                 success: true,
