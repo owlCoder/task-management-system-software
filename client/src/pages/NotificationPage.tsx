@@ -9,13 +9,6 @@ import type { Notification } from '../models/notification/NotificationCardDTO';
 import { notificationAPI } from '../api/notification/NotificationAPI';
 import { socketManager } from '../api/notification/SocketManager';
 
-/*
-const backgroundImageUrl = new URL(
-  "../../public/background.png",
-  import.meta.url
-).href;
-*/
-
 const backgroundImageUrl = "/background.png";
 
 const NotificationPage: React.FC = () => {
@@ -167,7 +160,11 @@ const NotificationPage: React.FC = () => {
   // funkcija za mark as read
   const handleMarkAsRead = async () => {
     try {
-      console.log(`Marking as read: ${selectedNotifications}`);
+      console.log('🔍 Frontend handleMarkAsRead - selectedNotifications:', selectedNotifications);
+      console.log('🔍 Frontend handleMarkAsRead - typeof:', typeof selectedNotifications);
+      console.log('🔍 Frontend handleMarkAsRead - isArray:', Array.isArray(selectedNotifications));
+      console.log('🔍 Frontend handleMarkAsRead - length:', selectedNotifications.length);
+      
       await notificationAPI.markMultipleAsRead(selectedNotifications);
       
       // WebSocket će automatski ažurirati state!
@@ -179,16 +176,22 @@ const NotificationPage: React.FC = () => {
       setSelectedNotifications([]);
       setIsAllSelected(false);
       
-    } catch (err) {
-      console.error('Error marking as read:', err);
-      alert('Failed to mark notifications as read');
+    } catch (err: any) {
+      console.error('❌ Frontend handleMarkAsRead error:', err);
+      console.error('❌ Error response:', err.response);
+      console.error('❌ Error data:', err.response?.data);
+      alert(`Failed to mark notifications as read: ${err.response?.data?.message || err.message}`);
     }
   };
 
   // funkcija za mark as unread
   const handleMarkAsUnread = async () => {
     try {
-      console.log(`Marking as unread: ${selectedNotifications}`);
+      console.log('🔍 Frontend handleMarkAsUnread - selectedNotifications:', selectedNotifications);
+      console.log('🔍 Frontend handleMarkAsUnread - typeof:', typeof selectedNotifications);
+      console.log('🔍 Frontend handleMarkAsUnread - isArray:', Array.isArray(selectedNotifications));
+      console.log('🔍 Frontend handleMarkAsUnread - length:', selectedNotifications.length);
+      
       await notificationAPI.markMultipleAsUnread(selectedNotifications);
       
       // WebSocket će automatski ažurirati state!
@@ -199,16 +202,22 @@ const NotificationPage: React.FC = () => {
       setSelectedNotifications([]);
       setIsAllSelected(false);
       
-    } catch (err) {
-      console.error('Error marking as unread:', err);
-      alert('Failed to mark notifications as unread');
+    } catch (err: any) {
+      console.error('❌ Frontend handleMarkAsUnread error:', err);
+      console.error('❌ Error response:', err.response);
+      console.error('❌ Error data:', err.response?.data);
+      alert(`Failed to mark notifications as unread: ${err.response?.data?.message || err.message}`);
     }
   };
 
   // funkcija za delete selected
   const handleDeleteSelected = async () => {
     try {
-      console.log(`Deleting: ${selectedNotifications}`);
+      console.log('🔍 Frontend handleDeleteSelected - selectedNotifications:', selectedNotifications);
+      console.log('🔍 Frontend handleDeleteSelected - typeof:', typeof selectedNotifications);
+      console.log('🔍 Frontend handleDeleteSelected - isArray:', Array.isArray(selectedNotifications));
+      console.log('🔍 Frontend handleDeleteSelected - length:', selectedNotifications.length);
+      
       await notificationAPI.deleteMultipleNotifications(selectedNotifications);
       
       // WebSocket će automatski ažurirati state!
@@ -219,9 +228,11 @@ const NotificationPage: React.FC = () => {
       setSelectedNotifications([]);
       setIsAllSelected(false);
       
-    } catch (err) {
-      console.error('Error deleting notifications:', err);
-      alert('Failed to delete notifications');
+    } catch (err: any) {
+      console.error('❌ Frontend handleDeleteSelected error:', err);
+      console.error('❌ Error response:', err.response);
+      console.error('❌ Error data:', err.response?.data);
+      alert(`Failed to delete notifications: ${err.response?.data?.message || err.message}`);
     }
   };
 
