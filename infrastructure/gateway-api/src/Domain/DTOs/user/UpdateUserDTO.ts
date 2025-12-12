@@ -1,4 +1,4 @@
-import { UserRole } from "../../enums/UserRole"
+import { UserRole } from "../../enums/user/UserRole"
 
 export interface UpdateUserDTO {
     username: string,

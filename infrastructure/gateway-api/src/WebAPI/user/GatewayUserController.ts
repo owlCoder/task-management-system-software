@@ -3,7 +3,7 @@ import { RegistrationUserDTO } from "../../Domain/DTOs/auth/RegistrationUserDTO"
 import { IGatewayUserService } from "../../Domain/services/user/IGatewayUserService";
 import { authenticate } from "../../Middlewares/authentification/AuthMiddleware";
 import { authorize } from "../../Middlewares/authorization/AuthorizeMiddleware";
-import { UserRole } from "../../Domain/enums/UserRole";
+import { UserRole } from "../../Domain/enums/user/UserRole";
 import { UserDTO } from "../../Domain/DTOs/user/UserDTO";
 import { UpdateUserDTO } from "../../Domain/DTOs/user/UpdateUserDTO";
 
