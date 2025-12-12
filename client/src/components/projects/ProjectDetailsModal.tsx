@@ -5,12 +5,14 @@ type Props = {
   project: ProjectDTO | null;
   isOpen: boolean;
   onClose: () => void;
+  onEdit?: (project: ProjectDTO) => void; 
 };
 
 export const ProjectDetailsModal: React.FC<Props> = ({
   project,
   isOpen,
   onClose,
+  onEdit,
 }) => {
   if (! isOpen || !project) return null;
 
@@ -219,7 +221,11 @@ export const ProjectDetailsModal: React.FC<Props> = ({
             </button>
             <button
                 type="button"
-                onClick={() => alert(`Edit project: ${project.name}`)}
+                onClick={() => {
+                    if (project && onEdit) {
+                      onEdit(project); 
+                      onClose();
+                    }}}
                 className="px-6 py-2 rounded-lg text-sm font-semibold transition-colors duration-150 cursor-pointer"
                 style={{
                 background: "var(--soft-bg)",
