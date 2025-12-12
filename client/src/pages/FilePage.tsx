@@ -1,46 +1,40 @@
 import { FileList } from "../components/files/FileList";
-import { FileUpload } from "../components/files/FileUpload";
 import { useState } from "react";
-
 import { FileDTO } from "../models/file/FileDTO";
 import Sidebar from "../components/dashboard/navbar/Sidebar";
+import { FileModalDelete } from "../components/files/FileModalDelete";
 
 export const FilePage = () => {
-  const [view, setView] = useState<"upload" | "list">("upload");
   const [selectedFile, setSelectedFile] = useState<FileDTO | null>(null);
+  const [view, setView] = useState<"deleteModal" | "list">("list");
+  const [deleteCallback, setDeleteCallback] = useState<(() => void) | null>(null);
 
 return (
-    <div className="min-h-screen flex">
-       <Sidebar />
-    <div className="flex-1 relative flex items-center justify-center">
-        {view === "upload" && (
-          <FileUpload
-            setIsOpen={() => setView("list")}
-            fileInfo={selectedFile!}
-          />
-        )}
+    <div className="min-h-screen w-screen flex">
+      <Sidebar />
+      <div className="flex-1 flex items-center justify-center px-10">
 
-        {view === "list" && (
-          <>
-            <FileList
-              onSelectFile={(file) => {
-                setSelectedFile(file);
-                setView("upload");
-              }}
-            />
-
-            <button
-              onClick={() => setView("upload")}
-              className="absolute top-6 right-8 w-12 h-12 flex 
-              items-center justify-center rounded-full
-              hover:bg-red-600 
-              text-white font-bold text-2xl z-50 shadow-xl transition"
-            >
-              ×
-            </button>
-          </>
-        )}
-      </div>
+    {view === "list" && (
+          <FileList
+          onSelectFile={(file) => {
+            setSelectedFile(file);
+          }}
+          openDeleteModal={(cb) => {
+            setDeleteCallback(() => cb); 
+            setView("deleteModal");
+          }}
+      />
+    )} 
+  </div>
+    {view === "deleteModal" && (
+        <FileModalDelete
+          setIsClose={() => setView("list")}
+          setIsDelete={() => {
+          deleteCallback?.();  
+          setView("list");     
+        }}
+      />
+    )}
     </div>
   );
 };
