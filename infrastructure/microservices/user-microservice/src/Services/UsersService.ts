@@ -1,4 +1,4 @@
-import { Repository } from "typeorm";
+import { Not, Repository } from "typeorm";
 import { IUsersService } from "../Domain/services/IUsersService";
 import { User } from "../Domain/models/User";
 import { UserDTO } from "../Domain/DTOs/UserDTO";
@@ -136,8 +136,8 @@ export class UsersService implements IUsersService {
 
     const alreadyExist = await this.userRepository.count({
       where: [
-        { username: updateUserData.username },
-        { email: updateUserData.email },
+        { username: updateUserData.username, user_id: Not(user_id) },
+        { email: updateUserData.email, user_id: Not(user_id) },
       ], //na ovaj nacin proveravam da li username ili email vec postoje i da li je obrisan korisnik sa tim podacima
       //kaze onda da dupliramo podatke sto je logicno, ali da li je potrebno onda da ostavim samo bez is_deleted: false u oba slucaja?
     });
@@ -168,12 +168,40 @@ export class UsersService implements IUsersService {
       }
     }
 
-    //Spaja postojece podatke user-a sa novim podacima
-    const result = await this.userRepository.update(user_id, existingUser);
+    const updatedUser = await this.userRepository.save(existingUser);
+
+    return toDTO(updatedUser);
+  }
+
+  /**
+   * Set user's weekly_working_hour_sum by userId
+   */
+
+  async setWeeklyHours(
+    user_id: number,
+    weekly_working_hour: number
+  ): Promise<UserDTO> {
+    const existingUser = await this.userRepository.findOne({
+      where: { user_id },
+      relations: ["user_role"],
+    });
+
+    if (!existingUser) {
+      throw new Error(`User with ID ${user_id} not found`);
+    }
+
+    const weekly_working_hour_sum =
+      existingUser.weekly_working_hour_sum + weekly_working_hour;
+
+    const result = await this.userRepository.update(user_id, {
+      weekly_working_hour_sum,
+    });
 
     if (result.affected === undefined || result.affected === 0) {
       throw new Error(`User with ID ${user_id} could not be updated`);
     }
+
+    existingUser.weekly_working_hour_sum = weekly_working_hour_sum;
 
     return toDTO(existingUser);
   }
