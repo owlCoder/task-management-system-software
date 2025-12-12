@@ -85,7 +85,7 @@ export const EditProjectModal: React.FC<Props> = ({ project, isOpen, onClose, on
           <button
             type="button"
             onClick={onClose}
-            className="text-white text-2xl w-8 h-8 flex items-center justify-center hover:text-gray-200"
+            className="text-white text-2xl w-8 h-8 flex items-center justify-center hover:text-gray-200 cursor-pointer"
           >
             ×
           </button>
@@ -96,7 +96,7 @@ export const EditProjectModal: React.FC<Props> = ({ project, isOpen, onClose, on
             <label className="block text-sm font-semibold text-gray-500 mb-1">Project Name</label>
             <input
               type="text"
-              className="w-full border rounded-lg px-3 py-2"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent/30"
               value={formData.name}
               onChange={(e) => updateField("name", e.target.value)}
               required
@@ -106,7 +106,7 @@ export const EditProjectModal: React.FC<Props> = ({ project, isOpen, onClose, on
           <div>
             <label className="block text-sm font-semibold text-gray-500 mb-1">Description</label>
             <textarea
-              className="w-full border rounded-lg px-3 py-2 h-24"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg h-24 focus:outline-none focus:ring-2 focus:ring-accent/30"
               value={formData.description || ""}
               onChange={(e) => updateField("description", e.target.value)}
             />
@@ -116,7 +116,7 @@ export const EditProjectModal: React.FC<Props> = ({ project, isOpen, onClose, on
             <label className="block text-sm font-semibold text-gray-500 mb-1">Image URL</label>
             <input
               type="text"
-              className="w-full border rounded-lg px-3 py-2"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent/30"
               value={formData.imageUrl || ""}
               onChange={(e) => updateField("imageUrl", e.target.value)}
             />
@@ -127,7 +127,7 @@ export const EditProjectModal: React.FC<Props> = ({ project, isOpen, onClose, on
             <input
               type="number"
               min={0}
-              className="w-full border rounded-lg px-3 py-2"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent/30"
               value={formData.totalWeeklyHours || 0}
               onChange={(e) => updateField("totalWeeklyHours", Number(e.target.value))}
             />
@@ -138,7 +138,7 @@ export const EditProjectModal: React.FC<Props> = ({ project, isOpen, onClose, on
             <input
               type="number"
               min={0}
-              className="w-full border rounded-lg px-3 py-2"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent/30"
               value={formData.allowedBudget || 0}
               onChange={(e) => updateField("allowedBudget", Number(e.target.value))}
             />
@@ -149,7 +149,7 @@ export const EditProjectModal: React.FC<Props> = ({ project, isOpen, onClose, on
             <input
               type="number"
               min={1}
-              className="w-full border rounded-lg px-3 py-2"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent/30"
               value={formData.numberOfSprints || ""}
               onChange={(e) => updateField("numberOfSprints", Number(e.target.value))}
             />
@@ -160,7 +160,7 @@ export const EditProjectModal: React.FC<Props> = ({ project, isOpen, onClose, on
             <input
               type="number"
               min={1}
-              className="w-full border rounded-lg px-3 py-2"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent/30"
               value={formData.sprintDuration || ""}
               onChange={(e) => updateField("sprintDuration", Number(e.target.value))}
             />
@@ -170,7 +170,7 @@ export const EditProjectModal: React.FC<Props> = ({ project, isOpen, onClose, on
             <label className="block text-sm font-semibold text-gray-500 mb-1">Start Date</label>
             <input
               type="date"
-              className="w-full border rounded-lg px-3 py-2"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent/30"
               value={formData.startDate ? new Date(formData.startDate).toISOString().split("T")[0] : ""}
               onChange={(e) => updateField("startDate", e.target.value)}
             />
@@ -185,7 +185,7 @@ export const EditProjectModal: React.FC<Props> = ({ project, isOpen, onClose, on
                     type="checkbox"
                     checked={selectedMembers.includes(user.id)}
                     onChange={() => toggleMember(user.id)}
-                    className="w-4 h-4 cursor-pointer"
+                    className="w-4 h-4 cursor-pointer focus:outline-none"
                     style={{ accentColor: "var(--brand)" }}
                   />
                   <span className="text-sm text-gray-700">{user.username}</span>
@@ -199,7 +199,7 @@ export const EditProjectModal: React.FC<Props> = ({ project, isOpen, onClose, on
           <button
             type="button"
             onClick={handleSubmit}
-            className="px-6 py-2 rounded-lg text-sm font-semibold"
+            className="px-6 py-2 rounded-lg text-sm font-semibold cursor-pointer"
             style={{ background: "var(--brand)", color: "white" }}
           >
             Save
@@ -207,7 +207,7 @@ export const EditProjectModal: React.FC<Props> = ({ project, isOpen, onClose, on
           <button
             type="button"
             onClick={onClose}
-            className="px-6 py-2 rounded-lg text-sm font-semibold"
+            className="px-6 py-2 rounded-lg text-sm font-semibold cursor-pointer"
             style={{ background: "var(--soft-bg)", color: "var(--brand)" }}
           >
             Cancel

@@ -34,6 +34,7 @@ export const ProjectsPage: React.FC = () => {
   const handleCloseDetailsModal = () => {
     setIsDetailsModalOpen(false);
     setViewProject(null);
+    setSelectedId(null); 
   };
 
   const handleOpenCreateModal = () => {
@@ -53,6 +54,8 @@ export const ProjectsPage: React.FC = () => {
   };
 
   const handleOpenEditModal = (project: ProjectDTO) => {
+    setIsDetailsModalOpen(false);
+    setViewProject(null);
     setProjectToEdit(project);
     setIsEditModalOpen(true);
   };
@@ -60,6 +63,7 @@ export const ProjectsPage: React.FC = () => {
   const handleCloseEditModal = () => {
     setIsEditModalOpen(false);
     setProjectToEdit(null);
+    setSelectedId(null); 
   };
 
   const handleCreateProject = async (newProject: Omit<ProjectDTO, "id">) => {
@@ -104,7 +108,7 @@ export const ProjectsPage: React.FC = () => {
             className="m-0 text-2xl md:text-3xl"
             style={{
               fontFamily: "var(--font-secondary)",
-              color: "var(--brand)",
+              color: "var(--soft-bg)",
               fontWeight: "bold",
             }}
           >
@@ -116,8 +120,8 @@ export const ProjectsPage: React.FC = () => {
               type="button"
               className="inline-flex items-center justify-center gap-2 rounded-lg px-4 h-10 text-sm focus:outline-none focus:ring-2 focus:ring-accent/30 transition-opacity duration-150"
               style={{
-              background: selectedId ? "var(--brand)" : "var(--soft-bg)",
-              color: selectedId ? "white" : "var(--muted)",
+              background: selectedId ? "white" : "var(--soft-bg)",
+              color: selectedId ? "var(--brand)" : "var(--muted)",
               opacity: !selectedId ? 0.5 : 1,
               pointerEvents: !selectedId ? "none" : "auto",
               fontFamily: "var(--font-primary)",
@@ -126,6 +130,8 @@ export const ProjectsPage: React.FC = () => {
               height: 30,
               cursor: "pointer",
               fontSize: "16px",
+              fontWeight: "bold",
+              width: "140px",
               }}
               aria-disabled={!selectedId}
               onClick={handleOpenEditModalClick}
@@ -138,8 +144,8 @@ export const ProjectsPage: React.FC = () => {
               type="button"
               className="inline-flex items-center justify-center gap-2 rounded-lg px-4 h-10 text-sm focus:outline-none focus:ring-2 focus:ring-accent/30 transition-opacity duration-150"
               style={{
-              background: selectedId ? "var(--brand)" : "var(--soft-bg)",
-              color: selectedId ? "white" : "var(--muted)",
+              background: selectedId ? "white" : "var(--soft-bg)",
+              color: selectedId ? "var(--brand)" : "var(--muted)",
               opacity: !selectedId ? 0.5 : 1,
               pointerEvents: !selectedId ? "none" : "auto",
               fontFamily: "var(--font-primary)",
@@ -148,6 +154,8 @@ export const ProjectsPage: React.FC = () => {
               height: 30,
               cursor: "pointer",
               fontSize: "16px",
+              fontWeight: "bold",
+              width: "140px",
             }}
               aria-disabled={!selectedId}
               onClick={handleDelete}
@@ -160,14 +168,16 @@ export const ProjectsPage: React.FC = () => {
               type="button"
               onClick={handleOpenCreateModal}
               style={{
-              background: "var(--brand)",
-              color: "white",
+              background: "white",
+              color: "var(--brand)",
               fontFamily: "var(--font-primary)",
               margin: "3px",
               borderRadius: "4px",
               height: 30,
               cursor: "pointer",
               fontSize: "16px",
+              fontWeight: "bold",
+              width: "140px",
               }}
             >
               Create Project
@@ -197,6 +207,7 @@ export const ProjectsPage: React.FC = () => {
           project={viewProject}
           isOpen={isDetailsModalOpen}
           onClose={handleCloseDetailsModal}
+          onEdit={handleOpenEditModal}
         />
 
         <CreateProjectModal
