@@ -90,20 +90,30 @@ export class NotificationValidation {
    * @returns null ako je validno, ili error poruka ako nije
    */
   static validateIdsArray(ids: any): string | null {
+    console.log('🔍 VALIDATION - validateIdsArray called with:', ids);
+    console.log('🔍 VALIDATION - typeof ids:', typeof ids);
+    console.log('🔍 VALIDATION - Array.isArray(ids):', Array.isArray(ids));
+    
     if (!Array.isArray(ids)) {
+      console.log('❌ VALIDATION - Not an array!');
       return 'IDs must be an array';
     }
 
     if (ids.length === 0) {
+      console.log('❌ VALIDATION - Empty array!');
       return 'IDs array cannot be empty';
     }
 
+    console.log('🔍 VALIDATION - Iterating through IDs...');
     for (const id of ids) {
+      console.log('🔍 VALIDATION - Checking ID:', id, '| typeof:', typeof id, '| value > 0:', id > 0);
       if (typeof id !== 'number' || id <= 0) {
+        console.log('❌ VALIDATION - Invalid ID detected:', id);
         return 'All IDs must be positive numbers';
       }
     }
 
+    console.log('✅ VALIDATION - All IDs valid!');
     return null;
   }
 }

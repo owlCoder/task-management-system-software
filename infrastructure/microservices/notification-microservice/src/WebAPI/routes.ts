@@ -11,6 +11,45 @@ export const createNotificationRoutes = (notificationService: INotificationServi
   const router = Router();
   const controller = new NotificationController(notificationService);
 
+  console.log('📝 Routes created! Registering all notification routes...');
+
+  // ============================================
+  // BULK ROUTES - MORAJU BITI PRE :id RUTA!
+  // ============================================
+
+  /**
+   * PATCH /notifications/bulk/read
+   * Oznaci vise notifikacija kao procitane
+   */
+  router.patch('/notifications/bulk/read', (req, res) => {
+    console.log('🎯 ROUTE HANDLER - bulk/read called!');
+    console.log('🎯 ROUTE - req.body:', req.body);
+    controller.markMultipleAsRead(req, res);
+  });
+
+  /**
+   * PATCH /notifications/bulk/unread
+   * Oznaci vise notifikacija kao neprocitane
+   */
+  router.patch('/notifications/bulk/unread', (req, res) => {
+    console.log('🎯🎯🎯 ROUTE HANDLER CALLED - bulk/unread');
+    console.log('🎯 ROUTE - req.body:', req.body);
+    console.log('🎯 ROUTE - req.body.ids:', req.body.ids);
+    console.log('🎯 ROUTE - typeof req.body.ids:', typeof req.body.ids);
+    console.log('🎯 ROUTE - Array.isArray(req.body.ids):', Array.isArray(req.body.ids));
+    controller.markMultipleAsUnread(req, res);
+  });
+
+  /**
+   * DELETE /notifications/bulk
+   * Brise vise notifikacija odjednom
+   */
+  router.delete('/notifications/bulk', (req, res) => {
+    console.log('🎯 ROUTE HANDLER - bulk/delete called!');
+    console.log('🎯 ROUTE - req.body:', req.body);
+    controller.deleteMultipleNotifications(req, res);
+  });
+
   // ============================================
   // GET ROUTES
   // ============================================
@@ -21,14 +60,6 @@ export const createNotificationRoutes = (notificationService: INotificationServi
    */
   router.get('/notifications', (req, res) => 
     controller.getAllNotifications(req, res)
-  );
-
-  /**
-   * GET /notifications/:id
-   * Vraca notifikaciju po ID-u
-   */
-  router.get('/notifications/:id', (req, res) => 
-    controller.getNotificationById(req, res)
   );
 
   /**
@@ -45,6 +76,14 @@ export const createNotificationRoutes = (notificationService: INotificationServi
    */
   router.get('/notifications/user/:userId/unread-count', (req, res) => 
     controller.getUnreadCount(req, res)
+  );
+
+  /**
+   * GET /notifications/:id
+   * Vraca notifikaciju po ID-u
+   */
+  router.get('/notifications/:id', (req, res) => 
+    controller.getNotificationById(req, res)
   );
 
   // ============================================
@@ -64,14 +103,6 @@ export const createNotificationRoutes = (notificationService: INotificationServi
   // ============================================
 
   /**
-   * PATCH /notifications/:id
-   * Azurira notifikaciju
-   */
-  router.patch('/notifications/:id', (req, res) => 
-    controller.updateNotification(req, res)
-  );
-
-  /**
    * PATCH /notifications/:id/read
    * Oznaci notifikaciju kao procitanu
    */
@@ -88,19 +119,11 @@ export const createNotificationRoutes = (notificationService: INotificationServi
   );
 
   /**
-   * PATCH /notifications/bulk/read
-   * Oznaci vise notifikacija kao procitane
+   * PATCH /notifications/:id
+   * Azurira notifikaciju
    */
-  router.patch('/notifications/bulk/read', (req, res) => 
-    controller.markMultipleAsRead(req, res)
-  );
-
-  /**
-   * PATCH /notifications/bulk/unread
-   * Oznaci vise notifikacija kao neprocitane
-   */
-  router.patch('/notifications/bulk/unread', (req, res) => 
-    controller.markMultipleAsUnread(req, res)
+  router.patch('/notifications/:id', (req, res) => 
+    controller.updateNotification(req, res)
   );
 
   // ============================================
@@ -115,13 +138,7 @@ export const createNotificationRoutes = (notificationService: INotificationServi
     controller.deleteNotification(req, res)
   );
 
-  /**
-   * DELETE /notifications/bulk
-   * Brise vise notifikacija odjednom
-   */
-  router.delete('/notifications/bulk', (req, res) => 
-    controller.deleteMultipleNotifications(req, res)
-  );
-
+  console.log('✅ All routes registered successfully!');
+  
   return router;
 };

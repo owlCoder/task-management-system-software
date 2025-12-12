@@ -234,17 +234,24 @@ export class NotificationController {
    */
   async markMultipleAsRead(req: Request, res: Response): Promise<void> {
     try {
+      console.log('🔍 DEBUG markMultipleAsRead - req.body:', req.body);
+      console.log('🔍 DEBUG markMultipleAsRead - req.body.ids:', req.body.ids);
+      
       // validacija IDs array-a
       const validationError = NotificationValidation.validateIdsArray(req.body.ids);
       if (validationError) {
+        console.log('❌ Validation error markMultipleAsRead:', validationError);
         res.status(400).json({ message: validationError });
         return;
       }
 
       const { ids } = req.body;
+      console.log('✅ Calling service markMultipleAsRead with ids:', ids);
+      
       await this.notificationService.markMultipleAsRead(ids);
       res.status(200).json({ message: 'Notifications marked as read' });
     } catch (error) {
+      console.error('❌ Error in markMultipleAsRead:', error);
       res.status(500).json({ 
         message: 'Error marking notifications as read', 
         error: (error as Error).message 
@@ -258,17 +265,24 @@ export class NotificationController {
    */
   async markMultipleAsUnread(req: Request, res: Response): Promise<void> {
     try {
+      console.log('🔍 DEBUG markMultipleAsUnread - req.body:', req.body);
+      console.log('🔍 DEBUG markMultipleAsUnread - req.body.ids:', req.body.ids);
+      
       // validacija IDs array-a
       const validationError = NotificationValidation.validateIdsArray(req.body.ids);
       if (validationError) {
+        console.log('❌ Validation error markMultipleAsUnread:', validationError);
         res.status(400).json({ message: validationError });
         return;
       }
 
       const { ids } = req.body;
+      console.log('✅ Calling service markMultipleAsUnread with ids:', ids);
+      
       await this.notificationService.markMultipleAsUnread(ids);
       res.status(200).json({ message: 'Notifications marked as unread' });
     } catch (error) {
+      console.error('❌ Error in markMultipleAsUnread:', error);
       res.status(500).json({ 
         message: 'Error marking notifications as unread', 
         error: (error as Error).message 
@@ -312,17 +326,24 @@ export class NotificationController {
    */
   async deleteMultipleNotifications(req: Request, res: Response): Promise<void> {
     try {
+      console.log('🔍 DEBUG deleteMultiple - req.body:', req.body);
+      console.log('🔍 DEBUG deleteMultiple - req.body.ids:', req.body.ids);
+      
       // validacija IDs array-a
       const validationError = NotificationValidation.validateIdsArray(req.body.ids);
       if (validationError) {
+        console.log('❌ Validation error deleteMultiple:', validationError);
         res.status(400).json({ message: validationError });
         return;
       }
 
       const { ids } = req.body;
+      console.log('✅ Calling service deleteMultiple with ids:', ids);
+      
       await this.notificationService.deleteMultipleNotifications(ids);
       res.status(200).json({ message: 'Notifications deleted successfully' });
     } catch (error) {
+      console.error('❌ Error in deleteMultiple:', error);
       res.status(500).json({ 
         message: 'Error deleting notifications', 
         error: (error as Error).message 
