@@ -25,6 +25,7 @@ export class UsersController {
     this.router.post("/users", this.createUser.bind(this));
     this.router.delete("/users/:id", this.logicalyDeleteUser.bind(this));
     this.router.put("/users/:id", this.updateUser.bind(this));
+    this.router.put("/users/:id/working-hours", this.setWeeklyHours.bind(this));
     this.router.get("/user-roles", this.getAllUserRoles.bind(this));
   }
 
@@ -57,7 +58,7 @@ export class UsersController {
       const id = parseInt(req.params.id, 10);
 
       if (isNaN(id)) {
-        res.status(400).json({ message: "Prosledjeni id nije broj" });
+        res.status(400).json({ message: "The passed id is not a number." });
         return;
       }
 
@@ -109,7 +110,7 @@ export class UsersController {
       const id = parseInt(req.params.id, 10);
 
       if (isNaN(id)) {
-        res.status(400).json({ message: "Prosledjeni id nije broj" });
+        res.status(400).json({ message: "The passed id is not a number." });
         return;
       }
 
@@ -117,7 +118,7 @@ export class UsersController {
       const result = await this.usersService.logicalyDeleteUserById(id);
 
       if (result === false) {
-        res.status(500).json({ message: "Logicko brisanje nije uspelo" });
+        res.status(500).json({ message: "Logical delete failed." });
       } else {
         res
           .status(200)
@@ -141,7 +142,7 @@ export class UsersController {
       const id = parseInt(req.params.id, 10);
 
       if (isNaN(id)) {
-        res.status(400).json({ message: "Prosledjeni id nije broj" });
+        res.status(400).json({ message: "The passed id is not a number" });
         return;
       }
 
@@ -164,7 +165,44 @@ export class UsersController {
   }
 
   /**
-   * GET /api/v1//user-roles
+   * PUT /api/v1/users/:id/working-hours
+   * @param {id and weekly_working_hours} req.body - ID of user that you want to update, and weekly_working_hours
+   * @returns {UserDTO} - JSON format return
+   * @see {@link UserDTO} for input structure
+   */
+
+  private async setWeeklyHours(req: Request, res: Response): Promise<void> {
+    try {
+      const id = parseInt(req.params.id, 10);
+
+      if (isNaN(id)) {
+        res.status(400).json({ message: "The passed id is not a number" });
+        return;
+      }
+
+      const { weekly_working_hours } = req.body;
+
+      if (isNaN(weekly_working_hours)) {
+        res
+          .status(400)
+          .json({ message: "The passed weekly_working_hours is not a number" });
+        return;
+      }
+
+      this.logger.log("Update user's weekly_working_hours_sum");
+      const updatedUser = await this.usersService.setWeeklyHours(
+        id,
+        weekly_working_hours
+      );
+      res.status(200).json(updatedUser);
+    } catch (err) {
+      this.logger.log((err as Error).message);
+      res.status(500).json({ message: (err as Error).message });
+    }
+  }
+
+  /**
+   * GET /api/v1/user-roles
    * Get all roles
    * @returns {UserRoleDTO[]} JSON response with success status, session/token, and message
    * @see {@link UserRoleDTO} for input structure
