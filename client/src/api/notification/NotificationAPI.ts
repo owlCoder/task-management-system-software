@@ -6,12 +6,6 @@ export class NotificationAPI implements INotificationAPI {
   
   private baseURL = 'http://localhost:6432/api';
 
-  // GET /api/notifications
-  async getAllNotifications(): Promise<Notification[]> {
-    const response = await axios.get(`${this.baseURL}/notifications`);
-    return response.data;
-  }
-
   // GET /api/notifications/user/:userId
   async getNotificationsByUserId(userId: number): Promise<Notification[]> {
     const response = await axios.get(`${this.baseURL}/notifications/user/${userId}`);

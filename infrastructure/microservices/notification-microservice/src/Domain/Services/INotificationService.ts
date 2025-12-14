@@ -1,12 +1,11 @@
 import { NotificationCreateDTO } from '../DTOs/NotificationCreateDTO';
 import { NotificationUpdateDTO } from '../DTOs/NotificationUpdateDTO';
-import { NotificationResponseDTO } from '../DTOs/NotificationResponseDTO';
+import { NotificationResponseDTO } from '../DTOs/NotificationDTO';
 
 export interface INotificationService {
   
   // CRUD
   createNotification(data: NotificationCreateDTO): Promise<NotificationResponseDTO>;
-  getAllNotifications(): Promise<NotificationResponseDTO[]>;
   getNotificationById(id: number): Promise<NotificationResponseDTO | null>;
   getNotificationsByUserId(userId: number): Promise<NotificationResponseDTO[]>;
   updateNotification(id: number, data: NotificationUpdateDTO): Promise<NotificationResponseDTO | null>;

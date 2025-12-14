@@ -1,16 +1,19 @@
+
 export interface Notification {
   id: number;
+  title: string;           
   content: string;
-  timestamp: string;
+  type: 'info' | 'warning' | 'error' | 'success';
   isRead: boolean;
-  type?: 'info' | 'warning' | 'error';
-  source?: string;
+  userId: number;         
+  createdAt: string;      
+  updatedAt: string;       
 }
 
 export interface NotificationCardProps {
   notification: Notification;
   onClick?: (id: number) => void;
-  isSelected?: boolean;                    
-  onSelectChange?: (id: number) => void;   
+  isSelected?: boolean;
+  onSelectChange?: (id: number) => void;
   className?: string;
 }

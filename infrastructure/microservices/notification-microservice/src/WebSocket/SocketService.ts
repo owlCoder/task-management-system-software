@@ -1,7 +1,7 @@
 import { Server as SocketIOServer, Socket } from 'socket.io';
 import { Server as HTTPServer } from 'http';
 import { SocketEvents } from './SocketEvents';
-import type { NotificationResponseDTO } from '../Domain/DTOs/NotificationResponseDTO';
+import type { NotificationResponseDTO } from '../Domain/DTOs/NotificationDTO';
 
 export class SocketService {
   private io: SocketIOServer;

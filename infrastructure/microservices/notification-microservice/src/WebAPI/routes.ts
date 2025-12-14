@@ -55,14 +55,6 @@ export const createNotificationRoutes = (notificationService: INotificationServi
   // ============================================
 
   /**
-   * GET /notifications
-   * Vraca sve notifikacije
-   */
-  router.get('/notifications', (req, res) => 
-    controller.getAllNotifications(req, res)
-  );
-
-  /**
    * GET /notifications/user/:userId
    * Vraca notifikacije za odredjenog korisnika
    */

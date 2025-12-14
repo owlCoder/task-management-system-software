@@ -3,7 +3,6 @@ import type { Notification } from '../../models/notification/NotificationCardDTO
 export interface INotificationAPI {
   
   // GET operacije
-  getAllNotifications(): Promise<Notification[]>;
   getNotificationsByUserId(userId: number): Promise<Notification[]>;
   getUnreadCount(userId: number): Promise<number>;
   

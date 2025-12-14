@@ -54,7 +54,7 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
           <h3 className={`font-bold text-lg transition ${
             isSelected ? 'text-slate-50' : 'text-slate-100'
           }`}>
-            Notification {notification.id}
+            {notification.title}
           </h3>
           
           <p className={`mt-2 text-sm leading-relaxed transition ${
@@ -66,7 +66,13 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
           <div className={`mt-3 text-xs transition ${
             isSelected ? 'text-slate-400' : 'text-slate-500'
           }`}>
-            {notification.timestamp}
+            {new Date(notification.createdAt).toLocaleString('sr-RS', {
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit'
+            })}
           </div>
         </div>
         

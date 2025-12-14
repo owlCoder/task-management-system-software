@@ -1,6 +1,6 @@
 import { Notification } from '../models/Notification';
 import { NotificationCreateDTO } from '../DTOs/NotificationCreateDTO';
-import { NotificationResponseDTO } from '../DTOs/NotificationResponseDTO';
+import { NotificationResponseDTO } from '../DTOs/NotificationDTO';
 
 export interface INotificationMapper {
   

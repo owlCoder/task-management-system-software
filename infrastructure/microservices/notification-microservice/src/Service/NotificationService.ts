@@ -3,7 +3,7 @@ import { INotificationMapper } from '../Domain/services/INotificationMapper';
 import { INotificationService } from '../Domain/services/INotificationService';
 import { NotificationCreateDTO } from '../Domain/DTOs/NotificationCreateDTO';
 import { NotificationUpdateDTO } from '../Domain/DTOs/NotificationUpdateDTO';
-import { NotificationResponseDTO } from '../Domain/DTOs/NotificationResponseDTO';
+import { NotificationResponseDTO } from '../Domain/DTOs/NotificationDTO';
 import { SocketService } from '../WebSocket/SocketService';
 
 export class NotificationService implements INotificationService {
@@ -37,12 +37,6 @@ export class NotificationService implements INotificationService {
     }
     
     return responseDTO;
-  }
-
-  // vraca sve notifikacije
-  async getAllNotifications(): Promise<NotificationResponseDTO[]> {
-    const notifications = await this.repository.findAll();
-    return this.mapper.toResponseDTOArray(notifications);
   }
 
   // vraca notifikaciju po ID-u

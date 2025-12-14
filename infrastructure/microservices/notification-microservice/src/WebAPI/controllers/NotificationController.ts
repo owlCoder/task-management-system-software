@@ -13,22 +13,6 @@ export class NotificationController {
   }
 
   /**
-   * GET /notifications
-   * vraca sve notifikacije
-   */
-  async getAllNotifications(req: Request, res: Response): Promise<void> {
-    try {
-      const notifications = await this.notificationService.getAllNotifications();
-      res.status(200).json(notifications);
-    } catch (error) {
-      res.status(500).json({ 
-        message: 'Error fetching notifications', 
-        error: (error as Error).message 
-      });
-    }
-  }
-
-  /**
    * GET /notifications/:id
    * vraca notifikaciju po ID-u
    */
