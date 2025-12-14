@@ -1,3 +1,5 @@
+import { NotificationType } from '../enums/NotificationType';
+
 import { 
   Entity, 
   PrimaryGeneratedColumn, 
@@ -20,10 +22,10 @@ export class Notification {
 
   @Column({ 
     type: 'enum', 
-    enum: ['info', 'warning', 'error'],
-    default: 'info'
+    enum: NotificationType,
+    default: NotificationType.INFO
   })
-  type!: 'info' | 'warning' | 'error';
+  type!: NotificationType;
 
   @Column({ type: 'boolean', default: false })
   isRead!: boolean;

@@ -2,7 +2,6 @@ import { INotificationRepository } from '../Domain/services/INotificationReposit
 import { INotificationMapper } from '../Domain/services/INotificationMapper';
 import { INotificationService } from '../Domain/services/INotificationService';
 import { NotificationCreateDTO } from '../Domain/DTOs/NotificationCreateDTO';
-import { NotificationUpdateDTO } from '../Domain/DTOs/NotificationUpdateDTO';
 import { NotificationResponseDTO } from '../Domain/DTOs/NotificationDTO';
 import { SocketService } from '../WebSocket/SocketService';
 
@@ -54,31 +53,6 @@ export class NotificationService implements INotificationService {
   async getNotificationsByUserId(userId: number): Promise<NotificationResponseDTO[]> {
     const notifications = await this.repository.findByUserId(userId);
     return this.mapper.toResponseDTOArray(notifications);
-  }
-
-  // azurira notifikaciju
-  async updateNotification(id: number, data: NotificationUpdateDTO): Promise<NotificationResponseDTO | null> {
-    const notification = await this.repository.findOne(id);
-
-    if (!notification) {
-      return null;
-    }
-
-    // azuriraj samo polja koja su prosledjena
-    if (data.title !== undefined) notification.title = data.title;
-    if (data.content !== undefined) notification.content = data.content;
-    if (data.type !== undefined) notification.type = data.type;
-    if (data.isRead !== undefined) notification.isRead = data.isRead;
-
-    const updatedNotification = await this.repository.save(notification);
-    const responseDTO = this.mapper.toResponseDTO(updatedNotification);
-    
-    // Emit WebSocket event
-    if (this.socketService) {
-      this.socketService.emitNotificationUpdated(responseDTO);
-    }
-    
-    return responseDTO;
   }
 
   // oznaci notifikaciju kao procitanu

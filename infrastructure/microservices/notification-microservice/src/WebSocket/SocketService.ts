@@ -52,13 +52,6 @@ export class SocketService {
     console.log(`Emitted NOTIFICATION_CREATED to room: ${room}`);
   }
 
-   // Emituje događaj o ažuriranoj notifikaciji
-  public emitNotificationUpdated(notification: NotificationResponseDTO): void {
-    const room = `user:${notification.userId}`;
-    this.io.to(room).emit(SocketEvents.NOTIFICATION_UPDATED, notification);
-    console.log(`Emitted NOTIFICATION_UPDATED to room: ${room}`);
-  }
-
    // Emituje događaj o obrisanoj notifikaciji
   public emitNotificationDeleted(notificationId: number, userId: number): void {
     const room = `user:${userId}`;
@@ -66,7 +59,7 @@ export class SocketService {
     console.log(`Emitted NOTIFICATION_DELETED to room: ${room}`);
   }
 
-   // Emituje događaj o notifikaciji označenoj kao pročitana
+   // Emituje događaj o notifikaciji oznacenoj kao pročitana
   public emitNotificationMarkedRead(notification: NotificationResponseDTO): void {
     const room = `user:${notification.userId}`;
     this.io.to(room).emit(SocketEvents.NOTIFICATION_MARKED_READ, notification);

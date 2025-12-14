@@ -110,14 +110,6 @@ export const createNotificationRoutes = (notificationService: INotificationServi
     controller.markAsUnread(req, res)
   );
 
-  /**
-   * PATCH /notifications/:id
-   * Azurira notifikaciju
-   */
-  router.patch('/notifications/:id', (req, res) => 
-    controller.updateNotification(req, res)
-  );
-
   // ============================================
   // DELETE ROUTES
   // ============================================

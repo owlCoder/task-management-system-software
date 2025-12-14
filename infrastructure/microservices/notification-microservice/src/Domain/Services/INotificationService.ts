@@ -1,5 +1,4 @@
 import { NotificationCreateDTO } from '../DTOs/NotificationCreateDTO';
-import { NotificationUpdateDTO } from '../DTOs/NotificationUpdateDTO';
 import { NotificationResponseDTO } from '../DTOs/NotificationDTO';
 
 export interface INotificationService {
@@ -8,7 +7,6 @@ export interface INotificationService {
   createNotification(data: NotificationCreateDTO): Promise<NotificationResponseDTO>;
   getNotificationById(id: number): Promise<NotificationResponseDTO | null>;
   getNotificationsByUserId(userId: number): Promise<NotificationResponseDTO[]>;
-  updateNotification(id: number, data: NotificationUpdateDTO): Promise<NotificationResponseDTO | null>;
   deleteNotification(id: number): Promise<boolean>;
   
   // mark as read/unread

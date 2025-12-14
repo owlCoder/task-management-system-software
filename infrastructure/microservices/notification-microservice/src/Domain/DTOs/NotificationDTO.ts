@@ -1,8 +1,10 @@
+import { NotificationType } from '../enums/NotificationType';
+
 export interface NotificationResponseDTO {
   id: number;
   title: string;
   content: string;
-  type: 'info' | 'warning' | 'error';
+  type: NotificationType;
   isRead: boolean;
   userId?: number;
   createdAt: Date;
@@ -13,7 +15,7 @@ export class NotificationResponse implements NotificationResponseDTO {
   id: number;
   title: string;
   content: string;
-  type: 'info' | 'warning' | 'error';
+  type: NotificationType;
   isRead: boolean;
   userId?: number;
   createdAt: Date;

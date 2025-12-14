@@ -1,6 +1,7 @@
 import axios from 'axios';
 import type { Notification } from '../../models/notification/NotificationCardDTO';
 import type { INotificationAPI } from './INotificationAPI';
+import { NotificationType } from '../../enums/NotificationType';
 
 export class NotificationAPI implements INotificationAPI {
   
@@ -22,7 +23,7 @@ export class NotificationAPI implements INotificationAPI {
   async createNotification(data: {
     title: string;
     content: string;
-    type: 'info' | 'warning' | 'error';
+    type: NotificationType;
     userId: number;
   }): Promise<Notification> {
     const response = await axios.post(`${this.baseURL}/notifications`, data);
@@ -62,5 +63,5 @@ export class NotificationAPI implements INotificationAPI {
   }
 }
 
-// Export instance (kao projectAPI u njihovom kodu)
+// Export instance
 export const notificationAPI = new NotificationAPI();

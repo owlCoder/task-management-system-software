@@ -1,4 +1,5 @@
 import type { Notification } from '../../models/notification/NotificationCardDTO';
+import { NotificationType } from '../../enums/NotificationType';
 
 export interface INotificationAPI {
   
@@ -10,7 +11,7 @@ export interface INotificationAPI {
   createNotification(data: {
     title: string;
     content: string;
-    type: 'info' | 'warning' | 'error';
+    type: NotificationType; 
     userId: number;
   }): Promise<Notification>;
   

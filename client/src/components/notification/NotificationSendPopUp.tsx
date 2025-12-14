@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import type { NotificationSendPopUpProps } from '../../models/notification/NotificationSendPopUpDTO';
+import { NotificationType } from '../../enums/NotificationType';
 
 const NotificationSendPopUp: React.FC<NotificationSendPopUpProps> = ({
   isOpen,
@@ -11,21 +12,30 @@ const NotificationSendPopUp: React.FC<NotificationSendPopUpProps> = ({
 
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
+  const [type, setType] = useState<NotificationType>(NotificationType.INFO);
 
   const handleClose = () => {
     setTitle('');
     setContent('');
+    setType(NotificationType.INFO);
     onClose();
   };
 
   const handleSend = () => {
+    if (!title.trim()) {
+      alert('Title is required!');
+      return;
+    }
+    
     if (!content.trim()) {
       alert('Content is required!');
       return;
     }
-    onSend(title, content);
+    
+    onSend(title, content, type);
     setTitle('');
     setContent('');
+    setType(NotificationType.INFO);
   };
 
   const handleOverlayClick = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -75,9 +85,10 @@ const NotificationSendPopUp: React.FC<NotificationSendPopUpProps> = ({
         {/* form */}
         <div className="space-y-4">
           
+          {/* Title Input */}
           <div>
             <label className="block text-sm font-semibold text-slate-300 mb-2">
-              Title
+              Title *
             </label>
             <input
               type="text"
@@ -89,6 +100,7 @@ const NotificationSendPopUp: React.FC<NotificationSendPopUpProps> = ({
             />
           </div>
 
+          {/* Content Textarea */}
           <div>
             <label className="block text-sm font-semibold text-slate-300 mb-2">
               Content *
@@ -101,6 +113,23 @@ const NotificationSendPopUp: React.FC<NotificationSendPopUpProps> = ({
               className="w-full bg-slate-800 border border-white/10 rounded-lg px-4 py-3 text-slate-100 placeholder-slate-500 focus:outline-none focus:border-blue-500 transition resize-none"
               disabled={loading}
             />
+          </div>
+
+          {/* Type Dropdown */}
+          <div>
+            <label className="block text-sm font-semibold text-slate-300 mb-2">
+              Type
+            </label>
+            <select
+              value={type}
+              onChange={(e) => setType(e.target.value as NotificationType)}
+              className="w-full bg-slate-800 border border-white/10 rounded-lg px-4 py-3 text-slate-100 focus:outline-none focus:border-blue-500 transition"
+              disabled={loading}
+            >
+              <option value={NotificationType.INFO}>Info</option>
+              <option value={NotificationType.WARNING}>Warning</option>
+              <option value={NotificationType.ERROR}>Error</option>
+            </select>
           </div>
 
         </div>
@@ -118,7 +147,7 @@ const NotificationSendPopUp: React.FC<NotificationSendPopUpProps> = ({
 
           <button
             onClick={handleSend}
-            disabled={loading || !content.trim()}
+            disabled={loading || !title.trim() || !content.trim()}
             className="flex-1 px-4 py-3 rounded-lg font-semibold text-sm bg-blue-600 text-white hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
           >
             {loading ? (

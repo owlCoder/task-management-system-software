@@ -1,17 +1,24 @@
+import { NotificationType } from '../enums/NotificationType';
+
 export interface NotificationCreateDTO {
   title: string;
   content: string;
-  type: 'info' | 'warning' | 'error';
+  type: NotificationType;
   userId?: number;
 }
 
-export class NotificatioCreateRequest implements NotificationCreateDTO {
+export class NotificationCreateRequest implements NotificationCreateDTO {
   title: string;
   content: string;
-  type: 'info' | 'warning' | 'error';
+  type: NotificationType;
   userId?: number;
 
-  constructor(title: string, content: string, type: 'info' | 'warning' | 'error', userId?: number) {
+  constructor(
+    title: string, 
+    content: string, 
+    type: NotificationType, 
+    userId?: number
+  ) {
     this.title = title;
     this.content = content;
     this.type = type;

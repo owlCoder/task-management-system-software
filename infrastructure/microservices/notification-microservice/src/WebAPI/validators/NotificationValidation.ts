@@ -1,5 +1,5 @@
 import { NotificationCreateDTO } from '../../Domain/DTOs/NotificationCreateDTO';
-import { NotificationUpdateDTO } from '../../Domain/DTOs/NotificationUpdateDTO';
+import { NotificationType, VALID_NOTIFICATION_TYPES, isValidNotificationType } from '../../Domain/enums/NotificationType';
 
 export class NotificationValidation {
   
@@ -24,48 +24,13 @@ export class NotificationValidation {
       return 'Type is required';
     }
 
-    const validTypes = ['info', 'warning', 'error'];
-    if (!validTypes.includes(data.type)) {
-      return `Type must be one of: ${validTypes.join(', ')}`;
+    // ✅ NOVO - koristi enum helper funkciju
+    if (!isValidNotificationType(data.type)) {
+      return `Type must be one of: ${VALID_NOTIFICATION_TYPES.join(', ')}`;
     }
 
     if (data.userId !== undefined && (typeof data.userId !== 'number' || data.userId <= 0)) {
       return 'UserId must be a positive number';
-    }
-
-    return null; // Nema greške - validno!
-  }
-
-  /**
-   * Validira UpdateNotificationDTO
-   * @returns null ako je validno, ili error poruka ako nije
-   */
-  static validateUpdateDTO(data: any): string | null {
-    if (!data || Object.keys(data).length === 0) {
-      return 'Request body must contain at least one field to update';
-    }
-
-    if (data.title !== undefined) {
-      if (typeof data.title !== 'string' || data.title.trim() === '') {
-        return 'Title must be a non-empty string';
-      }
-    }
-
-    if (data.content !== undefined) {
-      if (typeof data.content !== 'string' || data.content.trim() === '') {
-        return 'Content must be a non-empty string';
-      }
-    }
-
-    if (data.type !== undefined) {
-      const validTypes = ['info', 'warning', 'error'];
-      if (!validTypes.includes(data.type)) {
-        return `Type must be one of: ${validTypes.join(', ')}`;
-      }
-    }
-
-    if (data.isRead !== undefined && typeof data.isRead !== 'boolean') {
-      return 'IsRead must be a boolean value';
     }
 
     return null; // Nema greške - validno!

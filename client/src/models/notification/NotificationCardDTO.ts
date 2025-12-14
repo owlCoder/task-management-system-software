@@ -1,13 +1,14 @@
+import { NotificationType } from "../../enums/NotificationType";
 
 export interface Notification {
   id: number;
-  title: string;           
+  title: string;
   content: string;
-  type: 'info' | 'warning' | 'error' | 'success';
+  type: NotificationType;
   isRead: boolean;
-  userId: number;         
-  createdAt: string;      
-  updatedAt: string;       
+  userId: number;
+  createdAt: string;  
+  updatedAt: string;  
 }
 
 export interface NotificationCardProps {

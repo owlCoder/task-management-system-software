@@ -2,7 +2,6 @@
 export const SocketEvents = {
   // Server → Client events
   NOTIFICATION_CREATED: 'notification:created',
-  NOTIFICATION_UPDATED: 'notification:updated',
   NOTIFICATION_DELETED: 'notification:deleted',
   NOTIFICATION_MARKED_READ: 'notification:marked_read',
   NOTIFICATION_MARKED_UNREAD: 'notification:marked_unread',

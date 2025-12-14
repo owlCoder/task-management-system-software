@@ -1,7 +1,6 @@
 import { Request, Response } from 'express';
 import { INotificationService } from '../../Domain/services/INotificationService';
 import { NotificationCreateDTO } from '../../Domain/DTOs/NotificationCreateDTO';
-import { NotificationUpdateDTO } from '../../Domain/DTOs/NotificationUpdateDTO';
 import { NotificationValidation } from '../validators/NotificationValidation';
 
 export class NotificationController {
@@ -109,44 +108,6 @@ export class NotificationController {
     } catch (error) {
       res.status(500).json({ 
         message: 'Error creating notification', 
-        error: (error as Error).message 
-      });
-    }
-  }
-
-  /**
-   * PATCH /notifications/:id
-   * azurira notifikaciju
-   */
-  async updateNotification(req: Request, res: Response): Promise<void> {
-    try {
-      // validacija ID-a
-      const idValidationError = NotificationValidation.validateId(req.params.id);
-      if (idValidationError) {
-        res.status(400).json({ message: idValidationError });
-        return;
-      }
-
-      // validacija podataka
-      const dataValidationError = NotificationValidation.validateUpdateDTO(req.body);
-      if (dataValidationError) {
-        res.status(400).json({ message: dataValidationError });
-        return;
-      }
-
-      const id = parseInt(req.params.id);
-      const data: NotificationUpdateDTO = req.body;
-      const notification = await this.notificationService.updateNotification(id, data);
-      
-      if (!notification) {
-        res.status(404).json({ message: 'Notification not found' });
-        return;
-      }
-
-      res.status(200).json(notification);
-    } catch (error) {
-      res.status(500).json({ 
-        message: 'Error updating notification', 
         error: (error as Error).message 
       });
     }
