@@ -380,3 +380,5 @@ const NotificationPage: React.FC = () => {
     </div>
   );
 };
+
+export default NotificationPage;
