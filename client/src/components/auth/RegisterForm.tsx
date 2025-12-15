@@ -1,8 +1,6 @@
 import React, { useState } from "react";
 import { IAuthAPI } from "../../api/auth/IAuthAPI";
 import { RegistrationUserDTO } from "../../models/auth/RegistrationUserDTO";
-import { useAuth } from "../../hooks/useAuthHook";
-import { useNavigate } from "react-router-dom";
 import { UserRole } from "../../enums/UserRole";
 import logoImage from "../../../public/logo.png";
 
@@ -15,22 +13,18 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
   authAPI,
   onSwitchToLogin,
 }) => {
-
-  
   const [formData, setFormData] = useState<any>({
     username: "",
     email: "",
     password: "",
     confirmPassword: "",
     role: UserRole.ANIMATION_WORKER,
-    profileImage: "", 
+    profileImage: "",
   });
 
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-
-  const { login } = useAuth();
-  const navigate = useNavigate();
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -45,9 +39,9 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setSuccess("");
     setIsLoading(true);
 
-  
     if (formData.password !== formData.confirmPassword) {
       setError("Passwords do not match.");
       setIsLoading(false);
@@ -60,12 +54,19 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
         email: formData.email,
         password: formData.password,
         role: formData.role,
-        profileImage: "", 
+        profileImage: "",
       };
 
-      const res = await authAPI.register(sendData);
-      login(res.token ?? "");
-      navigate("/");
+      await authAPI.register(sendData);
+
+      setSuccess(
+        "Uspešno ste se registrovali. Molimo vas da se prijavite."
+      );
+
+      
+      setTimeout(() => {
+        onSwitchToLogin?.();
+      }, 1500);
     } catch (err: any) {
       setError(
         err.response?.data?.message ||
@@ -84,7 +85,6 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
         className="w-50 mx-auto mb-8 select-none"
       />
 
-      
       <div className="w-full mb-6">
         <label className="block w-[95%] mx-auto text-left text-sm font-semibold text-white/80">
           Username
@@ -98,7 +98,6 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
         />
       </div>
 
-      
       <div className="w-full mb-6">
         <label className="block w-[95%] mx-auto text-left text-sm font-semibold text-white/80">
           Email
@@ -112,7 +111,6 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
         />
       </div>
 
-     
       <div className="w-full mb-6">
         <label className="block w-[95%] mx-auto text-left text-sm font-semibold text-white/80">
           Password
@@ -126,7 +124,6 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
         />
       </div>
 
-      
       <div className="w-full mb-6">
         <label className="block w-[95%] mx-auto text-left text-sm font-semibold text-white/80">
           Confirm Password
@@ -140,7 +137,6 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
         />
       </div>
 
-     
       <div className="w-full mb-6">
         <label className="block w-[95%] mx-auto text-left text-sm font-semibold text-white/80">
           Role
@@ -159,13 +155,20 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
         </select>
       </div>
 
-      {error && <p className="text-red-400 text-center text-sm">{error}</p>}
+      {error && (
+        <p className="text-red-400 text-center text-sm">{error}</p>
+      )}
+
+      {success && (
+        <p className="text-green-400 text-center text-sm">
+          {success}
+        </p>
+      )}
 
       <button
         type="submit"
         disabled={isLoading}
         className="mt-6 w-[95%] mx-auto py-2 rounded-md bg-white/90 text-black font-semibold hover:bg-white"
-
       >
         {isLoading ? "Loading..." : "Register"}
       </button>

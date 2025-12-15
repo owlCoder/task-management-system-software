@@ -9,7 +9,7 @@ import MainWindow from "./pages/MainWindow";
 import { ProtectedRoute } from "./components/protected_route/ProtectedRoute";
 import UserPage from "./pages/UserPage";
 import { RegisterPage } from "./pages/RegisterPage";
-import NotificationPage from "./pages/NotificationPage";
+//import NotificationPage from "./pages/NotificationPage";
 import TaskPage from "./pages/TaskPage";
 import { FilePage } from "./pages/FilePage";
 
@@ -26,7 +26,7 @@ function App() {
     >
       <Routes>
         <Route path="/projects" element={<ProjectsPage />} />
-        <Route path="/notifications" element={<NotificationPage />} />
+        {/*<Route path="/notifications" element={<NotificationPage />} /> */}
         <Route path="/tasks" element={<TaskPage projectId={""} token={""} />} />
         <Route path="/auth" element={<AuthPage authAPI={auth_api} />} />
         <Route path="/register" element={<RegisterPage authAPI={auth_api} />} />

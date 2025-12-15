@@ -44,3 +44,12 @@ html, body, #root {
   clip: rect(1px, 1px, 1px, 1px);
   white-space: nowrap;
 }
+
+.hide-scrollbar {
+  scrollbar-width: none;       
+  -ms-overflow-style: none;    
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;            
+}
