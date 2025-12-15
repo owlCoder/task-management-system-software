@@ -5,7 +5,14 @@ import { AliveService } from "./Services/AliveService";
 import cors from "cors";
 
 const app = express();
-app.use(cors());
+
+const corsOrigin = process.env.CORS_ORIGIN ?? "*";
+
+app.use(cors({
+  origin: corsOrigin,
+  methods: "POST",
+}));
+
 app.use(express.json());
 
 const aliveService = new AliveService();
