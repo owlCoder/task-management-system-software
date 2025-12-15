@@ -25,10 +25,10 @@ ODGOVORI:
     500 - greška do servera
     50x - TODO mikroservis nedostupan
 
-#TODO
 GET http://localhost:500/api/v1/MailService/MailAlive
+#TDLR Provera da li mail service dostupan
 
-Provera da li mail service dostupan
+Posto API nema klasican ping opciju, napravljeno je tako da zatrazimo statisticke podatke profila, na mikroservis to odbacije i vraca samo da li je dobio te podatke ili ne, u buducim verzijama ti podaci mogu biti implementirani za potrebe nekog admin panela.
 
 ODGOVORI:
     200 - sve ok
