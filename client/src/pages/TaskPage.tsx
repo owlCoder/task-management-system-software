@@ -38,12 +38,12 @@ const TaskPage: React.FC<TaskListPageProps> = ({ projectId, token }) => {
   }
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex h-screen overflow-hidden">
       <Sidebar />
 
-      <main className="flex-1 p-6 flex items-start justify-center">
-        <div className="w-full max-w-4xl">
-          <header className="flex items-center justify-between mb-6">
+      <main className="flex-1 p-6 flex flex-col overflow-hidden">
+        <div className="w-full max-w-4xl mx-auto flex flex-col h-full">
+          <header className="flex items-center justify-between mb-6 flex-shrink-0">
             <h1 className="text-3xl md:text-4xl font-bold text-white">Tasks</h1>
 
             <div className="flex gap-2">
@@ -86,7 +86,7 @@ const TaskPage: React.FC<TaskListPageProps> = ({ projectId, token }) => {
             </div>
           </header>
 
-          <section className="bg-white/5 backdrop-blur-xl rounded-2xl p-6 shadow-lg border border-white/10 min-h-[320px]">
+          <section className="bg-white/5 backdrop-blur-xl rounded-2xl p-6 shadow-lg border border-white/10 flex-1 overflow-y-auto styled-scrollbar">
             {tasks.length === 0 ? (
               <TaskListPreview />
             ) : (

@@ -23,13 +23,7 @@ function createWindow() {
     },
   });
 
-<<<<<<< Updated upstream
-  
-
-  Menu.setApplicationMenu(null)
-=======
   Menu.setApplicationMenu(null);
->>>>>>> Stashed changes
 
   if (process.env.VITE_DEV_SERVER_URL) {
     win.loadURL(process.env.VITE_DEV_SERVER_URL);

@@ -10,11 +10,10 @@ const Sidebar: React.FC<SidebarProps> = ({
   className = "",
 }) => {
   const [logoError, setLogoError] = useState(false); // KOJA JE POENTA logoError - ukoloni ga visak je
-  const [showUserMenu, setShowUserMenu] = useState(false);
 
   return (
     <aside
-      className={`w-54 min-h-screen bg-white/10 backdrop-blur-xl border-r border-white/20 shadow-[4px_0_25px_rgba(0,0,0,0.25)] p-4 flex flex-col justify-between rounded-tr-xl rounded-br-xl overflow-hidden ${className}`}
+      className={`w-54 h-screen bg-white/10 backdrop-blur-xl border-r border-white/20 shadow-[4px_0_25px_rgba(0,0,0,0.25)] p-4 flex flex-col justify-between rounded-tr-xl rounded-br-xl overflow-hidden ${className}`}
     >
       {/* Top: Logo */}
       <div className="pt-4 pb-4 flex items-center justify-center">
@@ -87,12 +86,11 @@ const Sidebar: React.FC<SidebarProps> = ({
           <div className="text-xs text-white/70">{role}</div>
         </div>
 
-        {/* Settings (gear) icon to toggle logout */}
-        <button
-          type="button"
-          aria-label="User settings"
+        {/* Logout icon */}
+        <Link
+          to="/auth"
+          aria-label="Logout"
           className="p-2 rounded-md hover:bg-white/10 text-white/80 hover:text-white transition"
-          onClick={() => setShowUserMenu((v) => !v)}
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -104,21 +102,11 @@ const Sidebar: React.FC<SidebarProps> = ({
             strokeLinecap="round"
             strokeLinejoin="round"
           >
-            <path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z" />
-            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 8.4 4.6 1.65 1.65 0 0 0 9.91 3.6H10A2 2 0 1 1 14 3.6h.09a1.65 1.65 0 0 0 1.51 1 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82 1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+            <polyline points="16 17 21 12 16 7" />
+            <line x1="21" y1="12" x2="9" y2="12" />
           </svg>
-        </button>
-
-        {showUserMenu && (
-          <div className="absolute right-0 bottom-14 bg-white/10 backdrop-blur-xl border border-white/20 rounded-md shadow-lg p-2 flex flex-col min-w-[140px]">
-            <Link
-              to="/auth"
-              className="w-full px-3 py-2 rounded text-sm text-white/90 hover:bg-white/20 hover:text-white transition text-center"
-            >
-              Logout
-            </Link>
-          </div>
-        )}
+        </Link>
       </div>
     </aside>
   );
