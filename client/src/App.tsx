@@ -12,6 +12,7 @@ import { RegisterPage } from "./pages/RegisterPage";
 //import NotificationPage from "./pages/NotificationPage";
 import TaskPage from "./pages/TaskPage";
 import { FilePage } from "./pages/FilePage";
+import { OtpPage } from "./pages/OTPPage";
 
 const auth_api: IAuthAPI = new AuthAPI();
 const user_api: IUserAPI = new UserAPI();
@@ -33,6 +34,7 @@ function App() {
         <Route path="/files" element={<FilePage/>} />
         <Route path="/mainwindow" element={<MainWindow />} />
         <Route path="/" element={<AuthPage authAPI={auth_api} />} />
+        <Route path="/otp" element={<OtpPage />} />
         <Route
           path="/users"
           element={

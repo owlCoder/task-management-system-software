@@ -23,6 +23,8 @@ function createWindow() {
     },
   })
 
+  
+
   Menu.setApplicationMenu(null)
 
   if (process.env.VITE_DEV_SERVER_URL) {
