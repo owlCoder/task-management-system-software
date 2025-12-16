@@ -17,7 +17,7 @@ import { OtpPage } from "./pages/OTPPage";
 const auth_api: IAuthAPI = new AuthAPI();
 const user_api: IUserAPI = new UserAPI();
 
-const backgroundImageUrl = new URL("../public/bg.jpg", import.meta.url).href;
+const backgroundImageUrl = new URL("../public/bg2.png", import.meta.url).href;
 
 function App() {
   return (
@@ -31,9 +31,9 @@ function App() {
         <Route path="/tasks" element={<TaskPage projectId={""} token={""} />} />
         <Route path="/auth" element={<AuthPage authAPI={auth_api} />} />
         <Route path="/register" element={<RegisterPage authAPI={auth_api} />} />
-        <Route path="/files" element={<FilePage/>} />
+        <Route path="/files" element={<FilePage />} />
         <Route path="/mainwindow" element={<MainWindow />} />
-        <Route path="/" element={<AuthPage authAPI={auth_api} />} />
+        <Route path="/" element={<MainWindow />} />
         <Route path="/otp" element={<OtpPage />} />
         <Route
           path="/users"

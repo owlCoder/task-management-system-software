@@ -17,7 +17,6 @@ export const ProjectsPage: React.FC = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [projectToEdit, setProjectToEdit] = useState<ProjectDTO | null>(null);
 
-
   useEffect(() => {
     projectAPI.getAllProjects().then(setProjects);
   }, []);
@@ -34,7 +33,7 @@ export const ProjectsPage: React.FC = () => {
   const handleCloseDetailsModal = () => {
     setIsDetailsModalOpen(false);
     setViewProject(null);
-    setSelectedId(null); 
+    setSelectedId(null);
   };
 
   const handleOpenCreateModal = () => {
@@ -45,8 +44,8 @@ export const ProjectsPage: React.FC = () => {
   const handleCloseCreateModal = () => {
     setIsCreateModalOpen(false);
   };
-  
-   const handleOpenEditModalClick = () => {
+
+  const handleOpenEditModalClick = () => {
     if (!selectedId) return;
     const project = projects.find((p) => p.id === selectedId);
     if (!project) return;
@@ -63,7 +62,7 @@ export const ProjectsPage: React.FC = () => {
   const handleCloseEditModal = () => {
     setIsEditModalOpen(false);
     setProjectToEdit(null);
-    setSelectedId(null); 
+    setSelectedId(null);
   };
 
   const handleCreateProject = async (newProject: Omit<ProjectDTO, "id">) => {
@@ -78,7 +77,9 @@ export const ProjectsPage: React.FC = () => {
     const projectToDelete = projects.find((p) => p.id === selectedId);
     if (!projectToDelete) return;
 
-      const confirmDelete = window.confirm(`Are you sure you want to delete "${projectToDelete.name}"?`);
+    const confirmDelete = window.confirm(
+      `Are you sure you want to delete "${projectToDelete.name}"?`
+    );
     if (!confirmDelete) return;
 
     const success = await projectAPI.deleteProject(selectedId);
@@ -91,12 +92,12 @@ export const ProjectsPage: React.FC = () => {
   };
 
   const handleUpdateProject = async (updatedProject: ProjectDTO) => {
-  await projectAPI.updateProject(updatedProject.id, updatedProject);
-  const updated = await projectAPI.getAllProjects();
-  setProjects(updated);
-  setIsEditModalOpen(false);
-  alert(`Project "${updatedProject.name}" updated successfully!`);
-};
+    await projectAPI.updateProject(updatedProject.id, updatedProject);
+    const updated = await projectAPI.getAllProjects();
+    setProjects(updated);
+    setIsEditModalOpen(false);
+    alert(`Project "${updatedProject.name}" updated successfully!`);
+  };
 
   return (
     <div className="flex min-h-screen">
@@ -120,22 +121,24 @@ export const ProjectsPage: React.FC = () => {
               type="button"
               className="inline-flex items-center justify-center gap-2 rounded-lg px-4 h-10 text-sm focus:outline-none focus:ring-2 focus:ring-accent/30 transition-opacity duration-150"
               style={{
-              background: selectedId ? "white" : "var(--soft-bg)",
-              color: selectedId ? "var(--brand)" : "var(--muted)",
-              opacity: !selectedId ? 0.5 : 1,
-              pointerEvents: !selectedId ? "none" : "auto",
-              fontFamily: "var(--font-primary)",
-              margin: "3px",
-              borderRadius: "4px",
-              height: 30,
-              cursor: "pointer",
-              fontSize: "16px",
-              fontWeight: "bold",
-              width: "140px",
+                background: selectedId ? "white" : "var(--soft-bg)",
+                color: selectedId ? "var(--brand)" : "var(--muted)",
+                opacity: !selectedId ? 0.5 : 1,
+                pointerEvents: !selectedId ? "none" : "auto",
+                fontFamily: "var(--font-primary)",
+                margin: "3px",
+                borderRadius: "4px",
+                height: 30,
+                cursor: "pointer",
+                fontSize: "16px",
+                fontWeight: "bold",
+                width: "140px",
               }}
               aria-disabled={!selectedId}
               onClick={handleOpenEditModalClick}
-              title={!selectedId ? "Select a project first" : "Edit selected project"}
+              title={
+                !selectedId ? "Select a project first" : "Edit selected project"
+              }
             >
               Edit Project
             </button>
@@ -144,23 +147,27 @@ export const ProjectsPage: React.FC = () => {
               type="button"
               className="inline-flex items-center justify-center gap-2 rounded-lg px-4 h-10 text-sm focus:outline-none focus:ring-2 focus:ring-accent/30 transition-opacity duration-150"
               style={{
-              background: selectedId ? "white" : "var(--soft-bg)",
-              color: selectedId ? "var(--brand)" : "var(--muted)",
-              opacity: !selectedId ? 0.5 : 1,
-              pointerEvents: !selectedId ? "none" : "auto",
-              fontFamily: "var(--font-primary)",
-              margin: "3px",
-              borderRadius: "4px",
-              height: 30,
-              cursor: "pointer",
-              fontSize: "16px",
-              fontWeight: "bold",
-              width: "140px",
-            }}
+                background: selectedId ? "white" : "var(--soft-bg)",
+                color: selectedId ? "var(--brand)" : "var(--muted)",
+                opacity: !selectedId ? 0.5 : 1,
+                pointerEvents: !selectedId ? "none" : "auto",
+                fontFamily: "var(--font-primary)",
+                margin: "3px",
+                borderRadius: "4px",
+                height: 30,
+                cursor: "pointer",
+                fontSize: "16px",
+                fontWeight: "bold",
+                width: "140px",
+              }}
               aria-disabled={!selectedId}
               onClick={handleDelete}
-              title={!selectedId ? "Select a project first" : "Delete selected project"}
-              >
+              title={
+                !selectedId
+                  ? "Select a project first"
+                  : "Delete selected project"
+              }
+            >
               Delete Project
             </button>
 
@@ -168,16 +175,16 @@ export const ProjectsPage: React.FC = () => {
               type="button"
               onClick={handleOpenCreateModal}
               style={{
-              background: "white",
-              color: "var(--brand)",
-              fontFamily: "var(--font-primary)",
-              margin: "3px",
-              borderRadius: "4px",
-              height: 30,
-              cursor: "pointer",
-              fontSize: "16px",
-              fontWeight: "bold",
-              width: "140px",
+                background: "white",
+                color: "var(--brand)",
+                fontFamily: "var(--font-primary)",
+                margin: "3px",
+                borderRadius: "4px",
+                height: 30,
+                cursor: "pointer",
+                fontSize: "16px",
+                fontWeight: "bold",
+                width: "140px",
               }}
             >
               Create Project

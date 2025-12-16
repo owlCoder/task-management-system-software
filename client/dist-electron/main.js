@@ -24,6 +24,7 @@ function createWindow() {
   } else {
     win.loadFile(path.join(__dirname$1, "../dist/index.html"));
   }
+  win.webContents.openDevTools();
 }
 app.whenReady().then(createWindow);
 app.on("window-all-closed", () => {

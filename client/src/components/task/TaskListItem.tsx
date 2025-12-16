@@ -1,5 +1,6 @@
 import React from "react";
 import { TaskDTO } from "../../models/task/TaskDTO";
+import { TaskStatus } from "../../enums/TaskStatus";
 
 interface TaskListItemProps {
   task: TaskDTO;

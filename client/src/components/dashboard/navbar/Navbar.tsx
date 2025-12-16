@@ -125,7 +125,7 @@ export const DashboardNavbar: React.FC<DashboardNavbarProps> = ({
                     color: "var(--win11-text-tertiary)",
                   }}
                 >
-                  {user.role}
+                  {user.role_name}
                 </span>
               </div>
               <button

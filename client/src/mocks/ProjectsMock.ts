@@ -19,7 +19,7 @@ export const mockProjects: ProjectDTO[] = [
           user_id: 101,
           username: "mila",
           email: "mila@example.com",
-          role: UserRole.PROJECT_MANAGER,
+          role_name: UserRole.PROJECT_MANAGER,
           profileImage: "https://i.pravatar.cc/150?img=11",
         },
       },
@@ -33,7 +33,7 @@ export const mockProjects: ProjectDTO[] = [
           user_id: 102,
           username: "ivan",
           email: "ivan@example.com",
-          role: UserRole.ANIMATION_WORKER,
+          role_name: UserRole.ANIMATION_WORKER,
           profileImage: "https://i.pravatar.cc/150?img=12",
         },
       },
@@ -47,7 +47,7 @@ export const mockProjects: ProjectDTO[] = [
           user_id: 102,
           username: "ivan",
           email: "ivan@example.com",
-          role: UserRole.ANIMATION_WORKER,
+          role_name: UserRole.ANIMATION_WORKER,
           profileImage: "https://i.pravatar.cc/150?img=12",
         },
       },
@@ -61,7 +61,7 @@ export const mockProjects: ProjectDTO[] = [
           user_id: 102,
           username: "ivan",
           email: "ivan@example.com",
-          role: UserRole.ANIMATION_WORKER,
+          role_name: UserRole.ANIMATION_WORKER,
           profileImage: "https://i.pravatar.cc/150?img=12",
         },
       },
@@ -69,14 +69,15 @@ export const mockProjects: ProjectDTO[] = [
     totalWeeklyHours: 30,
     allowedBudget: 12000,
     status: ProjectStatus.ACTIVE,
-    numberOfSprints:2,   
-    sprintDuration:4,
-    startDate : "2024-06-01"
+    numberOfSprints: 2,
+    sprintDuration: 4,
+    startDate: "2024-06-01",
   },
   {
     id: "2",
     name: "Naziv drugog projekta",
-    description: "ajsdhausudgausxaspojoiashdosandsapjdkaoskdsssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss",
+    description:
+      "ajsdhausudgausxaspojoiashdosandsapjdkaoskdsssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss",
     imageUrl: "https://picsum.photos/seed/proj2/800/450",
     members: [
       {
@@ -89,7 +90,7 @@ export const mockProjects: ProjectDTO[] = [
           user_id: 103,
           username: "jelena",
           email: "jelena@example.com",
-          role: UserRole.AUDIO_MUSIC_STAGIST,
+          role_name: UserRole.AUDIO_MUSIC_STAGIST,
           profileImage: "https://i.pravatar.cc/150?img=15",
         },
       },
@@ -97,10 +98,9 @@ export const mockProjects: ProjectDTO[] = [
     totalWeeklyHours: 30,
     allowedBudget: 6000,
     status: ProjectStatus.PAUSED,
-    
-    numberOfSprints:3,   
-    sprintDuration:7,
-    startDate : "2024-07-01"
+
+    numberOfSprints: 3,
+    sprintDuration: 7,
+    startDate: "2024-07-01",
   },
-  
 ];

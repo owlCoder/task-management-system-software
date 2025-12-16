@@ -4,7 +4,7 @@ export type ProjectUserDTO = {
   id?: number;
   projectId: number;
   userId: number;
-  role?: UserDTO["role"];
-  hoursPerWeek: number; 
-  user?: UserDTO; 
-}
+  role?: UserDTO["role_name"];
+  hoursPerWeek: number;
+  user?: UserDTO;
+};

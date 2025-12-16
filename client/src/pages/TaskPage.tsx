@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import Sidebar from "../components/dashboard/navbar/Sidebar";
 import TaskListItem from "../components/task/TaskListItem";
+import TaskListPreview from "../components/task/TaskListPreview";
 import { TaskDTO } from "../models/task/TaskDTO";
 import { TaskAPI } from "../api/task/TaskAPI";
 import CreateTaskModal from "../components/task/CreateTaskModal";
@@ -87,9 +88,7 @@ const TaskPage: React.FC<TaskListPageProps> = ({ projectId, token }) => {
 
           <section className="bg-white/5 backdrop-blur-xl rounded-2xl p-6 shadow-lg border border-white/10 min-h-[320px]">
             {tasks.length === 0 ? (
-              <div className="flex items-center justify-center h-40 text-white/60 text-lg">
-                No tasks found.
-              </div>
+              <TaskListPreview />
             ) : (
               <div className="flex flex-col gap-3">
                 {tasks.map((task) => (
