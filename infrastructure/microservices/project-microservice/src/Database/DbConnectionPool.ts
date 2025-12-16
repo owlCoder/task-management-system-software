@@ -3,6 +3,7 @@ import { DataSource } from "typeorm";
 import dotenv from "dotenv";
 import { Project } from "../Domain/models/Project";
 import { ProjectUser } from "../Domain/models/ProjectUser";
+import { Sprint } from "../Domain/models/Sprint";
 
 dotenv.config();
 
@@ -16,5 +17,5 @@ export const Db = new DataSource({
   ssl: { rejectUnauthorized: false },
   synchronize: true, // automatsko kreiranje tabela u bazi
   logging: false, // debug sql gresaka
-  entities: [Project, ProjectUser],
+  entities: [Project, ProjectUser, Sprint],
 });
