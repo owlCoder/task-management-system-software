@@ -1,5 +1,6 @@
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { ProjectUser } from "./ProjectUser";
+import { Sprint } from "./Sprint";
 
 @Entity("projects")
 export class Project {
@@ -23,4 +24,7 @@ export class Project {
 
   @OneToMany(() => ProjectUser, (project_user) => project_user.project)
   project_users!: ProjectUser[];
+
+  @OneToMany(() => Sprint, (sprint) => sprint.project)
+  sprints!: Sprint[];
 }
