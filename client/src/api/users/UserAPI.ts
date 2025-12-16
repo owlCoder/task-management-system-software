@@ -46,9 +46,16 @@ export class UserAPI implements IUserAPI {
     })).data;
   }
 
-  async updateUserById(token: string, newUserData: UserUpdateDTO): Promise<UserDTO> {
+  async updateUser(token: string, user_id: number, newUserData: UserUpdateDTO): Promise<UserDTO> {
     return (
-      await this.axiosInstance.put<UserDTO>(`/users/${newUserData.user_id}}`, newUserData, {
+      await this.axiosInstance.put<UserDTO>(`/users/${user_id}`, newUserData, {
+      headers: { Authorization: `Bearer ${token}`},
+    })).data;
+  }
+
+  async setWeeklyHours(token: string, user_id: number, weekly_working_hours: number): Promise<UserDTO> {
+    return (
+      await this.axiosInstance.put<UserDTO>(`/users/${user_id}/working-hours`, {weekly_working_hours}, {
       headers: { Authorization: `Bearer ${token}`},
     })).data;
   }

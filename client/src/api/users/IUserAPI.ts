@@ -7,5 +7,6 @@ export interface IUserAPI {
   getUserById(token: string, id: number): Promise<UserDTO>;
   createUser(token: string, user: UserCreationDTO): Promise<UserDTO>;
   logicalyDeleteUserById(token: string, user_id: number): Promise<boolean>;
-  updateUserById(token: string, newUserData: UserUpdateDTO): Promise<UserDTO>;
+   updateUser(token: string,id:number, newUserData: UserUpdateDTO): Promise<UserDTO>;
+  setWeeklyHours(token: string, user_id: number, weekly_working_hours: number) : Promise<UserDTO>;
 }
