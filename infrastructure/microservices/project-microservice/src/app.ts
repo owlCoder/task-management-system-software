@@ -1,37 +1,40 @@
 import express from "express";
 import cors from "cors";
 import "reflect-metadata";
-import { initialize_database } from "./Database/InitializeConnection";
 import dotenv from "dotenv";
-import { Repository } from "typeorm";
-import { Db } from "./Database/DbConnectionPool";
-import { UsersController } from "./WebAPI/controllers/UsersController";
-import { ILogerService } from "./Domain/services/ILogerService";
+import { initialize_database } from "./Database/InitializeConnection";
 import { LogerService } from "./Services/LogerService";
+import { ProjectsController } from "./WebAPI/controllers/ProjectsController";
 
-dotenv.config({ quiet: true });
+dotenv.config(/*{ quiet: true }*/);
+console.clear();
 
 const app = express();
+const PORT = process.env.PORT || 5000;
 
-// Read CORS settings from environment
-const corsOrigin = process.env.CORS_ORIGIN ?? "*";
-const corsMethods = process.env.CORS_METHODS?.split(",").map((m) =>
-  m.trim()
-) ?? ["POST"];
-
-// Protected microservice from unauthorized access
+// Middleware
+app.use(express.json());
 app.use(
   cors({
-    origin: corsOrigin,
-    methods: corsMethods,
+    origin: process.env.CORS_ORIGIN ?? "*",
+    methods: ["GET", "POST", "PUT", "DELETE"],
   })
 );
 
-app.use(express.json());
-
 initialize_database();
 
-// Registering routes
-//app.use("/api/v1", userController.getRouter());
+const logger = new LogerService();
+
+const projectsController = new ProjectsController(logger);
+
+app.use("/api/v1", projectsController.getRouter());
+
+app.get("/", (_req, res) => {
+  res.send("Project Microservice up and running!");
+});
+
+app.listen(PORT, () => {
+  logger.log(`Project microservice listening on port ${PORT}`);
+});
 
 export default app;
