@@ -1,19 +1,21 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import logoImageUrl from "../../../../public/logo.png";
-import type { SidebarProps } from "../../../models/dashboard/navbar/SidebarPropsDTO";
+import { useAuth } from "../../../hooks/useAuthHook";
 
-const Sidebar: React.FC<SidebarProps> = ({
-  username = "Username",
-  role = "Role",
-  profileImage,
-  className = "",
-}) => {
-  const [logoError, setLogoError] = useState(false); // KOJA JE POENTA logoError - ukoloni ga visak je
+const Sidebar: React.FC = () => {
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate("/auth");
+  };
 
   return (
     <aside
-      className={`w-54 h-screen bg-white/10 backdrop-blur-xl border-r border-white/20 shadow-[4px_0_25px_rgba(0,0,0,0.25)] p-4 flex flex-col justify-between rounded-tr-xl rounded-br-xl overflow-hidden ${className}`}
+      className={`w-54 h-screen bg-white/10 backdrop-blur-xl border-r border-white/20 shadow-[4px_0_25px_rgba(0,0,0,0.25)] p-4 flex flex-col justify-between rounded-tr-xl rounded-br-xl overflow-hidden`}
     >
       {/* Top: Logo */}
       <div className="pt-4 pb-4 flex items-center justify-center">
@@ -23,7 +25,6 @@ const Sidebar: React.FC<SidebarProps> = ({
               src={logoImageUrl}
               alt="Logo"
               className="w-34 h-34 object-contain"
-              onError={() => setLogoError(true)}
             />
           }
         </div>
@@ -69,26 +70,18 @@ const Sidebar: React.FC<SidebarProps> = ({
 
       {/* Bottom: User info */}
       <div className="mt-6 pt-4 border-t border-white/10 flex items-center gap-3 relative">
-        {profileImage ? (
-          <img
-            src={profileImage}
-            alt={username}
-            className="w-10 h-10 rounded-full object-cover border-2 border-white/20"
-          />
-        ) : (
-          <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-sm font-semibold text-white/90">
-            {username.charAt(0).toUpperCase()}
-          </div>
-        )}
+        <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-sm font-semibold text-white/90">
+          {user?.username.charAt(0).toUpperCase()}
+        </div>
 
         <div className="text-sm flex-1">
-          <div className="font-semibold text-white">{username}</div>
-          <div className="text-xs text-white/70">{role}</div>
+          <div className="font-semibold text-white">{user?.username}</div>
+          <div className="text-xs text-white/70">{user?.role}</div>
         </div>
 
         {/* Logout icon */}
-        <Link
-          to="/auth"
+        <button
+          onClick={handleLogout}
           aria-label="Logout"
           className="p-2 rounded-md hover:bg-white/10 text-white/80 hover:text-white transition"
         >
@@ -106,7 +99,7 @@ const Sidebar: React.FC<SidebarProps> = ({
             <polyline points="16 17 21 12 16 7" />
             <line x1="21" y1="12" x2="9" y2="12" />
           </svg>
-        </Link>
+        </button>
       </div>
     </aside>
   );

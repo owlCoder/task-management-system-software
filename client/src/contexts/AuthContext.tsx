@@ -1,14 +1,20 @@
 import { ReactNode, useState, useEffect, createContext } from "react";
 import { decodeJWT } from "../helpers/decode_jwt";
 import { isTokenExpired } from "../helpers/expiration_jwt_validate";
-import { readValueByKey, removeValueByKey, saveValueByKey } from "../helpers/local_storage";
+import {
+  readValueByKey,
+  removeValueByKey,
+  saveValueByKey,
+} from "../helpers/local_storage";
 import { AuthContextType } from "../types/AuthContextType";
 import { AuthTokenClaimsType } from "../types/AuthTokenClaimsType";
 
 // Create the context
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+export const AuthProvider: React.FC<{ children: ReactNode }> = ({
+  children,
+}) => {
   const [user, setUser] = useState<AuthTokenClaimsType | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -47,7 +53,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       console.error("Invalid or expired token");
     }
   };
-
 
   const logout = () => {
     setToken(null);
