@@ -1,25 +1,26 @@
 import { Router, Request, Response } from "express";
 import { IGatewayNotificationService } from "../../Domain/services/notification/IGatewayNotificationService";
 import { NotificationDTO } from "../../Domain/DTOs/notification/NotificationDTO";
+import { authenticate } from "../../Middlewares/authentification/AuthMiddleware";
 
 export class GatewayNotificationController {
     private readonly router: Router;
 
-    constructor(private notificationService: IGatewayNotificationService) {
+    constructor(private gatewayNotificationService: IGatewayNotificationService) {
         this.router = Router();
         this.initializeRoutes();
     }
 
     private initializeRoutes(){
-        this.router.get("/notifications/:id", this.getNotificationById.bind(this));
-        this.router.get("/notifications/user/:userId", this.getNotificationsByUserId.bind(this));
-        this.router.get("/notifications/user/:userId/unread-count", this.getUnreadNotificationCount.bind(this));
-        this.router.patch("/notifications/bulk/unread", this.markMultipleNotificationsAsUnread.bind(this));
-        this.router.patch("/notifications/bulk/read", this.markMultipleNotificationsAsRead.bind(this));
-        this.router.patch("/notifications/:id/read", this.markNotificationAsRead.bind(this));
-        this.router.patch("/notifications/:id/unread", this.markNotificationAsUnread.bind(this));
-        this.router.delete("/notifications/bulk", this.deleteMultipleNotifications.bind(this));
-        this.router.delete("/notifications/:id", this.deleteNotification.bind(this));
+        this.router.get("/notifications/:id", authenticate, this.getNotificationById.bind(this));
+        this.router.get("/notifications/user/:userId", authenticate, this.getNotificationsByUserId.bind(this));
+        this.router.get("/notifications/user/:userId/unread-count", authenticate, this.getUnreadNotificationCount.bind(this));
+        this.router.patch("/notifications/bulk/unread", authenticate, this.markMultipleNotificationsAsUnread.bind(this));
+        this.router.patch("/notifications/bulk/read", authenticate, this.markMultipleNotificationsAsRead.bind(this));
+        this.router.patch("/notifications/:id/read", authenticate, this.markNotificationAsRead.bind(this));
+        this.router.patch("/notifications/:id/unread", authenticate, this.markNotificationAsUnread.bind(this));
+        this.router.delete("/notifications/bulk", authenticate, this.deleteMultipleNotifications.bind(this));
+        this.router.delete("/notifications/:id", authenticate, this.deleteNotification.bind(this));
     }
 
     /**
@@ -33,7 +34,7 @@ export class GatewayNotificationController {
     private async getNotificationById(req: Request, res: Response): Promise<void> {
         const id = parseInt(req.params.id);
 
-        const result = await this.notificationService.getNotificationById(id);
+        const result = await this.gatewayNotificationService.getNotificationById(id);
         if(result.success){
             res.status(200).json(result.data);
             return;
@@ -52,7 +53,7 @@ export class GatewayNotificationController {
     private async getNotificationsByUserId(req: Request, res: Response): Promise<void> {
         const userId = parseInt(req.params.userId);
 
-        const result = await this.notificationService.getNotificationsByUserId(userId);
+        const result = await this.gatewayNotificationService.getNotificationsByUserId(userId);
         if(result.success){
             res.status(200).json(result.data);
             return;
@@ -71,7 +72,7 @@ export class GatewayNotificationController {
     private async getUnreadNotificationCount(req: Request, res: Response): Promise<void> {
         const userId = parseInt(req.params.userId);
 
-        const result = await this.notificationService.getUnreadNotificationCount(userId);
+        const result = await this.gatewayNotificationService.getUnreadNotificationCount(userId);
         if(result.success){
             res.status(200).json(result.data);
             return;
@@ -90,7 +91,7 @@ export class GatewayNotificationController {
     private async markMultipleNotificationsAsRead(req: Request, res: Response): Promise<void> {
         const ids = req.body as number[];
 
-        const result = await this.notificationService.markMultipleNotificationsAsRead(ids);
+        const result = await this.gatewayNotificationService.markMultipleNotificationsAsRead(ids);
         if(result.success){
             res.status(200).json(result.data);
             return;
@@ -109,7 +110,7 @@ export class GatewayNotificationController {
     private async markMultipleNotificationsAsUnread(req: Request, res: Response): Promise<void> {
         const ids = req.body as number[];
 
-        const result = await this.notificationService.markMultipleNotificationsAsUnread(ids);
+        const result = await this.gatewayNotificationService.markMultipleNotificationsAsUnread(ids);
         if(result.success){
             res.status(200).json(result.data);
             return;
@@ -128,7 +129,7 @@ export class GatewayNotificationController {
     private async markNotificationAsRead(req: Request, res: Response): Promise<void> {
         const id = parseInt(req.params.id);
         
-        const result = await this.notificationService.markNotificationAsRead(id);
+        const result = await this.gatewayNotificationService.markNotificationAsRead(id);
         if(result.success){
             res.status(200).json(result.data);
             return;
@@ -147,7 +148,7 @@ export class GatewayNotificationController {
     private async markNotificationAsUnread(req: Request, res: Response): Promise<void> {
         const id = parseInt(req.params.id);
 
-        const result = await this.notificationService.markNotificationAsUnread(id);
+        const result = await this.gatewayNotificationService.markNotificationAsUnread(id);
         if(result.success){
             res.status(200).json(result.data);
             return;
@@ -166,7 +167,7 @@ export class GatewayNotificationController {
     private async deleteMultipleNotifications(req: Request, res: Response): Promise<void> {
         const ids = req.body as number[];
 
-        const result = await this.notificationService.deleteMultipleNotifications(ids);
+        const result = await this.gatewayNotificationService.deleteMultipleNotifications(ids);
         if(result.success){
             res.status(204).send();
             return;
@@ -185,7 +186,7 @@ export class GatewayNotificationController {
     private async deleteNotification(req: Request, res: Response): Promise<void> {
         const id = parseInt(req.params.id);
 
-        const result = await this.notificationService.deleteNotification(id);
+        const result = await this.gatewayNotificationService.deleteNotification(id);
         if(result.success){
             res.status(204).send();
             return;

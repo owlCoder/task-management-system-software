@@ -20,6 +20,9 @@ import { logger } from './Utils/Logger/Logger';
 import { IGatewayNotificationService } from './Domain/services/notification/IGatewayNotificationService';
 import { GatewayNotificationService } from './Services/notification/GatewayNotificationService';
 import { GatewayNotificationController } from './WebAPI/notification/GatewayNotificationController';
+import { IGatewayProjectService } from './Domain/services/project/IGatewayProjectService';
+import { GatewayProjectService } from './Services/project/GatewayProjectService';
+import { GatewayProjectController } from './WebAPI/project/GatewayProjectController';
 
 dotenv.config({ quiet: true });
 
@@ -44,18 +47,21 @@ const loggerService: ILoggerService = new LoggerService(logger);
 const errorHandlingService: IErrorHandlingService = new ErrorHandlingService(loggerService);
 const gatewayAuthService: IGatewayAuthService = new GatewayAuthService(errorHandlingService);
 const gatewayUserService: IGatewayUserService = new GatewayUserService(errorHandlingService);
+const gatewayProjectService: IGatewayProjectService = new GatewayProjectService(errorHandlingService);
 const gatewayFileService: IGatewayFileService = new GatewayFileService(errorHandlingService);
 const gatewayNotificationService: IGatewayNotificationService = new GatewayNotificationService(errorHandlingService);
 
 // WebAPI routes
 const gatewayAuthController = new GatewayAuthController(gatewayAuthService);
 const gatewayUserController = new GatewayUserController(gatewayUserService);
+const gatewayProjectController = new GatewayProjectController(gatewayProjectService);
 const gatewayFileController = new GatewayFileController(gatewayFileService);
 const gatewayNotificationController = new GatewayNotificationController(gatewayNotificationService);
 
 // Registering routes
 app.use('/api/v1', gatewayAuthController.getRouter());
 app.use('/api/v1', gatewayUserController.getRouter());
+app.use('/api/v1', gatewayProjectController.getRouter());
 app.use('/api/v1', gatewayFileController.getRouter());
 app.use('/api/v1', gatewayNotificationController.getRouter());
 
