@@ -6,4 +6,5 @@ export interface UpdateTaskDTO {
   estimatedCost?: number;
   status?: TaskStatus;
   assignedTo?: number;
+  total_hours_spent?: number;
 }

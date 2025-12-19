@@ -9,11 +9,10 @@ import MainWindow from "./pages/MainWindow";
 import { ProtectedRoute } from "./components/protected_route/ProtectedRoute";
 import UserPage from "./pages/UserPage";
 import { RegisterPage } from "./pages/RegisterPage";
-//import NotificationPage from "./pages/NotificationPage";
+import NotificationPage from "./pages/NotificationPage";
 import TaskPage from "./pages/TaskPage";
 import { FilePage } from "./pages/FilePage";
 import { OtpPage } from "./pages/OTPPage";
-import { UserRole } from "./enums/UserRole";
 
 const auth_api: IAuthAPI = new AuthAPI();
 const user_api: IUserAPI = new UserAPI();
@@ -28,20 +27,13 @@ function App() {
     >
       <Routes>
         <Route path="/projects" element={<ProjectsPage />} />
-        {/*<Route path="/notifications" element={<NotificationPage />} /> */}
+        <Route path="/notifications" element={<NotificationPage />} />
         <Route path="/tasks" element={<TaskPage projectId={""} token={""} />} />
         <Route path="/auth" element={<AuthPage authAPI={auth_api} />} />
         <Route path="/register" element={<RegisterPage authAPI={auth_api} />} />
         <Route path="/files" element={<FilePage />} />
-        <Route
-          path="/mainwindow"
-          element={
-            <ProtectedRoute requiredRole={Object.values(UserRole).join("|")}>
-              <MainWindow />
-            </ProtectedRoute>
-          }
-        />
-        <Route path="/" element={<AuthPage authAPI={auth_api} />} />
+        <Route path="/mainwindow" element={<MainWindow />} />
+        <Route path="/" element={<MainWindow />} />
         <Route path="/otp" element={<OtpPage />} />
         <Route
           path="/users"

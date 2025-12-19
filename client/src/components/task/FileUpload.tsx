@@ -1,8 +1,6 @@
 import React from "react";
 import { useState } from "react";
 import { TaskAPI } from "../../api/task/TaskAPI";
-import { TaskDetailPage } from "../../pages/TaskDetailPage";
-import { UserRole } from "../../enums/UserRole";
 
 interface UploadFileProps{
     token : string;

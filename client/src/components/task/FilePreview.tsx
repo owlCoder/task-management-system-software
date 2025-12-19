@@ -47,7 +47,6 @@ return (
   <div className="fixed inset-0 z-50 flex items-center justify-center
                   bg-black/40 backdrop-blur-md">
 
-    {/* MODAL */}
     <div
       className="
         bg-white rounded-3xl shadow-2xl
@@ -58,7 +57,6 @@ return (
       "
     >
 
-      {/* PREVIEW CONTAINER */}
       <div
         className="
           flex-1
@@ -100,10 +98,8 @@ return (
         )}
       </div>
 
-      {/* FOOTER */}
       <div className="mt-6 flex items-center justify-between">
 
-        {/* STATUS */}
         {isTrue ? (
           <div className="px-4 py-2 rounded-xl bg-green-100 text-green-700 text-sm font-semibold">
             ✔ File type is valid
@@ -114,7 +110,6 @@ return (
           </div>
         )}
 
-        {/* ACTION */}
         <button
           disabled={!isTrue}
           onClick={isUpload}
