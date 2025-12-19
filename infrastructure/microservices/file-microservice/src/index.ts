@@ -1,12 +1,11 @@
 import dotenv from 'dotenv';
-import App from './app';
+import app from './app';
 
 dotenv.config();
 
 const port = process.env.PORT || 3003;
-const app = new App();
 
-app.express.listen(port, () => {
+app.listen(port, () => {
   console.log(`File microservice running on port ${port}`);
 });
 

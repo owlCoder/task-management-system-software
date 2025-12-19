@@ -1,10 +1,45 @@
-import { Request, Response } from 'express';
+import { Request, Response, Router } from 'express';
+import multer from 'multer';
 import { IFileService } from '../Domain/services/IFileService';
 import { CreateFileDTO } from '../Domain/DTOs/CreateFileDTO';
 import * as path from 'path';
 
 export class FileController {
-  constructor(private fileService: IFileService) {}
+  private router: Router;
+  private upload: multer.Multer;
+
+  constructor(private fileService: IFileService) {
+    this.router = Router();
+    this.upload = multer({ 
+      storage: multer.memoryStorage(),
+      limits: {
+        fileSize: 10 * 1024 * 1024
+      }
+    });
+    this.initializeRoutes();
+  }
+
+  private initializeRoutes(): void {
+    this.router.post('/files/upload', this.upload.single('file'), this.uploadFile);
+    this.router.get('/files/download/:fileId', this.downloadFile);
+    this.router.delete('/files/:fileId', this.deleteFile);
+    this.router.get('/files/author/:authorId', this.getFilesByAuthor);
+    this.router.get('/files/metadata/:fileId', this.getFileMetadata);
+    this.router.get('/health', this.healthCheck);
+  }
+
+  public getRouter(): Router {
+    return this.router;
+  }
+
+  /**
+   * GET /api/v1/health
+   * Health check endpoint
+   * @returns {object} JSON response with service status
+   */
+  healthCheck = async (req: Request, res: Response): Promise<void> => {
+    res.status(200).json({ status: 'OK', service: 'file-microservice' });
+  };
 
   /**
    * POST /api/v1/files/upload

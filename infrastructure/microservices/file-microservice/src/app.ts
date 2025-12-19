@@ -1,66 +1,46 @@
 import express from 'express';
 import cors from 'cors';
-import multer from 'multer';
+import 'reflect-metadata';
 import { FileController } from './WebAPI/FileController';
 import { FileService } from './Services/FileService';
 import { FileStorageService } from './Services/FileStorageService';
-import { FileRepository } from './Database/FileRepository';
-import Database from './Database/Database';
+import { initializeDatabase } from './Database/InitializeConnection';
+import { Db } from './Database/DbConnectionPool';
+import { UploadedFile } from './Domain/models/UploadedFile';
+import { Repository } from 'typeorm';
+import dotenv from 'dotenv';
 
-class App {
-  public express: express.Application;
-  private fileController!: FileController;
+dotenv.config({ quiet: true });
 
-  constructor() {
-    this.express = express();
-    this.initializeDatabase();
-    this.initializeServices();
-    this.initializeMiddlewares();
-    this.initializeRoutes();
-  }
+const app = express();
 
-  private async initializeDatabase(): Promise<void> {
-    try {
-      const database = Database.getInstance();
-      await database.connect();
-      console.log('Database connected successfully');
-    } catch (error) {
-      console.error('Database connection failed:', error);
-      process.exit(1);
-    }
-  }
+// CORS Management
+const corsOrigin = process.env.CORS_ORIGIN ?? "*";
+const corsMethods = process.env.CORS_METHODS?.split(",").map(m => m.trim()) ?? ["GET", "POST", "PUT", "DELETE"];
+app.use(cors({
+  origin: corsOrigin,
+  methods: corsMethods,
+}));
 
-  private initializeServices(): void {
-    const fileRepository = new FileRepository();
-    const fileStorageService = new FileStorageService();
-    const fileService = new FileService(fileRepository, fileStorageService);
-    this.fileController = new FileController(fileService);
-  }
+// Body parsing middleware
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-  private initializeMiddlewares(): void {
-    this.express.use(cors());
-    this.express.use(express.json());
-    this.express.use(express.urlencoded({ extended: true }));
-  }
+(async () => {
+  await initializeDatabase();
 
-  private initializeRoutes(): void {
-    const upload = multer({ 
-      storage: multer.memoryStorage(),
-      limits: {
-        fileSize: 10 * 1024 * 1024
-      }
-    });
+  // ORM Repository
+  const fileRepository: Repository<UploadedFile> = Db.getRepository(UploadedFile);
 
-    this.express.post('/api/files/upload', upload.single('file'), this.fileController.uploadFile);
-    this.express.get('/api/files/download/:fileId', this.fileController.downloadFile);
-    this.express.delete('/api/files/:fileId', this.fileController.deleteFile);
-    this.express.get('/api/files/author/:authorId', this.fileController.getFilesByAuthor);
-    this.express.get('/api/files/metadata/:fileId', this.fileController.getFileMetadata);
+  // Services
+  const fileStorageService = new FileStorageService();
+  const fileService = new FileService(fileRepository, fileStorageService);
 
-    this.express.get('/health', (req, res) => {
-      res.status(200).json({ status: 'OK', service: 'file-microservice' });
-    });
-  }
-}
+  // WebAPI routes
+  const fileController = new FileController(fileService);
 
-export default App;
+  // Registering routes
+  app.use('/api/v1', fileController.getRouter());
+})();
+
+export default app;
