@@ -1,5 +1,4 @@
 import { IFileService } from '../Domain/services/IFileService';
-import { IFileRepository } from '../Domain/services/IFileRepository';
 import { IFileStorageService } from '../Domain/services/IFileStorageService';
 import { CreateFileDTO } from '../Domain/DTOs/CreateFileDTO';
 import { UploadedFileDTO } from '../Domain/DTOs/UploadedFileDTO';
@@ -7,10 +6,11 @@ import { FileResponseDTO } from '../Domain/DTOs/FileResponseDTO';
 import { Result } from '../Domain/types/Result';
 import { UploadedFile } from '../Domain/models/UploadedFile';
 import { v4 as uuidv4 } from 'uuid';
+import { Repository } from 'typeorm';
 
 export class FileService implements IFileService {
   constructor(
-    private fileRepository: IFileRepository,
+    private fileRepository: Repository<UploadedFile>,
     private fileStorageService: IFileStorageService
   ) {}
 
@@ -33,28 +33,23 @@ export class FileService implements IFileService {
         return { success: false, error: saveResult.error };
       }
 
-      const fileModel: UploadedFile = {
-        originalFileName: fileData.originalFileName,
-        fileType: fileData.fileType,
-        fileExtension: fileExtension,
-        authorId: fileData.authorId,
-        pathToFile: saveResult.data!
-      };
+      const fileModel = this.fileRepository.create({
+        original_file_name: fileData.originalFileName,
+        file_type: fileData.fileType,
+        file_extension: fileExtension,
+        author_id: fileData.authorId,
+        path_to_file: saveResult.data!
+      });
 
-      const createResult = await this.fileRepository.create(fileModel);
-
-      if (!createResult.success) {
-        await this.fileStorageService.deleteFile(saveResult.data!);
-        return { success: false, error: createResult.error };
-      }
+      const savedFile = await this.fileRepository.save(fileModel);
 
       const uploadedFileDTO: UploadedFileDTO = {
-        fileId: createResult.data!.fileId!,
-        originalFileName: createResult.data!.originalFileName,
-        fileType: createResult.data!.fileType,
-        fileExtension: createResult.data!.fileExtension,
-        authorId: createResult.data!.authorId,
-        pathToFile: createResult.data!.pathToFile
+        fileId: savedFile.file_id!,
+        originalFileName: savedFile.original_file_name,
+        fileType: savedFile.file_type,
+        fileExtension: savedFile.file_extension,
+        authorId: savedFile.author_id,
+        pathToFile: savedFile.path_to_file
       };
 
       return { success: true, data: uploadedFileDTO };
@@ -68,28 +63,26 @@ export class FileService implements IFileService {
 
   async retrieveFile(fileId: number): Promise<Result<FileResponseDTO>> {
     try {
-      const fileResult = await this.fileRepository.getById(fileId);
+      const file = await this.fileRepository.findOne({
+        where: { file_id: fileId }
+      });
 
-      if (!fileResult.success) {
-        return { success: false, error: fileResult.error };
-      }
-
-      if (!fileResult.data) {
+      if (!file) {
         return { success: false, error: 'File not found' };
       }
 
-      const storageResult = await this.fileStorageService.retrieveFile(fileResult.data.pathToFile);
+      const storageResult = await this.fileStorageService.retrieveFile(file.path_to_file);
 
       if (!storageResult.success) {
         return { success: false, error: storageResult.error };
       }
 
       const fileResponseDTO: FileResponseDTO = {
-        fileId: fileResult.data.fileId!,
-        originalFileName: fileResult.data.originalFileName,
-        fileType: fileResult.data.fileType,
-        fileExtension: fileResult.data.fileExtension,
-        authorId: fileResult.data.authorId,
+        fileId: file.file_id!,
+        originalFileName: file.original_file_name,
+        fileType: file.file_type,
+        fileExtension: file.file_extension,
+        authorId: file.author_id,
         fileBuffer: storageResult.data!
       };
 
@@ -104,25 +97,23 @@ export class FileService implements IFileService {
 
   async deleteFile(fileId: number): Promise<Result<boolean>> {
     try {
-      const fileResult = await this.fileRepository.getById(fileId);
+      const file = await this.fileRepository.findOne({
+        where: { file_id: fileId }
+      });
 
-      if (!fileResult.success) {
-        return { success: false, error: fileResult.error };
-      }
-
-      if (!fileResult.data) {
+      if (!file) {
         return { success: false, error: 'File not found' };
       }
 
-      const storageResult = await this.fileStorageService.deleteFile(fileResult.data.pathToFile);
+      const storageResult = await this.fileStorageService.deleteFile(file.path_to_file);
       
       if (!storageResult.success) {
         return { success: false, error: storageResult.error };
       }
 
-      const deleteResult = await this.fileRepository.delete(fileId);
+      const deleteResult = await this.fileRepository.delete({ file_id: fileId });
       
-      return deleteResult;
+      return { success: true, data: (deleteResult.affected ?? 0) > 0 };
     } catch (error) {
       return { 
         success: false, 
@@ -133,19 +124,17 @@ export class FileService implements IFileService {
 
   async getFilesByAuthor(authorId: number): Promise<Result<UploadedFileDTO[]>> {
     try {
-      const filesResult = await this.fileRepository.getByAuthorId(authorId);
+      const files = await this.fileRepository.find({
+        where: { author_id: authorId }
+      });
 
-      if (!filesResult.success) {
-        return { success: false, error: filesResult.error };
-      }
-
-      const uploadedFileDTOs: UploadedFileDTO[] = filesResult.data!.map(file => ({
-        fileId: file.fileId!,
-        originalFileName: file.originalFileName,
-        fileType: file.fileType,
-        fileExtension: file.fileExtension,
-        authorId: file.authorId,
-        pathToFile: file.pathToFile
+      const uploadedFileDTOs: UploadedFileDTO[] = files.map(file => ({
+        fileId: file.file_id!,
+        originalFileName: file.original_file_name,
+        fileType: file.file_type,
+        fileExtension: file.file_extension,
+        authorId: file.author_id,
+        pathToFile: file.path_to_file
       }));
 
       return { success: true, data: uploadedFileDTOs };
