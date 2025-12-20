@@ -9,4 +9,9 @@ export class LogerService implements ILogerService {
         console.log(`\x1b[35m[Logger@1.45.4]\x1b[0m ${message}`);
         return true;
     }
+
+    async error(message: string | unknown): Promise<boolean> {
+        console.error(`\x1b[31m[Logger@1.45.4-ERR]\x1b[0m`, message);
+        return false;
+    }
 }
