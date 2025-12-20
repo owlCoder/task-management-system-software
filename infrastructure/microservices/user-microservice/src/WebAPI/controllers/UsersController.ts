@@ -21,6 +21,7 @@ export class UsersController {
 
   private initializeRoutes(): void {
     this.router.get("/users", this.getAllUsers.bind(this));
+    this.router.get("/users/oneProject", this.getUsersByIds.bind(this));
     this.router.get("/users/:id", this.getUserById.bind(this));
     this.router.post("/users", this.createUser.bind(this));
     this.router.delete("/users/:id", this.logicalyDeleteUser.bind(this));
@@ -65,6 +66,35 @@ export class UsersController {
       this.logger.log(`Fetching user with ID ${id}`);
       const user = await this.usersService.getUserById(id);
       res.status(200).json(user);
+    } catch (err) {
+      this.logger.log((err as Error).message);
+      res.status(500).json({ message: (err as Error).message });
+    }
+  }
+
+  /**
+   * GET /api/v1/users/oneProject
+   * @param {ids[]} req.body - Array of user ids that work on one project
+   * @returns {UserDTO[]} JSON response with success status, session/token, and message
+   * @see {@link UserDTO} for input structure
+   */
+
+  private async getUsersByIds(req: Request, res: Response): Promise<void> {
+    try {
+      const { ids } = req.body;
+
+      ids.forEach((element: any) => {
+        if (isNaN(element)) {
+          res
+            .status(400)
+            .json({ message: "The passed id is not a number." + element });
+          return;
+        }
+      });
+
+      this.logger.log(`Fetching users with IDs ${ids}`);
+      const users = await this.usersService.getUsersByIds(ids);
+      res.status(200).json(users);
     } catch (err) {
       this.logger.log((err as Error).message);
       res.status(500).json({ message: (err as Error).message });

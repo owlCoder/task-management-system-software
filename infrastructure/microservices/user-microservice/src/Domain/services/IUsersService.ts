@@ -6,6 +6,7 @@ import { User } from "../models/User";
 export interface IUsersService {
   getAllUsers(): Promise<UserDTO[]>;
   getUserById(id: number): Promise<UserDTO>;
+  getUsersByIds(ids: number[]): Promise<UserDTO[]>;
   createUser(user: UserCreationDTO): Promise<UserDTO>;
   logicalyDeleteUserById(user_id: number): Promise<boolean>;
   updateUserById(

@@ -1,4 +1,4 @@
-import { Not, Repository } from "typeorm";
+import { In, Not, Repository } from "typeorm";
 import { IUsersService } from "../Domain/services/IUsersService";
 import { User } from "../Domain/models/User";
 import { UserDTO } from "../Domain/DTOs/UserDTO";
@@ -43,6 +43,19 @@ export class UsersService implements IUsersService {
 
     if (!user) throw new Error(`User with ID ${user_id} not found`);
     return toDTO(user);
+  }
+
+  /**
+   * Get users by IDs
+   */
+
+  async getUsersByIds(ids: number[]): Promise<UserDTO[]> {
+    const users = await this.userRepository.find({
+      where: { user_id: In(ids), is_deleted: false },
+      relations: ["user_role"],
+    });
+
+    return users.map((u) => toDTO(u));
   }
 
   /**
