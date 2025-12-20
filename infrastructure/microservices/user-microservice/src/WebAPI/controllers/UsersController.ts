@@ -6,6 +6,8 @@ import {
   UserDataUpdateValidation,
   UserDataValidation,
 } from "../validation/UserDataValidation";
+import { Result } from "../../Domain/types/Result";
+import { parseIds } from "../../Helpers/parseIds";
 
 export class UsersController {
   private readonly router: Router;
@@ -21,7 +23,7 @@ export class UsersController {
 
   private initializeRoutes(): void {
     this.router.get("/users", this.getAllUsers.bind(this));
-    this.router.get("/users/oneProject", this.getUsersByIds.bind(this));
+    this.router.get("/users/ids", this.getUsersByIds.bind(this));
     this.router.get("/users/:id", this.getUserById.bind(this));
     this.router.post("/users", this.createUser.bind(this));
     this.router.delete("/users/:id", this.logicalyDeleteUser.bind(this));
@@ -39,8 +41,14 @@ export class UsersController {
   private async getAllUsers(req: Request, res: Response): Promise<void> {
     try {
       this.logger.log("Fetching all users");
-      const users = await this.usersService.getAllUsers();
-      res.status(200).json(users);
+      const result = await this.usersService.getAllUsers();
+
+      if (result.success) {
+        res.status(200).json(result.data);
+      } else {
+        this.logger.log(result.error);
+        res.status(result.code).json(result.error);
+      }
     } catch (err) {
       this.logger.log((err as Error).message);
       res.status(500).json({ message: (err as Error).message });
@@ -64,8 +72,14 @@ export class UsersController {
       }
 
       this.logger.log(`Fetching user with ID ${id}`);
-      const user = await this.usersService.getUserById(id);
-      res.status(200).json(user);
+      const result = await this.usersService.getUserById(id);
+
+      if (result.success) {
+        res.status(200).json(result.data);
+      } else {
+        this.logger.log(result.error);
+        res.status(result.code).json(result.error);
+      }
     } catch (err) {
       this.logger.log((err as Error).message);
       res.status(500).json({ message: (err as Error).message });
@@ -73,7 +87,7 @@ export class UsersController {
   }
 
   /**
-   * GET /api/v1/users/oneProject
+   * GET /api/v1/users/ids?ids=1,2,3
    * @param {ids[]} req.body - Array of user ids that work on one project
    * @returns {UserDTO[]} JSON response with success status, session/token, and message
    * @see {@link UserDTO} for input structure
@@ -81,9 +95,9 @@ export class UsersController {
 
   private async getUsersByIds(req: Request, res: Response): Promise<void> {
     try {
-      const { ids } = req.body;
+      const idArray: number[] = parseIds(req.query.ids?.toString());
 
-      ids.forEach((element: any) => {
+      idArray.forEach((element: any) => {
         if (isNaN(element)) {
           res
             .status(400)
@@ -92,9 +106,14 @@ export class UsersController {
         }
       });
 
-      this.logger.log(`Fetching users with IDs ${ids}`);
-      const users = await this.usersService.getUsersByIds(ids);
-      res.status(200).json(users);
+      this.logger.log(`Fetching users with IDs ${idArray}`);
+      const result = await this.usersService.getUsersByIds(idArray);
+      if (result.success) {
+        res.status(200).json(result.data);
+      } else {
+        this.logger.log(result.error);
+        res.status(result.code).json(result.error);
+      }
     } catch (err) {
       this.logger.log((err as Error).message);
       res.status(500).json({ message: (err as Error).message });
@@ -120,8 +139,14 @@ export class UsersController {
       }
 
       this.logger.log("Creating new user");
-      const newUser = await this.usersService.createUser(userData);
-      res.status(201).json(newUser);
+      const result = await this.usersService.createUser(userData);
+
+      if (result.success) {
+        res.status(201).json(result.data);
+      } else {
+        this.logger.log(result.error);
+        res.status(result.code).json(result.error);
+      }
     } catch (err) {
       this.logger.log((err as Error).message);
       res.status(500).json({ message: (err as Error).message });
@@ -147,8 +172,9 @@ export class UsersController {
       this.logger.log(`Logically deleting user with ID ${id}`);
       const result = await this.usersService.logicalyDeleteUserById(id);
 
-      if (result === false) {
-        res.status(500).json({ message: "Logical delete failed." });
+      if (result.success === false) {
+        this.logger.log(result.error);
+        res.status(result.code).json(result.error);
       } else {
         res
           .status(200)
@@ -186,8 +212,14 @@ export class UsersController {
       }
 
       this.logger.log(`Updating user with ID ${id}`);
-      const updatedUser = await this.usersService.updateUserById(id, userData);
-      res.status(200).json(updatedUser);
+      const result = await this.usersService.updateUserById(id, userData);
+
+      if (result.success) {
+        res.status(200).json(result.data);
+      } else {
+        this.logger.log(result.error);
+        res.status(result.code).json(result.error);
+      }
     } catch (err) {
       this.logger.log((err as Error).message);
       res.status(500).json({ message: (err as Error).message });
@@ -220,11 +252,16 @@ export class UsersController {
       }
 
       this.logger.log("Update user's weekly_working_hours_sum");
-      const updatedUser = await this.usersService.setWeeklyHours(
+      const result = await this.usersService.setWeeklyHours(
         id,
         weekly_working_hours
       );
-      res.status(200).json(updatedUser);
+      if (result.success) {
+        res.status(200).json(result.data);
+      } else {
+        this.logger.log(result.error);
+        res.status(result.code).json(result.error);
+      }
     } catch (err) {
       this.logger.log((err as Error).message);
       res.status(500).json({ message: (err as Error).message });
@@ -242,8 +279,10 @@ export class UsersController {
     try {
       this.logger.log("Fetching all user roles");
 
-      const roles = await this.userRoleService.getAllUserRoles();
-      res.status(200).json(roles);
+      const result = await this.userRoleService.getAllUserRoles();
+      if (result.success) {
+        res.status(200).json(result.data);
+      }
     } catch (err) {
       this.logger.log((err as Error).message);
       res.status(500).json({ message: (err as Error).message });

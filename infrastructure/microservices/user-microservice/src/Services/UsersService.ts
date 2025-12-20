@@ -7,6 +7,10 @@ import bcrypt from "bcryptjs";
 import { UserRole } from "../Domain/models/UserRole";
 import { UserUpdateDTO } from "../Domain/DTOs/UserUpdateDTO";
 import { toDTO } from "../Helpers/toUserDto";
+import { ILogerService } from "../Domain/services/ILogerService";
+import { Result } from "../Domain/types/Result";
+import { ErrorCode } from "../Domain/enums/ErrorCode";
+import { error } from "console";
 
 export class UsersService implements IUsersService {
   private readonly saltRounds: number = parseInt(
@@ -22,18 +26,18 @@ export class UsersService implements IUsersService {
   /**
    * Get all users
    */
-  async getAllUsers(): Promise<UserDTO[]> {
+  async getAllUsers(): Promise<Result<UserDTO[]>> {
     const users = await this.userRepository.find({
       where: { is_deleted: false },
       relations: ["user_role"],
     });
-    return users.map((u) => toDTO(u));
+    return { success: true, data: users.map((u) => toDTO(u)) };
   }
 
   /**
    * Get user by ID
    */
-  async getUserById(user_id: number): Promise<UserDTO> {
+  async getUserById(user_id: number): Promise<Result<UserDTO>> {
     const user = await this.userRepository.findOne({
       where: { user_id, is_deleted: false },
       relations: ["user_role"],
@@ -41,28 +45,34 @@ export class UsersService implements IUsersService {
     //relations omogucava da se uz ucitavanje User-a ucitaju i podaci iz povezane tabele UserRole
     //Zbog ovoga nema potrebe za dodatnim upitom da bi dobili role_name
 
-    if (!user) throw new Error(`User with ID ${user_id} not found`);
-    return toDTO(user);
+    if (!user) {
+      return {
+        success: false,
+        code: ErrorCode.NOT_FOUND,
+        error: `User with ID ${user_id} not found`,
+      };
+    }
+    return { success: true, data: toDTO(user) };
   }
 
   /**
    * Get users by IDs
    */
 
-  async getUsersByIds(ids: number[]): Promise<UserDTO[]> {
+  async getUsersByIds(ids: number[]): Promise<Result<UserDTO[]>> {
     const users = await this.userRepository.find({
       where: { user_id: In(ids), is_deleted: false },
       relations: ["user_role"],
     });
 
-    return users.map((u) => toDTO(u));
+    return { success: true, data: users.map((u) => toDTO(u)) };
   }
 
   /**
    * Create new user
    */
 
-  async createUser(user: UserCreationDTO): Promise<UserDTO> {
+  async createUser(user: UserCreationDTO): Promise<Result<UserDTO>> {
     const existingUser = await this.userRepository.findOne({
       where: [{ username: user.username }, { email: user.email }], //na ovaj nacin proveravam da li username ili email vec postoje i da li je obrisan korisnik sa tim podacima
       //kaze onda da dupliramo podatke sto je logicno, ali da li je potrebno onda da ostavim samo bez is_deleted: false u oba slucaja?
@@ -70,7 +80,11 @@ export class UsersService implements IUsersService {
     //generise: SELECT * FROM users WHERE username = 'user.username' OR email = 'user.email'
 
     if (existingUser) {
-      throw new Error("Username or email already exists");
+      return {
+        success: false,
+        code: ErrorCode.CONFLICT,
+        error: "Username or email already exists",
+      };
     }
 
     //posto dobijamo role_name:string onda pretrazujemo da li postoji taj role_name u bazi
@@ -79,7 +93,11 @@ export class UsersService implements IUsersService {
     });
 
     if (userRole === null) {
-      throw new Error("User role does not exist");
+      return {
+        success: false,
+        code: ErrorCode.NOT_FOUND,
+        error: "User role does not exist",
+      };
     }
 
     const hashedPassword = await bcrypt.hash(user.password, this.saltRounds);
@@ -103,31 +121,34 @@ export class UsersService implements IUsersService {
       weekly_working_hour_sum: result.generatedMaps[0].weekly_working_hour_sum,
     };
 
-    return toDTO(newUser);
+    return { success: true, data: toDTO(newUser) };
   }
 
   /**
    * Logicaly delete user by ID
    */
 
-  async logicalyDeleteUserById(user_id: number): Promise<boolean> {
+  async logicalyDeleteUserById(user_id: number): Promise<Result<boolean>> {
     const existingUser = await this.userRepository.findOne({
       where: { user_id },
     });
 
     if (!existingUser) {
-      throw new Error(`User with ID ${user_id} not found`);
+      return {
+        success: false,
+        code: ErrorCode.NOT_FOUND,
+        error: `User with ID ${user_id} not found`,
+      };
     }
-
-    // const result = await this.userRepository.softDelete({ user_id }); ne mozemo raditi soft delete jer nam je potrebna dodatna kolona deletedAt u tabeli za to
-    // a ako je dodamo nema smisla da idmamo is_deleted kolonu
 
     const result = await this.userRepository.update(user_id, {
       is_deleted: true,
     });
     //na ovaj nacin brisanje je manje vise azuriranje kolone is_deleted na true
 
-    return result.affected !== undefined && result.affected > 0; //vraca true ako je obrisan bar jedan red
+    const booleanResult = result.affected !== undefined && result.affected > 0; //vraca true ako je obrisan bar jedan red
+
+    return { success: true, data: booleanResult };
   }
 
   /**
@@ -137,14 +158,18 @@ export class UsersService implements IUsersService {
   async updateUserById(
     user_id: number,
     updateUserData: UserUpdateDTO
-  ): Promise<UserDTO> {
+  ): Promise<Result<UserDTO>> {
     const existingUser = await this.userRepository.findOne({
       where: { user_id, is_deleted: false },
       relations: ["user_role"],
     });
 
     if (!existingUser) {
-      throw new Error(`User with ID ${user_id} not found`);
+      return {
+        success: false,
+        code: ErrorCode.NOT_FOUND,
+        error: `User with ID ${user_id} not found`,
+      };
     }
 
     const alreadyExist = await this.userRepository.count({
@@ -156,9 +181,11 @@ export class UsersService implements IUsersService {
     });
 
     if (alreadyExist > 0) {
-      throw new Error(
-        `User with username: ${updateUserData.username} or email: ${updateUserData.email} already exist`
-      );
+      return {
+        success: false,
+        code: ErrorCode.CONFLICT,
+        error: `User with username: ${updateUserData.username} or email: ${updateUserData.email} already exist`,
+      };
     }
 
     if (updateUserData.password) {
@@ -183,7 +210,7 @@ export class UsersService implements IUsersService {
 
     const updatedUser = await this.userRepository.save(existingUser);
 
-    return toDTO(updatedUser);
+    return { success: true, data: toDTO(updatedUser) };
   }
 
   /**
@@ -193,14 +220,18 @@ export class UsersService implements IUsersService {
   async setWeeklyHours(
     user_id: number,
     weekly_working_hour: number
-  ): Promise<UserDTO> {
+  ): Promise<Result<UserDTO>> {
     const existingUser = await this.userRepository.findOne({
       where: { user_id },
       relations: ["user_role"],
     });
 
     if (!existingUser) {
-      throw new Error(`User with ID ${user_id} not found`);
+      return {
+        success: false,
+        code: ErrorCode.NOT_FOUND,
+        error: `User with ID ${user_id} not found`,
+      };
     }
 
     const weekly_working_hour_sum =
@@ -211,11 +242,15 @@ export class UsersService implements IUsersService {
     });
 
     if (result.affected === undefined || result.affected === 0) {
-      throw new Error(`User with ID ${user_id} could not be updated`);
+      return {
+        success: false,
+        code: ErrorCode.CONFLICT,
+        error: `User with ID ${user_id} could not be updated`,
+      };
     }
 
     existingUser.weekly_working_hour_sum = weekly_working_hour_sum;
 
-    return toDTO(existingUser);
+    return { success: true, data: toDTO(existingUser) };
   }
 }

@@ -2,6 +2,7 @@ import { Repository } from "typeorm";
 import { UserRole } from "../Domain/models/UserRole";
 import { IUserRoleService } from "../Domain/services/IUserRoleService";
 import { UserRoleDTO } from "../Domain/DTOs/UserRoleDTO";
+import { Result } from "../Domain/types/Result";
 
 export class UserRoleService implements IUserRoleService {
   constructor(private userRoleRepository: Repository<UserRole>) {}
@@ -10,12 +11,15 @@ export class UserRoleService implements IUserRoleService {
    * Get all user roles
    */
 
-  async getAllUserRoles(): Promise<UserRoleDTO[]> {
+  async getAllUserRoles(): Promise<Result<UserRoleDTO[]>> {
     const roles = await this.userRoleRepository.find();
-    return roles.map((r) => ({
-      user_role_id: r.user_role_id,
-      role_name: r.role_name,
-    }));
+    return {
+      success: true,
+      data: roles.map((r) => ({
+        user_role_id: r.user_role_id,
+        role_name: r.role_name,
+      })),
+    };
   }
 
   /**
@@ -28,6 +32,6 @@ export class UserRoleService implements IUserRoleService {
       where: { role_name: role_name },
     });
 
-    return new UserRoleDTO(userRole?.user_role_id,userRole?.role_name);
+    return new UserRoleDTO(userRole?.user_role_id, userRole?.role_name);
   }
 }

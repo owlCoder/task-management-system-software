@@ -1,5 +1,6 @@
 import { UserRoleDTO } from "../DTOs/UserRoleDTO";
+import { Result } from "../types/Result";
 
 export interface IUserRoleService {
-  getAllUserRoles(): Promise<UserRoleDTO[]>;
+  getAllUserRoles(): Promise<Result<UserRoleDTO[]>>;
 }
