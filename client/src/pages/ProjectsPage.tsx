@@ -100,73 +100,46 @@ export const ProjectsPage: React.FC = () => {
   };
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex min-h-screen bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-[#0f172a] via-[#020617] to-black">
       <Sidebar />
 
-      <div className="flex-1 p-5">
+      <div className="flex-1 p-6">
         <header className="flex items-center justify-between gap-5 mb-6 flex-wrap">
-          <h1
-            className="m-0 text-2xl md:text-3xl"
-            style={{
-              fontFamily: "var(--font-secondary)",
-              color: "var(--soft-bg)",
-              fontWeight: "bold",
-            }}
-          >
+          <h1 className="text-3xl md:text-4xl font-bold text-white">
             Projects
           </h1>
 
           <div className="flex gap-2 flex-wrap">
             <button
               type="button"
-              className="inline-flex items-center justify-center gap-2 rounded-lg px-4 h-10 text-sm focus:outline-none focus:ring-2 focus:ring-accent/30 transition-opacity duration-150"
-              style={{
-                background: selectedId ? "white" : "var(--soft-bg)",
-                color: selectedId ? "var(--brand)" : "var(--muted)",
-                opacity: !selectedId ? 0.5 : 1,
-                pointerEvents: !selectedId ? "none" : "auto",
-                fontFamily: "var(--font-primary)",
-                margin: "3px",
-                borderRadius: "4px",
-                height: 30,
-                cursor: "pointer",
-                fontSize: "16px",
-                fontWeight: "bold",
-                width: "140px",
-              }}
+              className={`
+                w-[140px] h-[40px] rounded-[3em]
+                font-semibold transition-all duration-300
+                ${
+                  selectedId
+                    ? "bg-white text-[var(--palette-deep-blue)] hover:-translate-y-1 shadow-lg"
+                    : "bg-white/10 text-white/40 cursor-not-allowed"
+                }
+              `}
               aria-disabled={!selectedId}
               onClick={handleOpenEditModalClick}
-              title={
-                !selectedId ? "Select a project first" : "Edit selected project"
-              }
             >
               Edit Project
             </button>
 
             <button
               type="button"
-              className="inline-flex items-center justify-center gap-2 rounded-lg px-4 h-10 text-sm focus:outline-none focus:ring-2 focus:ring-accent/30 transition-opacity duration-150"
-              style={{
-                background: selectedId ? "white" : "var(--soft-bg)",
-                color: selectedId ? "var(--brand)" : "var(--muted)",
-                opacity: !selectedId ? 0.5 : 1,
-                pointerEvents: !selectedId ? "none" : "auto",
-                fontFamily: "var(--font-primary)",
-                margin: "3px",
-                borderRadius: "4px",
-                height: 30,
-                cursor: "pointer",
-                fontSize: "16px",
-                fontWeight: "bold",
-                width: "140px",
-              }}
+              className={`
+                w-[140px] h-[40px] rounded-[3em]
+                font-semibold transition-all duration-300
+                ${
+                  selectedId
+                    ? "bg-white text-red-600 hover:-translate-y-1 shadow-lg"
+                    : "bg-white/10 text-white/40 cursor-not-allowed"
+                }
+              `}
               aria-disabled={!selectedId}
               onClick={handleDelete}
-              title={
-                !selectedId
-                  ? "Select a project first"
-                  : "Delete selected project"
-              }
             >
               Delete Project
             </button>
@@ -174,18 +147,19 @@ export const ProjectsPage: React.FC = () => {
             <button
               type="button"
               onClick={handleOpenCreateModal}
-              style={{
-                background: "white",
-                color: "var(--brand)",
-                fontFamily: "var(--font-primary)",
-                margin: "3px",
-                borderRadius: "4px",
-                height: 30,
-                cursor: "pointer",
-                fontSize: "16px",
-                fontWeight: "bold",
-                width: "140px",
-              }}
+              className="
+                w-[160px] h-[40px] rounded-[3em]
+                font-semibold
+                bg-white
+                text-[var(--palette-deep-blue)]
+                hover:bg-gradient-to-t
+                hover:from-[var(--palette-medium-blue)]
+                hover:to-[var(--palette-deep-blue)]
+                hover:text-white
+                transition-all duration-300
+                hover:-translate-y-1
+                shadow-lg
+              "
             >
               Create Project
             </button>
@@ -194,7 +168,10 @@ export const ProjectsPage: React.FC = () => {
 
         <section
           aria-live="polite"
-          className="grid gap-[20px] [grid-template-columns:repeat(auto-fill,minmax(280px,1fr))]"
+          className="
+            grid gap-6
+            [grid-template-columns:repeat(auto-fill,minmax(280px,1fr))]
+          "
         >
           {projects.map((p) => (
             <ProjectCard
