@@ -3,3 +3,4 @@
 database/docker-compose.yml
 database/output.txt
 package-lock.json
+.vscode/
