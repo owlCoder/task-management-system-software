@@ -104,6 +104,12 @@ export class NotificationController {
 
       const data: NotificationCreateDTO = req.body;
       const notification = await this.notificationService.createNotification(data);
+      
+      if (!notification) {
+        res.status(500).json({ message: 'Failed to create notification' });
+        return;
+      }
+      
       res.status(201).json(notification);
     } catch (error) {
       res.status(500).json({ 
@@ -193,7 +199,13 @@ export class NotificationController {
       const { ids } = req.body;
       console.log('✅ Calling service markMultipleAsRead with ids:', ids);
       
-      await this.notificationService.markMultipleAsRead(ids);
+      const success = await this.notificationService.markMultipleAsRead(ids);
+      
+      if (!success) {
+        res.status(500).json({ message: 'Failed to mark notifications as read' });
+        return;
+      }
+      
       res.status(200).json({ message: 'Notifications marked as read' });
     } catch (error) {
       console.error('❌ Error in markMultipleAsRead:', error);
@@ -224,7 +236,13 @@ export class NotificationController {
       const { ids } = req.body;
       console.log('✅ Calling service markMultipleAsUnread with ids:', ids);
       
-      await this.notificationService.markMultipleAsUnread(ids);
+      const success = await this.notificationService.markMultipleAsUnread(ids);
+      
+      if (!success) {
+        res.status(500).json({ message: 'Failed to mark notifications as unread' });
+        return;
+      }
+      
       res.status(200).json({ message: 'Notifications marked as unread' });
     } catch (error) {
       console.error('❌ Error in markMultipleAsUnread:', error);
@@ -285,7 +303,13 @@ export class NotificationController {
       const { ids } = req.body;
       console.log('✅ Calling service deleteMultiple with ids:', ids);
       
-      await this.notificationService.deleteMultipleNotifications(ids);
+      const success = await this.notificationService.deleteMultipleNotifications(ids);
+      
+      if (!success) {
+        res.status(500).json({ message: 'Failed to delete notifications' });
+        return;
+      }
+      
       res.status(200).json({ message: 'Notifications deleted successfully' });
     } catch (error) {
       console.error('❌ Error in deleteMultiple:', error);

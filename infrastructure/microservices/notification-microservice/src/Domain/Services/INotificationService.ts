@@ -4,7 +4,7 @@ import { NotificationResponseDTO } from '../DTOs/NotificationDTO';
 export interface INotificationService {
   
   // CRUD
-  createNotification(data: NotificationCreateDTO): Promise<NotificationResponseDTO>;
+  createNotification(data: NotificationCreateDTO): Promise<NotificationResponseDTO | null>;
   getNotificationById(id: number): Promise<NotificationResponseDTO | null>;
   getNotificationsByUserId(userId: number): Promise<NotificationResponseDTO[]>;
   deleteNotification(id: number): Promise<boolean>;
@@ -14,9 +14,9 @@ export interface INotificationService {
   markAsUnread(id: number): Promise<NotificationResponseDTO | null>;
   
   // bulk operacije
-  markMultipleAsRead(ids: number[]): Promise<void>;
-  markMultipleAsUnread(ids: number[]): Promise<void>;
-  deleteMultipleNotifications(ids: number[]): Promise<void>;
+  markMultipleAsRead(ids: number[]): Promise<boolean>;
+  markMultipleAsUnread(ids: number[]): Promise<boolean>;
+  deleteMultipleNotifications(ids: number[]): Promise<boolean>;
   
   // counter
   getUnreadCount(userId: number): Promise<number>;

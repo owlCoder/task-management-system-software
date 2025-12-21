@@ -4,15 +4,15 @@ export interface INotificationRepository {
   
   // CRUD 
   create(notification: Partial<Notification>): Notification;
-  save(notification: Notification): Promise<Notification>;
+  save(notification: Notification): Promise<Notification | null>;
   findAll(): Promise<Notification[]>;
   findOne(id: number): Promise<Notification | null>;
   findByUserId(userId: number): Promise<Notification[]>;
   delete(id: number): Promise<boolean>;
-  deleteMultiple(ids: number[]): Promise<void>;
+  deleteMultiple(ids: number[]): Promise<boolean>;
   
   // bulk operacije
-  updateMultiple(ids: number[], data: Partial<Notification>): Promise<void>;
+  updateMultiple(ids: number[], data: Partial<Notification>): Promise<boolean>;
   
   // counter
   countUnread(userId: number): Promise<number>;

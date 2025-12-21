@@ -1,4 +1,4 @@
-/*import { io, Socket } from "socket.io-client";
+import { io, Socket } from "socket.io-client";
 import type { Notification } from "../../models/notification/NotificationCardDTO";
 
 export const SocketEvents = {
@@ -105,7 +105,6 @@ export class SocketManager {
   }
 
   // Registruje listener za notifications:bulk_deleted event
-
   onNotificationsBulkDeleted(
     callback: (data: { ids: number[] }) => void
   ): void {
@@ -139,4 +138,3 @@ export class SocketManager {
 
 // Export singleton instance
 export const socketManager = new SocketManager();
-*/

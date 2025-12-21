@@ -31,7 +31,7 @@ const NotificationPage: React.FC = () => {
   // UCITAJ NOTIFIKACIJE SA BACKEND-A I KONEKTUJ WEBSOCKET
   useEffect(() => {
     loadNotifications();
-    setupWebSocket();
+    //setupWebSocket();
 
     // Cleanup na unmount
     return () => {
@@ -290,13 +290,14 @@ const NotificationPage: React.FC = () => {
       style={{ backgroundImage: `url(${backgroundImageUrl})` }}
     >
       
+      
       <div className="fixed left-0 top-0 h-screen z-40">
         <Sidebar 
-          username="John Doe"
-          role="Project Manager"
+        //username="John Doe"       // baca gresku TO DO  
+        //role="Project Manager"
         />
       </div>
-
+      
       <div className="ml-48 pl-8">
         
         <div className="fixed top-0 z-50" style={{ left: '224px', right: 0 }}>
