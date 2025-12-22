@@ -32,6 +32,17 @@ export function UserDataValidation(
     poruka = "You did not enter an email in the correct format!";
   }
 
+  //Validacija role_name
+
+  switch (UserData.role_name) {
+    case "Admin":
+      poruka = `Unauthorized user role: ${UserData.role_name}`;
+      break;
+    case "SysAdmin":
+      poruka = `Unauthorized user role: ${UserData.role_name}`;
+      break;
+  }
+
   return {
     uspesno: poruka.length === 0,
     poruka,
@@ -58,6 +69,18 @@ export function UserDataUpdateValidation(
     UserData.email.match("[a-zA-Z0-9]+@[a-z]+.[a-z]+") === null
   ) {
     poruka = "You did not enter an email in the correct format!";
+  }
+
+  //Validacija role_name
+  if (UserData.user_role) {
+    switch (UserData.user_role.role_name) {
+      case "Admin":
+        poruka = `Unauthorized user role: ${UserData.user_role.role_name}`;
+        break;
+      case "SysAdmin":
+        poruka = `Unauthorized user role: ${UserData.user_role.role_name}`;
+        break;
+    }
   }
 
   return {

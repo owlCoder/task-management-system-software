@@ -6,7 +6,6 @@ import {
   UserDataUpdateValidation,
   UserDataValidation,
 } from "../validation/UserDataValidation";
-import { Result } from "../../Domain/types/Result";
 import { parseIds } from "../../Helpers/parseIds";
 
 export class UsersController {
@@ -30,6 +29,10 @@ export class UsersController {
     this.router.put("/users/:id", this.updateUser.bind(this));
     this.router.put("/users/:id/working-hours", this.setWeeklyHours.bind(this));
     this.router.get("/user-roles", this.getAllUserRoles.bind(this));
+    this.router.get(
+      "/user-roles/userCreation",
+      this.getUserRolesForUserCreation.bind(this)
+    );
     this.router.get(
       "/user-roles/:impact_level",
       this.getUserRoleByImpactLevel.bind(this)
@@ -180,9 +183,7 @@ export class UsersController {
         this.logger.log(result.error);
         res.status(result.code).json(result.error);
       } else {
-        res
-          .status(200)
-          .json({ message: `User with ID ${id} logically deleted` });
+        res.status(204).send();
       }
     } catch (err) {
       this.logger.log((err as Error).message);
@@ -284,6 +285,30 @@ export class UsersController {
       this.logger.log("Fetching all user roles");
 
       const result = await this.userRoleService.getAllUserRoles();
+      if (result.success) {
+        res.status(200).json(result.data);
+      }
+    } catch (err) {
+      this.logger.log((err as Error).message);
+      res.status(500).json({ message: (err as Error).message });
+    }
+  }
+
+  /**
+   * GET /api/v1/user-roles/userCreation
+   * Get all roles
+   * @returns {UserRoleDTO[]} JSON response with success status, session/token, and message
+   * @see {@link UserRoleDTO} for input structure
+   * */
+
+  private async getUserRolesForUserCreation(
+    req: Request,
+    res: Response
+  ): Promise<void> {
+    try {
+      this.logger.log("Fetching all user roles for user creation");
+
+      const result = await this.userRoleService.getUserRolesForUserCreation();
       if (result.success) {
         res.status(200).json(result.data);
       }

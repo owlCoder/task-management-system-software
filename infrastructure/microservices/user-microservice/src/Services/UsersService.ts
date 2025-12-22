@@ -150,7 +150,7 @@ export class UsersService implements IUsersService {
     } else {
       return {
         success: false,
-        code: ErrorCode.NO_CONTENT,
+        code: ErrorCode.INTERNAL_ERROR,
         error: `There is error with deleting user with ID ${user_id}`,
       };
     }
