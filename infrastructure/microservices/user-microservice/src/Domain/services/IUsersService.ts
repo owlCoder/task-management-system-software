@@ -8,7 +8,7 @@ export interface IUsersService {
   getUserById(id: number): Promise<Result<UserDTO>>;
   getUsersByIds(ids: number[]): Promise<Result<UserDTO[]>>;
   createUser(user: UserCreationDTO): Promise<Result<UserDTO>>;
-  logicalyDeleteUserById(user_id: number): Promise<Result<boolean>>;
+  logicalyDeleteUserById(user_id: number): Promise<Result<void>>;
   updateUserById(
     user_id: number,
     updateUserData: UserUpdateDTO

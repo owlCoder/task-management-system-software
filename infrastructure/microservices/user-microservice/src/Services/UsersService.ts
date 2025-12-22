@@ -7,10 +7,8 @@ import bcrypt from "bcryptjs";
 import { UserRole } from "../Domain/models/UserRole";
 import { UserUpdateDTO } from "../Domain/DTOs/UserUpdateDTO";
 import { toDTO } from "../Helpers/toUserDto";
-import { ILogerService } from "../Domain/services/ILogerService";
 import { Result } from "../Domain/types/Result";
 import { ErrorCode } from "../Domain/enums/ErrorCode";
-import { error } from "console";
 
 export class UsersService implements IUsersService {
   private readonly saltRounds: number = parseInt(
@@ -128,7 +126,7 @@ export class UsersService implements IUsersService {
    * Logicaly delete user by ID
    */
 
-  async logicalyDeleteUserById(user_id: number): Promise<Result<boolean>> {
+  async logicalyDeleteUserById(user_id: number): Promise<Result<void>> {
     const existingUser = await this.userRepository.findOne({
       where: { user_id },
     });
@@ -146,9 +144,16 @@ export class UsersService implements IUsersService {
     });
     //na ovaj nacin brisanje je manje vise azuriranje kolone is_deleted na true
 
-    const booleanResult = result.affected !== undefined && result.affected > 0; //vraca true ako je obrisan bar jedan red
-
-    return { success: true, data: booleanResult };
+    if (result.affected !== undefined && result.affected > 0) {
+      //vraca true ako je obrisan bar jedan red
+      return { success: true, data: undefined };
+    } else {
+      return {
+        success: false,
+        code: ErrorCode.NO_CONTENT,
+        error: `There is error with deleting user with ID ${user_id}`,
+      };
+    }
   }
 
   /**

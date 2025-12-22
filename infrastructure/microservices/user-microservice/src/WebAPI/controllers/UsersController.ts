@@ -30,6 +30,10 @@ export class UsersController {
     this.router.put("/users/:id", this.updateUser.bind(this));
     this.router.put("/users/:id/working-hours", this.setWeeklyHours.bind(this));
     this.router.get("/user-roles", this.getAllUserRoles.bind(this));
+    this.router.get(
+      "/user-roles/:impact_level",
+      this.getUserRoleByImpactLevel.bind(this)
+    );
   }
 
   /**
@@ -282,6 +286,44 @@ export class UsersController {
       const result = await this.userRoleService.getAllUserRoles();
       if (result.success) {
         res.status(200).json(result.data);
+      }
+    } catch (err) {
+      this.logger.log((err as Error).message);
+      res.status(500).json({ message: (err as Error).message });
+    }
+  }
+
+  /**
+   * GET /api/v1/user-roles/:impact_level
+   * Get user roles based on their impact level
+   * @returns {UserRoleDTO[]} JSON response with success status, session/token, and message
+   * @see {@link ImpactLevels} for input strucutre
+   * */
+
+  private async getUserRoleByImpactLevel(
+    req: Request,
+    res: Response
+  ): Promise<void> {
+    try {
+      const impact_level = parseInt(req.params.impact_level, 10);
+      if (isNaN(impact_level)) {
+        res
+          .status(400)
+          .json({ message: "The passed impact_level is not a number" });
+        return;
+      }
+
+      this.logger.log(
+        `Fetching all user roles with impact level ${impact_level}`
+      );
+
+      const result = await this.userRoleService.getUserRoleByImpactLevel(
+        impact_level
+      );
+      if (result.success) {
+        res.status(200).json(result.data);
+      } else {
+        res.status(result.code).json(result.error);
       }
     } catch (err) {
       this.logger.log((err as Error).message);
