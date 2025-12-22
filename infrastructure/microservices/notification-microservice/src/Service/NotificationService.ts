@@ -1,6 +1,7 @@
 import { INotificationRepository } from '../Domain/services/INotificationRepository';
 import { INotificationMapper } from '../Domain/services/INotificationMapper';
-import { INotificationService } from '../Domain/services/INotificationService';
+import { INotificationService} from '../Domain/services/INotificationService';
+import { Result } from '../Domain/types/common/Result';
 import { NotificationCreateDTO } from '../Domain/DTOs/NotificationCreateDTO';
 import { NotificationResponseDTO } from '../Domain/DTOs/NotificationDTO';
 import { SocketService } from '../WebSocket/SocketService';
@@ -16,15 +17,11 @@ export class NotificationService implements INotificationService {
     this.mapper = mapper;
   }
 
-  /**
-   * Injektuje SocketService za real-time events
-   */
   setSocketService(socketService: SocketService): void {
     this.socketService = socketService;
   }
 
-  // kreira novu notifikaciju
-  async createNotification(data: NotificationCreateDTO): Promise<NotificationResponseDTO | null> {
+  async createNotification(data: NotificationCreateDTO): Promise<Result<NotificationResponseDTO>> {
     try {
       const notificationEntity = this.mapper.toEntity(data);
       const notification = this.repository.create(notificationEntity);
@@ -32,57 +29,53 @@ export class NotificationService implements INotificationService {
 
       if (!savedNotification) {
         console.error(' Service.createNotification: Failed to save notification');
-        return null;
+        return { success: false, status: 500, message: 'Failed to save notification' };
       }
 
       const responseDTO = this.mapper.toResponseDTO(savedNotification);
 
-      // Emit WebSocket event
       if (this.socketService) {
         this.socketService.emitNotificationCreated(responseDTO);
       }
 
-      return responseDTO;
+      return { success: true, data: responseDTO };
     } catch (error) {
       console.error(' Service.createNotification error:', error);
-      return null;
+      return { success: false, status: 500, message: (error as Error).message };
     }
   }
 
-  // vraca notifikaciju po ID-u
-  async getNotificationById(id: number): Promise<NotificationResponseDTO | null> {
+  async getNotificationById(id: number): Promise<Result<NotificationResponseDTO>> {
     try {
       const notification = await this.repository.findOne(id);
 
       if (!notification) {
-        return null;
+        return { success: false, status: 404, message: 'Notification not found' };
       }
 
-      return this.mapper.toResponseDTO(notification);
+      return { success: true, data: this.mapper.toResponseDTO(notification) };
     } catch (error) {
       console.error(' Service.getNotificationById error:', error);
-      return null;
+      return { success: false, status: 500, message: (error as Error).message };
     }
   }
 
-  // vraca notifikacije za odredjenog korisnika
-  async getNotificationsByUserId(userId: number): Promise<NotificationResponseDTO[]> {
+  async getNotificationsByUserId(userId: number): Promise<Result<NotificationResponseDTO[]>> {
     try {
       const notifications = await this.repository.findByUserId(userId);
-      return this.mapper.toResponseDTOArray(notifications);
+      return { success: true, data: this.mapper.toResponseDTOArray(notifications) };
     } catch (error) {
       console.error(' Service.getNotificationsByUserId error:', error);
-      return [];
+      return { success: false, status: 500, message: (error as Error).message };
     }
   }
 
-  // oznaci notifikaciju kao procitanu
-  async markAsRead(id: number): Promise<NotificationResponseDTO | null> {
+  async markAsRead(id: number): Promise<Result<NotificationResponseDTO>> {
     try {
       const notification = await this.repository.findOne(id);
 
       if (!notification) {
-        return null;
+        return { success: false, status: 404, message: 'Notification not found' };
       }
 
       notification.isRead = true;
@@ -90,30 +83,28 @@ export class NotificationService implements INotificationService {
 
       if (!updatedNotification) {
         console.error(' Service.markAsRead: Failed to update notification');
-        return null;
+        return { success: false, status: 500, message: 'Failed to update notification' };
       }
 
       const responseDTO = this.mapper.toResponseDTO(updatedNotification);
 
-      // Emit WebSocket event
       if (this.socketService) {
         this.socketService.emitNotificationMarkedRead(responseDTO);
       }
 
-      return responseDTO;
+      return { success: true, data: responseDTO };
     } catch (error) {
       console.error(' Service.markAsRead error:', error);
-      return null;
+      return { success: false, status: 500, message: (error as Error).message };
     }
   }
 
-  // oznaci notifikaciju kao neprocitanu
-  async markAsUnread(id: number): Promise<NotificationResponseDTO | null> {
+  async markAsUnread(id: number): Promise<Result<NotificationResponseDTO>> {
     try {
       const notification = await this.repository.findOne(id);
 
       if (!notification) {
-        return null;
+        return { success: false, status: 404, message: 'Notification not found' };
       }
 
       notification.isRead = false;
@@ -121,90 +112,87 @@ export class NotificationService implements INotificationService {
 
       if (!updatedNotification) {
         console.error(' Service.markAsUnread: Failed to update notification');
-        return null;
+        return { success: false, status: 500, message: 'Failed to update notification' };
       }
 
       const responseDTO = this.mapper.toResponseDTO(updatedNotification);
 
-      // Emit WebSocket event
       if (this.socketService) {
         this.socketService.emitNotificationMarkedUnread(responseDTO);
       }
 
-      return responseDTO;
+      return { success: true, data: responseDTO };
     } catch (error) {
       console.error(' Service.markAsUnread error:', error);
-      return null;
+      return { success: false, status: 500, message: (error as Error).message };
     }
   }
 
-  // oznaci vise notifikacija kao procitane
-  async markMultipleAsRead(ids: number[]): Promise<boolean> {
+  async markMultipleAsRead(ids: number[]): Promise<Result<void>> {
     try {
-      if (ids.length === 0) return false;
+      if (ids.length === 0) {
+        return { success: false, status: 400, message: 'No notification IDs provided' };
+      }
 
-      // Dobavi userId od prve notifikacije
       const firstNotification = await this.repository.findOne(ids[0]);
-      if (!firstNotification) return false;
+      if (!firstNotification) {
+        return { success: false, status: 404, message: 'Notifications not found' };
+      }
 
       const userId = firstNotification.userId;
-
       const updated = await this.repository.updateMultiple(ids, { isRead: true });
 
       if (!updated) {
         console.error(' Service.markMultipleAsRead: Failed to update notifications');
-        return false;
+        return { success: false, status: 500, message: 'Failed to update notifications' };
       }
 
-      // Emit WebSocket event
       if (this.socketService) {
         this.socketService.emitNotificationsBulkMarkedRead(ids, userId!);
       }
 
-      return true;
+      return { success: true, data: undefined };
     } catch (error) {
       console.error(' Service.markMultipleAsRead error:', error);
-      return false;
+      return { success: false, status: 500, message: (error as Error).message };
     }
   }
 
-  // oznaci vise notifikacija kao neprocitane
-  async markMultipleAsUnread(ids: number[]): Promise<boolean> {
+  async markMultipleAsUnread(ids: number[]): Promise<Result<void>> {
     try {
-      if (ids.length === 0) return false;
+      if (ids.length === 0) {
+        return { success: false, status: 400, message: 'No notification IDs provided' };
+      }
 
-      // Dobavi userId od prve notifikacije
       const firstNotification = await this.repository.findOne(ids[0]);
-      if (!firstNotification) return false;
+      if (!firstNotification) {
+        return { success: false, status: 404, message: 'Notifications not found' };
+      }
 
       const userId = firstNotification.userId;
-
       const updated = await this.repository.updateMultiple(ids, { isRead: false });
 
       if (!updated) {
         console.error(' Service.markMultipleAsUnread: Failed to update notifications');
-        return false;
+        return { success: false, status: 500, message: 'Failed to update notifications' };
       }
 
-      // Emit WebSocket event
       if (this.socketService) {
         this.socketService.emitNotificationsBulkMarkedUnread(ids, userId!);
       }
 
-      return true;
+      return { success: true, data: undefined };
     } catch (error) {
       console.error(' Service.markMultipleAsUnread error:', error);
-      return false;
+      return { success: false, status: 500, message: (error as Error).message };
     }
   }
 
-  // brise notifikaciju
-  async deleteNotification(id: number): Promise<boolean> {
+  async deleteNotification(id: number): Promise<Result<void>> {
     try {
-      // Prvo dobavi notifikaciju da bi znali userId
       const notification = await this.repository.findOne(id);
       if (!notification) {
-        return false;
+        return { success: false, status: 404, message: 'Notification not found' };
       }
 
       const userId = notification.userId;
@@ -212,58 +200,57 @@ export class NotificationService implements INotificationService {
 
       if (!deleted) {
         console.error(' Service.deleteNotification: Failed to delete notification');
-        return false;
+        return { success: false, status: 500, message: 'Failed to delete notification' };
       }
 
-      // Emit WebSocket event
       if (this.socketService) {
         this.socketService.emitNotificationDeleted(id, userId!);
       }
 
-      return true;
+      return { success: true, data: undefined };
     } catch (error) {
       console.error(' Service.deleteNotification error:', error);
-      return false;
+      return { success: false, status: 500, message: (error as Error).message };
     }
   }
 
-  // brise vise notifikacija odjednom
-  async deleteMultipleNotifications(ids: number[]): Promise<boolean> {
+  async deleteMultipleNotifications(ids: number[]): Promise<Result<void>> {
     try {
-      if (ids.length === 0) return false;
+      if (ids.length === 0) {
+        return { success: false, status: 400, message: 'No notification IDs provided' };
+      }
 
-      // Dobavi userId od prve notifikacije
       const firstNotification = await this.repository.findOne(ids[0]);
-      if (!firstNotification) return false;
+      if (!firstNotification) {
+        return { success: false, status: 404, message: 'Notifications not found' };
+      }
 
       const userId = firstNotification.userId;
-
       const deleted = await this.repository.deleteMultiple(ids);
 
       if (!deleted) {
         console.error(' Service.deleteMultipleNotifications: Failed to delete notifications');
-        return false;
+        return { success: false, status: 500, message: 'Failed to delete notifications' };
       }
 
-      // Emit WebSocket event
       if (this.socketService) {
         this.socketService.emitNotificationsBulkDeleted(ids, userId!);
       }
 
-      return true;
+      return { success: true, data: undefined };
     } catch (error) {
       console.error(' Service.deleteMultipleNotifications error:', error);
-      return false;
+      return { success: false, status: 500, message: (error as Error).message };
     }
   }
 
-  // vraca broj neprocitanih notifikacija za korisnika
-  async getUnreadCount(userId: number): Promise<number> {
+  async getUnreadCount(userId: number): Promise<Result<number>> {
     try {
-      return await this.repository.countUnread(userId);
+      const count = await this.repository.countUnread(userId);
+      return { success: true, data: count };
     } catch (error) {
       console.error(' Service.getUnreadCount error:', error);
-      return 0;
+      return { success: false, status: 500, message: (error as Error).message };
     }
   }
 }
