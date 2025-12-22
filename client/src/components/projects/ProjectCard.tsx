@@ -1,5 +1,6 @@
 import React from "react";
 import type { ProjectDTO } from "../../models/project/ProjectDTO";
+import { getProjectStatusColor } from "../../helpers/projectStatusHelper";
 
 type Props = {
   project: ProjectDTO;
@@ -79,6 +80,15 @@ export const ProjectCard: React.FC<Props> = ({
         >
           {project.name}
         </h3>
+        <div className="flex items-center gap-2">
+          <span
+            className={`w-3 h-3 rounded-full ${getProjectStatusColor(project.status!)}`}
+          ></span>
+          <span className="text-sm font-semibold text-white/90">
+            {project.status}
+          </span>
+        </div>
+
 
         <p className="text-white text-muted text-sm flex items-center gap-2">
           <svg
