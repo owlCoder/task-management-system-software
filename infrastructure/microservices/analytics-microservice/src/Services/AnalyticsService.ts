@@ -46,6 +46,21 @@ export class AnalyticsService implements IAnalyticsService {
     }
 
 
+    async getVelocityForProject(projectId: number): Promise<number> {
+        const proj = await this.projectRepository.find({ where: { project_id: projectId } })[0];
+        const sprints = await this.sprintRepository.find({ where: { project: proj, end_date: LessThan(new Date()) } });
+
+        let sum = 0;
+
+        for (let i = 0; i < sprints.length; ++i)
+            sum += sprints[i].end_date.getTime() - sprints[i].start_date.getTime();
 
 
-}
+        const avgHours = (sum / sprints.length) / (1000 * 60 * 60);
+
+        return parseFloat(avgHours.toFixed(2));
+    }
+
+
+
+}       
