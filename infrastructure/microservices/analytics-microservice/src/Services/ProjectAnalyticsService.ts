@@ -21,6 +21,10 @@ export class ProjectAnalyticsService implements IProjectAnalyticsService {
 
         const s = await this.sprintRepository.findOneBy({ sprint_id: sprintId });
 
+        if (!s) {
+            throw new Error("Sprint not found");
+        }
+
         const time = (s.end_date.getTime() - s.start_date.getTime()) / (1000 * 60 * 60); //allowed hours to spend in sprint
 
         //NEED TO CHANGE FROM PROJECT TO SPRINT ID IN TASK! - sastanak sa mandicem i goranom je u sredu!
@@ -49,6 +53,10 @@ export class ProjectAnalyticsService implements IProjectAnalyticsService {
 
     async getBurnUpChartsForSprintId(sprintId: number): Promise<BurnupDto> {
         const s = await this.sprintRepository.findOneBy({ sprint_id: sprintId });
+
+        if (!s) {
+            throw new Error("Sprint not found");
+        }
 
         const time = (s.end_date.getTime() - s.start_date.getTime()) / (1000 * 60 * 60 * 24); //x-axis in days
 
@@ -83,7 +91,12 @@ export class ProjectAnalyticsService implements IProjectAnalyticsService {
 
 
     async getVelocityForProject(projectId: number): Promise<number> {
-        const proj = await this.projectRepository.find({ where: { project_id: projectId } })[0];
+        const proj = await this.projectRepository.findOneBy({ project_id: projectId });
+
+        if (!proj) {
+            throw new Error("Project not found");
+        }
+
         const sprints = await this.sprintRepository.find({ where: { project: proj, end_date: LessThan(new Date()) } });
 
         let sum = 0;
