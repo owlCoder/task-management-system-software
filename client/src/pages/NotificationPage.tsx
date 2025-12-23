@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import DashboardNavbar from "../components/dashboard/sidebar/Navbar";
 import Sidebar from "../components/dashboard/sidebar/Sidebar";
 import NotificationHeader from "../components/notification/NotificationHeader";
 import NotificationFilters from "../components/notification/NotificationFilters";
@@ -324,7 +323,6 @@ const NotificationPage: React.FC = () => {
 
       <div className="ml-48 pl-8">
         <div className="fixed top-0 z-50" style={{ left: "224px", right: 0 }}>
-          <DashboardNavbar />
         </div>
 
         <div className="pt-[50px]">
