@@ -1,4 +1,4 @@
-import { Repository } from "typeorm";
+import { In, Repository } from "typeorm";
 import { UserRole } from "../Domain/models/UserRole";
 import { IUserRoleService } from "../Domain/services/IUserRoleService";
 import { UserRoleDTO } from "../Domain/DTOs/UserRoleDTO";
@@ -50,6 +50,42 @@ export class UserRoleService implements IUserRoleService {
         success: false,
         code: ErrorCode.INVALID_INPUT,
         error: `There is no user roles with IMPACT_LEVEL ${impact_level}`,
+      };
+    }
+  }
+
+  /**
+   * Get roles for creation
+   */
+
+  async getUserRolesForUserCreation(): Promise<Result<UserRoleDTO[]>> {
+    const roles = await this.userRoleRepository.find({
+      where: {
+        role_name: In([
+          "Project Manager",
+          "Audio & Music Stagist",
+          "Animation Worker",
+          "Analytics & Development Manager",
+        ]),
+      },
+    });
+
+    if (roles.length > 0) {
+      const userRoles: UserRoleDTO[] = roles.map((r) => ({
+        user_role_id: r.user_role_id,
+        role_name: r.role_name,
+        impact_level: r.impact_level,
+      }));
+
+      return {
+        success: true,
+        data: userRoles,
+      };
+    } else {
+      return {
+        success: false,
+        code: ErrorCode.INTERNAL_ERROR,
+        error: `There is error on server`,
       };
     }
   }

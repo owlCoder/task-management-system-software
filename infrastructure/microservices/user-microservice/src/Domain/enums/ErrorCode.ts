@@ -1,5 +1,4 @@
 export enum ErrorCode {
-  NO_CONTENT = 204,
   INVALID_INPUT = 400,
   NOT_FOUND = 404,
   UNAUTHORIZED = 401,

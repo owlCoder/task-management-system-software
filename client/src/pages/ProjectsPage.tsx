@@ -115,6 +115,7 @@ export const ProjectsPage: React.FC = () => {
               className={`
                 w-[140px] h-[40px] rounded-[3em]
                 font-semibold transition-all duration-300
+                cursor-pointer
                 ${
                   selectedId
                     ? "bg-white text-[var(--palette-deep-blue)] hover:-translate-y-1 shadow-lg"
@@ -132,6 +133,7 @@ export const ProjectsPage: React.FC = () => {
               className={`
                 w-[140px] h-[40px] rounded-[3em]
                 font-semibold transition-all duration-300
+                cursor-pointer
                 ${
                   selectedId
                     ? "bg-white text-red-600 hover:-translate-y-1 shadow-lg"
@@ -159,6 +161,7 @@ export const ProjectsPage: React.FC = () => {
                 transition-all duration-300
                 hover:-translate-y-1
                 shadow-lg
+                cursor-pointer
               "
             >
               Create Project

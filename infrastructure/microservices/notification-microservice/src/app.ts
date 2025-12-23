@@ -48,7 +48,7 @@ export const createApp = (notificationService: INotificationService): Applicatio
 
   // DEBUG - Proveri da li bilo koja ruta nije matchovana
   app.use((req: Request, res: Response, next) => {
-    console.log('⚠️⚠️⚠️ NO ROUTE MATCHED!');
+    console.log('NO ROUTE MATCHED!');
     console.log('  Method:', req.method);
     console.log('  Path:', req.path);
     console.log('  URL:', req.url);

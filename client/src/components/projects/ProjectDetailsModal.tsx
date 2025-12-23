@@ -1,11 +1,12 @@
 import React from "react";
 import type { ProjectDTO } from "../../models/project/ProjectDTO";
+import { getProjectStatusColor } from "../../helpers/projectStatusHelper";
 
 type Props = {
   project: ProjectDTO | null;
   isOpen: boolean;
   onClose: () => void;
-  onEdit?: (project: ProjectDTO) => void; 
+  onEdit?: (project: ProjectDTO) => void;
 };
 
 export const ProjectDetailsModal: React.FC<Props> = ({
@@ -14,10 +15,10 @@ export const ProjectDetailsModal: React.FC<Props> = ({
   onClose,
   onEdit,
 }) => {
-  if (! isOpen || !project) return null;
+  if (!isOpen || !project) return null;
 
   const handleBackdropClick = (e: React.MouseEvent) => {
-    if (e.target === e.  currentTarget) {
+    if (e.target === e.currentTarget) {
       onClose();
     }
   };
@@ -27,11 +28,11 @@ export const ProjectDetailsModal: React.FC<Props> = ({
       onClose();
     }
   };
+  
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      style={{ backgroundColor: "rgba(0, 0, 0, 0.6)" }}
+      className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-md p-4 bg-black/60"
       onClick={handleBackdropClick}
       onKeyDown={handleKeyDown}
       role="dialog"
@@ -39,37 +40,42 @@ export const ProjectDetailsModal: React.FC<Props> = ({
       aria-labelledby="modal-title"
     >
       <div
-        className="bg-white rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] flex flex-col overflow-hidden"
-        onClick={(e) => e. stopPropagation()}
+        className="
+          bg-white/10 
+          border border-white/20
+          rounded-2xl
+          shadow-2xl
+          max-w-2xl w-full max-h-[90vh]
+          flex flex-col overflow-hidden
+          text-white
+        "
+        onClick={(e) => e.stopPropagation()}
       >
 
-        <div
-          className="px-6 py-4 border-b border-gray-200 flex items-center justify-between flex-shrink-0"
-          style={{ background: "var(--accent)" }}
-        >
+        <div className="px-6 py-4 flex items-center justify-between border-b border-white/10">
           <h2
             id="modal-title"
-            className="text-2xl font-semibold text-white m-0 break-words"
+            className="text-2xl font-semibold"
             style={{ fontFamily: "var(--font-secondary)" }}
           >
             Project Details
           </h2>
+
           <button
             type="button"
             onClick={onClose}
-            className="text-white hover:text-gray-200 transition-colors duration-150 text-2xl leading-none w-8 h-8 flex items-center justify-center cursor-pointer flex-shrink-0"
+            className="text-white/80 hover:text-white transition text-2xl leading-none w-8 h-8 flex items-center justify-center cursor-pointer"
             aria-label="Close modal"
           >
             ×
           </button>
         </div>
 
-
-        <div className="p-6 overflow-y-auto overflow-x-hidden flex-1">
-          {project. imageUrl && (
-            <div className="mb-6 rounded-lg overflow-hidden">
+        <div className="p-6 overflow-y-auto flex-1 styled-scrollbar">
+          {project.imageUrl && (
+            <div className="mb-6 rounded-xl overflow-hidden border border-white/10">
               <img
-                src={project. imageUrl}
+                src={project.imageUrl}
                 alt={`${project.name} cover`}
                 className="w-full h-64 object-cover"
               />
@@ -77,164 +83,123 @@ export const ProjectDetailsModal: React.FC<Props> = ({
           )}
 
           <div className="mb-4">
-            <h3
-              className="text-sm font-semibold text-gray-500 uppercase mb-1"
-              style={{ fontFamily: "var(--font-primary)" }}
-            >
+            <h3 className="text-xs uppercase tracking-wider text-white/60 mb-1">
               Project Name
             </h3>
-            <p
-              className="text-2xl font-semibold m-0 break-words"
-              style={{ fontFamily: "var(--font-secondary)", color: "var(--brand)" }}
-            >
+            <p className="text-2xl font-semibold break-words">
               {project.name}
             </p>
           </div>
 
           <div className="mb-4">
-            <h3
-              className="text-sm font-semibold text-gray-500 uppercase mb-1"
-              style={{ fontFamily: "var(--font-primary)" }}
-            >
+            <h3 className="text-xs uppercase tracking-wider text-white/60 mb-1">
+              Status
+            </h3>
+            <div className="mt-2 flex items-center gap-2">
+              <span
+                className={`w-3 h-3 rounded-full ${getProjectStatusColor(project.status!)}`}
+              ></span>
+              <span className="text-sm font-semibold text-white/90">
+                {project.status}
+              </span>
+            </div>
+          </div>
+
+          <div className="mb-4">
+            <h3 className="text-xs uppercase tracking-wider text-white/60 mb-1">
               Description
             </h3>
-            <p className="text-base text-gray-700 leading-relaxed break-words whitespace-normal">
+            <p className="text-sm text-white/80 leading-relaxed break-words">
               {project.description || "No description available"}
             </p>
           </div>
 
-          {project.members && project.members. length > 0 && (
+          {project.members && project.members.length > 0 && (
             <div className="mb-4">
-                <h3
-                className="text-sm font-semibold text-gray-500 uppercase mb-2"
-                style={{ fontFamily: "var(--font-primary)" }}
-                >
-                Members List
-                </h3>
-                <div className="flex flex-wrap gap-2">
-                {project. members.map((member, index) => (
-                    <span 
+              <h3 className="text-xs uppercase tracking-wider text-white/60 mb-2">
+                Members
+              </h3>
+              <div className="flex flex-wrap gap-2">
+                {project.members.map((member, index) => (
+                  <span
                     key={index}
-                    className="px-3 py-1. 5 rounded-md border border-gray-300 bg-gray-50 text-sm break-all"
-                    style={{ fontFamily: "var(--font-primary)" }}
-                    >
-                    {typeof member === "string" ? member : member.user?.username || "Unknown"}
-                    </span>
+                    className="
+                      px-3 py-1 rounded-lg
+                      bg-white/10
+                      border border-white/20
+                      text-sm
+                    "
+                  >
+                    {typeof member === "string"
+                      ? member
+                      : member.user?.username || "Unknown"}
+                  </span>
                 ))}
-                </div>
+              </div>
             </div>
-            )}
+          )}
 
-          <div className="mb-4">
-            <h3
-              className="text-sm font-semibold text-gray-500 uppercase mb-1"
-              style={{ fontFamily: "var(--font-primary)" }}
-            >
-              Total arrangement
-            </h3>
-            <p className="text-base text-gray-700 font-mono break-all" 
-            style={{ fontFamily: "var(--font-primary)" }}>{project.totalWeeklyHours}</p>
-          </div>
-
-          <div className="mb-4">
-            <h3
-              className="text-sm font-semibold text-gray-500 uppercase mb-1"
-              style={{ fontFamily: "var(--font-primary)" }}
-            >
-              Allowed Budget
-            </h3>
-            <p className="text-base text-gray-700 font-mono break-all"
-            style={{ fontFamily: "var(--font-primary)" }}>${project.allowedBudget}</p>
-          </div>
-
-          <div className="mb-4">
-            <h3
-              className="text-sm font-semibold text-gray-500 uppercase mb-1"
-              style={{ fontFamily: "var(--font-primary)" }}
-            >
-              Project ID
-            </h3>
-            <p className="text-base text-gray-700 font-mono break-all" style={{ fontFamily: "var(--font-primary)" }}>{project.id}</p>
-          </div>
-
-          <div className="mb-4">
-            <h3
-              className="text-sm font-semibold text-gray-500 uppercase mb-1"
-              style={{ fontFamily: "var(--font-primary)" }}
-            >
-              Number of Sprints
-            </h3>
-            <p
-              className="text-base text-gray-700 font-mono break-all"
-              style={{ fontFamily: "var(--font-primary)" }}
-            >
-              {project.numberOfSprints ?? "Not set"}
-            </p>
-          </div>
-
-          <div className="mb-4">
-            <h3
-              className="text-sm font-semibold text-gray-500 uppercase mb-1"
-              style={{ fontFamily: "var(--font-primary)" }}
-            >
-              Sprint Duration (days)
-            </h3>
-            <p
-              className="text-base text-gray-700 font-mono break-all"
-              style={{ fontFamily: "var(--font-primary)" }}
-            >
-              {project.sprintDuration ?? "Not set"}
-            </p>
-          </div>
-
-          <div className="mb-4">
-            <h3
-              className="text-sm font-semibold text-gray-500 uppercase mb-1"
-              style={{ fontFamily: "var(--font-primary)" }}
-            >
-              Start Date
-            </h3>
-            <p
-              className="text-base text-gray-700 font-mono break-all"
-              style={{ fontFamily: "var(--font-primary)" }}
-            >
-              {project.startDate
+          {[
+            ["Total arrangement", project.totalWeeklyHours],
+            ["Allowed Budget", project.allowedBudget && `$${project.allowedBudget}`],
+            ["Project ID", project.id],
+            ["Number of Sprints", project.numberOfSprints ?? "Not set"],
+            ["Sprint Duration (days)", project.sprintDuration ?? "Not set"],
+            [
+              "Start Date",
+              project.startDate
                 ? new Date(project.startDate).toLocaleDateString()
-                : "Not set"}
-            </p>
-          </div>
-
+                : "Not set",
+            ],
+          ].map(([label, value]) => (
+            <div key={label as string} className="mb-4">
+              <h3 className="text-xs uppercase tracking-wider text-white/60 mb-1">
+                {label}
+              </h3>
+              <p className="text-sm text-white font-mono break-all">
+                {value as any}
+              </p>
+            </div>
+          ))}
         </div>
 
-        <div className="px-6 py-4 border-t border-gray-200 flex justify-center gap-3 flex-shrink-0 items-center">
-            <button
-                type="button"
-                onClick={() => alert(`Navigate to tasks for: ${project.name}`)}
-                className="px-6 py-2 rounded-lg text-sm font-semibold transition-colors duration-150 cursor-pointer"
-                style={{
-                background: "var(--brand)",
-                color: "white",
-                fontFamily: "var(--font-primary)",
-                }}
-            >
-                Tasks
-            </button>
-            <button
-                type="button"
-                onClick={() => {
-                    if (project && onEdit) {
-                      onEdit(project); 
-                      onClose();
-                    }}}
-                className="px-6 py-2 rounded-lg text-sm font-semibold transition-colors duration-150 cursor-pointer"
-                style={{
-                background: "var(--soft-bg)",
-                color: "var(--brand)",
-                fontFamily: "var(--font-primary)",
-                }}
-            >
-                Edit
-            </button>
+        <div className="px-6 py-4 border-t border-white/10 flex justify-center gap-3">
+          <button
+            type="button"
+            onClick={() => alert(`Navigate to tasks for: ${project.name}`)}
+            className="
+              px-6 py-2 rounded-lg text-sm font-semibold
+              bg-gradient-to-t
+              from-[var(--palette-medium-blue)]
+              to-[var(--palette-deep-blue)]
+              text-white
+              transition
+              cursor-pointer
+            "
+          >
+            Tasks
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              if (project && onEdit) {
+                onEdit(project);
+                onClose();
+              }
+            }}
+            className="
+              px-6 py-2 rounded-lg text-sm font-semibold
+              bg-white/10
+              border border-white/20
+              text-white
+              hover:bg-white/20
+              transition
+              cursor-pointer
+            "
+          >
+            Edit
+          </button>
         </div>
       </div>
     </div>

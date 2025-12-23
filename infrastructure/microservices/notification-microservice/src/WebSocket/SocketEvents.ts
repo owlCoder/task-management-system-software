@@ -1,4 +1,3 @@
-// centralizovane konstante za sve socket events
 export const SocketEvents = {
   // Server → Client events
   NOTIFICATION_CREATED: 'notification:created',
