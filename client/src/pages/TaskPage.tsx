@@ -7,6 +7,7 @@ import { TaskAPI } from "../api/task/TaskAPI";
 import CreateTaskModal from "../components/task/CreateTaskModal";
 import EditTaskModal from "../components/task/EditTaskModal";
 import { mockTasks } from "../mocks/TaskMock";
+import TaskSearchBar from "../components/task/TaskSearchBar";
 // import { TaskDetailPage } from "./TaskDetailPage";
 // import EditTaskModal from "../components/task/EditTaskModal";
 
@@ -21,7 +22,12 @@ const TaskPage: React.FC<TaskListPageProps> = ({ projectId, token }) => {
   const [open, setOpen] = useState(false);
   const [selectedtaskId, setSelectedTaskId] = useState<number | null>(null);
   const [editOpen, setEditOpen] = useState(false);
+  const [search, setSearch] = useState("");
   const api = new TaskAPI(import.meta.env.VITE_GATEWAY_URL, token);
+
+  const filteredTasks = (tasks.length > 0 ? tasks : mockTasks).filter((task) =>
+    task.title.toLowerCase().includes(search.toLowerCase())
+  );
 
   useEffect(() => {
     const load = async () => {
@@ -30,6 +36,7 @@ const TaskPage: React.FC<TaskListPageProps> = ({ projectId, token }) => {
         setTasks(data);
       } catch (err) {
         console.error("Failed to fetch tasks", err);
+        setTasks(mockTasks);
       } finally {
         setLoading(false);
       }
@@ -59,8 +66,12 @@ const TaskPage: React.FC<TaskListPageProps> = ({ projectId, token }) => {
         }}
       >
         <div className="w-full max-w-4xl mx-auto flex flex-col h-full">
-          <header className="flex items-center justify-between mb-6 flex-shrink-0">
-            <h1 className="text-3xl md:text-4xl font-bold text-white">Tasks</h1>
+          <header className="flex items-center justify-between gap-4 mb-6 flex-shrink-0">
+            <h1 className="text-3xl md:text-4xl font-bold text-white whitespace-nowrap">
+              Tasks
+            </h1>
+
+            <TaskSearchBar value={search} onChange={setSearch} />
 
             <div className="flex gap-2">
               <button
@@ -133,49 +144,8 @@ const TaskPage: React.FC<TaskListPageProps> = ({ projectId, token }) => {
                   Edit Task
                 </span>
               </button>
-
-              <CreateTaskModal
-                open={open}
-                onClose={() => setOpen(false)}
-                projectId={projectId}
-                token={token}
-              />
-
-              <EditTaskModal
-                open={editOpen}
-                onClose={() => setEditOpen(false)}
-                task={(() => {
-                  if (selectedtaskId !== null) {
-                    const real = tasks.find(
-                      (t) => t.task_id === selectedtaskId
-                    );
-                    if (real) return real;
-                    const mock = mockTasks.find(
-                      (t) => t.task_id === selectedtaskId
-                    );
-                    if (mock) return mock;
-                  }
-                  return tasks[0] ?? mockTasks[0];
-                })()}
-                token={token}
-              />
             </div>
           </header>
-
-          {/*<section className="bg-white/5 backdrop-blur-xl rounded-2xl p-6 shadow-lg border border-white/10 flex-1 overflow-y-auto styled-scrollbar">
-            {tasks.length === 0 ? (
-              <TaskListPreview />
-            ) : (
-              <div className="flex flex-col gap-3">
-                {tasks.map((task) => (
-                  <TaskListItem key={task.task_id} task={task} />
-                ))}
-              </div>
-            )}
-          </section>
-        </div>
-      </main>
-    </div>*/}
 
           <section
             className="bg-white/5 backdrop-blur-xl rounded-2xl p-6 shadow-lg border border-white/10 flex-1 overflow-y-auto styled-scrollbar"
@@ -185,11 +155,15 @@ const TaskPage: React.FC<TaskListPageProps> = ({ projectId, token }) => {
               }
             }}
           >
-            {tasks.length === 0 ? (
+            {search && filteredTasks.length === 0 ? (
+              <div className="text-center text-white/50 py-12">
+                <p>No tasks found matching "{search}"</p>
+              </div>
+            ) : filteredTasks.length === 0 ? (
               <TaskListPreview onSelect={setSelectedTaskId} />
             ) : (
               <div className="flex flex-col gap-3">
-                {tasks.map((task) => (
+                {filteredTasks.map((task) => (
                   <TaskListItem
                     onSelect={setSelectedTaskId}
                     key={task.task_id}
@@ -201,6 +175,28 @@ const TaskPage: React.FC<TaskListPageProps> = ({ projectId, token }) => {
           </section>
         </div>
       </main>
+
+      <CreateTaskModal
+        open={open}
+        onClose={() => setOpen(false)}
+        projectId={projectId}
+        token={token}
+      />
+
+      <EditTaskModal
+        open={editOpen}
+        onClose={() => setEditOpen(false)}
+        task={(() => {
+          if (selectedtaskId !== null) {
+            const real = tasks.find((t) => t.task_id === selectedtaskId);
+            if (real) return real;
+            const mock = mockTasks.find((t) => t.task_id === selectedtaskId);
+            if (mock) return mock;
+          }
+          return tasks[0] ?? mockTasks[0];
+        })()}
+        token={token}
+      />
     </div>
   );
 };

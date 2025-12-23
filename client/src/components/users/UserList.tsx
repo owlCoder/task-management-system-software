@@ -12,7 +12,7 @@ type UserListProps = {
 };
 
 export const UserList: React.FC<UserListProps> = ({ userAPI }) => {
-  const { user: authUser, token} = useAuth();
+  const { user: authUser, token } = useAuth();
   const [users, setUsers] = useState<UserDTO[]>([]);
   const [filteredUsers, setFilteredUsers] = useState<UserDTO[]>([]);
   const [roles, setRoles] = useState<string[]>([]);
@@ -44,8 +44,8 @@ export const UserList: React.FC<UserListProps> = ({ userAPI }) => {
     if (authUser?.id === id) return;
     try {
       await userAPI.logicalyDeleteUserById(token, id);
-      setUsers(prev => prev.filter(u => u.user_id !== id));
-      setFilteredUsers(prev => prev.filter(u => u.user_id !== id));
+      setUsers((prev) => prev.filter((u) => u.user_id !== id));
+      setFilteredUsers((prev) => prev.filter((u) => u.user_id !== id));
     } catch (err) {
       console.error("Failed to delete user:", err);
     }
@@ -56,16 +56,14 @@ export const UserList: React.FC<UserListProps> = ({ userAPI }) => {
     if (role === "All") {
       setFilteredUsers(users);
     } else {
-      setFilteredUsers(users.filter(u => u.role_name === role));
+      setFilteredUsers(users.filter((u) => u.role_name === role));
     }
   };
-
 
   return (
     <div className="flex h-screen overflow-hidden">
       <main className="flex-1 p-6 flex flex-col overflow-hidden">
         <div className="w-full max-w-6xl mx-auto flex flex-col h-full">
-          
           <header className="flex items-center justify-between mb-6 flex-shrink-0">
             <h1 className="text-3xl md:text-4xl font-bold text-white">Users</h1>
 
@@ -75,9 +73,13 @@ export const UserList: React.FC<UserListProps> = ({ userAPI }) => {
                 onChange={(e) => handleRoleFilter(e.target.value)}
                 className="bg-white/10 backdrop-blur-xl border border-white/15 text-white/70 rounded-[3em] px-4 py-2 outline-none focus:ring-1 ring-white/30 cursor-pointer hover:bg-white/20 transition-all"
               >
-                <option value="All" className="bg-slate-900 text-white">All Roles</option>
+                <option value="All" className="bg-slate-900 text-white">
+                  All Roles
+                </option>
                 {roles.map((r) => (
-                  <option key={r} value={r} className="bg-slate-900 text-white">{r}</option>
+                  <option key={r} value={r} className="bg-slate-900 text-white">
+                    {r}
+                  </option>
                 ))}
               </select>
 
@@ -90,7 +92,13 @@ export const UserList: React.FC<UserListProps> = ({ userAPI }) => {
                   setIsEditing(false);
                 }}
               >
-                <svg className="w-5 h-5 text-white/60 group-hover:text-white transform transition-transform duration-300 group-hover:scale-110" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <svg
+                  className="w-5 h-5 text-white/60 group-hover:text-white transform transition-transform duration-300 group-hover:scale-110"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
                   <path d="M12 5v14M5 12h14" />
                 </svg>
                 <span className="font-semibold text-white/60 group-hover:text-white transition-colors duration-300 text-base">
@@ -115,14 +123,18 @@ export const UserList: React.FC<UserListProps> = ({ userAPI }) => {
                       setIsEditing(false);
                     }}
                   >
-                  <div className="w-20 h-20 rounded-full mb-4 border-2 border-white/20 shadow-md group-hover:border-white/40 transition-all flex items-center justify-center bg-white/10 backdrop-blur-sm">
-                    <span className="text-3xl font-bold text-white uppercase select-none">
-                      {u.username.charAt(0)}
-                    </span>
-                  </div>
+                    <div className="w-20 h-20 rounded-full mb-4 border-2 border-white/20 shadow-md group-hover:border-white/40 transition-all flex items-center justify-center bg-white/10 backdrop-blur-sm">
+                      <span className="text-3xl font-bold text-white uppercase select-none">
+                        {u.username.charAt(0)}
+                      </span>
+                    </div>
 
-                    <span className="font-semibold text-white text-lg text-center">{u.username}</span>
-                    <span className="text-sm text-white/50 mb-4 text-center">{u.role_name}</span>
+                    <span className="font-semibold text-white text-lg text-center">
+                      {u.username}
+                    </span>
+                    <span className="text-sm text-white/50 mb-4 text-center">
+                      {u.role_name}
+                    </span>
 
                     <div className="flex gap-2 mt-auto">
                       <button
@@ -177,8 +189,16 @@ export const UserList: React.FC<UserListProps> = ({ userAPI }) => {
                 token={token}
                 existingUser={selectedUser}
                 onUserUpdated={(updatedUser) => {
-                  setUsers((prev) => prev.map((u) => (u.user_id === updatedUser.user_id ? updatedUser : u)));
-                  setFilteredUsers((prev) => prev.map((u) => (u.user_id === updatedUser.user_id ? updatedUser : u)));
+                  setUsers((prev) =>
+                    prev.map((u) =>
+                      u.user_id === updatedUser.user_id ? updatedUser : u
+                    )
+                  );
+                  setFilteredUsers((prev) =>
+                    prev.map((u) =>
+                      u.user_id === updatedUser.user_id ? updatedUser : u
+                    )
+                  );
                   setSelectedUser(null);
                   setIsEditing(false);
                 }}
@@ -195,7 +215,10 @@ export const UserList: React.FC<UserListProps> = ({ userAPI }) => {
       {selectedUser && !isEditing && (
         <div className="fixed inset-0 bg-blue/80 backdrop-blur-md flex justify-center items-center z-50 p-4">
           <div className="w-full max-w-md animate-in fade-in zoom-in duration-300">
-           <UserDetail user={selectedUser} onClose={() => setSelectedUser(null)} />
+            <UserDetail
+              user={selectedUser}
+              onClose={() => setSelectedUser(null)}
+            />
           </div>
         </div>
       )}

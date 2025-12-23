@@ -7,10 +7,10 @@ const userAPI = new UserAPI();
 
 const UserPage: React.FC = () => {
   return (
-    <div className="flex min-h-screen">
+    <div className="flex h-screen min-h-screen">
       <Sidebar />
 
-      <div className="flex-1 p-6">
+      <div className="flex-1 h-full overflow-auto ">
         <UserList userAPI={userAPI} />
       </div>
     </div>
