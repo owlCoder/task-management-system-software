@@ -4,6 +4,8 @@ import { UserDTO } from "../../models/users/UserDTO";
 import { UserCreationDTO } from "../../models/users/UserCreationDTO";
 import { UserRole } from "../../enums/UserRole";
 
+const inputClasses = "w-full px-4 py-3 rounded-xl text-white bg-black/20 backdrop-blur-md border border-white/10 placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:bg-black/30 transition-all shadow-inner";
+
 type AddUserFormProps = {
   userAPI: IUserAPI;
   token: string;
@@ -48,61 +50,36 @@ export const AddUserForm: React.FC<AddUserFormProps> = ({
   };
 
   return (
-    <div className="p-6 rounded-2xl bg-gradient-to-b from-blue-800/90 to-blue-900/80 backdrop-blur-md w-full max-w-md mx-auto shadow-xl">
-  <h3 className="text-2xl font-bold mb-6 text-white text-center">Add New User</h3>
+    <div className="p-8 rounded-3xl bg-white/10 backdrop-blur-xl border border-white/15 w-full max-w-md mx-auto shadow-2xl">
+      <h3 className="text-2xl font-bold mb-6 text-white text-center">Add New User</h3>
 
-  <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
-    <input
-      type="text"
-      name="username"
-      value={formData.username}
-      onChange={handleChange}
-      placeholder="Username"
-      className="w-full px-4 py-2 rounded-xl text-white bg-blue-700/60 placeholder:text-white/50 focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
-      required
-    />
+      <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
+        <input type="text" name="username" value={formData.username} onChange={handleChange} placeholder="Username" className={inputClasses} required />
+        <input type="email" name="email" value={formData.email} onChange={handleChange} placeholder="Email" className={inputClasses} required />
+        <input type="password" name="password" value={formData.password} onChange={handleChange} placeholder="Password" className={inputClasses} required />
 
-    <input
-      type="email"
-      name="email"
-      value={formData.email}
-      onChange={handleChange}
-      placeholder="Email"
-      className="w-full px-4 py-2 rounded-xl text-white bg-blue-700/60 placeholder:text-white/50 focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
-      required
-    />
+        <select name="role_name" value={formData.role_name} onChange={handleChange} className={inputClasses}>
+          {Object.values(UserRole).map((role) => (
+            <option key={role} value={role} className="bg-slate-900">{role}</option>
+          ))}
+        </select>
 
-    <input
-      type="password"
-      name="password"
-      value={formData.password}
-      onChange={handleChange}
-      placeholder="Password"
-      className="w-full px-4 py-2 rounded-xl text-white bg-blue-700/60 placeholder:text-white/50 focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
-      required
-    />
-
-    <select
-      name="role_name"
-      value={formData.role_name}
-      onChange={handleChange}
-      className="w-full px-4 py-2 rounded-xl text-white bg-blue-700/60 focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
-    >
-      {Object.values(UserRole).map((role) => (
-        <option key={role} value={role}>{role}</option>
-      ))}
-    </select>
-
-    <div className="flex gap-4 mt-4">
-      <button type="submit" className="flex-1 bg-green-500 hover:bg-green-400 text-white py-2 rounded-xl transition transform hover:scale-105">
-        Add
-      </button>
-      <button type="button" onClick={onClose} className="flex-1 bg-gray-600 hover:bg-gray-500 text-white py-2 rounded-xl transition transform hover:scale-105">
-        Cancel
-      </button>
+        <div className="flex gap-3 mt-6">
+          <button 
+            type="submit" 
+            className="flex-1 h-[50px] rounded-full bg-gradient-to-t from-[var(--palette-medium-blue)] to-[var(--palette-deep-blue)] text-white font-bold shadow-lg hover:-translate-y-1 transition-all duration-300"
+          >
+            Add User
+          </button>
+          <button 
+            type="button" 
+            onClick={onClose} 
+            className="flex-1 h-[50px] rounded-full bg-white/5 hover:bg-white/10 text-white font-semibold border border-white/10 transition-all duration-300"
+          >
+            Cancel
+          </button>
+        </div>
+      </form>
     </div>
-  </form>
-</div>
-
   );
 };

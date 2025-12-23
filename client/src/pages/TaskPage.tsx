@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Sidebar from "../components/dashboard/navbar/Sidebar";
-import TaskListItem from "../components/task/TaskListItem";
+//import TaskListItem from "../components/task/TaskListItem";
 import TaskListPreview from "../components/task/TaskListPreview";
 import { TaskDTO } from "../models/task/TaskDTO";
 import { TaskAPI } from "../api/task/TaskAPI";
@@ -16,7 +16,7 @@ interface TaskListPageProps {
 }
 
 const TaskPage: React.FC<TaskListPageProps> = ({ projectId, token }) => {
-  const [tasks, setTasks] = useState<TaskDTO[]>([]);
+  const [tasks, setTasks] = useState<TaskDTO[]>(mockTasks);
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
   const [selectedtaskId, setSelectedTaskId] = useState<number | null>(null);
@@ -185,19 +185,11 @@ const TaskPage: React.FC<TaskListPageProps> = ({ projectId, token }) => {
               }
             }}
           >
-            {tasks.length === 0 ? (
-              <TaskListPreview onSelect={setSelectedTaskId} />
-            ) : (
-              <div className="flex flex-col gap-3">
-                {tasks.map((task) => (
-                  <TaskListItem
-                    onSelect={setSelectedTaskId}
-                    key={task.task_id}
-                    task={task}
-                  />
-                ))}
-              </div>
-            )}
+           <TaskListPreview 
+              tasks={tasks} 
+              onSelect={setSelectedTaskId} 
+              selectedTaskId={selectedtaskId} 
+            />
           </section>
         </div>
       </main>
