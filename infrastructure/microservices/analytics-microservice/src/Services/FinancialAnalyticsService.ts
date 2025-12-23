@@ -5,6 +5,7 @@ import { Task } from "../../../task-microservice/src/Domain/models/Task";
 import { BudgetTrackingDto } from "../Domain/DTOs/BudgetTrackingDto";
 import { ResourceCostAllocationDto } from "../Domain/DTOs/ResourceCostAllocationDto";
 import { ResourceCostAllocationItemDto } from "../Domain/DTOs/ResourceCostAllocationItemDto";
+import { ProfitMarginDto } from "../Domain/DTOs/ProfitMarginDto";
 
 export class FinancialAnalyticsService implements IFinancialAnalyticsService {
 
@@ -80,4 +81,40 @@ export class FinancialAnalyticsService implements IFinancialAnalyticsService {
             resources
         };
     }
+
+    async getProfitMarginForProject(projectId: number): Promise<ProfitMarginDto> {
+
+    const project = await this.projectRepository.findOneBy({ project_id: projectId });
+
+    if (!project) {
+        throw new Error("Project not found");
+    }
+
+    const tasks = await this.taskRepository.find({
+        where: { project_id: projectId }
+    });
+
+    let totalCost = 0;
+
+    for (let i = 0; i < tasks.length; ++i) {
+        totalCost += tasks[i].estimated_cost;
+    }
+
+    const allowedBudget = project.allowed_budget;
+    const profit = allowedBudget - totalCost;
+
+    let profitMarginPercentage = 0;
+
+    if (allowedBudget > 0) {
+        profitMarginPercentage = (profit / allowedBudget) * 100;
+    }
+
+    return {
+        project_id: project.project_id,
+        allowed_budget: parseFloat(allowedBudget.toFixed(2)),
+        total_cost: parseFloat(totalCost.toFixed(2)),
+        profit: parseFloat(profit.toFixed(2)),
+        profit_margin_percentage: parseFloat(profitMarginPercentage.toFixed(2))
+    };
+}
 }
