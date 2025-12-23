@@ -1,8 +1,9 @@
 import { BurndownDto } from "../DTOs/BurndownDto";
+import { BurnupDto } from "../DTOs/BurnupDto";
 
-export interface IAnalyticsService {
+export interface IProjectAnalyticsService {
     getBurnDownChartsForSprintId(sprintId: number): Promise<BurndownDto>;
-    // getBurnUpChartsForSprintId(sprintId: number): Promise<BurnupDto>;
+    getBurnUpChartsForSprintId(sprintId: number): Promise<BurnupDto>;
     getVelocityForProject(projectId: number): Promise<number>;
 
 }

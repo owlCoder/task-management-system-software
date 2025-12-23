@@ -1,13 +1,15 @@
 import { LessThan, Repository } from "typeorm";
-import { IAnalyticsService } from "../Domain/services/IAnalyticsService";
+import { IProjectAnalyticsService } from "../Domain/services/IProjectAnalyticsService";
 import { Task } from "../../../task-microservice/src/Domain/models/Task";
 import { Sprint } from "../../../project-microservice/src/Domain/models/Sprint";
 import { Project } from "../../../project-microservice/src/Domain/models/Project";
 import { BurndownDto } from "../Domain/DTOs/BurndownDto";
 import { BurndownTaskDTO } from "../Domain/DTOs/BurndownTaskDto";
-import { takeCoverage } from "v8";
+import { BurnupDto } from "../Domain/DTOs/BurnupDto";
+import { BurnupPointDto } from "../Domain/DTOs/BurnupPointDto";
 
-export class AnalyticsService implements IAnalyticsService {
+
+export class ProjectAnalyticsService implements IProjectAnalyticsService {
 
     constructor(
         private readonly taskRepository: Repository<Task>,
@@ -43,6 +45,40 @@ export class AnalyticsService implements IAnalyticsService {
         }
 
         return { project_id: s.project.project_id, sprint_id: s.sprint_id, tasks: BurndownTasks }
+    }
+
+    async getBurnUpChartsForSprintId(sprintId: number): Promise<BurnupDto> {
+        const s = await this.sprintRepository.findOneBy({ sprint_id: sprintId });
+
+        const time = (s.end_date.getTime() - s.start_date.getTime()) / (1000 * 60 * 60 * 24); //x-axis in days
+
+        //NEED TO CHANGE FROM PROJECT TO SPRINT ID IN TASK! - sastanak sa mandicem i goranom je u sredu!
+        const tasks = await this.taskRepository.find({ where: { project_id: sprintId } });
+
+        let sum = 0; //y - axis
+
+        for (let i = 0; i < tasks.length; ++i)
+            sum += tasks[i].estimated_cost;
+
+
+        const points: BurnupPointDto[] = [];
+
+        for (const task of tasks) {
+            //TODO dodati kada je task zavrsen da bi mogao da se stavi na grafik
+
+            // if (
+            //     task.finished_at &&
+            //     task.finished_at <= sprint.end_date &&
+            //     task.finished_at > today
+            // ) {
+            //     points.push({
+            //         x: task.total_hours_spent,
+            //         y: task.estimated_cost,
+            //     });
+            // }
+        }
+
+        return { project_id: s.project.project_id, sprint_id: s.sprint_id, sprint_duration_date: time, work_amount: sum, points: points };
     }
 
 
