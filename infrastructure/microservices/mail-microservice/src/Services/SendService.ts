@@ -8,7 +8,7 @@ export class SendService implements ISendService{
 
  async SendMessage(mail : Mail) {
   try {
-    const template = new MessageTemplate();
+    const template = new MessageTemplate(mail.type);
     const result = await mailjet
       .post("send", { version: "v3.1" })
       .request({

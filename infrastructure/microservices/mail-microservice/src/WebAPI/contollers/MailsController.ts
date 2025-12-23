@@ -43,7 +43,7 @@ export class MailsController {
       if(result===true)
       res.status(200).json();
       else
-      res.status(500).json({message: "cannot connect to server!"});
+      res.status(501).json({message: "cannot connect to server!"});
     } catch (err) {
       res.status(500).json({ message: (err as Error).message });
     }

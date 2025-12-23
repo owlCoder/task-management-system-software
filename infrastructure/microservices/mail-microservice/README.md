@@ -18,12 +18,19 @@ body
     "user":"proba@proba.proba",
     "header":"Zahtev za prenos broja tu tu i tu",
     "message":"Poruka koja se prenosi"
+    "type"": (number) tip poruke koji se salje -- OPCIONI PARAMETAR
 }
+
+Tip poruke samo menja izgled template-a za slanje poruke, moze i da se izostavi
+    OTP - 0
+    PasswordReset = 1,
+    Info = 2,
+    Promo = 3
+
 ODGOVORI: 
     200 - sve ok
-    40x - TODO za neispravan body poruke
-    500 - greška do servera
-    50x - TODO mikroservis nedostupan
+    40x - za neispravan body poruke
+    500 -  mikroservis nedostupan
 
 GET http://localhost:500/api/v1/MailService/MailAlive
 #TDLR Provera da li mail service dostupan
