@@ -33,7 +33,7 @@ function App() {
         <Route path="/register" element={<RegisterPage authAPI={auth_api} />} />
         <Route path="/files" element={<FilePage />} />
         <Route path="/mainwindow" element={<MainWindow />} />
-        <Route path="/" element={<MainWindow />} />
+        <Route path="/" element={<AuthPage authAPI={auth_api} />} />
         <Route path="/otp" element={<OtpPage />} />
         <Route
           path="/users"
