@@ -4,9 +4,10 @@ import { TaskStatus } from "../../enums/TaskStatus";
 
 interface TaskListItemProps {
   task: TaskDTO;
+  onSelect?: (taskId: number) => void;
 }
 
-const TaskListItem: React.FC<TaskListItemProps> = ({ task }) => {
+const TaskListItem: React.FC<TaskListItemProps> = ({ task,onSelect }) => {
   const getStatusColor = (status: TaskStatus): string => {
     switch (status) {
       case TaskStatus.IN_PROGRESS:
@@ -25,8 +26,12 @@ const TaskListItem: React.FC<TaskListItemProps> = ({ task }) => {
   };
 
   return (
-    <div className="bg-white/10 p-4 rounded-lg border border-white/20 hover:bg-white/20 transition cursor-pointer">
-      <div className="flex justify-between items-center">
+    <div onClick={() => {
+  if (onSelect) {
+    onSelect(task.task_id);
+  }
+}} className="bg-white/10 p-4 rounded-lg border border-white/20 hover:bg-white/20 transition cursor-pointer">
+      <div  className="flex justify-between items-center">
         <span className="font-bold text-white text-xl">{task.title}</span>
 
         <span className="px-2 py-1 rounded-md text-xs bg-white/20 text-white/90 flex items-center gap-1.5">

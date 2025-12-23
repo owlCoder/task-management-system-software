@@ -4,7 +4,7 @@ import { TaskAPI } from "../../api/task/TaskAPI";
 
 interface UploadFileProps{
     token : string;
-    taskId : string;
+    taskId : number;
     setFile : (file : File) => void;
 }
 

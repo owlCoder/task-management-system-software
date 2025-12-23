@@ -4,14 +4,14 @@ import { UserRole } from "../../enums/UserRole";
 
 interface FilePreviewProps {
     file: File | undefined;    
-    role: UserRole;
     isUpload : () => void;
     setClose : () => void;
 };
 
-export const FilePreview : React.FC<FilePreviewProps> = ({file,role,isUpload,setClose} : FilePreviewProps) => {
+export const FilePreview : React.FC<FilePreviewProps> = ({file,isUpload,setClose} : FilePreviewProps) => {
 
     const [isTrue,setIsTrue] = useState(false);
+    const role = localStorage.getItem("role");
     
     const isImage = file?.type.startsWith("image/");
     const isVideo = file?.type.startsWith("video/");

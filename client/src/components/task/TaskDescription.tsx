@@ -7,7 +7,7 @@ import { UpdateTaskDTO } from "../../models/task/UpdateTaskDTO";
 
 interface TaskDescriptionProps {
     token : string;
-    taskId : string;
+    taskId : number;
     role : UserRole
     task : TaskDTO;
 }

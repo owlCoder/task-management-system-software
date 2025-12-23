@@ -5,6 +5,7 @@ import TaskListPreview from "../components/task/TaskListPreview";
 import { TaskDTO } from "../models/task/TaskDTO";
 import { TaskAPI } from "../api/task/TaskAPI";
 import CreateTaskModal from "../components/task/CreateTaskModal";
+import { TaskDetailPage } from "./TaskDetailPage";
 
 interface TaskListPageProps {
   projectId: string;
@@ -15,6 +16,7 @@ const TaskPage: React.FC<TaskListPageProps> = ({ projectId, token }) => {
   const [tasks, setTasks] = useState<TaskDTO[]>([]);
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
+  const [selectedtaskId,setSelectedTaskId] = useState <number | null>(null);
 
   const api = new TaskAPI(import.meta.env.VITE_GATEWAY_URL, token);
 
@@ -32,6 +34,10 @@ const TaskPage: React.FC<TaskListPageProps> = ({ projectId, token }) => {
 
     load();
   }, [projectId]);
+
+  useEffect(() => {
+  console.log("SELECTED TASK ID STATE:", selectedtaskId);
+}, [selectedtaskId]);
 
   if (loading) {
     return <div className="text-white p-6">Loading tasks...</div>;
@@ -86,16 +92,20 @@ const TaskPage: React.FC<TaskListPageProps> = ({ projectId, token }) => {
             </div>
           </header>
 
-          <section className="bg-white/5 backdrop-blur-xl rounded-2xl p-6 shadow-lg border border-white/10 flex-1 overflow-y-auto styled-scrollbar">
-            {tasks.length === 0 ? (
-              <TaskListPreview />
+          <section  className="bg-white/5 backdrop-blur-xl rounded-2xl p-6 shadow-lg border border-white/10 flex-1 overflow-y-auto styled-scrollbar">
+          { selectedtaskId !== null ? (
+            <TaskDetailPage taskId={selectedtaskId} token={token} setClose={() => setSelectedTaskId(null)}/>
+          ) : (
+            tasks.length === 0 ? (
+              <TaskListPreview onSelect={setSelectedTaskId} />
             ) : (
-              <div className="flex flex-col gap-3">
+              <div  className="flex flex-col gap-3">
                 {tasks.map((task) => (
-                  <TaskListItem key={task.task_id} task={task} />
+                  <TaskListItem onSelect={setSelectedTaskId} key={task.task_id} task={task} />
                 ))}
               </div>
-            )}
+            )
+          )}
           </section>
         </div>
       </main>

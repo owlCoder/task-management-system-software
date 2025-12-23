@@ -26,12 +26,17 @@ export class TaskAPI implements ITaskAPI {
     return res.json();
   }
 
-  async getTask(taskId: string): Promise<TaskDTO> {
-    const res = await fetch(`${this.baseUrl}/task/${taskId}`, {
-      headers: this.headers,
-    });
-    return res.json();
+  async getTask(taskId: number): Promise<TaskDTO> {
+  const res = await fetch(`${this.baseUrl}/api/v1/tasks/${taskId}`, {
+    headers: this.headers,
+  });
+
+  if (!res.ok) {
+    throw new Error("Failed to fetch task");
   }
+
+  return res.json();
+}
 
   async createTask(payload: CreateTaskDTO): Promise<TaskDTO> {
     const res = await fetch(`${this.baseUrl}/task`, {
@@ -42,7 +47,7 @@ export class TaskAPI implements ITaskAPI {
     return res.json();
   }
 
-  async updateTask(taskId: string, payload: UpdateTaskDTO): Promise<TaskDTO> {
+  async updateTask(taskId: number, payload: UpdateTaskDTO): Promise<TaskDTO> {
     const res = await fetch(`${this.baseUrl}/task/${taskId}`, {
       method: "PUT",
       headers: this.headers,
@@ -58,7 +63,7 @@ export class TaskAPI implements ITaskAPI {
     });
   }
 
- async uploadFile(taskId: string, file: File): Promise<void> {
+ async uploadFile(taskId: number, file: File): Promise<void> {
   const formData = new FormData();
   formData.append("file", file);
 
