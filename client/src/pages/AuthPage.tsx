@@ -8,7 +8,7 @@ type AuthPageProps = {
 };
 
 const backgroundImageUrl = new URL(
-  "../../public/pozadina.png",
+  "../../public/background.png",
   import.meta.url
 ).href;
 

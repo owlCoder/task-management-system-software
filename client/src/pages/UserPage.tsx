@@ -1,7 +1,7 @@
 import React from "react";
 import { UserList } from "../components/users/UserList";
 import { UserAPI } from "../api/users/UserAPI";
-import Sidebar from "../components/dashboard/navbar/Sidebar";
+import Sidebar from "../components/dashboard/sidebar/Sidebar";
 
 const userAPI = new UserAPI();
 

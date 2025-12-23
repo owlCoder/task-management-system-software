@@ -4,7 +4,7 @@ import ProjectDetailsModal from "../components/projects/ProjectDetailsModal";
 import CreateProjectModal from "../components/projects/CreateProjectModal";
 import { mockProjects } from "../mocks/ProjectsMock";
 import type { ProjectDTO } from "../models/project/ProjectDTO";
-import Sidebar from "../components/dashboard/navbar/Sidebar";
+import Sidebar from "../components/dashboard/sidebar/Sidebar";
 import { projectAPI } from "../api/project/ProjectAPI";
 import { EditProjectModal } from "../components/projects/EditProjectModal";
 
