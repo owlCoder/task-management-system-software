@@ -15,70 +15,58 @@ export class FinancialAnalyticsService implements IFinancialAnalyticsService {
     private readonly taskRepository: Repository<Task>
   ) {}
 
-  // ---------------- BUDGET TRACKING ----------------
   async getBudgetTrackingForProject(projectId: number): Promise<BudgetTrackingDto> {
-    const project = await this.projectRepository.findOne({
-      where: { project_id: projectId }
-    });
-
+    const project = await this.projectRepository.findOneBy({ project_id: projectId });
     if (!project) throw new Error("Project not found");
 
-    const tasks = await this.taskRepository
-      .createQueryBuilder("task")
-      .leftJoin("task.sprint", "sprint")
-      .leftJoin("sprint.project", "project")
-      .where("project.project_id = :projectId", { projectId })
-      .getMany();
+    const sprints = await this.sprintRepository.find({ where: { project } });
 
-    const totalSpent = tasks.reduce(
-      (sum, t) => sum + (t.estimated_cost ?? 0),
-      0
-    );
+    let totalSpent = 0;
+
+    for (const sprint of sprints) {
+      // TODO: CHANGE TO SPRINT
+      // trenutno ide po project_id jer Task nema sprint_id
+      const sprintTasks = await this.taskRepository.find({
+        where: { project_id: projectId }
+      });
+      totalSpent += sprintTasks.reduce((sum, t) => sum + (t.estimated_cost ?? 0), 0);
+    }
 
     const remaining = project.allowed_budget - totalSpent;
+    const variance = totalSpent - project.allowed_budget;
 
     return {
       project_id: project.project_id,
-      allowed_budget: project.allowed_budget,
+      allowed_budget: Number(project.allowed_budget.toFixed(2)),
       total_spent: Number(totalSpent.toFixed(2)),
       remaining_budget: Number(remaining.toFixed(2)),
-      variance: Number(remaining.toFixed(2))
+      variance: Number(variance.toFixed(2))
     };
   }
 
-  // ---------------- RESOURCE COST ALLOCATION ----------------
-  async getResourceCostAllocationForProject(
-    projectId: number
-  ): Promise<ResourceCostAllocationDto> {
-
-    const project = await this.projectRepository.findOne({
-      where: { project_id: projectId }
-    });
-
+  async getResourceCostAllocationForProject(projectId: number): Promise<ResourceCostAllocationDto> {
+    const project = await this.projectRepository.findOneBy({ project_id: projectId });
     if (!project) throw new Error("Project not found");
 
-    const tasks = await this.taskRepository
-      .createQueryBuilder("task")
-      .leftJoin("task.sprint", "sprint")
-      .leftJoin("sprint.project", "project")
-      .where("project.project_id = :projectId", { projectId })
-      .getMany();
+    const sprints = await this.sprintRepository.find({ where: { project } });
 
     const costPerUser = new Map<number, number>();
 
-    for (const task of tasks) {
-      if (!task.worker_id) continue;
-
-      const current = costPerUser.get(task.worker_id) ?? 0;
-      costPerUser.set(current ? task.worker_id : task.worker_id, current + (task.estimated_cost ?? 0));
+    for (const sprint of sprints) {
+      // TODO: CHANGE TO SPRINT
+      const sprintTasks = await this.taskRepository.find({ where: { project_id: projectId } });
+      for (const task of sprintTasks) {
+        if (!task.worker_id) continue;
+        const current = costPerUser.get(task.worker_id) ?? 0;
+        costPerUser.set(task.worker_id, current + (task.estimated_cost ?? 0));
+      }
     }
 
     const resources: ResourceCostAllocationItemDto[] = [];
-
-    costPerUser.forEach((value, userId) => {
+    costPerUser.forEach((total_cost, user_id) => {
       resources.push({
-        user_id: userId,
-        total_cost: Number(value.toFixed(2))
+        user_id,
+        total_cost: Number(total_cost.toFixed(2))
       });
     });
 
@@ -88,31 +76,22 @@ export class FinancialAnalyticsService implements IFinancialAnalyticsService {
     };
   }
 
-  // ---------------- PROFIT MARGIN ----------------
   async getProfitMarginForProject(projectId: number): Promise<ProfitMarginDto> {
-    const project = await this.projectRepository.findOne({
-      where: { project_id: projectId }
-    });
-
+    const project = await this.projectRepository.findOneBy({ project_id: projectId });
     if (!project) throw new Error("Project not found");
 
-    const tasks = await this.taskRepository
-      .createQueryBuilder("task")
-      .leftJoin("task.sprint", "sprint")
-      .leftJoin("sprint.project", "project")
-      .where("project.project_id = :projectId", { projectId })
-      .getMany();
+    const sprints = await this.sprintRepository.find({ where: { project } });
 
-    const totalCost = tasks.reduce(
-      (sum, t) => sum + (t.estimated_cost ?? 0),
-      0
-    );
+    let totalCost = 0;
+
+    for (const sprint of sprints) {
+      // TODO: CHANGE TO SPRINT
+      const sprintTasks = await this.taskRepository.find({ where: { project_id: projectId } });
+      totalCost += sprintTasks.reduce((sum, t) => sum + (t.estimated_cost ?? 0), 0);
+    }
 
     const profit = project.allowed_budget - totalCost;
-    const profitMargin =
-      project.allowed_budget > 0
-        ? (profit / project.allowed_budget) * 100
-        : 0;
+    const profitMargin = project.allowed_budget > 0 ? (profit / project.allowed_budget) * 100 : 0;
 
     return {
       project_id: project.project_id,
