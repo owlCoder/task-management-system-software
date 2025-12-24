@@ -20,7 +20,9 @@ export class AnalyticsController {
         this.router.get('/analytics/burndown/:sprintId', this.getBurndownAnalytics.bind(this));
         this.router.get('/analytics/burnup/:sprintId', this.getBurnupAnalytics.bind(this));
         this.router.get('/analytics/velocity/:projectId', this.getVelocityAnalytics.bind(this));
-
+        this.router.get('/analytics/financial/budget/:projectId', this.getBudgetTracking.bind(this));
+        this.router.get('/analytics/financial/resource-cost/:projectId', this.getResourceCostAllocation.bind(this));
+        this.router.get('/analytics/financial/profit-margin/:projectId', this.getProfitMargin.bind(this));
     }
 
     async getBurndownAnalytics(req: Request, res: Response): Promise<void> {
@@ -87,6 +89,72 @@ export class AnalyticsController {
             res.status(200).json(result);
 
         } catch (error) {
+            res.status(500).json({ message: "Internal server error" });
+        }
+    }
+
+    async getBudgetTracking(req: Request, res: Response): Promise<void> {
+        try {
+            const projectId = parseInt(req.params.projectId, 10);
+            if (isNaN(projectId)) {
+                res.status(400).json({ message: "Invalid project ID for Budget Tracking" });
+                return;
+            }
+
+            const result = await this.financialAnalyticsService.getBudgetTrackingForProject(projectId);
+
+            if (!result) {
+                res.status(404).json({ message: "Budget tracking data not found" });
+                return;
+            }
+
+            res.status(200).json(result);
+
+        } catch {
+            res.status(500).json({ message: "Internal server error" });
+        }
+    }
+
+    async getResourceCostAllocation(req: Request, res: Response): Promise<void> {
+        try {
+            const projectId = parseInt(req.params.projectId, 10);
+            if (isNaN(projectId)) {
+                res.status(400).json({ message: "Invalid project ID for Resource Cost Allocation" });
+                return;
+            }
+
+            const result = await this.financialAnalyticsService.getResourceCostAllocationForProject(projectId);
+
+            if (!result) {
+                res.status(404).json({ message: "Resource cost allocation data not found" });
+                return;
+            }
+
+            res.status(200).json(result);
+
+        } catch {
+            res.status(500).json({ message: "Internal server error" });
+        }
+    }
+
+    async getProfitMargin(req: Request, res: Response): Promise<void> {
+        try {
+            const projectId = parseInt(req.params.projectId, 10);
+            if (isNaN(projectId)) {
+                res.status(400).json({ message: "Invalid project ID for Profit Margin" });
+                return;
+            }
+
+            const result = await this.financialAnalyticsService.getProfitMarginForProject(projectId);
+
+            if (!result) {
+                res.status(404).json({ message: "Profit margin data not found" });
+                return;
+            }
+
+            res.status(200).json(result);
+
+        } catch {
             res.status(500).json({ message: "Internal server error" });
         }
     }
