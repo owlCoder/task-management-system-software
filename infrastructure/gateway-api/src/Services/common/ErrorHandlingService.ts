@@ -6,7 +6,7 @@ import { ILoggerService } from "../../Domain/services/common/ILoggerService";
 export class ErrorHandlingService implements IErrorHandlingService {
     constructor(private readonly loggerService: ILoggerService) {}
 
-    handle(error: any, serviceName: string, method:string, url: string): Result<never> {
+    handle(error: AxiosError | unknown, serviceName: string, method: string, url: string): Result<never> {
         if(axios.isAxiosError(error)){
             const axiosError = error as AxiosError;
 
@@ -45,7 +45,7 @@ export class ErrorHandlingService implements IErrorHandlingService {
             return { success: false, status: status, message: message };
         }
 
-        this.loggerService.err("Gateway", "GATEWAY_ERROR", url, method, `Gateway error ${error?.message ? ` - ${error.message}` : ""}`);
+        this.loggerService.err("Gateway", "GATEWAY_ERROR", url, method, `Gateway error ${error instanceof Error ? `- ${error.message}` : ""}`);
 
         return {
             success: false,
