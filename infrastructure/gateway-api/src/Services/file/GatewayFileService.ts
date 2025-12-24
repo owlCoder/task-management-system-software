@@ -8,9 +8,9 @@ import { IErrorHandlingService } from "../../Domain/services/common/IErrorHandli
 import { HTTP_METHODS } from "../../Constants/common/HttpMethods";
 import { FILE_ROUTES } from "../../Constants/routes/file/FileRoutes";
 import { extractDownloadDTOFromResponse, generateFormData } from "../../Utils/File/FileUtils";
+import { SERVICES } from "../../Constants/services/Services";
 
 export class GatewayFileService implements IGatewayFileService {
-    private static readonly serviceName: string = "File Service";
     private readonly fileClient: AxiosInstance;
     
     constructor(private readonly errorHandlingService: IErrorHandlingService){
@@ -34,7 +34,7 @@ export class GatewayFileService implements IGatewayFileService {
                 data: downloadFile
             };
         } catch(error){
-            return this.errorHandlingService.handle(error, GatewayFileService.serviceName, HTTP_METHODS.GET, FILE_ROUTES.DOWNLOAD(fileId));
+            return this.errorHandlingService.handle(error, SERVICES.FILE, HTTP_METHODS.GET, FILE_ROUTES.DOWNLOAD(fileId));
         }
     }
 
@@ -47,7 +47,7 @@ export class GatewayFileService implements IGatewayFileService {
                 data: response.data
             };
         } catch(error) {
-            return this.errorHandlingService.handle(error, GatewayFileService.serviceName, HTTP_METHODS.GET, FILE_ROUTES.GET_BY_AUTHOR(authorId));
+            return this.errorHandlingService.handle(error, SERVICES.FILE, HTTP_METHODS.GET, FILE_ROUTES.GET_BY_AUTHOR(authorId));
         }
     }
 
@@ -60,7 +60,7 @@ export class GatewayFileService implements IGatewayFileService {
                 data: response.data
             };
         } catch(error){
-            return this.errorHandlingService.handle(error, GatewayFileService.serviceName, HTTP_METHODS.GET, FILE_ROUTES.METADATA(fileId));
+            return this.errorHandlingService.handle(error, SERVICES.FILE, HTTP_METHODS.GET, FILE_ROUTES.METADATA(fileId));
         }
     }
 
@@ -74,7 +74,7 @@ export class GatewayFileService implements IGatewayFileService {
                 data: response.data
             };
         } catch(error) {
-            return this.errorHandlingService.handle(error, GatewayFileService.serviceName, HTTP_METHODS.POST, FILE_ROUTES.UPLOAD);
+            return this.errorHandlingService.handle(error, SERVICES.FILE, HTTP_METHODS.POST, FILE_ROUTES.UPLOAD);
         }
     }
 
@@ -87,7 +87,7 @@ export class GatewayFileService implements IGatewayFileService {
                 data: response.data
             };
         } catch(error) {
-            return this.errorHandlingService.handle(error, GatewayFileService.serviceName, HTTP_METHODS.DELETE, FILE_ROUTES.DELETE(fileId))
+            return this.errorHandlingService.handle(error, SERVICES.FILE, HTTP_METHODS.DELETE, FILE_ROUTES.DELETE(fileId))
         }
     }
 

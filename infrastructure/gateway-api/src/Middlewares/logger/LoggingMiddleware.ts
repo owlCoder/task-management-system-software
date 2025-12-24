@@ -25,7 +25,7 @@ export function logTraffic(req: Request, res: Response, next: NextFunction) {
             url: req.originalUrl,
             code: "RESPONSE",
             ip: req.ip
-        }, `Response sent with status ${res.statusCode}`);
+        }, `Outgoing response status: ${res.statusCode}`);
     });
 
     next();

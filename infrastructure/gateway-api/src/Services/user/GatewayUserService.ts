@@ -7,9 +7,10 @@ import { UpdateUserDTO } from "../../Domain/DTOs/user/UpdateUserDTO";
 import { IErrorHandlingService } from "../../Domain/services/common/IErrorHandlingService";
 import { USER_ROUTES } from "../../Constants/routes/user/UserRoutes";
 import { HTTP_METHODS } from "../../Constants/common/HttpMethods";
+import { SERVICES } from "../../Constants/services/Services";
+import { UserRoleDTO } from "../../Domain/DTOs/user/UserRoleDTO";
 
 export class GatewayUserService implements IGatewayUserService {
-    private static readonly serviceName: string = "User Service";
     private readonly userClient: AxiosInstance;
 
     constructor(private readonly errorHandlingService: IErrorHandlingService) {
@@ -31,7 +32,7 @@ export class GatewayUserService implements IGatewayUserService {
                 data: response.data
             }
         } catch(error) {
-            return this.errorHandlingService.handle(error, GatewayUserService.serviceName, HTTP_METHODS.POST, USER_ROUTES.CREATE);
+            return this.errorHandlingService.handle(error, SERVICES.USER, HTTP_METHODS.POST, USER_ROUTES.CREATE);
         }
     }
 
@@ -44,7 +45,24 @@ export class GatewayUserService implements IGatewayUserService {
                 data: response.data
             }
         } catch(error) {
-            return this.errorHandlingService.handle(error, GatewayUserService.serviceName, HTTP_METHODS.GET, USER_ROUTES.GET_BY_ID(id));
+            return this.errorHandlingService.handle(error, SERVICES.USER, HTTP_METHODS.GET, USER_ROUTES.GET_BY_ID(id));
+        }
+    }
+
+    async getUsersByIds(ids: number[]): Promise<Result<UserDTO[]>> {
+        try {
+            const response = await this.userClient.get<UserDTO[]>(USER_ROUTES.GET_BY_IDS, { 
+                params:{
+                    ids: ids.join(",")
+                } 
+            });
+
+            return {
+                success: true,
+                data: response.data
+            }
+        } catch(error) {
+            return this.errorHandlingService.handle(error, SERVICES.USER, HTTP_METHODS.GET, USER_ROUTES.GET_BY_IDS);
         }
     }
 
@@ -57,7 +75,7 @@ export class GatewayUserService implements IGatewayUserService {
                 data: response.data
             }
         } catch(error) {
-            return this.errorHandlingService.handle(error, GatewayUserService.serviceName, HTTP_METHODS.GET, USER_ROUTES.GET_ALL);
+            return this.errorHandlingService.handle(error, SERVICES.USER, HTTP_METHODS.GET, USER_ROUTES.GET_ALL);
         }
     }
 
@@ -70,20 +88,33 @@ export class GatewayUserService implements IGatewayUserService {
                 data: response.data
             }
         } catch(error) {
-            return this.errorHandlingService.handle(error, GatewayUserService.serviceName, HTTP_METHODS.PUT, USER_ROUTES.UPDATE(id));
+            return this.errorHandlingService.handle(error, SERVICES.USER, HTTP_METHODS.PUT, USER_ROUTES.UPDATE(id));
         }
     }
 
-    async logicallyDeleteUserById(id: number): Promise<Result<boolean>> {
+    async logicallyDeleteUserById(id: number): Promise<Result<void>> {
         try {
-            const response = await this.userClient.delete<boolean>(USER_ROUTES.DELETE(id));
+            await this.userClient.delete<void>(USER_ROUTES.DELETE(id));
+
+            return {
+                success: true,
+                data: undefined
+            }
+        } catch(error) {
+            return this.errorHandlingService.handle(error, SERVICES.USER, HTTP_METHODS.DELETE, USER_ROUTES.DELETE(id));
+        }
+    }
+
+    async getCreationRoles(): Promise<Result<UserRoleDTO[]>> {
+        try {
+            const response = await this.userClient.get<UserRoleDTO[]>(USER_ROUTES.CREATION_ROLES);
 
             return {
                 success: true,
                 data: response.data
             }
         } catch(error) {
-            return this.errorHandlingService.handle(error, GatewayUserService.serviceName, HTTP_METHODS.DELETE, USER_ROUTES.DELETE(id));
+            return this.errorHandlingService.handle(error, SERVICES.USER, HTTP_METHODS.GET, USER_ROUTES.CREATION_ROLES);
         }
     }
 

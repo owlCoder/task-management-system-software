@@ -9,9 +9,9 @@ import { IErrorHandlingService } from "../../Domain/services/common/IErrorHandli
 import { AUTH_ROUTES } from "../../Constants/routes/auth/AuthRoutes";
 import { HTTP_METHODS } from "../../Constants/common/HttpMethods";
 import { OTPVerificationDTO } from "../../Domain/DTOs/auth/OTPVerificationDTO";
+import { SERVICES } from "../../Constants/services/Services";
 
 export class GatewayAuthService implements IGatewayAuthService {
-    private static readonly serviceName: string = "Auth Service";
     private readonly authClient: AxiosInstance;
 
     constructor(private readonly errorHandlingService: IErrorHandlingService) {
@@ -39,7 +39,7 @@ export class GatewayAuthService implements IGatewayAuthService {
                 }
             };
         } catch(error) {
-            return this.errorHandlingService.handle(error, GatewayAuthService.serviceName, HTTP_METHODS.POST, AUTH_ROUTES.LOGIN);
+            return this.errorHandlingService.handle(error, SERVICES.AUTH, HTTP_METHODS.POST, AUTH_ROUTES.LOGIN);
         }
     }
     
@@ -56,7 +56,7 @@ export class GatewayAuthService implements IGatewayAuthService {
                 }
             };
         } catch(error) {
-            return this.errorHandlingService.handle(error, GatewayAuthService.serviceName, HTTP_METHODS.POST, AUTH_ROUTES.REGISTER);
+            return this.errorHandlingService.handle(error, SERVICES.AUTH, HTTP_METHODS.POST, AUTH_ROUTES.REGISTER);
         }
     }
 
@@ -73,7 +73,7 @@ export class GatewayAuthService implements IGatewayAuthService {
                 }
             };
         } catch(error) {
-            return this.errorHandlingService.handle(error, GatewayAuthService.serviceName, HTTP_METHODS.POST, AUTH_ROUTES.VERIFY_OTP);
+            return this.errorHandlingService.handle(error, SERVICES.AUTH, HTTP_METHODS.POST, AUTH_ROUTES.VERIFY_OTP);
         }
     }
 
@@ -92,7 +92,7 @@ export class GatewayAuthService implements IGatewayAuthService {
                 }
             };
         } catch(error) {
-            return this.errorHandlingService.handle(error, GatewayAuthService.serviceName, HTTP_METHODS.POST, AUTH_ROUTES.RESEND_OTP);
+            return this.errorHandlingService.handle(error, SERVICES.AUTH, HTTP_METHODS.POST, AUTH_ROUTES.RESEND_OTP);
         }
     }
 

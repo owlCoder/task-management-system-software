@@ -7,9 +7,9 @@ import { IErrorHandlingService } from "../../Domain/services/common/IErrorHandli
 import { Result } from "../../Domain/types/common/Result";
 import { PROJECT_ROUTES } from "../../Constants/routes/project/ProjectRoutes";
 import { HTTP_METHODS } from "../../Constants/common/HttpMethods";
+import { SERVICES } from "../../Constants/services/Services";
 
 export class GatewayProjectService implements IGatewayProjectService {
-    private static readonly serviceName: string = "Project Service";
     private readonly projectClient: AxiosInstance;
     
     constructor(private readonly errorHandlingService: IErrorHandlingService){
@@ -30,7 +30,7 @@ export class GatewayProjectService implements IGatewayProjectService {
                 data: response.data
             };
         } catch(error) {
-            return this.errorHandlingService.handle(error, GatewayProjectService.serviceName, HTTP_METHODS.GET, PROJECT_ROUTES.GET_BY_ID(id));
+            return this.errorHandlingService.handle(error, SERVICES.PROJECT, HTTP_METHODS.GET, PROJECT_ROUTES.GET_BY_ID(id));
         }
     }
 
@@ -43,7 +43,7 @@ export class GatewayProjectService implements IGatewayProjectService {
                 data: response.data
             };
         } catch(error) {
-            return this.errorHandlingService.handle(error, GatewayProjectService.serviceName, HTTP_METHODS.POST, PROJECT_ROUTES.CREATE);
+            return this.errorHandlingService.handle(error, SERVICES.PROJECT, HTTP_METHODS.POST, PROJECT_ROUTES.CREATE);
         }
     }
 
@@ -56,7 +56,7 @@ export class GatewayProjectService implements IGatewayProjectService {
                 data: response.data
             };
         } catch(error) {
-            return this.errorHandlingService.handle(error, GatewayProjectService.serviceName, HTTP_METHODS.PUT, PROJECT_ROUTES.UPDATE(id));
+            return this.errorHandlingService.handle(error, SERVICES.PROJECT, HTTP_METHODS.PUT, PROJECT_ROUTES.UPDATE(id));
         }
     }
 
@@ -69,7 +69,7 @@ export class GatewayProjectService implements IGatewayProjectService {
                 data: response.data
             };
         } catch(error) {
-            return this.errorHandlingService.handle(error, GatewayProjectService.serviceName, HTTP_METHODS.DELETE, PROJECT_ROUTES.DELETE(id));
+            return this.errorHandlingService.handle(error, SERVICES.PROJECT, HTTP_METHODS.DELETE, PROJECT_ROUTES.DELETE(id));
         }
     }
 

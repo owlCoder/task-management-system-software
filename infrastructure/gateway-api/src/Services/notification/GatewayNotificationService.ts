@@ -5,9 +5,9 @@ import { IErrorHandlingService } from "../../Domain/services/common/IErrorHandli
 import { NOTIFICATION_ROUTES } from "../../Constants/routes/notification/NotificationRoutes";
 import { HTTP_METHODS } from "../../Constants/common/HttpMethods";
 import { Result } from "../../Domain/types/common/Result";
+import { SERVICES } from "../../Constants/services/Services";
 
 export class GatewayNotificationService implements IGatewayNotificationService {
-    private static readonly serviceName: string = "Notification Service";
     private readonly notificationClient: AxiosInstance;
     
     constructor(private readonly errorHandlingService: IErrorHandlingService) {
@@ -29,7 +29,7 @@ export class GatewayNotificationService implements IGatewayNotificationService {
                 data: response.data 
             };
         } catch(error) {
-            return this.errorHandlingService.handle(error, GatewayNotificationService.serviceName, HTTP_METHODS.GET, NOTIFICATION_ROUTES.GET_BY_ID(id));
+            return this.errorHandlingService.handle(error, SERVICES.NOTIFICATION, HTTP_METHODS.GET, NOTIFICATION_ROUTES.GET_BY_ID(id));
         }
     }
 
@@ -42,7 +42,7 @@ export class GatewayNotificationService implements IGatewayNotificationService {
                 data: response.data 
             };
         } catch(error) {
-            return this.errorHandlingService.handle(error, GatewayNotificationService.serviceName, HTTP_METHODS.GET, NOTIFICATION_ROUTES.GET_BY_USER_ID(userId));
+            return this.errorHandlingService.handle(error, SERVICES.NOTIFICATION, HTTP_METHODS.GET, NOTIFICATION_ROUTES.GET_BY_USER_ID(userId));
         }
     }
 
@@ -55,72 +55,72 @@ export class GatewayNotificationService implements IGatewayNotificationService {
                 data: response.data 
             };
         } catch(error) {
-            return this.errorHandlingService.handle(error, GatewayNotificationService.serviceName, HTTP_METHODS.GET, NOTIFICATION_ROUTES.GET_UNREAD_COUNT(id));
+            return this.errorHandlingService.handle(error, SERVICES.NOTIFICATION, HTTP_METHODS.GET, NOTIFICATION_ROUTES.GET_UNREAD_COUNT(id));
         }
     }
 
-    async markNotificationAsRead(id: number): Promise<Result<NotificationDTO>> {
+    async markNotificationAsRead(id: number): Promise<Result<void>> {
         try {
-            const response = await this.notificationClient.patch<NotificationDTO>(NOTIFICATION_ROUTES.MARK_AS_READ(id));
+            await this.notificationClient.patch<void>(NOTIFICATION_ROUTES.MARK_AS_READ(id));
 
             return { 
                 success: true, 
-                data: response.data 
+                data: undefined 
             };
         } catch(error) {
-            return this.errorHandlingService.handle(error, GatewayNotificationService.serviceName, HTTP_METHODS.PATCH, NOTIFICATION_ROUTES.MARK_AS_READ(id));
+            return this.errorHandlingService.handle(error, SERVICES.NOTIFICATION, HTTP_METHODS.PATCH, NOTIFICATION_ROUTES.MARK_AS_READ(id));
         }
     }
 
-    async markNotificationAsUnread(id: number): Promise<Result<NotificationDTO>> {
+    async markNotificationAsUnread(id: number): Promise<Result<void>> {
         try {
-            const response = await this.notificationClient.patch<NotificationDTO>(NOTIFICATION_ROUTES.MARK_AS_UNREAD(id));
+            await this.notificationClient.patch<void>(NOTIFICATION_ROUTES.MARK_AS_UNREAD(id));
 
             return { 
                 success: true, 
-                data: response.data 
+                data: undefined
             };
         } catch(error) {
-            return this.errorHandlingService.handle(error, GatewayNotificationService.serviceName, HTTP_METHODS.PATCH, NOTIFICATION_ROUTES.MARK_AS_UNREAD(id));
+            return this.errorHandlingService.handle(error, SERVICES.NOTIFICATION, HTTP_METHODS.PATCH, NOTIFICATION_ROUTES.MARK_AS_UNREAD(id));
         }
     }
     
-    async markMultipleNotificationsAsRead(ids: number[]): Promise<Result<NotificationDTO[]>> {
+    async markMultipleNotificationsAsRead(ids: number[]): Promise<Result<void>> {
         try {
-            const response = await this.notificationClient.patch<NotificationDTO[]>(NOTIFICATION_ROUTES.MARK_MULTIPLE_AS_READ, ids);
+            await this.notificationClient.patch<void>(NOTIFICATION_ROUTES.MARK_MULTIPLE_AS_READ, ids);
 
             return { 
                 success: true, 
-                data: response.data 
+                data: undefined
             };
         } catch(error) {
-            return this.errorHandlingService.handle(error, GatewayNotificationService.serviceName, HTTP_METHODS.PATCH, NOTIFICATION_ROUTES.MARK_MULTIPLE_AS_READ);
+            return this.errorHandlingService.handle(error, SERVICES.NOTIFICATION, HTTP_METHODS.PATCH, NOTIFICATION_ROUTES.MARK_MULTIPLE_AS_READ);
         }
     }
 
-    async markMultipleNotificationsAsUnread(ids: number[]): Promise<Result<NotificationDTO[]>> {
+    async markMultipleNotificationsAsUnread(ids: number[]): Promise<Result<void>> {
         try {
-            const response = await this.notificationClient.patch<NotificationDTO[]>(NOTIFICATION_ROUTES.MARK_MULTIPLE_AS_UNREAD, ids);
+            await this.notificationClient.patch<void>(NOTIFICATION_ROUTES.MARK_MULTIPLE_AS_UNREAD, ids);
 
             return { 
                 success: true, 
-                data: response.data 
+                data: undefined
             };
         } catch(error) {
-            return this.errorHandlingService.handle(error, GatewayNotificationService.serviceName, HTTP_METHODS.PATCH, NOTIFICATION_ROUTES.MARK_MULTIPLE_AS_UNREAD);
+            return this.errorHandlingService.handle(error, SERVICES.NOTIFICATION, HTTP_METHODS.PATCH, NOTIFICATION_ROUTES.MARK_MULTIPLE_AS_UNREAD);
         }
     }
 
-    async deleteNotification(id: number): Promise<Result<boolean>> {
+    async deleteNotification(id: number): Promise<Result<void>> {
         try {
-            const response = await this.notificationClient.delete<boolean>(NOTIFICATION_ROUTES.DELETE(id));
+            await this.notificationClient.delete<void>(NOTIFICATION_ROUTES.DELETE(id));
 
             return { 
                 success: true, 
-                data: response.data 
+                data: undefined
             };
         } catch(error) {
-            return this.errorHandlingService.handle(error, GatewayNotificationService.serviceName, HTTP_METHODS.DELETE, NOTIFICATION_ROUTES.DELETE(id));
+            return this.errorHandlingService.handle(error, SERVICES.NOTIFICATION, HTTP_METHODS.DELETE, NOTIFICATION_ROUTES.DELETE(id));
         }
     }
 
@@ -133,7 +133,7 @@ export class GatewayNotificationService implements IGatewayNotificationService {
                 data: undefined
             };
         } catch(error) {
-            return this.errorHandlingService.handle(error, GatewayNotificationService.serviceName, HTTP_METHODS.DELETE, NOTIFICATION_ROUTES.DELETE_MULTIPLE);
+            return this.errorHandlingService.handle(error, SERVICES.NOTIFICATION, HTTP_METHODS.DELETE, NOTIFICATION_ROUTES.DELETE_MULTIPLE);
         }
     }
 
