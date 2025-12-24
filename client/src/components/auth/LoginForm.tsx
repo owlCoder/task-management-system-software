@@ -4,11 +4,7 @@ import { LoginUserDTO } from "../../models/auth/LoginUserDTO";
 import { useAuth } from "../../hooks/useAuthHook";
 import { useNavigate } from "react-router-dom";
 import logoImage from "../../../public/logo.png";
-
-type LoginFormProps = {
-  authAPI: IAuthAPI;
-  onSwitchToRegister?: () => void;
-};
+import { LoginFormProps } from "../../types/LoginFormProps";
 
 export const LoginForm: React.FC<LoginFormProps> = ({
   authAPI,

@@ -8,6 +8,9 @@ import CreateTaskModal from "../components/task/CreateTaskModal";
 import EditTaskModal from "../components/task/EditTaskModal";
 import { mockTasks } from "../mocks/TaskMock";
 import TaskSearchBar from "../components/task/TaskSearchBar";
+import TaskStatusFilter from "../components/task/TaskStatusFilter";
+import TaskSortSelect from "../components/task/TaskSortSelect";
+import { SortOption } from "../types/SortOption";
 // import { TaskDetailPage } from "./TaskDetailPage";
 // import EditTaskModal from "../components/task/EditTaskModal";
 
@@ -15,8 +18,6 @@ interface TaskListPageProps {
   projectId: string;
   token: string;
 }
-
-type SortOption = "TITLE_ASC" | "TITLE_DESC" | "STATUS" | "NEWEST";
 
 const TaskPage: React.FC<TaskListPageProps> = ({ projectId, token }) => {
   const [tasks, setTasks] = useState<TaskDTO[]>([]);
@@ -185,97 +186,12 @@ const TaskPage: React.FC<TaskListPageProps> = ({ projectId, token }) => {
                   </span>
                 </button>
 
-                <select
-                  value={statusFilter ?? ""}
-                  onChange={(e) => setStatusFilter(e.target.value || null)}
-                  className="
-                    flex-1 sm:flex-none
-                    px-3 py-2
-                    rounded-lg
-                    bg-white/10
-                    border border-white/20
-                    text-white
-                    text-sm sm:text-base
-                    outline-none
-                  "
-                >
-                  <option
-                    value=""
-                    className="bg-slate-900/95 backdrop-blur-xl text-white"
-                  >
-                    All statuses
-                  </option>
-                  <option
-                    value="CREATED"
-                    className="bg-slate-900/95 backdrop-blur-xl text-white"
-                  >
-                    Created
-                  </option>
-                  <option
-                    value="IN_PROGRESS"
-                    className="bg-slate-900/95 backdrop-blur-xl text-white"
-                  >
-                    In Progress
-                  </option>
-                  <option
-                    value="DONE"
-                    className="bg-slate-900/95 backdrop-blur-xl text-white"
-                  >
-                    Done
-                  </option>
-                  <option
-                    value="COMPLETED"
-                    className="bg-slate-900/95 backdrop-blur-xl text-white"
-                  >
-                    Completed
-                  </option>
-                  <option
-                    value="PENDING"
-                    className="bg-slate-900/95 backdrop-blur-xl text-white"
-                  >
-                    Pending
-                  </option>
-                </select>
+                <TaskStatusFilter
+                  value={statusFilter}
+                  onChange={setStatusFilter}
+                />
 
-                <select
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value as SortOption)}
-                  className="
-                    flex-1 sm:flex-none
-                    px-3 py-2
-                    rounded-lg
-                    bg-white/10
-                    border border-white/20
-                    text-white
-                    text-sm sm:text-base
-                    outline-none
-                  "
-                >
-                  <option
-                    value="NEWEST"
-                    className="bg-slate-900/95 backdrop-blur-xl text-white"
-                  >
-                    Newest
-                  </option>
-                  <option
-                    value="TITLE_ASC"
-                    className="bg-slate-900/95 backdrop-blur-xl text-white"
-                  >
-                    Title A–Z
-                  </option>
-                  <option
-                    value="TITLE_DESC"
-                    className="bg-slate-900/95 backdrop-blur-xl text-white"
-                  >
-                    Title Z–A
-                  </option>
-                  <option
-                    value="STATUS"
-                    className="bg-slate-900/95 backdrop-blur-xl text-white"
-                  >
-                    Status
-                  </option>
-                </select>
+                <TaskSortSelect value={sortBy} onChange={setSortBy} />
               </div>
             </div>
           </header>
