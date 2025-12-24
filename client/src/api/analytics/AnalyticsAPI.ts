@@ -20,7 +20,7 @@ export class AnalyticsAPI implements IAnalyticsAPI {
   }
 
   async getBudgetTracking(projectId: string): Promise<BudgetTrackingDto> {
-    const res = await fetch(`${this.baseUrl}/analytics/budget-tracking/${projectId}`, {
+    const res = await fetch(`${this.baseUrl}/analytics/budget/${projectId}`, {
       headers: this.headers,
     });
     if (!res.ok) throw new Error("Failed to fetch Budget Tracking data");
@@ -36,7 +36,7 @@ export class AnalyticsAPI implements IAnalyticsAPI {
   }
 
   async getResourceCostAllocation(projectId: string): Promise<ResourceCostAllocationDto> {
-    const res = await fetch(`${this.baseUrl}/analytics/resource-cost-allocation/${projectId}`, {
+    const res = await fetch(`${this.baseUrl}/analytics/resource-cost/${projectId}`, {
       headers: this.headers,
     });
     if (!res.ok) throw new Error("Failed to fetch Resource Cost Allocation data");
