@@ -16,6 +16,8 @@ interface TaskListPageProps {
   token: string;
 }
 
+type SortOption = "TITLE_ASC" | "TITLE_DESC" | "STATUS" | "NEWEST";
+
 const TaskPage: React.FC<TaskListPageProps> = ({ projectId, token }) => {
   const [tasks, setTasks] = useState<TaskDTO[]>([]);
   const [loading, setLoading] = useState(true);
@@ -23,11 +25,46 @@ const TaskPage: React.FC<TaskListPageProps> = ({ projectId, token }) => {
   const [selectedtaskId, setSelectedTaskId] = useState<number | null>(null);
   const [editOpen, setEditOpen] = useState(false);
   const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string | null>(null);
+  const [sortBy, setSortBy] = useState<SortOption>("NEWEST");
   const api = new TaskAPI(import.meta.env.VITE_GATEWAY_URL, token);
 
-  const filteredTasks = (tasks.length > 0 ? tasks : mockTasks).filter((task) =>
-    task.title.toLowerCase().includes(search.toLowerCase())
-  );
+  const filteredAndSortedTasks = tasks
+    .filter((task) => {
+      const title =
+        typeof task.title === "string"
+          ? task.title
+          : typeof (task as any).name === "string"
+          ? (task as any).name
+          : "";
+
+      const matchesSearch = title.toLowerCase().includes(search.toLowerCase());
+
+      const matchesStatus = statusFilter
+        ? task.task_status === statusFilter
+        : true;
+
+      return matchesSearch && matchesStatus;
+    })
+    .sort((a, b) => {
+      switch (sortBy) {
+        case "TITLE_ASC":
+          return a.title.localeCompare(b.title);
+
+        case "TITLE_DESC":
+          return b.title.localeCompare(a.title);
+
+        case "STATUS":
+          return a.task_status.localeCompare(b.task_status);
+
+        case "NEWEST":
+        default:
+          return (
+            new Date(b.total_hours_spent ?? 0).getTime() -
+            new Date(a.total_hours_spent ?? 0).getTime()
+          );
+      }
+    });
 
   useEffect(() => {
     const load = async () => {
@@ -66,19 +103,22 @@ const TaskPage: React.FC<TaskListPageProps> = ({ projectId, token }) => {
         }}
       >
         <div className="w-full max-w-4xl mx-auto flex flex-col h-full">
-          <header className="flex items-center justify-between gap-4 mb-6 flex-shrink-0">
-            <h1 className="text-3xl md:text-4xl font-bold text-white whitespace-nowrap">
+          <header className="flex flex-col gap-4 mb-6 flex-shrink-0">
+            <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-white">
               Tasks
             </h1>
 
-            <TaskSearchBar value={search} onChange={setSearch} />
+            <div className="flex flex-col lg:flex-row lg:items-center gap-4">
+              <div className="w-full lg:flex-1">
+                <TaskSearchBar value={search} onChange={setSearch} />
+              </div>
 
-            <div className="flex gap-2">
-              <button
-                type="button"
-                className="
+              <div className="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  className="
                 group
-                w-[140px] h-[50px]
+                w-[48px] sm:w-[140px] h-[48px] sm:h-[50px]
                 rounded-[3em]
                 flex items-center justify-center gap-[12px]
                 bg-white/10 backdrop-blur-xl
@@ -88,31 +128,31 @@ const TaskPage: React.FC<TaskListPageProps> = ({ projectId, token }) => {
                 hover:-translate-y-1
                 cursor-pointer
               "
-                onClick={() => setOpen(true)}
-              >
-                <svg
-                  className="w-5 h-5 text-white/60 group-hover:text-white transform transition-transform duration-300 group-hover:scale-110"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  aria-hidden="true"
+                  onClick={() => setOpen(true)}
                 >
-                  <path d="M12 5v14M5 12h14" />
-                </svg>
+                  <svg
+                    className="w-5 h-5 text-white/60 group-hover:text-white transform transition-transform duration-300 group-hover:scale-110"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M12 5v14M5 12h14" />
+                  </svg>
 
-                <span className="font-semibold text-white/60 hover:text-white transition-colors duration-300 text-base">
-                  Create Task
-                </span>
-              </button>
+                  <span className="hidden sm:inline font-semibold text-white/60 group-hover:text-white transition-colors duration-300 text-base">
+                    Create Task
+                  </span>
+                </button>
 
-              <button
-                type="button"
-                className="
+                <button
+                  type="button"
+                  className="
                   group
-                  w-[140px] h-[50px]
+                  w-[48px] sm:w-[140px] h-[48px] sm:h-[50px]
                   rounded-[3em]
                   flex items-center justify-center gap-[12px]
                   bg-white/10 backdrop-blur-xl
@@ -123,27 +163,120 @@ const TaskPage: React.FC<TaskListPageProps> = ({ projectId, token }) => {
                   cursor-pointer
                   disabled:cursor-not-allowed disabled:opacity-50 disabled:pointer-events-none disabled:bg-white/5 disabled:border-white/5 disabled:shadow-none
                 "
-                onClick={() => setEditOpen(true)}
-                disabled={selectedtaskId === null}
-              >
-                <svg
-                  className="w-5 h-5 text-white/60 group-hover:text-white transform transition-transform duration-300 group-hover:scale-110"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  aria-hidden="true"
+                  onClick={() => setEditOpen(true)}
+                  disabled={selectedtaskId === null}
                 >
-                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                </svg>
+                  <svg
+                    className="w-5 h-5 text-white/60 group-hover:text-white transform transition-transform duration-300 group-hover:scale-110"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                  </svg>
 
-                <span className="font-semibold text-white/60 hover:text-white transition-colors duration-300 text-base">
-                  Edit Task
-                </span>
-              </button>
+                  <span className="hidden sm:inline font-semibold text-white/60 group-hover:text-white transition-colors duration-300 text-base">
+                    Edit Task
+                  </span>
+                </button>
+
+                <select
+                  value={statusFilter ?? ""}
+                  onChange={(e) => setStatusFilter(e.target.value || null)}
+                  className="
+                    flex-1 sm:flex-none
+                    px-3 py-2
+                    rounded-lg
+                    bg-white/10
+                    border border-white/20
+                    text-white
+                    text-sm sm:text-base
+                    outline-none
+                  "
+                >
+                  <option
+                    value=""
+                    className="bg-slate-900/95 backdrop-blur-xl text-white"
+                  >
+                    All statuses
+                  </option>
+                  <option
+                    value="CREATED"
+                    className="bg-slate-900/95 backdrop-blur-xl text-white"
+                  >
+                    Created
+                  </option>
+                  <option
+                    value="IN_PROGRESS"
+                    className="bg-slate-900/95 backdrop-blur-xl text-white"
+                  >
+                    In Progress
+                  </option>
+                  <option
+                    value="DONE"
+                    className="bg-slate-900/95 backdrop-blur-xl text-white"
+                  >
+                    Done
+                  </option>
+                  <option
+                    value="COMPLETED"
+                    className="bg-slate-900/95 backdrop-blur-xl text-white"
+                  >
+                    Completed
+                  </option>
+                  <option
+                    value="PENDING"
+                    className="bg-slate-900/95 backdrop-blur-xl text-white"
+                  >
+                    Pending
+                  </option>
+                </select>
+
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value as SortOption)}
+                  className="
+                    flex-1 sm:flex-none
+                    px-3 py-2
+                    rounded-lg
+                    bg-white/10
+                    border border-white/20
+                    text-white
+                    text-sm sm:text-base
+                    outline-none
+                  "
+                >
+                  <option
+                    value="NEWEST"
+                    className="bg-slate-900/95 backdrop-blur-xl text-white"
+                  >
+                    Newest
+                  </option>
+                  <option
+                    value="TITLE_ASC"
+                    className="bg-slate-900/95 backdrop-blur-xl text-white"
+                  >
+                    Title A–Z
+                  </option>
+                  <option
+                    value="TITLE_DESC"
+                    className="bg-slate-900/95 backdrop-blur-xl text-white"
+                  >
+                    Title Z–A
+                  </option>
+                  <option
+                    value="STATUS"
+                    className="bg-slate-900/95 backdrop-blur-xl text-white"
+                  >
+                    Status
+                  </option>
+                </select>
+              </div>
             </div>
           </header>
 
@@ -155,15 +288,15 @@ const TaskPage: React.FC<TaskListPageProps> = ({ projectId, token }) => {
               }
             }}
           >
-            {search && filteredTasks.length === 0 ? (
+            {search && filteredAndSortedTasks.length === 0 ? (
               <div className="text-center text-white/50 py-12">
                 <p>No tasks found matching "{search}"</p>
               </div>
-            ) : filteredTasks.length === 0 ? (
+            ) : filteredAndSortedTasks.length === 0 ? (
               <TaskListPreview onSelect={setSelectedTaskId} />
             ) : (
               <div className="flex flex-col gap-3">
-                {filteredTasks.map((task) => (
+                {filteredAndSortedTasks.map((task) => (
                   <TaskListItem
                     onSelect={setSelectedTaskId}
                     key={task.task_id}

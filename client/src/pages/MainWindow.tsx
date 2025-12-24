@@ -1,5 +1,3 @@
-import React from "react";
-import Navbar from "../components/dashboard/sidebar/Navbar";
 import Sidebar from "../components/dashboard/sidebar/Sidebar";
 
 const MainWindow = () => {
