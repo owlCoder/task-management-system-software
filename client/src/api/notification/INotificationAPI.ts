@@ -16,8 +16,8 @@ export interface INotificationAPI {
   }): Promise<Notification>;
   
   // PATCH operacije (mark as read/unread)
-  markAsRead(id: number): Promise<Notification>;
-  markAsUnread(id: number): Promise<Notification>;
+  markAsRead(id: number): Promise<void>;
+  markAsUnread(id: number): Promise<void>;
   markMultipleAsRead(ids: number[]): Promise<void>;
   markMultipleAsUnread(ids: number[]): Promise<void>;
   

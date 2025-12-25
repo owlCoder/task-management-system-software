@@ -31,15 +31,13 @@ export class NotificationAPI implements INotificationAPI {
   }
 
   // PATCH /api/notifications/:id/read
-  async markAsRead(id: number): Promise<Notification> {
-    const response = await axios.patch(`${this.baseURL}/notifications/${id}/read`);
-    return response.data;
+  async markAsRead(id: number): Promise<void> {
+    await axios.patch(`${this.baseURL}/notifications/${id}/read`);
   }
 
   // PATCH /api/notifications/:id/unread
-  async markAsUnread(id: number): Promise<Notification> {
-    const response = await axios.patch(`${this.baseURL}/notifications/${id}/unread`);
-    return response.data;
+  async markAsUnread(id: number): Promise<void> {
+    await axios.patch(`${this.baseURL}/notifications/${id}/unread`);
   }
 
   // PATCH /api/notifications/bulk/read
