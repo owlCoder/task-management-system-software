@@ -2,6 +2,8 @@ import { IAnalyticsAPI } from "./IAnalyticsAPI";
 import { BudgetTrackingDto } from "../../models/analytics/BudgetTrackingDto";
 import { ProfitMarginDto } from "../../models/analytics/ProfitMarginDto";
 import { ResourceCostAllocationDto } from "../../models/analytics/ResourceCostAllocationDto";
+import { BurndownDto } from "../../models/analytics/BurndownDto";
+import { BurnupDto } from "../../models/analytics/BurnupDto";
 
 export class AnalyticsAPI implements IAnalyticsAPI {
   private baseUrl: string;
@@ -17,6 +19,30 @@ export class AnalyticsAPI implements IAnalyticsAPI {
       "Content-Type": "application/json",
       Authorization: `Bearer ${this.token}`,
     };
+  }
+
+  async getBurndownAnalytics(sprintId: string): Promise<BurndownDto> {
+    const res = await fetch(`${this.baseUrl}/analytics/burndown/${sprintId}`, {
+      headers: this.headers,
+    });
+    if (!res.ok) throw new Error("Failed to fetch Burndown Analytics data");
+    return res.json();
+  }
+
+  async getBurnupAnalytics(sprintId: string): Promise<BurnupDto> {
+    const res = await fetch(`${this.baseUrl}/analytics/burnup/${sprintId}`, {
+      headers: this.headers,
+    });
+    if (!res.ok) throw new Error("Failed to fetch Burnup Analytics data");
+    return res.json();
+  }
+
+  async getVelocityTracking(projectId: string): Promise<number> {
+    const res = await fetch(`${this.baseUrl}/analytics/velocity/${projectId}`, {
+      headers: this.headers,
+    });
+    if (!res.ok) throw new Error("Failed to fetch Velocity tracking data");
+    return res.json();
   }
 
   async getBudgetTracking(projectId: string): Promise<BudgetTrackingDto> {
