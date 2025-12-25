@@ -11,6 +11,7 @@ export class TaskAPI implements ITaskAPI {
     this.baseUrl = baseUrl;
     this.token = token;
   }
+  
 
   private get headers() {
     return {
@@ -74,6 +75,27 @@ export class TaskAPI implements ITaskAPI {
     },
     body: formData
   });
+}
+
+async uploadComment(taskId: number,userId: number,comment: string): Promise<void> {
+  const response = await fetch(
+    `${this.baseUrl}/tasks/${taskId}/comments`,
+    {
+      method: "POST",
+      headers: {
+        ...this.headers,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        user_id: userId,
+        comment: comment,
+      }),
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error("Failed to add comment");
+  }
 }
 
 }
