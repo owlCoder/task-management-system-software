@@ -1,6 +1,12 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Sidebar from "../components/dashboard/sidebar/Sidebar";
 import { AnalyticsTab } from "../enums/AnalyticsTabs";
+import { ProjectDTO } from "../models/project/ProjectDTO";
+import { projectAPI } from "../api/project/ProjectAPI";
+import { BurndownAnalytics } from "../components/analytics/Burndown";
+import { VelocityAnalytics } from "../components/analytics/Velocity";
+import { BurnupAnalytics } from "../components/analytics/Burnup";
+
 
 const TABS: { id: AnalyticsTab; label: string }[] = [
     { id: "BURNDOWN", label: "Burndown" },
@@ -13,6 +19,31 @@ const TABS: { id: AnalyticsTab; label: string }[] = [
 
 export const AnalyticsPage: React.FC = () => {
     const [activeTab, setActiveTab] = useState<AnalyticsTab>("BURNDOWN");
+    const [projects, setProjects] = useState<ProjectDTO[]>([]);
+    const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
+    const [selectedProject, setSelectedProject] = useState<ProjectDTO | null>(null);
+    const [loadingProjects, setLoadingProjects] = useState(true);
+
+    useEffect(() => {
+        const loadProjects = async () => {
+            try {
+                const data = await projectAPI.getAllProjects();
+                setProjects(data);
+                if (data.length > 0) {
+                    setSelectedProjectId(data[0].id); // default prvi projekat
+                    setSelectedProject(data[0]);
+                }
+            } catch (err) {
+                console.error("Failed to load projects", err);
+            } finally {
+                setLoadingProjects(false);
+            }
+        };
+
+        loadProjects();
+    }, []);
+
+
 
     return (
         <div className="flex min-h-screen bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-[#0f172a] via-[#020617] to-black">
@@ -24,6 +55,37 @@ export const AnalyticsPage: React.FC = () => {
                         Analytics
                     </h1>
                 </header>
+
+                {/* PROJECT SELECTOR */}
+                <section className="mb-8">
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-4 items-center justify-center">
+                        <span className="text-white/70 font-semibold">
+                            Selected project:
+                        </span>
+
+                        {loadingProjects ? (
+                            <div className="text-white/40">Loading projects...</div>
+                        ) : (
+                            <select
+                                value={selectedProjectId ?? ""}
+                                onChange={(e) => {
+                                    setSelectedProjectId(e.target.value)
+                                    setSelectedProject(projects.find(p => p.id === selectedProjectId)!)
+                                }}
+                                className="w-full sm:w-[320px] bg-white/10 backdrop-blur-xl border border-white/15 rounded-xl px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-[var(--palette-medium-blue)] transition-all">
+                                {projects.map((project) => (
+                                    <option
+                                        key={project.id}
+                                        value={project.id}
+                                        className="bg-[#020617] text-white"
+                                    >
+                                        {project.name}
+                                    </option>
+                                ))}
+                            </select>
+                        )}
+                    </div>
+                </section>
 
                 {/* TAB CARDS */}
                 <section className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
@@ -44,10 +106,20 @@ export const AnalyticsPage: React.FC = () => {
                 </section>
 
                 {/* CONTENT CARD */}
-                <section className="bg-white/5 backdrop-blur-xl rounded-2xl p-6 shadow-lg border border-white/10 min-h-[500px]">
-                    {activeTab === "BURNDOWN" && <div>TODO: Burndown analytics</div>}
-                    {activeTab === "BURNUP" && <div>TODO: Burnup analytics</div>}
-                    {activeTab === "VELOCITY" && <div>TODO: Velocity tracking</div>}
+                <section className="bg-white/5 backdrop-blur-xl rounded-2xl p-6 shadow-lg border border-white/10 min-h-[200px] max-h-[575px]">
+                    {activeTab === "BURNDOWN" &&
+                        <div>
+                            {selectedProjectId ?
+                                <BurndownAnalytics project={selectedProject!} token={""} /> : "Select project..."}
+                        </div>}
+                    {activeTab === "BURNUP" && <div>
+                        {selectedProjectId ?
+                            <BurnupAnalytics project={selectedProject!} /> : "Select project..."}
+                    </div>}
+                    {activeTab === "VELOCITY" && <div>
+                        {selectedProjectId ?
+                            <VelocityAnalytics project={selectedProject!} /> : "Select project..."}
+                    </div>}
                     {activeTab === "BUDGET" && <div>TODO: Budget analytics</div>}
                     {activeTab === "PROFIT" && <div>TODO: Profit margin analytics</div>}
                     {activeTab === "RESOURCES" && <div>TODO: Resource cost analytics</div>}

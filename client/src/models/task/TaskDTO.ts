@@ -3,7 +3,8 @@ import { CommentDTO } from "./CommentDTO";
 
 export interface TaskDTO {
   task_id: number;
-  project_id: number;
+  // project_id: number;
+  sprint_id: number;
   worker_id?: number;
   project_manager_id: number;
   title: string;
@@ -13,4 +14,5 @@ export interface TaskDTO {
   estimated_cost?: number;
   total_hours_spent?: number;
   comments?: CommentDTO[];
+  finished_at?: Date
 }
