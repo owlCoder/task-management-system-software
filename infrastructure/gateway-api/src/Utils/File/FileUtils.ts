@@ -1,4 +1,7 @@
+// Libraries
 import { AxiosResponse } from "axios";
+
+// Domain
 import { CreateFileDTO } from "../../Domain/DTOs/file/CreateFileDTO";
 import { DownloadFileDTO } from "../../Domain/DTOs/file/DownloadFileDTO";
 

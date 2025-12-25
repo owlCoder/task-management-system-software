@@ -1,9 +1,16 @@
+// Framework
 import { Router, Request, Response } from "express";
-import { IGatewayFileService } from "../../Domain/services/file/IGatewayFileService";
+
+// Libraries
 import path from "path";
 import multer, { Multer } from "multer";
+
+// Domain
+import { IGatewayFileService } from "../../Domain/services/file/IGatewayFileService";
 import { UploadedFileDTO } from "../../Domain/DTOs/file/UploadedFileDTO";
-import { authenticate } from "../../Middlewares/authentification/AuthMiddleware";
+
+// Middlewares
+import { authenticate } from "../../Middlewares/authentication/AuthMiddleware";
 
 export class GatewayFileController {
     private router: Router;

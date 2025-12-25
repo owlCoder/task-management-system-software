@@ -1,6 +1,11 @@
+// Framework
 import { Request, Response, NextFunction } from "express";
+
+// Domain
 import { UserRole } from "../../Domain/enums/user/UserRole";
 import { AuthTokenClaimsType } from "../../Domain/types/auth/AuthTokenClaims";
+
+// Utils
 import { logger } from "../../Utils/Logger/Logger";
 
 export const authorize = (...permittedRoles: UserRole[]) => {

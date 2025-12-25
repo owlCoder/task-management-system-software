@@ -1,6 +1,13 @@
+// Framework
 import { Request, Response, NextFunction } from "express";
+
+// Libraries
 import jwt from "jsonwebtoken";
+
+// Domain
 import { AuthTokenClaimsType } from "../../Domain/types/auth/AuthTokenClaims";
+
+// Utils
 import { logger } from "../../Utils/Logger/Logger";
 
 declare global {

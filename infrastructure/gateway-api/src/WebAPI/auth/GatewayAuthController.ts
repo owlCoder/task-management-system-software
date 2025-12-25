@@ -1,6 +1,9 @@
+// Framework
 import { Request, Response, Router } from "express";
-import { LoginUserDTO } from "../../Domain/DTOs/auth/LoginUserDTO";
+
+// Domain
 import { IGatewayAuthService } from "../../Domain/services/auth/IGatewayAuthService";
+import { LoginUserDTO } from "../../Domain/DTOs/auth/LoginUserDTO";
 import { RegistrationUserDTO } from "../../Domain/DTOs/auth/RegistrationUserDTO";
 import { BrowserDataDTO } from "../../Domain/DTOs/auth/BrowserDataDTO";
 import { AuthResponseType } from "../../Domain/types/auth/AuthResponse";

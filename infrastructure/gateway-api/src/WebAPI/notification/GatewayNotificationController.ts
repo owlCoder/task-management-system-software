@@ -1,7 +1,12 @@
+// Framework
 import { Router, Request, Response } from "express";
+
+// Domain
 import { IGatewayNotificationService } from "../../Domain/services/notification/IGatewayNotificationService";
 import { NotificationDTO } from "../../Domain/DTOs/notification/NotificationDTO";
-import { authenticate } from "../../Middlewares/authentification/AuthMiddleware";
+
+// Middlewares
+import { authenticate } from "../../Middlewares/authentication/AuthMiddleware";
 
 export class GatewayNotificationController {
     private readonly router: Router;

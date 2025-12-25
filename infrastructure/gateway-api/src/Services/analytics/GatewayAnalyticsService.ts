@@ -1,12 +1,17 @@
+// Libraries
 import axios, { AxiosInstance } from "axios";
-import { BudgetTrackingDTO } from "../../Domain/DTOs/analytics/BudgetTrackingDTO";
+
+// Domain
+import { IErrorHandlingService } from "../../Domain/services/common/IErrorHandlingService";
+import { IGatewayAnalyticsService } from "../../Domain/services/analytics/IGatewayAnalyticsService";
 import { BurndownDTO } from "../../Domain/DTOs/analytics/BurndownDTO";
 import { BurnupDTO } from "../../Domain/DTOs/analytics/BurnupDTO";
-import { ProfitMarginDTO } from "../../Domain/DTOs/analytics/ProfitMarginDTO";
+import { BudgetTrackingDTO } from "../../Domain/DTOs/analytics/BudgetTrackingDTO";
 import { ResourceCostAllocationDTO } from "../../Domain/DTOs/analytics/ResourceCostAllocationDTO";
-import { IGatewayAnalyticsService } from "../../Domain/services/analytics/IGatewayAnalyticsService";
+import { ProfitMarginDTO } from "../../Domain/DTOs/analytics/ProfitMarginDTO";
 import { Result } from "../../Domain/types/common/Result";
-import { IErrorHandlingService } from "../../Domain/services/common/IErrorHandlingService";
+
+// Constants
 import { SERVICES } from "../../Constants/services/Services";
 import { HTTP_METHODS } from "../../Constants/common/HttpMethods";
 import { ANALYTICS_ROUTES } from "../../Constants/routes/analytics/AnalyticsRoutes";

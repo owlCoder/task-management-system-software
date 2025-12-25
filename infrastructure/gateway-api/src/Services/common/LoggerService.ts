@@ -1,4 +1,7 @@
+// Libraries
 import { Logger } from "pino";
+
+// Domain
 import { ILoggerService } from "../../Domain/services/common/ILoggerService";
 
 export class LoggerService implements ILoggerService {
