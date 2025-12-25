@@ -6,6 +6,7 @@ import { authorize } from "../../Middlewares/authorization/AuthorizeMiddleware";
 import { UserRole } from "../../Domain/enums/user/UserRole";
 import { UserDTO } from "../../Domain/DTOs/user/UserDTO";
 import { UpdateUserDTO } from "../../Domain/DTOs/user/UpdateUserDTO";
+import { UserRoleDTO } from "../../Domain/DTOs/user/UserRoleDTO";
 
 export class GatewayUserController {
     private readonly router: Router;
@@ -21,6 +22,7 @@ export class GatewayUserController {
         this.router.get("/users", authenticate, authorize(UserRole.ADMIN), this.getUsers.bind(this));
         this.router.put("/users/:id", authenticate, authorize(UserRole.ADMIN), this.updateUserById.bind(this));
         this.router.delete("/users/:id", authenticate, authorize(UserRole.ADMIN), this.logicallyDeleteUserById.bind(this));
+        this.router.get("/user-roles/userCreation", authenticate, authorize(UserRole.ADMIN), this.getCreationRoles.bind(this));
     }
 
     /**
@@ -112,6 +114,23 @@ export class GatewayUserController {
         const result = await this.gatewayUserService.logicallyDeleteUserById(id);
         if(result.success){
             res.status(204).send();
+            return;
+        }
+        res.status(result.status).json({ message: result.message });
+    }
+
+    /**
+     * GET /api/v1/user-roles/userCreation
+     * @param {Request} _req - the request object, unused.
+     * @param {Response} res - the response object for the client.
+     * @returns {Object}
+     * - On success: A JSON object following the list of {@link UserRoleDTO} structure containing the result of the get creation roles operation. 
+     * - On failure: A JSON object with an error message and a HTTP status code indicating the failure.
+     */
+    private async getCreationRoles(_req: Request, res: Response): Promise<void> {
+        const result = await this.gatewayUserService.getCreationRoles();
+        if(result.success){
+            res.status(200).json(result.data);
             return;
         }
         res.status(result.status).json({ message: result.message });

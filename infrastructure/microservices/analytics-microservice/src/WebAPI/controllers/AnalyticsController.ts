@@ -20,9 +20,9 @@ export class AnalyticsController {
         this.router.get('/analytics/burndown/:sprintId', this.getBurndownAnalytics.bind(this));
         this.router.get('/analytics/burnup/:sprintId', this.getBurnupAnalytics.bind(this));
         this.router.get('/analytics/velocity/:projectId', this.getVelocityAnalytics.bind(this));
-        this.router.get('/analytics/financial/budget/:projectId', this.getBudgetTracking.bind(this));
-        this.router.get('/analytics/financial/resource-cost/:projectId', this.getResourceCostAllocation.bind(this));
-        this.router.get('/analytics/financial/profit-margin/:projectId', this.getProfitMargin.bind(this));
+        this.router.get('/analytics/budget/:projectId', this.getBudgetTracking.bind(this));
+        this.router.get('/analytics/resource-cost/:projectId', this.getResourceCostAllocation.bind(this));
+        this.router.get('/analytics/profit-margin/:projectId', this.getProfitMargin.bind(this));
     }
 
     async getBurndownAnalytics(req: Request, res: Response): Promise<void> {

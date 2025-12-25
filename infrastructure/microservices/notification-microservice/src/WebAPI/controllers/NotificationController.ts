@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { INotificationService } from '../../Domain/services/INotificationService';
 import { NotificationCreateDTO } from '../../Domain/DTOs/NotificationCreateDTO';
 import { NotificationValidation } from '../validators/NotificationValidation';
+import { mapErrorCodeToHttpStatus } from '../../Utils/errorCodeMapper';
 
 export class NotificationController {
   
@@ -20,18 +21,24 @@ export class NotificationController {
       }
 
       const id = parseInt(req.params.id);
-      const notification = await this.notificationService.getNotificationById(id);
-      
-      if (!notification) {
-        res.status(404).json({ message: 'Notification not found' });
+      if (isNaN(id)) {
+        res.status(400).json({ message: 'Invalid notification ID' });
         return;
       }
 
-      res.status(200).json(notification);
+      const result = await this.notificationService.getNotificationById(id);
+
+      if (!result.success) {
+        const statusCode = mapErrorCodeToHttpStatus(result.errorCode);
+        res.status(statusCode).json({ message: result.message });
+        return;
+      }
+
+      res.status(200).json(result.data);
     } catch (error) {
-      res.status(500).json({ 
-        message: 'Error fetching notification', 
-        error: (error as Error).message 
+      res.status(500).json({
+        message: 'Error fetching notification',
+        error: (error as Error).message
       });
     }
   }
@@ -45,19 +52,30 @@ export class NotificationController {
       }
 
       const userId = parseInt(req.params.userId);
-      const notifications = await this.notificationService.getNotificationsByUserId(userId);
-      res.status(200).json(notifications);
+      if (isNaN(userId)) {
+        res.status(400).json({ message: 'Invalid user ID' });
+        return;
+      }
+
+      const result = await this.notificationService.getNotificationsByUserId(userId);
+
+      if (!result.success) {
+        const statusCode = mapErrorCodeToHttpStatus(result.errorCode);
+        res.status(statusCode).json({ message: result.message });
+        return;
+      }
+
+      res.status(200).json(result.data);
     } catch (error) {
-      res.status(500).json({ 
-        message: 'Error fetching user notifications', 
-        error: (error as Error).message 
+      res.status(500).json({
+        message: 'Error fetching user notifications',
+        error: (error as Error).message
       });
     }
   }
 
   async getUnreadCount(req: Request, res: Response): Promise<void> {
     try {
-      // validacija userId
       const validationError = NotificationValidation.validateId(req.params.userId);
       if (validationError) {
         res.status(400).json({ message: validationError });
@@ -65,12 +83,24 @@ export class NotificationController {
       }
 
       const userId = parseInt(req.params.userId);
-      const count = await this.notificationService.getUnreadCount(userId);
-      res.status(200).json({ unreadCount: count });
+      if (isNaN(userId)) {
+        res.status(400).json({ message: 'Invalid user ID' });
+        return;
+      }
+
+      const result = await this.notificationService.getUnreadCount(userId);
+
+      if (!result.success) {
+        const statusCode = mapErrorCodeToHttpStatus(result.errorCode);
+        res.status(statusCode).json({ message: result.message });
+        return;
+      }
+
+      res.status(200).json({ unreadCount: result.data });
     } catch (error) {
-      res.status(500).json({ 
-        message: 'Error fetching unread count', 
-        error: (error as Error).message 
+      res.status(500).json({
+        message: 'Error fetching unread count',
+        error: (error as Error).message
       });
     }
   }
@@ -84,18 +114,19 @@ export class NotificationController {
       }
 
       const data: NotificationCreateDTO = req.body;
-      const notification = await this.notificationService.createNotification(data);
-      
-      if (!notification) {
-        res.status(500).json({ message: 'Failed to create notification' });
+      const result = await this.notificationService.createNotification(data);
+
+      if (!result.success) {
+        const statusCode = mapErrorCodeToHttpStatus(result.errorCode);
+        res.status(statusCode).json({ message: result.message });
         return;
       }
-      
-      res.status(201).json(notification);
+
+      res.status(201).json(result.data);
     } catch (error) {
-      res.status(500).json({ 
-        message: 'Error creating notification', 
-        error: (error as Error).message 
+      res.status(500).json({
+        message: 'Error creating notification',
+        error: (error as Error).message
       });
     }
   }
@@ -109,18 +140,24 @@ export class NotificationController {
       }
 
       const id = parseInt(req.params.id);
-      const notification = await this.notificationService.markAsRead(id);
-      
-      if (!notification) {
-        res.status(404).json({ message: 'Notification not found' });
+      if (isNaN(id)) {
+        res.status(400).json({ message: 'Invalid notification ID' });
         return;
       }
 
-      res.status(200).json(notification);
+      const result = await this.notificationService.markAsRead(id);
+
+      if (!result.success) {
+        const statusCode = mapErrorCodeToHttpStatus(result.errorCode);
+        res.status(statusCode).json({ message: result.message });
+        return;
+      }
+
+      res.status(200).json(result.data);
     } catch (error) {
-      res.status(500).json({ 
-        message: 'Error marking notification as read', 
-        error: (error as Error).message 
+      res.status(500).json({
+        message: 'Error marking notification as read',
+        error: (error as Error).message
       });
     }
   }
@@ -134,18 +171,24 @@ export class NotificationController {
       }
 
       const id = parseInt(req.params.id);
-      const notification = await this.notificationService.markAsUnread(id);
-      
-      if (!notification) {
-        res.status(404).json({ message: 'Notification not found' });
+      if (isNaN(id)) {
+        res.status(400).json({ message: 'Invalid notification ID' });
         return;
       }
 
-      res.status(200).json(notification);
+      const result = await this.notificationService.markAsUnread(id);
+
+      if (!result.success) {
+        const statusCode = mapErrorCodeToHttpStatus(result.errorCode);
+        res.status(statusCode).json({ message: result.message });
+        return;
+      }
+
+      res.status(200).json(result.data);
     } catch (error) {
-      res.status(500).json({ 
-        message: 'Error marking notification as unread', 
-        error: (error as Error).message 
+      res.status(500).json({
+        message: 'Error marking notification as unread',
+        error: (error as Error).message
       });
     }
   }
@@ -154,7 +197,7 @@ export class NotificationController {
     try {
       console.log(' DEBUG markMultipleAsRead - req.body:', req.body);
       console.log(' DEBUG markMultipleAsRead - req.body.ids:', req.body.ids);
-      
+
       const validationError = NotificationValidation.validateIdsArray(req.body.ids);
       if (validationError) {
         console.log(' Validation error markMultipleAsRead:', validationError);
@@ -164,20 +207,21 @@ export class NotificationController {
 
       const { ids } = req.body;
       console.log(' Calling service markMultipleAsRead with ids:', ids);
-      
-      const success = await this.notificationService.markMultipleAsRead(ids);
-      
-      if (!success) {
-        res.status(500).json({ message: 'Failed to mark notifications as read' });
+
+      const result = await this.notificationService.markMultipleAsRead(ids);
+
+      if (!result.success) {
+        const statusCode = mapErrorCodeToHttpStatus(result.errorCode);
+        res.status(statusCode).json({ message: result.message });
         return;
       }
-      
+
       res.status(200).json({ message: 'Notifications marked as read' });
     } catch (error) {
       console.error(' Error in markMultipleAsRead:', error);
-      res.status(500).json({ 
-        message: 'Error marking notifications as read', 
-        error: (error as Error).message 
+      res.status(500).json({
+        message: 'Error marking notifications as read',
+        error: (error as Error).message
       });
     }
   }
@@ -186,7 +230,7 @@ export class NotificationController {
     try {
       console.log(' DEBUG markMultipleAsUnread - req.body:', req.body);
       console.log(' DEBUG markMultipleAsUnread - req.body.ids:', req.body.ids);
-      
+
       const validationError = NotificationValidation.validateIdsArray(req.body.ids);
       if (validationError) {
         console.log(' Validation error markMultipleAsUnread:', validationError);
@@ -196,20 +240,21 @@ export class NotificationController {
 
       const { ids } = req.body;
       console.log(' Calling service markMultipleAsUnread with ids:', ids);
-      
-      const success = await this.notificationService.markMultipleAsUnread(ids);
-      
-      if (!success) {
-        res.status(500).json({ message: 'Failed to mark notifications as unread' });
+
+      const result = await this.notificationService.markMultipleAsUnread(ids);
+
+      if (!result.success) {
+        const statusCode = mapErrorCodeToHttpStatus(result.errorCode);
+        res.status(statusCode).json({ message: result.message });
         return;
       }
-      
+
       res.status(200).json({ message: 'Notifications marked as unread' });
     } catch (error) {
       console.error(' Error in markMultipleAsUnread:', error);
-      res.status(500).json({ 
-        message: 'Error marking notifications as unread', 
-        error: (error as Error).message 
+      res.status(500).json({
+        message: 'Error marking notifications as unread',
+        error: (error as Error).message
       });
     }
   }
@@ -223,18 +268,24 @@ export class NotificationController {
       }
 
       const id = parseInt(req.params.id);
-      const deleted = await this.notificationService.deleteNotification(id);
-      
-      if (!deleted) {
-        res.status(404).json({ message: 'Notification not found' });
+      if (isNaN(id)) {
+        res.status(400).json({ message: 'Invalid notification ID' });
+        return;
+      }
+
+      const result = await this.notificationService.deleteNotification(id);
+
+      if (!result.success) {
+        const statusCode = mapErrorCodeToHttpStatus(result.errorCode);
+        res.status(statusCode).json({ message: result.message });
         return;
       }
 
       res.status(200).json({ message: 'Notification deleted successfully' });
     } catch (error) {
-      res.status(500).json({ 
-        message: 'Error deleting notification', 
-        error: (error as Error).message 
+      res.status(500).json({
+        message: 'Error deleting notification',
+        error: (error as Error).message
       });
     }
   }
@@ -243,7 +294,7 @@ export class NotificationController {
     try {
       console.log(' DEBUG deleteMultiple - req.body:', req.body);
       console.log(' DEBUG deleteMultiple - req.body.ids:', req.body.ids);
-      
+
       const validationError = NotificationValidation.validateIdsArray(req.body.ids);
       if (validationError) {
         console.log(' Validation error deleteMultiple:', validationError);
@@ -253,20 +304,21 @@ export class NotificationController {
 
       const { ids } = req.body;
       console.log(' Calling service deleteMultiple with ids:', ids);
-      
-      const success = await this.notificationService.deleteMultipleNotifications(ids);
-      
-      if (!success) {
-        res.status(500).json({ message: 'Failed to delete notifications' });
+
+      const result = await this.notificationService.deleteMultipleNotifications(ids);
+
+      if (!result.success) {
+        const statusCode = mapErrorCodeToHttpStatus(result.errorCode);
+        res.status(statusCode).json({ message: result.message });
         return;
       }
-      
+
       res.status(200).json({ message: 'Notifications deleted successfully' });
     } catch (error) {
       console.error(' Error in deleteMultiple:', error);
-      res.status(500).json({ 
-        message: 'Error deleting notifications', 
-        error: (error as Error).message 
+      res.status(500).json({
+        message: 'Error deleting notifications',
+        error: (error as Error).message
       });
     }
   }

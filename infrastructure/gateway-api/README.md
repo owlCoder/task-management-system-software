@@ -12,18 +12,35 @@
     - `POST /login`: Authenticate user and issue JWT.
     - `POST /register`: Register user and issue JWT.
     - `POST /verify-otp`: Verify one-time password for user authentication.
+    - `POST /resend-otp`: Request for the new otp code.
 - **User Microservice** (*Accessible to admin users only*)
     - `POST /users`: Create a new user.
     - `GET /users/:id`: Get details of a specific user.
     - `GET /users`: List all users.
     - `PUT /users/:id`: Update a specific user's details.
     - `DELETE /users/:id`: Delete a specific user.
+    - `GET /user-roles/userCreation`: Get roles that are available for creation of a user.
 - **File Microservice** (*Accessible to authenticated users*)
     - `GET /files/download/:fileId`: Download a specific file.
     - `GET /files/author/:authorId`: Retrieve files by a specific author.
     - `GET /files/metadata/:fileId`: Get metadata for a specific file.
     - `POST /files/upload`: Upload a new file.
     - `DELETE /files/:fileId`: Delete a specific file.
+- **Project Microservice** (*Accessible to project managers, fetching available for workers*)
+    - `GET /projects/:id`: Get project by id.
+    - `POST /projects`: Create new project.
+    - `PUT /projects/:id`: Update a specific project.
+    - `DELETE /projects/:id`: Delete a specific project
+- **Notification Microservice** (*Accessible to authenticated users*)
+    - `GET /notifications/:id`: Get a specific notification.
+    - `GET /notifications/user/:userId`: Get a notifications of a specific user.
+    - `GET /notifications/user/:userId/unread-count`: Get a number of the unread notifications for a specific user.
+    - `PATCH /notifications/bulk/unread`: Mark multiple notifications as unread.
+    - `PATCH /notifications/bulk/read`: Mark multiple notifications as read.
+    - `PATCH /notifications/:id/read`: Mark specific notification as read.
+    - `PATCH /notifications/:id/unread`: Mark specific notification as unread.
+    - `DELETE /notifications/bulk`: Delete multiple notifications.
+    - `DELETE /notifications/:id`: Delete a specific notification.
 
 ## Setup and Running
 1. Install dependencies: `npm install`.
@@ -49,4 +66,5 @@ Configure the following in your `.env` file. Defaults are provided where applica
 - `FILE_SERVICE_API`: Endpoint of the file microservice.
 - `PROJECT_SERVICE_API`: Endpoint of the project microservice.
 - `TASK_SERVICE_API`: Endpoint of the task microservice.
-- `REPORTING_SERVICE_API`: Endpoint of the reporting microservice.
+- `NOTIFICATION_SERVICE_API`: Endpoint of the notification microservice.
+- `ANALYTICS_SERVICE_API`: Endpoint of the analytics microservice.

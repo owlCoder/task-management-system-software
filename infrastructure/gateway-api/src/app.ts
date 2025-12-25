@@ -23,6 +23,9 @@ import { GatewayNotificationController } from './WebAPI/notification/GatewayNoti
 import { IGatewayProjectService } from './Domain/services/project/IGatewayProjectService';
 import { GatewayProjectService } from './Services/project/GatewayProjectService';
 import { GatewayProjectController } from './WebAPI/project/GatewayProjectController';
+import { IGatewayAnalyticsService } from './Domain/services/analytics/IGatewayAnalyticsService';
+import { GatewayAnalyticsService } from './Services/analytics/GatewayAnalyticsService';
+import { GatewayAnalyticsController } from './WebAPI/analytics/GatewayAnalyticsController';
 
 dotenv.config({ quiet: true });
 
@@ -50,6 +53,7 @@ const gatewayUserService: IGatewayUserService = new GatewayUserService(errorHand
 const gatewayProjectService: IGatewayProjectService = new GatewayProjectService(errorHandlingService);
 const gatewayFileService: IGatewayFileService = new GatewayFileService(errorHandlingService);
 const gatewayNotificationService: IGatewayNotificationService = new GatewayNotificationService(errorHandlingService);
+const gatewayAnalyticsService: IGatewayAnalyticsService = new GatewayAnalyticsService(errorHandlingService);
 
 // WebAPI routes
 const gatewayAuthController = new GatewayAuthController(gatewayAuthService);
@@ -57,6 +61,7 @@ const gatewayUserController = new GatewayUserController(gatewayUserService);
 const gatewayProjectController = new GatewayProjectController(gatewayProjectService);
 const gatewayFileController = new GatewayFileController(gatewayFileService);
 const gatewayNotificationController = new GatewayNotificationController(gatewayNotificationService);
+const gatewayAnalyticsController = new GatewayAnalyticsController(gatewayAnalyticsService);
 
 // Registering routes
 app.use('/api/v1', gatewayAuthController.getRouter());
@@ -64,5 +69,6 @@ app.use('/api/v1', gatewayUserController.getRouter());
 app.use('/api/v1', gatewayProjectController.getRouter());
 app.use('/api/v1', gatewayFileController.getRouter());
 app.use('/api/v1', gatewayNotificationController.getRouter());
+app.use('/api/v1', gatewayAnalyticsController.getRouter());
 
 export default app;

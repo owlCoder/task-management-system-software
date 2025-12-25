@@ -85,7 +85,7 @@ export class GatewayNotificationController {
      * @param {Request} req - the request object, containing the ids in body.
      * @param {Response} res - the response object for the client.
      * @returns {Object}
-     * - On success: A JSON object following the {@link NotificationDTO[]} structure containing the result of the mark multiple as read operation. 
+     * - On success: 204 No Content.
      * - On failure: A JSON object with an error message and a HTTP status code indicating the failure.
      */
     private async markMultipleNotificationsAsRead(req: Request, res: Response): Promise<void> {
@@ -93,7 +93,7 @@ export class GatewayNotificationController {
 
         const result = await this.gatewayNotificationService.markMultipleNotificationsAsRead(ids);
         if(result.success){
-            res.status(200).json(result.data);
+            res.status(204).send();
             return;
         }
         res.status(result.status).json({ message: result.message });
@@ -104,7 +104,7 @@ export class GatewayNotificationController {
      * @param {Request} req - the request object, containing the ids in body.
      * @param {Response} res - the response object for the client.
      * @returns {Object}
-     * - On success: A JSON object following the {@link NotificationDTO[]} structure containing the result of the mark multiple as unread operation. 
+     * - On success: 204 No Content. 
      * - On failure: A JSON object with an error message and a HTTP status code indicating the failure.
      */
     private async markMultipleNotificationsAsUnread(req: Request, res: Response): Promise<void> {
@@ -112,7 +112,7 @@ export class GatewayNotificationController {
 
         const result = await this.gatewayNotificationService.markMultipleNotificationsAsUnread(ids);
         if(result.success){
-            res.status(200).json(result.data);
+            res.status(204).send();
             return;
         }
         res.status(result.status).json({ message: result.message });
@@ -123,7 +123,7 @@ export class GatewayNotificationController {
      * @param {Request} req - the request object, containing the id in params.
      * @param {Response} res - the response object for the client.
      * @returns {Object}
-     * - On success: A JSON object following the {@link NotificationDTO} structure containing the result of the mark as read operation. 
+     * - On success: 204 No Content.
      * - On failure: A JSON object with an error message and a HTTP status code indicating the failure.
      */
     private async markNotificationAsRead(req: Request, res: Response): Promise<void> {
@@ -131,7 +131,7 @@ export class GatewayNotificationController {
         
         const result = await this.gatewayNotificationService.markNotificationAsRead(id);
         if(result.success){
-            res.status(200).json(result.data);
+            res.status(204).send();
             return;
         }
         res.status(result.status).json({ message: result.message });
@@ -142,7 +142,7 @@ export class GatewayNotificationController {
      * @param {Request} req - the request object, containing the id in params.
      * @param {Response} res - the response object for the client.
      * @returns {Object}
-     * - On success: A JSON object following the {@link NotificationDTO} structure containing the result of the mark as unread operation. 
+     * - On success: 204 No Content.
      * - On failure: A JSON object with an error message and a HTTP status code indicating the failure.
      */
     private async markNotificationAsUnread(req: Request, res: Response): Promise<void> {
@@ -150,7 +150,7 @@ export class GatewayNotificationController {
 
         const result = await this.gatewayNotificationService.markNotificationAsUnread(id);
         if(result.success){
-            res.status(200).json(result.data);
+            res.status(204).send();
             return;
         }
         res.status(result.status).json({ message: result.message });
