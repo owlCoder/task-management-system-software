@@ -1,13 +1,20 @@
+// Libraries
 import axios, { AxiosInstance } from "axios";
+
+// Domain
+import { IErrorHandlingService } from "../../Domain/services/common/IErrorHandlingService";
+import { IGatewayFileService } from "../../Domain/services/file/IGatewayFileService";
 import { CreateFileDTO } from "../../Domain/DTOs/file/CreateFileDTO";
 import { DownloadFileDTO } from "../../Domain/DTOs/file/DownloadFileDTO";
 import { UploadedFileDTO } from "../../Domain/DTOs/file/UploadedFileDTO";
-import { IGatewayFileService } from "../../Domain/services/file/IGatewayFileService";
 import { Result } from "../../Domain/types/common/Result";
-import { IErrorHandlingService } from "../../Domain/services/common/IErrorHandlingService";
+
+// Utils
+import { extractDownloadDTOFromResponse, generateFormData } from "../../Utils/File/FileUtils";
+
+// Constants
 import { HTTP_METHODS } from "../../Constants/common/HttpMethods";
 import { FILE_ROUTES } from "../../Constants/routes/file/FileRoutes";
-import { extractDownloadDTOFromResponse, generateFormData } from "../../Utils/File/FileUtils";
 import { SERVICES } from "../../Constants/services/Services";
 
 export class GatewayFileService implements IGatewayFileService {

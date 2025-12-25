@@ -1,11 +1,16 @@
+// Framework
 import { Router, Request, Response } from "express";
+
+// Domain
 import { IGatewayProjectService } from "../../Domain/services/project/IGatewayProjectService";
 import { ProjectCreateDTO } from "../../Domain/DTOs/project/ProjectCreateDTO";
 import { ProjectUpdateDTO } from "../../Domain/DTOs/project/ProjectUpdateDTO";
 import { ProjectDTO } from "../../Domain/DTOs/project/ProjectDTO";
-import { authenticate } from "../../Middlewares/authentification/AuthMiddleware";
-import { authorize } from "../../Middlewares/authorization/AuthorizeMiddleware";
 import { UserRole } from "../../Domain/enums/user/UserRole";
+
+// Middlewares
+import { authenticate } from "../../Middlewares/authentication/AuthMiddleware";
+import { authorize } from "../../Middlewares/authorization/AuthorizeMiddleware";
 
 export class GatewayProjectController {
     private readonly router: Router;

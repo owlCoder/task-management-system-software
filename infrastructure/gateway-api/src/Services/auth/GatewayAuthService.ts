@@ -1,14 +1,19 @@
+// Libraries
 import axios, { AxiosInstance } from "axios";
+
+// Domain
+import { IErrorHandlingService } from "../../Domain/services/common/IErrorHandlingService";
+import { IGatewayAuthService } from "../../Domain/services/auth/IGatewayAuthService";
 import { LoginUserDTO } from "../../Domain/DTOs/auth/LoginUserDTO";
 import { RegistrationUserDTO } from "../../Domain/DTOs/auth/RegistrationUserDTO";
-import { IGatewayAuthService } from "../../Domain/services/auth/IGatewayAuthService";
 import { AuthResponseType } from "../../Domain/types/auth/AuthResponse";
 import { BrowserDataDTO } from "../../Domain/DTOs/auth/BrowserDataDTO";
+import { OTPVerificationDTO } from "../../Domain/DTOs/auth/OTPVerificationDTO";
 import { Result } from "../../Domain/types/common/Result";
-import { IErrorHandlingService } from "../../Domain/services/common/IErrorHandlingService";
+
+// Constants
 import { AUTH_ROUTES } from "../../Constants/routes/auth/AuthRoutes";
 import { HTTP_METHODS } from "../../Constants/common/HttpMethods";
-import { OTPVerificationDTO } from "../../Domain/DTOs/auth/OTPVerificationDTO";
 import { SERVICES } from "../../Constants/services/Services";
 
 export class GatewayAuthService implements IGatewayAuthService {

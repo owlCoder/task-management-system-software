@@ -1,4 +1,4 @@
-import { TaskStatus } from "../enums/task_status";
+import { TaskStatus } from "../../../Domain/enums/TaskStatus";
 
 export interface UpdateTaskDTO {
   title?: string;

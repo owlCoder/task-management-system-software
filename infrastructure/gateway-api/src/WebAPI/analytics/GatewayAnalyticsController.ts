@@ -1,13 +1,18 @@
+// Framework
 import { Router, Request, Response } from "express";
+
+// Domain
 import { IGatewayAnalyticsService } from "../../Domain/services/analytics/IGatewayAnalyticsService";
 import { BurndownDTO } from "../../Domain/DTOs/analytics/BurndownDTO";
 import { BurnupDTO } from "../../Domain/DTOs/analytics/BurnupDTO";
 import { BudgetTrackingDTO } from "../../Domain/DTOs/analytics/BudgetTrackingDTO";
 import { ResourceCostAllocationDTO } from "../../Domain/DTOs/analytics/ResourceCostAllocationDTO";
 import { ProfitMarginDTO } from "../../Domain/DTOs/analytics/ProfitMarginDTO";
-import { authenticate } from "../../Middlewares/authentification/AuthMiddleware";
-import { authorize } from "../../Middlewares/authorization/AuthorizeMiddleware";
 import { UserRole } from "../../Domain/enums/user/UserRole";
+
+// Middlewares
+import { authenticate } from "../../Middlewares/authentication/AuthMiddleware";
+import { authorize } from "../../Middlewares/authorization/AuthorizeMiddleware";
 
 export class GatewayAnalyticsController {
     private readonly router: Router;

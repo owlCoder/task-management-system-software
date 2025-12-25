@@ -1,7 +1,10 @@
+// Libraries
 import axios, { AxiosError } from "axios";
-import { Result } from "../../Domain/types/common/Result";
-import { IErrorHandlingService } from "../../Domain/services/common/IErrorHandlingService";
+
+// Domain
 import { ILoggerService } from "../../Domain/services/common/ILoggerService";
+import { IErrorHandlingService } from "../../Domain/services/common/IErrorHandlingService";
+import { Result } from "../../Domain/types/common/Result";
 
 export class ErrorHandlingService implements IErrorHandlingService {
     constructor(private readonly loggerService: ILoggerService) {}

@@ -1,14 +1,19 @@
+// Libraries
 import axios, { AxiosInstance } from "axios";
+
+// Domain
+import { IErrorHandlingService } from "../../Domain/services/common/IErrorHandlingService";
 import { IGatewayUserService } from "../../Domain/services/user/IGatewayUserService";
 import { RegistrationUserDTO } from "../../Domain/DTOs/auth/RegistrationUserDTO";
 import { UserDTO } from "../../Domain/DTOs/user/UserDTO";
-import { Result } from "../../Domain/types/common/Result";
 import { UpdateUserDTO } from "../../Domain/DTOs/user/UpdateUserDTO";
-import { IErrorHandlingService } from "../../Domain/services/common/IErrorHandlingService";
+import { UserRoleDTO } from "../../Domain/DTOs/user/UserRoleDTO";
+import { Result } from "../../Domain/types/common/Result";
+
+// Constants
 import { USER_ROUTES } from "../../Constants/routes/user/UserRoutes";
 import { HTTP_METHODS } from "../../Constants/common/HttpMethods";
 import { SERVICES } from "../../Constants/services/Services";
-import { UserRoleDTO } from "../../Domain/DTOs/user/UserRoleDTO";
 
 export class GatewayUserService implements IGatewayUserService {
     private readonly userClient: AxiosInstance;

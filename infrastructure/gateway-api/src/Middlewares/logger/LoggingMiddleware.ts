@@ -1,4 +1,7 @@
+// Framework
 import { Request, Response, NextFunction } from "express";
+
+// Utils
 import { logger } from "../../Utils/Logger/Logger";
 
 export function logTraffic(req: Request, res: Response, next: NextFunction) {

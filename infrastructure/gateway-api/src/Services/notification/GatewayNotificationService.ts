@@ -1,10 +1,15 @@
+// Libraries
 import axios, { AxiosInstance } from "axios";
+
+// Domain
+import { IErrorHandlingService } from "../../Domain/services/common/IErrorHandlingService";
 import { IGatewayNotificationService } from "../../Domain/services/notification/IGatewayNotificationService";
 import { NotificationDTO } from "../../Domain/DTOs/notification/NotificationDTO";
-import { IErrorHandlingService } from "../../Domain/services/common/IErrorHandlingService";
+import { Result } from "../../Domain/types/common/Result";
+
+// Constants
 import { NOTIFICATION_ROUTES } from "../../Constants/routes/notification/NotificationRoutes";
 import { HTTP_METHODS } from "../../Constants/common/HttpMethods";
-import { Result } from "../../Domain/types/common/Result";
 import { SERVICES } from "../../Constants/services/Services";
 
 export class GatewayNotificationService implements IGatewayNotificationService {

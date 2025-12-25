@@ -1,10 +1,15 @@
+// Libraries
 import axios, { AxiosInstance } from "axios";
+
+// Domain
+import { IErrorHandlingService } from "../../Domain/services/common/IErrorHandlingService";
+import { IGatewayProjectService } from "../../Domain/services/project/IGatewayProjectService";
 import { ProjectCreateDTO } from "../../Domain/DTOs/project/ProjectCreateDTO";
 import { ProjectDTO } from "../../Domain/DTOs/project/ProjectDTO";
 import { ProjectUpdateDTO } from "../../Domain/DTOs/project/ProjectUpdateDTO";
-import { IGatewayProjectService } from "../../Domain/services/project/IGatewayProjectService";
-import { IErrorHandlingService } from "../../Domain/services/common/IErrorHandlingService";
 import { Result } from "../../Domain/types/common/Result";
+
+// Constants
 import { PROJECT_ROUTES } from "../../Constants/routes/project/ProjectRoutes";
 import { HTTP_METHODS } from "../../Constants/common/HttpMethods";
 import { SERVICES } from "../../Constants/services/Services";

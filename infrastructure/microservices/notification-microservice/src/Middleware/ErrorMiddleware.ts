@@ -11,8 +11,8 @@ export const notFoundHandler = (req: Request, res: Response): void => {
 
  // global error handler
 export const errorHandler = (err: Error, req: Request, res: Response, next: NextFunction): void => {
-  console.error("❌ Error:", err.message);
-  console.error("📍 Stack:", err.stack);
+  console.error(" Error:", err.message);
+  console.error(" Stack:", err.stack);
 
   res.status(500).json({
     message: "Internal server error",
