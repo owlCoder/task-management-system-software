@@ -11,7 +11,7 @@ import TaskSearchBar from "../components/task/TaskSearchBar";
 import TaskStatusFilter from "../components/task/TaskStatusFilter";
 import TaskSortSelect from "../components/task/TaskSortSelect";
 import { SortOption } from "../types/SortOption";
-// import { TaskDetailPage } from "./TaskDetailPage";
+import { TaskDetailPage } from "./TaskDetailPage";
 // import EditTaskModal from "../components/task/EditTaskModal";
 
 interface TaskListPageProps {
@@ -196,31 +196,25 @@ const TaskPage: React.FC<TaskListPageProps> = ({ projectId, token }) => {
             </div>
           </header>
 
+          {selectedtaskId !== null && (
+            <TaskDetailPage taskId={selectedtaskId} token={token} 
+              setClose={() => setSelectedTaskId(null)}/>)}
+
           <section
-            className="bg-white/5 backdrop-blur-xl rounded-2xl p-6 shadow-lg border border-white/10 flex-1 overflow-y-auto styled-scrollbar"
-            onClick={(e) => {
-              if (e.target === e.currentTarget) {
-                setSelectedTaskId(null);
-              }
-            }}
-          >
-            {search && filteredAndSortedTasks.length === 0 ? (
-              <div className="text-center text-white/50 py-12">
-                <p>No tasks found matching "{search}"</p>
-              </div>
-            ) : filteredAndSortedTasks.length === 0 ? (
-              <TaskListPreview onSelect={setSelectedTaskId} />
-            ) : (
+            className="bg-white/5 backdrop-blur-xl rounded-2xl p-6 shadow-lg border border-white/10 flex-1 overflow-y-auto styled-scrollbar">
+            {
+              filteredAndSortedTasks.length  === 0 ? (
+                <TaskListPreview onSelect={setSelectedTaskId}/>
+              ) : (
               <div className="flex flex-col gap-3">
                 {filteredAndSortedTasks.map((task) => (
-                  <TaskListItem
-                    onSelect={setSelectedTaskId}
-                    key={task.task_id}
-                    task={task}
+                  <TaskListItem key={task.task_id} task={task}
+                    onSelect={() => setSelectedTaskId(task.task_id)}
                   />
                 ))}
               </div>
-            )}
+              )
+            }
           </section>
         </div>
       </main>

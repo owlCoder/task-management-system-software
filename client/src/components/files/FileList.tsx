@@ -5,7 +5,7 @@ import { FileDTO } from "../../models/file/FileDTO";
 
 type FileListProps = {
   onSelectFile: (file: FileDTO) => void;
-  openDeleteModal: (onConfirm: () => void) => void;
+  openDeleteModal: (onConfirm: () => Promise<void>) => void;
 };
 
 export const FileList = ({ onSelectFile, openDeleteModal }: FileListProps) => {
@@ -19,7 +19,14 @@ export const FileList = ({ onSelectFile, openDeleteModal }: FileListProps) => {
 
   const fetchFiles = async () => {
     try {
-      const userId = parseInt(localStorage.getItem("userId")!);
+      const userIdRaw = localStorage.getItem("userId");
+
+      if (!token || !userIdRaw) {
+        setFiles([]);
+        return;
+    }
+
+      const userId = Number(userIdRaw);
       const data = await fileApi.getFileList(token!, userId);
 
       if (Array.isArray(data)) {

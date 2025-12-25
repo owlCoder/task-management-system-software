@@ -1,131 +1,150 @@
-import React, { useEffect } from "react";
-import { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { UserRole } from "../../enums/UserRole";
 
 interface FilePreviewProps {
-    file: File | undefined;    
-    isUpload : () => void;
-    setClose : () => void;
-};
+  file: File | undefined;
+  isUpload: () => void;
+  setClose: () => void;
+}
 
-export const FilePreview : React.FC<FilePreviewProps> = ({file,isUpload,setClose} : FilePreviewProps) => {
+export const FilePreview: React.FC<FilePreviewProps> = ({
+  file,
+  isUpload,
+  setClose,
+}) => {
+  const [isValid, setIsValid] = useState(false);
+  const role = UserRole.ANIMATION_WORKER ?? UserRole.AUDIO_MUSIC_STAGIST;
+  //const role = localStorage.getItem("role");
 
-    const [isTrue,setIsTrue] = useState(false);
-    const role = localStorage.getItem("role");
-    
-    const isImage = file?.type.startsWith("image/");
-    const isVideo = file?.type.startsWith("video/");
-    const isAudio = file?.type.startsWith("audio/");
+  const isImage = file?.type.startsWith("image/");
+  const isVideo = file?.type.startsWith("video/");
+  const isAudio = file?.type.startsWith("audio/");
 
-
-    const handleValidate = async () => {
-        if(role == UserRole.ANIMATION_WORKER) {
-            if(isImage || isVideo) {
-                setIsTrue(true);
-            } else {
-                setIsTrue(false);
-            }
-        } else if (role == UserRole.AUDIO_MUSIC_STAGIST){
-            if(isAudio){
-                setIsTrue(true);
-            } else {
-                setIsTrue(false);
-            }
-        }
+  useEffect(() => {
+    if (!file) {
+      setIsValid(false);
+      return;
     }
 
-    useEffect(() => {
-        if(!file){
-            setIsTrue(false);
-            return;
-        }
-        handleValidate();
-    },[role,file]);
+    if (
+      role === UserRole.ANIMATION_WORKER &&
+      (isImage || isVideo)
+    ) {
+      setIsValid(true);
+    } else {
+      setIsValid(false);
+    }
+  }, [file, role]);
 
+  if (!file) return null;
 
-return (
-  <div className="fixed inset-0 z-50 flex items-center justify-center
-                  bg-black/40 backdrop-blur-md">
-
+  return (
+  <div
+    className="
+      fixed inset-0 z-50
+      flex items-center justify-center
+      bg-black/20 backdrop-blur-sm
+    "
+  >
     <div
       className="
-        bg-white rounded-3xl shadow-2xl
-        w-full max-w-5xl
-        h-full max-h-[85vh]
-        p-8
-        flex flex-col
+        w-full max-w-md
+        rounded-2xl
+        bg-gradient-to-br from-[#1f2a37]/80 to-[#111827]/80
+        border border-white/20
+        shadow-2xl
+        p-5
+        text-white
       "
     >
+      <div className="flex items-center justify-between mb-3">
+        <h3 className="text-sm font-semibold tracking-wide">
+          File Preview
+        </h3>
+      </div>
 
       <div
         className="
-          flex-1
+          h-44 mb-4
           flex items-center justify-center
-          bg-gray-50
-          rounded-2xl
-          border border-gray-200
+          rounded-xl
+          bg-white/10
+          border border-white/20
           overflow-hidden
         "
       >
-        {file?.type.startsWith("image/") && (
+        {isImage && (
           <img
             src={URL.createObjectURL(file)}
             alt="preview"
-            className="
-              max-w-full
-              max-h-full
-              object-contain
-              rounded-xl
-            "
+            className="max-h-full object-contain"
           />
         )}
 
-        {file?.type.startsWith("video/") && (
+        {isVideo && (
           <video
             controls
             src={URL.createObjectURL(file)}
-            className="
-              max-w-full
-              max-h-full
-              object-contain
-              rounded-xl
-            "
+            className="max-h-full object-contain"
           />
         )}
 
-        {file?.type.startsWith("audio/") && (
-          <audio controls className="w-full max-w-xl" />
+        {isAudio && (
+          <audio controls className="w-full px-4" />
         )}
       </div>
 
-      <div className="mt-6 flex items-center justify-between">
-
-        {isTrue ? (
-          <div className="px-4 py-2 rounded-xl bg-green-100 text-green-700 text-sm font-semibold">
-            ✔ File type is valid
-          </div>
-        ) : (
-          <div className="px-4 py-2 rounded-xl bg-red-100 text-red-700 text-sm font-semibold">
-            ✖ Invalid file type
-          </div>
-        )}
-
-        <button
-          disabled={!isTrue}
-          onClick={isUpload}
+      <div className="flex items-center justify-between">
+        <div
           className={`
-            px-8 py-3 rounded-2xl font-bold text-base transition
-            ${isTrue
-              ? "bg-blue-600 text-white hover:bg-blue-700 shadow-lg"
-              : "bg-gray-400 text-white cursor-not-allowed"}
+            px-3 py-1.5
+            rounded-lg
+            text-xs font-medium
+            ${
+              isValid
+                ? "bg-green-500/15 text-green-300 border border-green-400/30"
+                : "bg-red-500/15 text-red-300 border border-red-400/30"
+            }
           `}
         >
-          Submit
-        </button>
-        <button onClick={() => setClose()}
-            className="px-5 py-2 rounded-xl font-bold text-sm 
-            bg-blue-600 text-white hover:bg-blue-700 shadow-lg">Close
-        </button>
+          {isValid ? "✔ Valid file type" : "✖ Invalid file type"}
+        </div>
+
+        <div className="flex gap-2">
+          <button
+            onClick={setClose}
+            className="
+              px-4 py-2
+              rounded-lg
+              text-xs font-medium
+              bg-white/10
+              border border-white/20
+              text-white/80
+              hover:bg-white/20
+              transition
+            "
+          >
+            Cancel
+          </button>
+
+          <button
+            disabled={!isValid}
+            onClick={isUpload}
+            className={`
+              px-5 py-2
+              rounded-lg
+              text-xs font-semibold
+              transition-all
+              ${
+                isValid
+                  ? "bg-gradient-to-t from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 shadow-md shadow-blue-500/30"
+                  : "bg-white/10 text-white/40 border border-white/10 cursor-not-allowed"
+              }
+            `}
+          >
+            Submit
+          </button>
+        </div>
       </div>
     </div>
   </div>
