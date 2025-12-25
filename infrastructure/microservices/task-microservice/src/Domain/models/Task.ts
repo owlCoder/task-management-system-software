@@ -4,17 +4,21 @@ import {
   Column,
   ManyToOne,
   JoinColumn,
-  OneToMany
+  OneToMany,
+  CreateDateColumn
 } from "typeorm";
-import { TaskStatus } from "../enums/task_status";
+import { TaskStatus } from "../enums/TaskStatus";
 import { Comment } from "./Comment";
 
 @Entity("Tasks") 
 export class Task {
+  //ici preko sprint id a ne project id
+  //datum zavrsetka
+
     @PrimaryGeneratedColumn()
     task_id!: number;
     @Column({ type: "int", unique: false, nullable: false })
-    project_id!: number;
+    sprint_id!: number;
 
     @Column({ type: "int", nullable: true })
     worker_id!: number;
@@ -38,6 +42,12 @@ export class Task {
     estimated_cost!: number;
     @Column({ type: "int",default: 0, unique: false, nullable: true })
     total_hours_spent!: number;
+
+    @CreateDateColumn()
+    created_at!: Date
+
+    @CreateDateColumn({nullable: true})
+    finished_at?: Date
 
     @OneToMany(() => Comment, (comment) => comment.task)
     comments!: Comment[];

@@ -1,11 +1,17 @@
-import { TaskDTO } from "../DTOs/TaskDTO";
-import { TaskResponse } from "../types/TaskResponse";
-import { CommentDTO } from "../DTOs/CommentDTO";
+import { Task } from "../models/Task";
+import { Result } from "../types/Result";
 
 export interface ITaskService {
-    getTaskById(task_id: number): Promise<TaskResponse<TaskDTO>>;
-    getAllTasksForProject(project_id: number) : Promise<TaskResponse<TaskDTO[]>>;
-    getAllDummyTasksForProject() : Promise<TaskResponse<TaskDTO[]>>;
-    addTaskForProject(project_id: number, worker_id: number, project_manager_id : number, title: string, task_description: string, estimated_cost: number): Promise<TaskResponse<TaskDTO>>;
+    getTaskById(task_id: number): Promise<Result<Task>>;
+    getAllTasksForSprint(sprint_id: number) : Promise<Result<Task[]>>;
+    getAllDummyTasksForSprint() : Promise<Result<Task[]>>;
+    addTaskForSprint(
+        sprint_id: number,
+        worker_id: number,
+        project_manager_id : number, 
+        title: string, 
+        task_description: string, 
+        estimated_cost: number
+    ): Promise<Result<Task>>;
 
 }

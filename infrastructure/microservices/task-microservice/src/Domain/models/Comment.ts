@@ -12,7 +12,7 @@ import { Task } from "./Task";
 export class Comment {
     @PrimaryGeneratedColumn()
     comment_id!: number;
-
+    // 
     @Column({ type: "int", unique: false, nullable: false })
     user_id!: number;  // ID korisnika koji je napisao komentar
 
@@ -22,7 +22,10 @@ export class Comment {
     @CreateDateColumn()
     created_at!: Date;
 
-    @ManyToOne(() => Task, (task) => task.comments, { onDelete: "CASCADE" })
+    @ManyToOne(() => Task, (task) => task.comments, {
+    nullable: false,
+    onDelete: "CASCADE"
+    })
     @JoinColumn({ name: "task_id" })
-    task!: Task;//kolona koja se dobije je taskTaskId,tako typeorm pravi vezu izmedju tabela
+    task?: Task;//kolona koja se dobije je taskTaskId,tako typeorm pravi vezu izmedju tabela
 }

@@ -8,10 +8,10 @@ import { Db } from './Database/DbConnectionPool';
 import { Task } from './Domain/models/Task';
 import { Comment } from './Domain/models/Comment';
 import { ITaskService } from './Domain/services/ITaskService';
-import { TaskService } from './Services/Services/TaskService';
+import { TaskService } from './Services/TaskService';
 import { TaskController } from './WebAPI/controllers/TaskController';
 import { ICommentService } from './Domain/services/ICommentService';
-import { CommentService } from './Services/Services/CommentServices';
+import { CommentService } from './Services/CommentServices';
 
 
 dotenv.config({ quiet: true });
