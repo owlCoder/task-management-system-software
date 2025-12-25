@@ -27,8 +27,7 @@ export class ProjectAnalyticsService implements IProjectAnalyticsService {
 
         const time = (s.end_date.getTime() - s.start_date.getTime()) / (1000 * 60 * 60); //allowed hours to spend in sprint
 
-        //NEED TO CHANGE FROM PROJECT TO SPRINT ID IN TASK! - sastanak sa mandicem i goranom je u sredu!
-        const tasks = await this.taskRepository.find({ where: { project_id: sprintId } });
+        const tasks = await this.taskRepository.find({ where: { sprint_id: sprintId } });
 
         let sum = 0;
 
@@ -52,41 +51,67 @@ export class ProjectAnalyticsService implements IProjectAnalyticsService {
     }
 
     async getBurnUpChartsForSprintId(sprintId: number): Promise<BurnupDto> {
-        const s = await this.sprintRepository.findOneBy({ sprint_id: sprintId });
+        const sprint = await this.sprintRepository.findOne({
+            where: { sprint_id: sprintId }
+        });
 
-        if (!s) {
+        if (!sprint) {
             throw new Error("Sprint not found");
         }
 
-        const time = (s.end_date.getTime() - s.start_date.getTime()) / (1000 * 60 * 60 * 24); //x-axis in days
+        const sprintDuration =
+            (sprint.end_date.getTime() - sprint.start_date.getTime()) /
+            (1000 * 60 * 60 * 24);
 
-        //NEED TO CHANGE FROM PROJECT TO SPRINT ID IN TASK! - sastanak sa mandicem i goranom je u sredu!
-        const tasks = await this.taskRepository.find({ where: { project_id: sprintId } });
+        const tasks = await this.taskRepository.find({
+            where: { sprint_id: sprintId },
+        });
 
-        let sum = 0; //y - axis
+        const totalWork = tasks.reduce(
+            (sum, t) => sum + t.estimated_cost,
+            0,
+        );
 
-        for (let i = 0; i < tasks.length; ++i)
-            sum += tasks[i].estimated_cost;
+        const today = new Date();
 
+        const finishedTasks = tasks
+            .filter(
+                t =>
+                    t.finished_at &&
+                    t.finished_at >= sprint.start_date &&
+                    t.finished_at <= sprint.end_date &&
+                    t.finished_at <= today,
+            )
+            .sort(
+                (a, b) =>
+                    a.finished_at!.getTime() -
+                    b.finished_at!.getTime(),
+            );
 
         const points: BurnupPointDto[] = [];
+        let cumulativeWork = 0;
 
-        for (const task of tasks) {
-            //TODO dodati kada je task zavrsen da bi mogao da se stavi na grafik
+        for (const task of finishedTasks) {
+            cumulativeWork += task.estimated_cost;
 
-            // if (
-            //     task.finished_at &&
-            //     task.finished_at <= sprint.end_date &&
-            //     task.finished_at > today
-            // ) {
-            //     points.push({
-            //         x: task.total_hours_spent,
-            //         y: task.estimated_cost,
-            //     });
-            // }
+            const dayFromStart =
+                (task.finished_at!.getTime() -
+                    sprint.start_date.getTime()) /
+                (1000 * 60 * 60 * 24);
+
+            points.push({
+                x: Math.floor(dayFromStart),
+                y: cumulativeWork,
+            });
         }
 
-        return { project_id: s.project.project_id, sprint_id: s.sprint_id, sprint_duration_date: time, work_amount: sum, points: points };
+        return {
+            project_id: sprint.project.project_id,
+            sprint_id: sprint.sprint_id,
+            sprint_duration_date: sprintDuration,
+            work_amount: totalWork,
+            points,
+        };
     }
 
 
