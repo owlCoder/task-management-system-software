@@ -1,11 +1,12 @@
 import { TaskStatus } from "../enums/TaskStatus";
 import type { TaskDTO } from "../models/task/TaskDTO";
 
-// Lightweight mock data for previewing Task lists without backend
+// Tasks are now linked to SPRINTS (not directly to projects)
 export const mockTasks: TaskDTO[] = [
+  // ===== PROJECT 1 – SPRINT 1 =====
   {
     task_id: 1001,
-    project_id: 1,
+    sprint_id: 1,
     worker_id: 101,
     project_manager_id: 201,
     title: "Design wireframes for dashboard",
@@ -17,18 +18,21 @@ export const mockTasks: TaskDTO[] = [
   },
   {
     task_id: 1002,
-    project_id: 1,
+    sprint_id: 1,
     worker_id: 102,
     project_manager_id: 201,
     title: "Implement auth flow",
     task_description: "Add login, register, and token refresh to gateway.",
-    task_status: TaskStatus.PENDING,
+    task_status: TaskStatus.COMPLETED,
     estimated_cost: 1500,
-    total_hours_spent: 0,
+    total_hours_spent: 14,
+    finished_at: new Date("2024-06-10"),
   },
+
+  // ===== PROJECT 1 – SPRINT 2 =====
   {
     task_id: 1003,
-    project_id: 1,
+    sprint_id: 2,
     worker_id: 103,
     project_manager_id: 201,
     title: "Project settings page",
@@ -39,7 +43,7 @@ export const mockTasks: TaskDTO[] = [
   },
   {
     task_id: 1004,
-    project_id: 1,
+    sprint_id: 2,
     worker_id: 104,
     project_manager_id: 201,
     title: "Write unit tests",
@@ -48,9 +52,11 @@ export const mockTasks: TaskDTO[] = [
     estimated_cost: 700,
     total_hours_spent: 3,
   },
+
+  // ===== PROJECT 2 – SPRINT 1 =====
   {
     task_id: 2001,
-    project_id: 2,
+    sprint_id: 3,
     worker_id: 105,
     project_manager_id: 202,
     title: "Audio mixing pass",
@@ -58,10 +64,11 @@ export const mockTasks: TaskDTO[] = [
     task_status: TaskStatus.COMPLETED,
     estimated_cost: 600,
     total_hours_spent: 6,
+    finished_at: new Date("2024-07-02"),
   },
   {
     task_id: 2002,
-    project_id: 2,
+    sprint_id: 3,
     worker_id: 106,
     project_manager_id: 202,
     title: "SFX selection",
@@ -70,9 +77,11 @@ export const mockTasks: TaskDTO[] = [
     estimated_cost: 400,
     total_hours_spent: 2,
   },
+
+  // ===== PROJECT 2 – SPRINT 2 =====
   {
     task_id: 2003,
-    project_id: 2,
+    sprint_id: 4,
     worker_id: 107,
     project_manager_id: 202,
     title: "Render preview",
@@ -81,9 +90,11 @@ export const mockTasks: TaskDTO[] = [
     estimated_cost: 300,
     total_hours_spent: 0,
   },
+
+  // ===== PROJECT 2 – SPRINT 3 =====
   {
     task_id: 2004,
-    project_id: 2,
+    sprint_id: 5,
     worker_id: 108,
     project_manager_id: 202,
     title: "QA checklist",
@@ -94,9 +105,8 @@ export const mockTasks: TaskDTO[] = [
   },
 ];
 
-export const getMockTasksByProject = (
-  projectId: string | number
+export const getMockTasksBySprint = (
+  sprintId: number
 ): TaskDTO[] => {
-  const pid = typeof projectId === "string" ? Number(projectId) : projectId;
-  return mockTasks.filter((t) => t.project_id === pid);
+  return mockTasks.filter((t) => t.sprint_id === sprintId);
 };

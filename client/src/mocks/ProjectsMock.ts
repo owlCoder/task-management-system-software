@@ -103,4 +103,5 @@ export const mockProjects: ProjectDTO[] = [
     sprintDuration: 7,
     startDate: "2024-07-01",
   },
+
 ];
