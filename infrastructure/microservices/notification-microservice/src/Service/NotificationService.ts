@@ -2,6 +2,7 @@ import { INotificationRepository } from '../Domain/services/INotificationReposit
 import { INotificationMapper } from '../Domain/services/INotificationMapper';
 import { INotificationService} from '../Domain/services/INotificationService';
 import { Result } from '../Domain/types/common/Result';
+import { ErrorCode } from '../Domain/types/common/ErrorCode';
 import { NotificationCreateDTO } from '../Domain/DTOs/NotificationCreateDTO';
 import { NotificationResponseDTO } from '../Domain/DTOs/NotificationDTO';
 import { SocketService } from '../WebSocket/SocketService';
@@ -29,7 +30,7 @@ export class NotificationService implements INotificationService {
 
       if (!savedNotification) {
         console.error(' Service.createNotification: Failed to save notification');
-        return { success: false, status: 500, message: 'Failed to save notification' };
+        return { success: false, errorCode: ErrorCode.INTERNAL_ERROR, message: 'Failed to save notification' };
       }
 
       const responseDTO = this.mapper.toResponseDTO(savedNotification);
@@ -41,7 +42,7 @@ export class NotificationService implements INotificationService {
       return { success: true, data: responseDTO };
     } catch (error) {
       console.error(' Service.createNotification error:', error);
-      return { success: false, status: 500, message: (error as Error).message };
+      return { success: false, errorCode: ErrorCode.INTERNAL_ERROR, message: (error as Error).message };
     }
   }
 
@@ -50,13 +51,13 @@ export class NotificationService implements INotificationService {
       const notification = await this.repository.findOne(id);
 
       if (!notification) {
-        return { success: false, status: 404, message: 'Notification not found' };
+        return { success: false, errorCode: ErrorCode.NOT_FOUND, message: 'Notification not found' };
       }
 
       return { success: true, data: this.mapper.toResponseDTO(notification) };
     } catch (error) {
       console.error(' Service.getNotificationById error:', error);
-      return { success: false, status: 500, message: (error as Error).message };
+      return { success: false, errorCode: ErrorCode.INTERNAL_ERROR, message: (error as Error).message };
     }
   }
 
@@ -66,7 +67,7 @@ export class NotificationService implements INotificationService {
       return { success: true, data: this.mapper.toResponseDTOArray(notifications) };
     } catch (error) {
       console.error(' Service.getNotificationsByUserId error:', error);
-      return { success: false, status: 500, message: (error as Error).message };
+      return { success: false, errorCode: ErrorCode.INTERNAL_ERROR, message: (error as Error).message };
     }
   }
 
@@ -75,7 +76,7 @@ export class NotificationService implements INotificationService {
       const notification = await this.repository.findOne(id);
 
       if (!notification) {
-        return { success: false, status: 404, message: 'Notification not found' };
+        return { success: false, errorCode: ErrorCode.NOT_FOUND, message: 'Notification not found' };
       }
 
       notification.isRead = true;
@@ -83,7 +84,7 @@ export class NotificationService implements INotificationService {
 
       if (!updatedNotification) {
         console.error(' Service.markAsRead: Failed to update notification');
-        return { success: false, status: 500, message: 'Failed to update notification' };
+        return { success: false, errorCode: ErrorCode.INTERNAL_ERROR, message: 'Failed to update notification' };
       }
 
       const responseDTO = this.mapper.toResponseDTO(updatedNotification);
@@ -95,7 +96,7 @@ export class NotificationService implements INotificationService {
       return { success: true, data: responseDTO };
     } catch (error) {
       console.error(' Service.markAsRead error:', error);
-      return { success: false, status: 500, message: (error as Error).message };
+      return { success: false, errorCode: ErrorCode.INTERNAL_ERROR, message: (error as Error).message };
     }
   }
 
@@ -104,7 +105,7 @@ export class NotificationService implements INotificationService {
       const notification = await this.repository.findOne(id);
 
       if (!notification) {
-        return { success: false, status: 404, message: 'Notification not found' };
+        return { success: false, errorCode: ErrorCode.NOT_FOUND, message: 'Notification not found' };
       }
 
       notification.isRead = false;
@@ -112,7 +113,7 @@ export class NotificationService implements INotificationService {
 
       if (!updatedNotification) {
         console.error(' Service.markAsUnread: Failed to update notification');
-        return { success: false, status: 500, message: 'Failed to update notification' };
+        return { success: false, errorCode: ErrorCode.INTERNAL_ERROR, message: 'Failed to update notification' };
       }
 
       const responseDTO = this.mapper.toResponseDTO(updatedNotification);
@@ -124,19 +125,19 @@ export class NotificationService implements INotificationService {
       return { success: true, data: responseDTO };
     } catch (error) {
       console.error(' Service.markAsUnread error:', error);
-      return { success: false, status: 500, message: (error as Error).message };
+      return { success: false, errorCode: ErrorCode.INTERNAL_ERROR, message: (error as Error).message };
     }
   }
 
   async markMultipleAsRead(ids: number[]): Promise<Result<void>> {
     try {
       if (ids.length === 0) {
-        return { success: false, status: 400, message: 'No notification IDs provided' };
+        return { success: false, errorCode: ErrorCode.INVALID_INPUT, message: 'No notification IDs provided' };
       }
 
       const firstNotification = await this.repository.findOne(ids[0]);
       if (!firstNotification) {
-        return { success: false, status: 404, message: 'Notifications not found' };
+        return { success: false, errorCode: ErrorCode.NOT_FOUND, message: 'Notifications not found' };
       }
 
       const userId = firstNotification.userId;
@@ -144,7 +145,7 @@ export class NotificationService implements INotificationService {
 
       if (!updated) {
         console.error(' Service.markMultipleAsRead: Failed to update notifications');
-        return { success: false, status: 500, message: 'Failed to update notifications' };
+        return { success: false, errorCode: ErrorCode.INTERNAL_ERROR, message: 'Failed to update notifications' };
       }
 
       if (this.socketService) {
@@ -154,19 +155,19 @@ export class NotificationService implements INotificationService {
       return { success: true, data: undefined };
     } catch (error) {
       console.error(' Service.markMultipleAsRead error:', error);
-      return { success: false, status: 500, message: (error as Error).message };
+      return { success: false, errorCode: ErrorCode.INTERNAL_ERROR, message: (error as Error).message };
     }
   }
 
   async markMultipleAsUnread(ids: number[]): Promise<Result<void>> {
     try {
       if (ids.length === 0) {
-        return { success: false, status: 400, message: 'No notification IDs provided' };
+        return { success: false, errorCode: ErrorCode.INVALID_INPUT, message: 'No notification IDs provided' };
       }
 
       const firstNotification = await this.repository.findOne(ids[0]);
       if (!firstNotification) {
-        return { success: false, status: 404, message: 'Notifications not found' };
+        return { success: false, errorCode: ErrorCode.NOT_FOUND, message: 'Notifications not found' };
       }
 
       const userId = firstNotification.userId;
@@ -174,7 +175,7 @@ export class NotificationService implements INotificationService {
 
       if (!updated) {
         console.error(' Service.markMultipleAsUnread: Failed to update notifications');
-        return { success: false, status: 500, message: 'Failed to update notifications' };
+        return { success: false, errorCode: ErrorCode.INTERNAL_ERROR, message: 'Failed to update notifications' };
       }
 
       if (this.socketService) {
@@ -184,7 +185,7 @@ export class NotificationService implements INotificationService {
       return { success: true, data: undefined };
     } catch (error) {
       console.error(' Service.markMultipleAsUnread error:', error);
-      return { success: false, status: 500, message: (error as Error).message };
+      return { success: false, errorCode: ErrorCode.INTERNAL_ERROR, message: (error as Error).message };
     }
   }
 
@@ -192,7 +193,7 @@ export class NotificationService implements INotificationService {
     try {
       const notification = await this.repository.findOne(id);
       if (!notification) {
-        return { success: false, status: 404, message: 'Notification not found' };
+        return { success: false, errorCode: ErrorCode.NOT_FOUND, message: 'Notification not found' };
       }
 
       const userId = notification.userId;
@@ -200,7 +201,7 @@ export class NotificationService implements INotificationService {
 
       if (!deleted) {
         console.error(' Service.deleteNotification: Failed to delete notification');
-        return { success: false, status: 500, message: 'Failed to delete notification' };
+        return { success: false, errorCode: ErrorCode.INTERNAL_ERROR, message: 'Failed to delete notification' };
       }
 
       if (this.socketService) {
@@ -210,19 +211,19 @@ export class NotificationService implements INotificationService {
       return { success: true, data: undefined };
     } catch (error) {
       console.error(' Service.deleteNotification error:', error);
-      return { success: false, status: 500, message: (error as Error).message };
+      return { success: false, errorCode: ErrorCode.INTERNAL_ERROR, message: (error as Error).message };
     }
   }
 
   async deleteMultipleNotifications(ids: number[]): Promise<Result<void>> {
     try {
       if (ids.length === 0) {
-        return { success: false, status: 400, message: 'No notification IDs provided' };
+        return { success: false, errorCode: ErrorCode.INVALID_INPUT, message: 'No notification IDs provided' };
       }
 
       const firstNotification = await this.repository.findOne(ids[0]);
       if (!firstNotification) {
-        return { success: false, status: 404, message: 'Notifications not found' };
+        return { success: false, errorCode: ErrorCode.NOT_FOUND, message: 'Notifications not found' };
       }
 
       const userId = firstNotification.userId;
@@ -230,7 +231,7 @@ export class NotificationService implements INotificationService {
 
       if (!deleted) {
         console.error(' Service.deleteMultipleNotifications: Failed to delete notifications');
-        return { success: false, status: 500, message: 'Failed to delete notifications' };
+        return { success: false, errorCode: ErrorCode.INTERNAL_ERROR, message: 'Failed to delete notifications' };
       }
 
       if (this.socketService) {
@@ -240,7 +241,7 @@ export class NotificationService implements INotificationService {
       return { success: true, data: undefined };
     } catch (error) {
       console.error(' Service.deleteMultipleNotifications error:', error);
-      return { success: false, status: 500, message: (error as Error).message };
+      return { success: false, errorCode: ErrorCode.INTERNAL_ERROR, message: (error as Error).message };
     }
   }
 
@@ -250,7 +251,7 @@ export class NotificationService implements INotificationService {
       return { success: true, data: count };
     } catch (error) {
       console.error(' Service.getUnreadCount error:', error);
-      return { success: false, status: 500, message: (error as Error).message };
+      return { success: false, errorCode: ErrorCode.INTERNAL_ERROR, message: (error as Error).message };
     }
   }
 }
