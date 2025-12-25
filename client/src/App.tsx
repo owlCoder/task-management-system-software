@@ -12,6 +12,7 @@ import NotificationPage from "./pages/NotificationPage";
 import TaskPage from "./pages/TaskPage";
 import { FilePage } from "./pages/FilePage";
 import { OtpPage } from "./pages/OTPPage";
+import AnalyticsPage from "./pages/AnalyticsPage";
 
 const auth_api: IAuthAPI = new AuthAPI();
 const user_api: IUserAPI = new UserAPI();
@@ -26,6 +27,7 @@ function App() {
     >
       <Routes>
         <Route path="/projects" element={<ProjectsPage />} />
+        <Route path="/analytics" element={<AnalyticsPage />} />
         <Route path="/notifications" element={<NotificationPage />} />
         <Route path="/tasks" element={<TaskPage projectId={""} token={""} />} />
         <Route path="/auth" element={<AuthPage authAPI={auth_api} />} />
