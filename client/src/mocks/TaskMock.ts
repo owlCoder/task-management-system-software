@@ -77,6 +77,28 @@ export const mockTasks: TaskDTO[] = [
     estimated_cost: 400,
     total_hours_spent: 2,
   },
+  {
+    task_id: 2050,
+    sprint_id: 3,
+    worker_id: 106,
+    project_manager_id: 202,
+    title: "SFX selection",
+    task_description: "Select and trim SFX for transitions and alerts.",
+    task_status: TaskStatus.IN_PROGRESS,
+    estimated_cost: 400,
+    total_hours_spent: 2,
+  },
+  {
+    task_id: 2069,
+    sprint_id: 3,
+    worker_id: 106,
+    project_manager_id: 202,
+    title: "SFX selection",
+    task_description: "Select and trim SFX for transitions and alerts.",
+    task_status: TaskStatus.IN_PROGRESS,
+    estimated_cost: 400,
+    total_hours_spent: 52,
+  },
 
   // ===== PROJECT 2 – SPRINT 2 =====
   {

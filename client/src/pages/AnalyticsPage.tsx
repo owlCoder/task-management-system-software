@@ -4,6 +4,7 @@ import { AnalyticsTab } from "../enums/AnalyticsTabs";
 import { ProjectDTO } from "../models/project/ProjectDTO";
 import { projectAPI } from "../api/project/ProjectAPI";
 import { BurndownAnalytics } from "../components/analytics/Burndown";
+import { VelocityAnalytics } from "../components/analytics/Velocity";
 
 const TABS: { id: AnalyticsTab; label: string }[] = [
     { id: "BURNDOWN", label: "Burndown" },
@@ -103,14 +104,17 @@ export const AnalyticsPage: React.FC = () => {
                 </section>
 
                 {/* CONTENT CARD */}
-                <section className="bg-white/5 backdrop-blur-xl rounded-2xl p-6 shadow-lg border border-white/10 min-h-[500px]">
+                <section className="bg-white/5 backdrop-blur-xl rounded-2xl p-6 shadow-lg border border-white/10 min-h-[200px] max-h-[575px]">
                     {activeTab === "BURNDOWN" &&
                         <div>
                             {selectedProjectId ?
                                 <BurndownAnalytics project={selectedProject!} token={""} /> : "Select project..."}
                         </div>}
                     {activeTab === "BURNUP" && <div>TODO: Burnup analytics</div>}
-                    {activeTab === "VELOCITY" && <div>TODO: Velocity tracking</div>}
+                    {activeTab === "VELOCITY" && <div>
+                        {selectedProjectId ?
+                            <VelocityAnalytics project={selectedProject!} /> : "Select project..."}
+                    </div>}
                     {activeTab === "BUDGET" && <div>TODO: Budget analytics</div>}
                     {activeTab === "PROFIT" && <div>TODO: Profit margin analytics</div>}
                     {activeTab === "RESOURCES" && <div>TODO: Resource cost analytics</div>}

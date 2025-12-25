@@ -105,7 +105,7 @@ export const BurndownAnalytics: React.FC<BurndownAnalyticsProps> = ({
             {loading && <div className="text-white/50">Loading burndown...</div>}
 
             {!loading && data && (
-                <section className="flex flex-col gap-6">
+                <div className="flex-1 overflow-y-auto max-h-[450px] flex flex-col gap-4">
                     {data.tasks.map((task) => (
                         <TaskProgress
                             key={task.task_id}
@@ -114,7 +114,7 @@ export const BurndownAnalytics: React.FC<BurndownAnalyticsProps> = ({
                             real={task.real_progress}
                         />
                     ))}
-                </section>
+                </div>
 
             )}
         </div>
