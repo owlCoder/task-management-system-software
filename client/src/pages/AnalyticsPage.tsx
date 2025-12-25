@@ -5,6 +5,8 @@ import { ProjectDTO } from "../models/project/ProjectDTO";
 import { projectAPI } from "../api/project/ProjectAPI";
 import { BurndownAnalytics } from "../components/analytics/Burndown";
 import { VelocityAnalytics } from "../components/analytics/Velocity";
+import { BurnupAnalytics } from "../components/analytics/Burnup";
+
 
 const TABS: { id: AnalyticsTab; label: string }[] = [
     { id: "BURNDOWN", label: "Burndown" },
@@ -110,7 +112,10 @@ export const AnalyticsPage: React.FC = () => {
                             {selectedProjectId ?
                                 <BurndownAnalytics project={selectedProject!} token={""} /> : "Select project..."}
                         </div>}
-                    {activeTab === "BURNUP" && <div>TODO: Burnup analytics</div>}
+                    {activeTab === "BURNUP" && <div>
+                        {selectedProjectId ?
+                            <BurnupAnalytics project={selectedProject!} /> : "Select project..."}
+                    </div>}
                     {activeTab === "VELOCITY" && <div>
                         {selectedProjectId ?
                             <VelocityAnalytics project={selectedProject!} /> : "Select project..."}

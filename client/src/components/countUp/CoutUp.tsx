@@ -1,6 +1,8 @@
 import { useInView, useMotionValue, useSpring } from 'motion/react';
 import { useCallback, useEffect, useRef } from 'react';
 
+//DA BI RADILA POTREBNO JE POKRENUTI npm install motion
+
 interface CountUpProps {
     to: number;
     from?: number;

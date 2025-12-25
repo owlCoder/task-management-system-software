@@ -1,7 +1,6 @@
 import { TaskStatus } from "../enums/TaskStatus";
 import type { TaskDTO } from "../models/task/TaskDTO";
 
-// Tasks are now linked to SPRINTS (not directly to projects)
 export const mockTasks: TaskDTO[] = [
   // ===== PROJECT 1 – SPRINT 1 =====
   {
@@ -14,7 +13,8 @@ export const mockTasks: TaskDTO[] = [
       "Create low/high-fidelity wireframes covering main user flows.",
     task_status: TaskStatus.IN_PROGRESS,
     estimated_cost: 1200,
-    total_hours_spent: 8,
+    total_hours_spent: 600, // 50% done
+    finished_at: undefined,
   },
   {
     task_id: 1002,
@@ -25,7 +25,7 @@ export const mockTasks: TaskDTO[] = [
     task_description: "Add login, register, and token refresh to gateway.",
     task_status: TaskStatus.COMPLETED,
     estimated_cost: 1500,
-    total_hours_spent: 14,
+    total_hours_spent: 1500,
     finished_at: new Date("2024-06-10"),
   },
 
@@ -40,6 +40,7 @@ export const mockTasks: TaskDTO[] = [
     task_status: TaskStatus.CREATED,
     estimated_cost: 900,
     total_hours_spent: 0,
+    finished_at: undefined,
   },
   {
     task_id: 1004,
@@ -50,7 +51,8 @@ export const mockTasks: TaskDTO[] = [
     task_description: "Increase coverage for project and task services.",
     task_status: TaskStatus.IN_PROGRESS,
     estimated_cost: 700,
-    total_hours_spent: 3,
+    total_hours_spent: 10,
+    finished_at: undefined,
   },
 
   // ===== PROJECT 2 – SPRINT 1 =====
@@ -63,7 +65,7 @@ export const mockTasks: TaskDTO[] = [
     task_description: "Balance levels and compress main tracks.",
     task_status: TaskStatus.COMPLETED,
     estimated_cost: 600,
-    total_hours_spent: 6,
+    total_hours_spent: 600,
     finished_at: new Date("2024-07-02"),
   },
   {
@@ -75,60 +77,26 @@ export const mockTasks: TaskDTO[] = [
     task_description: "Select and trim SFX for transitions and alerts.",
     task_status: TaskStatus.IN_PROGRESS,
     estimated_cost: 400,
-    total_hours_spent: 2,
-  },
-  {
-    task_id: 2050,
-    sprint_id: 3,
-    worker_id: 106,
-    project_manager_id: 202,
-    title: "SFX selection",
-    task_description: "Select and trim SFX for transitions and alerts.",
-    task_status: TaskStatus.IN_PROGRESS,
-    estimated_cost: 400,
-    total_hours_spent: 2,
-  },
-  {
-    task_id: 2069,
-    sprint_id: 3,
-    worker_id: 106,
-    project_manager_id: 202,
-    title: "SFX selection",
-    task_description: "Select and trim SFX for transitions and alerts.",
-    task_status: TaskStatus.IN_PROGRESS,
-    estimated_cost: 400,
-    total_hours_spent: 52,
-  },
-
-  // ===== PROJECT 2 – SPRINT 2 =====
-  {
-    task_id: 2003,
-    sprint_id: 4,
-    worker_id: 107,
-    project_manager_id: 202,
-    title: "Render preview",
-    task_description: "Export a 1080p preview for stakeholder review.",
-    task_status: TaskStatus.PENDING,
-    estimated_cost: 300,
-    total_hours_spent: 0,
-  },
-
-  // ===== PROJECT 2 – SPRINT 3 =====
-  {
-    task_id: 2004,
-    sprint_id: 5,
-    worker_id: 108,
-    project_manager_id: 202,
-    title: "QA checklist",
-    task_description: "Finalize QA checklist for release candidate.",
-    task_status: TaskStatus.CREATED,
-    estimated_cost: 250,
-    total_hours_spent: 0,
+    total_hours_spent: 5,
+    finished_at: undefined,
   },
 ];
 
-export const getMockTasksBySprint = (
-  sprintId: number
-): TaskDTO[] => {
-  return mockTasks.filter((t) => t.sprint_id === sprintId);
+// Funkcija koja vraća taskove za sprint i dodaje "progress" u %
+export const getMockTasksBySprint = (sprintId: number) => {
+  return mockTasks
+    .filter((t) => t.sprint_id === sprintId)
+    .map((t) => {
+      const progress =
+        t.task_status === TaskStatus.COMPLETED
+          ? 100
+          : t.estimated_cost! > 0
+            ? Math.min(Math.round((t.total_hours_spent! / t.estimated_cost!) * 100), 99)
+            : 0;
+
+      return {
+        ...t,
+        progress, // novo polje za Burndown/Burnup
+      };
+    });
 };
