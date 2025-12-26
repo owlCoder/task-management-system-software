@@ -8,8 +8,8 @@ export interface INotificationService {
   getNotificationsByUserId(userId: number): Promise<Result<NotificationResponseDTO[]>>;
   deleteNotification(id: number): Promise<Result<void>>;
   
-  markAsRead(id: number): Promise<Result<NotificationResponseDTO>>;
-  markAsUnread(id: number): Promise<Result<NotificationResponseDTO>>;
+  markAsRead(id: number): Promise<Result<void>>;
+  markAsUnread(id: number): Promise<Result<void>>;
   
   markMultipleAsRead(ids: number[]): Promise<Result<void>>;
   markMultipleAsUnread(ids: number[]): Promise<Result<void>>;

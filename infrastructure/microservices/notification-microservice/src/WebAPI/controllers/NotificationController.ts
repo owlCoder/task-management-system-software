@@ -153,7 +153,7 @@ export class NotificationController {
         return;
       }
 
-      res.status(200).json(result.data);
+      res.status(204).send();
     } catch (error) {
       res.status(500).json({
         message: 'Error marking notification as read',
@@ -184,7 +184,7 @@ export class NotificationController {
         return;
       }
 
-      res.status(200).json(result.data);
+      res.status(204).send();
     } catch (error) {
       res.status(500).json({
         message: 'Error marking notification as unread',

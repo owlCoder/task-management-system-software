@@ -33,7 +33,7 @@ const NotificationPage: React.FC = () => {
   // UCITAJ NOTIFIKACIJE SA BACKEND-A I KONEKTUJ WEBSOCKET
   useEffect(() => {
     loadNotifications();
-    //setupWebSocket();
+    setupWebSocket();
 
     // Cleanup na unmount
     return () => {
@@ -122,10 +122,32 @@ const NotificationPage: React.FC = () => {
   };
 
   // filtriraj podatke po odabranom filteru
-  const filteredNotifications =
+  const filtered =
     activeFilter === "unread"
       ? allNotifications.filter((notification) => !notification.isRead)
       : allNotifications;
+
+  // sortiraj notifikacije na osnovu sortBy
+  const filteredNotifications = [...filtered].sort((a, b) => {
+    switch (sortBy) {
+      case "newest":
+        // Sortiraj od najnovijeg ka najstarijem (pretpostavljam da veci ID = noviji)
+        return b.id - a.id;
+      case "oldest":
+        // Sortiraj od najstarijeg ka najnovijem
+        return a.id - b.id;
+      case "unread":
+        // Neprocitane prvo, zatim procitane
+        if (a.isRead === b.isRead) return b.id - a.id;
+        return a.isRead ? 1 : -1;
+      case "read":
+        // Procitane prvo, zatim neprocitane
+        if (a.isRead === b.isRead) return b.id - a.id;
+        return a.isRead ? -1 : 1;
+      default:
+        return 0;
+    }
+  });
 
   // prebroj totalni broj neprocitanih notifikacija
   const unreadCount = allNotifications.filter(
@@ -142,7 +164,6 @@ const NotificationPage: React.FC = () => {
   const handleSortChange = (sort: "newest" | "oldest" | "unread" | "read") => {
     console.log(`Sort changed to: ${sort}`);
     setSortBy(sort);
-    // TODO: Implementirati logiku za sortiranje
   };
 
   // funkcija za select all
@@ -197,7 +218,7 @@ const NotificationPage: React.FC = () => {
     try {
       await notificationAPI.markMultipleAsUnread(selectedNotifications);
 
-      // WebSocket će automatski ažurirati state!
+      // WebSocket ce automatski azurirati state!
       setAllNotifications(
         allNotifications.map((n) =>
           selectedNotifications.includes(n.id) ? { ...n, isRead: false } : n
@@ -207,7 +228,7 @@ const NotificationPage: React.FC = () => {
       setSelectedNotifications([]);
       setIsAllSelected(false);
     } catch (err: any) {
-      console.error("❌ Frontend handleMarkAsUnread error:", err);
+      console.error(" Frontend handleMarkAsUnread error:", err);
       alert(
         `Failed to mark notifications as unread: ${
           err.response?.data?.message || err.message
@@ -221,7 +242,7 @@ const NotificationPage: React.FC = () => {
     try {
       await notificationAPI.deleteMultipleNotifications(selectedNotifications);
 
-      // WebSocket će automatski ažurirati state!
+      // WebSocket ce automatski azurirati state!
       setAllNotifications(
         allNotifications.filter((n) => !selectedNotifications.includes(n.id))
       );
@@ -229,7 +250,7 @@ const NotificationPage: React.FC = () => {
       setSelectedNotifications([]);
       setIsAllSelected(false);
     } catch (err: any) {
-      console.error("❌ Frontend handleDeleteSelected error:", err);
+      console.error(" Frontend handleDeleteSelected error:", err);
       alert(
         `Failed to delete notifications: ${
           err.response?.data?.message || err.message
@@ -242,14 +263,21 @@ const NotificationPage: React.FC = () => {
   const handleNotificationClick = async (id: number) => {
     try {
       console.log(`Notification with ID ${id} was clicked`);
-      await notificationAPI.markAsRead(id);
 
-      // WebSocket će automatski ažurirati state!
+      // OPTIMISTIC UPDATE - odmah promeni UI
       setAllNotifications(
         allNotifications.map((n) => (n.id === id ? { ...n, isRead: true } : n))
       );
+
+      // Zatim pozovi API (WebSocket ce takodje emitovati event)
+      await notificationAPI.markAsRead(id);
     } catch (err) {
       console.error("Error marking notification as read:", err);
+
+      // ROLLBACK - vrati na neprocitano ako zakaze
+      setAllNotifications(
+        allNotifications.map((n) => (n.id === id ? { ...n, isRead: false } : n))
+      );
     }
   };
 
@@ -268,14 +296,16 @@ const NotificationPage: React.FC = () => {
     try {
       console.log("Sending notification:", { title, content, type });
 
-      await notificationAPI.createNotification({
+      const newNotification = await notificationAPI.createNotification({
         title,
         content,
         type,
         userId: currentUserId,
       });
 
-      // WebSocket će automatski dodati novu notifikaciju!
+      // Odmah dodaj novu notifikaciju u listu (optimistic update)
+      setAllNotifications([newNotification, ...allNotifications]);
+
       setIsPopUpOpen(false);
     } catch (err) {
       console.error("Error sending notification:", err);

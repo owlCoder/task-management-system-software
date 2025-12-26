@@ -13,7 +13,7 @@ import { TaskStatus } from "../enums/TaskStatus";
 
 const MOCK_TASK: TaskDTO = {
   task_id: 1,
-  project_id: 1,
+  sprint_id: 1,   // nije project_id nego sprint_id dto ti je bacao gresku
   project_manager_id: 10,
   worker_id: 5,
   title: "Create character animation",

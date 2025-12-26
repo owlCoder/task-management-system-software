@@ -71,7 +71,7 @@ export class NotificationService implements INotificationService {
     }
   }
 
-  async markAsRead(id: number): Promise<Result<NotificationResponseDTO>> {
+  async markAsRead(id: number): Promise<Result<void>> {
     try {
       const notification = await this.repository.findOne(id);
 
@@ -93,14 +93,14 @@ export class NotificationService implements INotificationService {
         this.socketService.emitNotificationMarkedRead(responseDTO);
       }
 
-      return { success: true, data: responseDTO };
+      return { success: true, data: undefined };
     } catch (error) {
       console.error(' Service.markAsRead error:', error);
       return { success: false, errorCode: ErrorCode.INTERNAL_ERROR, message: (error as Error).message };
     }
   }
 
-  async markAsUnread(id: number): Promise<Result<NotificationResponseDTO>> {
+  async markAsUnread(id: number): Promise<Result<void>> {
     try {
       const notification = await this.repository.findOne(id);
 
@@ -122,7 +122,7 @@ export class NotificationService implements INotificationService {
         this.socketService.emitNotificationMarkedUnread(responseDTO);
       }
 
-      return { success: true, data: responseDTO };
+      return { success: true, data: undefined };
     } catch (error) {
       console.error(' Service.markAsUnread error:', error);
       return { success: false, errorCode: ErrorCode.INTERNAL_ERROR, message: (error as Error).message };
