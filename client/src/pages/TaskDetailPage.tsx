@@ -91,7 +91,7 @@ export const TaskDetailPage: React.FC<TaskDetailPageProps> = ({token,taskId,setC
                    max-w-2xl w-full max-h-[90vh] flex flex-col text-white"
         onClick={(e) => e.stopPropagation()}
       >
-        {task && role && <TaskHeader task={task} role={role} />}
+        {task && role && <TaskHeader task={task} role={role} token={token} onStatusUpdate={(newStatus) => setTask({...task, task_status: newStatus})} />}
 
         <div className="p-5 overflow-y-auto flex-1 flex flex-col gap-3">
           {task && role && (

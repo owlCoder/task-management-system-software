@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Sidebar from "../components/dashboard/sidebar/Sidebar";
 //import TaskListItem from "../components/task/TaskListItem";
-import TaskListPreview from "../components/task/TaskListPreview";
 import { TaskDTO } from "../models/task/TaskDTO";
 import { TaskAPI } from "../api/task/TaskAPI";
 import CreateTaskModal from "../components/task/CreateTaskModal";
@@ -16,7 +15,7 @@ interface TaskListPageProps {
   token: string;
 }
 
-const TaskPage: React.FC<TaskListPageProps> = ({ projectId, token }) => {
+const TaskBoardPage: React.FC<TaskListPageProps> = ({ projectId, token }) => {
   const [tasks, setTasks] = useState<TaskDTO[]>(mockTasks);
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
@@ -198,4 +197,4 @@ const TaskPage: React.FC<TaskListPageProps> = ({ projectId, token }) => {
   );
 };
 
-export default TaskPage;
+export default TaskBoardPage;

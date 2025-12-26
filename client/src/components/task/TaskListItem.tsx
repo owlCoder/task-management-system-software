@@ -1,6 +1,7 @@
 import React from "react";
 import { TaskDTO } from "../../models/task/TaskDTO";
-import { TaskStatus } from "../../enums/TaskStatus";
+//import { TaskStatus } from "../../enums/TaskStatus";
+import { StatusBadge } from "./StatusBadge";
 
 interface TaskListItemProps {
   task: TaskDTO;
@@ -8,23 +9,6 @@ interface TaskListItemProps {
 }
 
 const TaskListItem: React.FC<TaskListItemProps> = ({ task,onSelect }) => {
-  const getStatusColor = (status: TaskStatus): string => {
-    switch (status) {
-      case TaskStatus.IN_PROGRESS:
-        return "bg-red-500";
-      case TaskStatus.PENDING:
-        return "bg-yellow-500";
-      case TaskStatus.COMPLETED:
-        return "bg-blue-500";
-      case TaskStatus.CREATED:
-        return "bg-green-500";
-      case TaskStatus.CANCELLED:
-        return "bg-gray-500";
-      default:
-        return "bg-gray-500";
-    }
-  };
-
   return (
     <div onClick={() => {
   if (onSelect) {
@@ -34,14 +18,7 @@ const TaskListItem: React.FC<TaskListItemProps> = ({ task,onSelect }) => {
       <div  className="flex justify-between items-center">
         <span className="font-bold text-white text-xl">{task.title}</span>
 
-        <span className="px-2 py-1 rounded-md text-xs bg-white/20 text-white/90 flex items-center gap-1.5">
-          <span
-            className={`w-2 h-2 rounded-full ${getStatusColor(
-              task.task_status
-            )}`}
-          ></span>
-          {task.task_status}
-        </span>
+        <StatusBadge status={task.task_status} />
       </div>
 
       <p className="text-white/70 mt-1 text-sm">{task.task_description}</p>

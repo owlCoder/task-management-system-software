@@ -2,40 +2,50 @@ import React from "react";
 import { TaskDTO } from "../../models/task/TaskDTO";
 import { TaskStatus } from "../../enums/TaskStatus";
 import { UserRole } from "../../enums/UserRole";
+import StatusDropdown from "./StatusDropdown"; 
+import { TaskAPI } from "../../api/task/TaskAPI";
 
 interface TaskHeaderProps {
   task: TaskDTO;
   role: UserRole;
+  token: string; 
+  onStatusUpdate: (newStatus: TaskStatus) => void; 
 }
 
-const STATUS_COLORS: Record<TaskStatus, string> = {
-  CREATED: "bg-gray-500/20 text-gray-300 border-gray-400/30",
-  PENDING: "bg-yellow-500/20 text-yellow-300 border-yellow-400/30",
-  IN_PROGRESS: "bg-blue-500/20 text-blue-300 border-blue-400/30",
-  COMPLETED: "bg-green-500/20 text-green-300 border-green-400/30",
-  CANCELLED: "bg-red-500/20 text-red-300 border-red-400/30",
-};
-export const TaskHeader: React.FC<TaskHeaderProps> = ({ task }) => {
-  return (
-    <div className="px-6 py-4 flex items-center border-b border-white/10">
-      <h2 className="text-lg font-semibold text-white truncate max-w-[70%]">
-        {task.title}
-      </h2>
+export const TaskHeader: React.FC<TaskHeaderProps> = ({ task, role, token, onStatusUpdate }) => {
+  
+  const handleStatusChange = async (newStatus: TaskStatus) => {
+    try {
+      const api = new TaskAPI(import.meta.env.VITE_GATEWAY_URL, token);
+      await api.updateTask(task.task_id, { status: newStatus });
+      onStatusUpdate(newStatus);
+    } catch (err) {
+      console.error("Failed to update status", err);
+      alert("Error updating status");
+    }
+  };
 
-      <span
-        className={`
-          ml-auto
-          px-3 py-1
-          text-[11px]
-          rounded-full
-          uppercase
-          tracking-wide
-          border
-          ${STATUS_COLORS[task.task_status]}
-        `}
-      >
-        {task.task_status.replace("_", " ")}
-      </span>
+  return (
+    <div className="px-6 py-5 flex items-center justify-between border-b border-white/10 bg-white/5">
+      <div className="flex flex-col gap-1 max-w-[60%]">
+        <h2 className="text-xl font-bold text-white truncate">
+          {task.title}
+        </h2>
+        <span className="text-[10px] text-white/30 uppercase tracking-[0.2em] font-black">
+          Task ID: #{task.task_id}
+        </span>
+      </div>
+
+      <div className="flex flex-col items-end gap-2">
+        <label className="text-[9px] font-bold text-white/20 uppercase tracking-widest mr-2">
+          Change Status
+        </label>
+        
+        <StatusDropdown 
+          currentStatus={task.task_status as TaskStatus} 
+          onStatusChange={handleStatusChange} 
+        />
+      </div>
     </div>
   );
 };

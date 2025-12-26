@@ -12,6 +12,8 @@ import TaskStatusFilter from "../components/task/TaskStatusFilter";
 import TaskSortSelect from "../components/task/TaskSortSelect";
 import { SortOption } from "../types/SortOption";
 import { TaskDetailPage } from "./TaskDetailPage";
+import TaskBoardListPreview from "../components/task/TaskBoardListPreview";
+
 // import EditTaskModal from "../components/task/EditTaskModal";
 
 interface TaskListPageProps {
@@ -28,6 +30,7 @@ const TaskPage: React.FC<TaskListPageProps> = ({ projectId, token }) => {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<SortOption>("NEWEST");
+  const [showBoard, setShowBoard] = useState(false);
   const api = new TaskAPI(import.meta.env.VITE_GATEWAY_URL, token);
 
   const filteredAndSortedTasks = tasks
@@ -186,6 +189,21 @@ const TaskPage: React.FC<TaskListPageProps> = ({ projectId, token }) => {
                   </span>
                 </button>
 
+                <button
+                  type="button"
+                  className={`
+                    w-[140px] h-[50px] rounded-[3em] flex items-center justify-center 
+                    transition-all duration-500 border border-white/15 shadow-lg hover:-translate-y-1
+                    ${showBoard ? 'bg-red-500/20 hover:bg-red-500/40' : 'bg-white/10 hover:bg-white/20'}
+                  `}
+                  onClick={() => setShowBoard(!showBoard)}
+                >
+                  <span className="font-semibold text-white text-base">
+                    {showBoard ? "Close Board" : "Show Board"}
+                  </span>
+                </button>
+
+
                 <TaskStatusFilter
                   value={statusFilter}
                   onChange={setStatusFilter}
@@ -202,7 +220,16 @@ const TaskPage: React.FC<TaskListPageProps> = ({ projectId, token }) => {
 
           <section
             className="bg-white/5 backdrop-blur-xl rounded-2xl p-6 shadow-lg border border-white/10 flex-1 overflow-y-auto styled-scrollbar">
-            {
+              {showBoard ? (
+                <TaskBoardListPreview
+                  tasks={filteredAndSortedTasks}
+                  onSelect={setSelectedTaskId}
+                  selectedTaskId={selectedtaskId}
+                />
+                  
+              ) : (
+                <>
+                {
               filteredAndSortedTasks.length  === 0 ? (
                 <TaskListPreview onSelect={setSelectedTaskId}/>
               ) : (
@@ -213,8 +240,10 @@ const TaskPage: React.FC<TaskListPageProps> = ({ projectId, token }) => {
                   />
                 ))}
               </div>
-              )
-            }
+              )}
+              </>
+            )
+          }
           </section>
         </div>
       </main>
