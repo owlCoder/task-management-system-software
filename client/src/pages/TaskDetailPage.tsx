@@ -10,6 +10,7 @@ import { TaskTimeTracking } from "../components/task/TaskTimeTracking";
 import { TaskCostInfo } from "../components/task/TaskCostInfo";
 import { decodeJWT } from "../helpers/decode_jwt";
 import { TaskStatus } from "../enums/TaskStatus";
+import { TaskCommentList } from "../components/task/TaskCommentList";
 
 const MOCK_TASK: TaskDTO = {
   task_id: 1,
@@ -37,8 +38,10 @@ export const TaskDetailPage: React.FC<TaskDetailPageProps> = ({token,taskId,setC
   const [uploadedFileName, setUploadedFileName] = useState<string | null>(null);
   const [task, setTask] = useState<TaskDTO | null>(null);
   const [role, setRole] = useState<UserRole | null>(null);
+  const [userId, setUserId] = useState<number>(0);
 
   const apiTask = new TaskAPI(import.meta.env.VITE_GATEWAY_URL, token);
+
 
   const handleUpload = async () => {
     if (!selectedFile) return;
@@ -53,10 +56,21 @@ export const TaskDetailPage: React.FC<TaskDetailPageProps> = ({token,taskId,setC
     }
   };
 
+  const handleAddComments = async (text : string) => {
+    if(!text.trim()) return;
+
+    try {
+      await apiTask.uploadComment(taskId,userId,text);
+    }catch {
+      alert("Failed");
+    }
+  }
+
   useEffect(() => {
     const decoded = decodeJWT(token);
     if (decoded) {
       setRole(decoded.role as UserRole);
+      setUserId(decoded.id);
     }
   }, [token]);
 
@@ -98,6 +112,10 @@ export const TaskDetailPage: React.FC<TaskDetailPageProps> = ({token,taskId,setC
                 task={task}
               />
 
+              <TaskCommentList
+                onSubmit={handleAddComments}
+              />
+
               {view === "upload" && (
                 <FileUpload
                   setFile={(file) => {
@@ -118,6 +136,8 @@ export const TaskDetailPage: React.FC<TaskDetailPageProps> = ({token,taskId,setC
                   }}
                 />
               )}
+
+
             </>
           )}
         </div>
