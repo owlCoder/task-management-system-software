@@ -43,16 +43,26 @@ export const EditProjectModal: React.FC<Props> = ({ project, isOpen, onClose, on
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const members = selectedMembers.map((userId) => {
-      const user = mockUsers.find((u) => u.id === userId);
-      return {
-        id: 0,
-        projectId: Number(project?.id) || 0,
-        userId,
-        hoursPerWeek: 0,
-        role: user?.role || undefined,
-        user: user ? { ...user, user_id: user.id } : undefined,
-      };
-    });
+    const user = mockUsers.find((u) => u.id === userId);
+
+    return {
+      id: 0,
+      projectId: Number(project?.id) || 0,
+      userId,
+      hoursPerWeek: 0,
+      role: user?.role, 
+      user: user
+        ? {
+            user_id: user.id,
+            username: user.username,
+            email: user.email,
+            role_name: user.role,
+            profileImage: user.profileImage,
+          }
+        : undefined,
+    };
+  });
+
     onSave({ ...formData, members });
     onClose();
   };
