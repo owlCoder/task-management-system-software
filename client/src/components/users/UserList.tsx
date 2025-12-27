@@ -44,8 +44,14 @@ export const UserList: React.FC<UserListProps> = ({ userAPI }) => {
     if (authUser?.id === id) return;
     try {
       await userAPI.logicalyDeleteUserById(token, id);
-      setUsers((prev) => prev.filter((u) => u.user_id !== id));
-      setFilteredUsers((prev) => prev.filter((u) => u.user_id !== id));
+      const updatedUsers = users.filter((u) => u.user_id !== id);
+      setUsers(updatedUsers);
+      
+      if (selectedRole === "All") {
+        setFilteredUsers(updatedUsers);
+      } else {
+        setFilteredUsers(updatedUsers.filter((u) => u.role_name === selectedRole));
+      }
     } catch (err) {
       console.error("Failed to delete user:", err);
     }
@@ -92,13 +98,7 @@ export const UserList: React.FC<UserListProps> = ({ userAPI }) => {
                   setIsEditing(false);
                 }}
               >
-                <svg
-                  className="w-5 h-5 text-white/60 group-hover:text-white transform transition-transform duration-300 group-hover:scale-110"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                >
+                <svg className="w-5 h-5 text-white/60 group-hover:text-white transform transition-transform duration-300 group-hover:scale-110" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M12 5v14M5 12h14" />
                 </svg>
                 <span className="font-semibold text-white/60 group-hover:text-white transition-colors duration-300 text-base">
@@ -111,7 +111,7 @@ export const UserList: React.FC<UserListProps> = ({ userAPI }) => {
           <section className="bg-white/5 backdrop-blur-xl rounded-2xl p-6 shadow-lg border border-white/10 flex-1 overflow-y-auto styled-scrollbar">
             {isLoading ? (
               <div className="text-white p-6">Loading users...</div>
-            ) : (
+            ) : filteredUsers.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                 {filteredUsers.map((u) => (
                   <div
@@ -164,21 +164,46 @@ export const UserList: React.FC<UserListProps> = ({ userAPI }) => {
                   </div>
                 ))}
               </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center h-full text-center py-20 animate-in fade-in duration-700">
+                <div className="w-24 h-24 rounded-full bg-white/5 flex items-center justify-center mb-6 border border-white/10">
+                  <svg className="w-12 h-12 text-white/20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                  </svg>
+                </div>
+                <h2 className="text-2xl font-bold text-white/90">No Users Found</h2>
+                <p className="text-white/40 mt-3 max-w-sm mx-auto text-lg">
+                  User with role <span className="text-blue-400 font-bold">"{selectedRole}"</span> does not exist in the system.
+                </p>
+                <button 
+                  onClick={() => handleRoleFilter("All")}
+                  className="mt-8 px-8 py-2.5 rounded-full bg-white/5 hover:bg-white/10 text-white/60 hover:text-white border border-white/10 transition-all duration-300"
+                >
+                  Show all users
+                </button>
+              </div>
             )}
           </section>
         </div>
       </main>
 
       {(showAddForm || (selectedUser && isEditing)) && token && (
-        <div className="fixed inset-0 bg-blue/80 backdrop-blur-sm flex justify-center items-center z-50 p-4">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex justify-center items-center z-50 p-4">
           <div className="w-full max-w-md animate-in fade-in zoom-in duration-300">
             {showAddForm && (
               <AddUserForm
                 userAPI={userAPI}
                 token={token}
                 onUserAdded={(newUser) => {
-                  setUsers((prev) => [...prev, newUser]);
-                  handleRoleFilter(selectedRole);
+                  setUsers((prev) => {
+                    const updatedAllUsers = [...prev, newUser];
+                    if (selectedRole === "All") {
+                      setFilteredUsers(updatedAllUsers);
+                    } else {
+                      setFilteredUsers(updatedAllUsers.filter((u) => u.role_name === selectedRole));
+                    }
+                    return updatedAllUsers;
+                  });
                 }}
                 onClose={() => setShowAddForm(false)}
               />
@@ -189,16 +214,9 @@ export const UserList: React.FC<UserListProps> = ({ userAPI }) => {
                 token={token}
                 existingUser={selectedUser}
                 onUserUpdated={(updatedUser) => {
-                  setUsers((prev) =>
-                    prev.map((u) =>
-                      u.user_id === updatedUser.user_id ? updatedUser : u
-                    )
-                  );
-                  setFilteredUsers((prev) =>
-                    prev.map((u) =>
-                      u.user_id === updatedUser.user_id ? updatedUser : u
-                    )
-                  );
+                  const updateList = (prev: UserDTO[]) => prev.map((u) => u.user_id === updatedUser.user_id ? updatedUser : u);
+                  setUsers(updateList);
+                  setFilteredUsers(updateList);
                   setSelectedUser(null);
                   setIsEditing(false);
                 }}
@@ -213,7 +231,7 @@ export const UserList: React.FC<UserListProps> = ({ userAPI }) => {
       )}
 
       {selectedUser && !isEditing && (
-        <div className="fixed inset-0 bg-blue/80 backdrop-blur-md flex justify-center items-center z-50 p-4">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-md flex justify-center items-center z-50 p-4">
           <div className="w-full max-w-md animate-in fade-in zoom-in duration-300">
             <UserDetail
               user={selectedUser}

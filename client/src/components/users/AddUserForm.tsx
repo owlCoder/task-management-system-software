@@ -1,8 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react"; // Dodali smo useEffect
 import { IUserAPI } from "../../api/users/IUserAPI";
 import { UserDTO } from "../../models/users/UserDTO";
 import { UserCreationDTO } from "../../models/users/UserCreationDTO";
-import { UserRole } from "../../enums/UserRole";
+import { UserRoleDTO } from "../../models/users/UserRoleDTO";
 
 const inputClasses = "w-full px-4 py-3 rounded-xl text-white bg-black/20 backdrop-blur-md border border-white/10 placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:bg-black/30 transition-all shadow-inner";
 
@@ -19,12 +19,33 @@ export const AddUserForm: React.FC<AddUserFormProps> = ({
   onUserAdded,
   onClose,
 }) => {
+
+  const [availableRoles, setAvailableRoles] = useState<UserRoleDTO[]>([]);
+  const [loadingRoles, setLoadingRoles] = useState(true);
+
   const [formData, setFormData] = useState<UserCreationDTO>({
     username: "",
     email: "",
     password: "",
-    role_name: UserRole.ANALYTICS_DEVELOPMENT_MANAGER,
+    role_name: "", 
   });
+
+  useEffect(() => {
+    const fetchRoles = async () => {
+      try {
+        const roles = await userAPI.getUserRolesForCreation(token);
+        setAvailableRoles(roles);
+        if (roles.length > 0) {
+          setFormData(prev => ({ ...prev, role_name: roles[0].role_name }));
+        }
+      } catch (err) {
+        console.error("Failed to load roles:", err);
+      } finally {
+        setLoadingRoles(false);
+      }
+    };
+    fetchRoles();
+  }, [token, userAPI]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -37,15 +58,10 @@ export const AddUserForm: React.FC<AddUserFormProps> = ({
     try {
       const created = await userAPI.createUser(token, formData);
       onUserAdded(created);
-      setFormData({
-        username: "",
-        email: "",
-        password: "",
-        role_name: UserRole.ANALYTICS_DEVELOPMENT_MANAGER,
-      });
       onClose();
     } catch (err) {
       console.error("Failed to add user:", err);
+      alert("Error adding user. Check if username/email already exists.");
     }
   };
 
@@ -58,16 +74,29 @@ export const AddUserForm: React.FC<AddUserFormProps> = ({
         <input type="email" name="email" value={formData.email} onChange={handleChange} placeholder="Email" className={inputClasses} required />
         <input type="password" name="password" value={formData.password} onChange={handleChange} placeholder="Password" className={inputClasses} required />
 
-        <select name="role_name" value={formData.role_name} onChange={handleChange} className={inputClasses}>
-          {Object.values(UserRole).map((role) => (
-            <option key={role} value={role} className="bg-slate-900">{role}</option>
-          ))}
+        <select 
+          name="role_name" 
+          value={formData.role_name} 
+          onChange={handleChange} 
+          className={inputClasses}
+          disabled={loadingRoles}
+        >
+          {loadingRoles ? (
+            <option>Loading roles...</option>
+          ) : (
+            availableRoles.map((role) => (
+              <option key={role.user_role_id} value={role.role_name} className="bg-slate-900">
+                {role.role_name.replace(/_/g, " ")} 
+              </option>
+            ))
+          )}
         </select>
 
         <div className="flex gap-3 mt-6">
           <button 
             type="submit" 
-            className="flex-1 h-[50px] rounded-full bg-gradient-to-t from-[var(--palette-medium-blue)] to-[var(--palette-deep-blue)] text-white font-bold shadow-lg hover:-translate-y-1 transition-all duration-300"
+            disabled={loadingRoles}
+            className="flex-1 h-[50px] rounded-full bg-gradient-to-t from-[var(--palette-medium-blue)] to-[var(--palette-deep-blue)] text-white font-bold shadow-lg hover:-translate-y-1 transition-all duration-300 disabled:opacity-50"
           >
             Add User
           </button>

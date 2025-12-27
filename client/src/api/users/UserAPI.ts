@@ -3,6 +3,7 @@ import { IUserAPI } from "./IUserAPI";
 import { UserDTO } from "../../models/users/UserDTO";
 import { UserCreationDTO } from "../../models/users/UserCreationDTO";
 import { UserUpdateDTO } from "../../models/users/UserUpdateDTO";
+import { UserRoleDTO } from "../../models/users/UserRoleDTO";
 
 export class UserAPI implements IUserAPI {
   private readonly axiosInstance: AxiosInstance;
@@ -58,5 +59,12 @@ export class UserAPI implements IUserAPI {
       await this.axiosInstance.put<UserDTO>(`/users/${user_id}/working-hours`, {weekly_working_hours}, {
       headers: { Authorization: `Bearer ${token}`},
     })).data;
+  }
+
+  async getUserRolesForCreation(token: string): Promise<UserRoleDTO[]> {
+    return (
+      await this.axiosInstance.get<UserRoleDTO[]>("/user-roles/userCreation", {
+        headers: { Authorization: `Bearer ${token}`},
+      })).data;
   }
 }
