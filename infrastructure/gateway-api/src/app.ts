@@ -9,6 +9,7 @@ import { IErrorHandlingService } from './Domain/services/common/IErrorHandlingSe
 import { IGatewayAuthService } from './Domain/services/auth/IGatewayAuthService';
 import { IGatewayUserService } from './Domain/services/user/IGatewayUserService';
 import { IGatewayProjectService } from './Domain/services/project/IGatewayProjectService';
+import { IGatewayTaskService } from './Domain/services/task/IGatewayTaskService';
 import { IGatewayFileService } from './Domain/services/file/IGatewayFileService';
 import { IGatewayNotificationService } from './Domain/services/notification/IGatewayNotificationService';
 import { IGatewayAnalyticsService } from './Domain/services/analytics/IGatewayAnalyticsService';
@@ -19,6 +20,7 @@ import { LoggerService } from './Services/common/LoggerService';
 import { GatewayAuthService } from './Services/auth/GatewayAuthService';
 import { GatewayUserService } from './Services/user/GatewayUserService';
 import { GatewayProjectService } from './Services/project/GatewayProjectService';
+import { GatewayTaskService } from './Services/task/GatewayTaskService';
 import { GatewayFileService } from './Services/file/GatewayFileService';
 import { GatewayNotificationService } from './Services/notification/GatewayNotificationService';
 import { GatewayAnalyticsService } from './Services/analytics/GatewayAnalyticsService';
@@ -27,6 +29,7 @@ import { GatewayAnalyticsService } from './Services/analytics/GatewayAnalyticsSe
 import { GatewayAuthController } from './WebAPI/auth/GatewayAuthController';
 import { GatewayUserController } from './WebAPI/user/GatewayUserController';
 import { GatewayProjectController } from './WebAPI/project/GatewayProjectController';
+import { GatewayTaskController } from './WebAPI/task/GatewayTaskController';
 import { GatewayFileController } from './WebAPI/file/GatewayFileController';
 import { GatewayNotificationController } from './WebAPI/notification/GatewayNotificationController';
 import { GatewayAnalyticsController } from './WebAPI/analytics/GatewayAnalyticsController';
@@ -54,6 +57,7 @@ const errorHandlingService: IErrorHandlingService = new ErrorHandlingService(log
 const gatewayAuthService: IGatewayAuthService = new GatewayAuthService(errorHandlingService);
 const gatewayUserService: IGatewayUserService = new GatewayUserService(errorHandlingService);
 const gatewayProjectService: IGatewayProjectService = new GatewayProjectService(errorHandlingService);
+const gatewayTaskService: IGatewayTaskService = new GatewayTaskService(errorHandlingService);
 const gatewayFileService: IGatewayFileService = new GatewayFileService(errorHandlingService);
 const gatewayNotificationService: IGatewayNotificationService = new GatewayNotificationService(errorHandlingService);
 const gatewayAnalyticsService: IGatewayAnalyticsService = new GatewayAnalyticsService(errorHandlingService);
@@ -62,6 +66,7 @@ const gatewayAnalyticsService: IGatewayAnalyticsService = new GatewayAnalyticsSe
 const gatewayAuthController = new GatewayAuthController(gatewayAuthService);
 const gatewayUserController = new GatewayUserController(gatewayUserService);
 const gatewayProjectController = new GatewayProjectController(gatewayProjectService);
+const gatewayTaskController = new GatewayTaskController(gatewayTaskService);
 const gatewayFileController = new GatewayFileController(gatewayFileService);
 const gatewayNotificationController = new GatewayNotificationController(gatewayNotificationService);
 const gatewayAnalyticsController = new GatewayAnalyticsController(gatewayAnalyticsService);
@@ -70,6 +75,7 @@ const gatewayAnalyticsController = new GatewayAnalyticsController(gatewayAnalyti
 app.use('/api/v1', gatewayAuthController.getRouter());
 app.use('/api/v1', gatewayUserController.getRouter());
 app.use('/api/v1', gatewayProjectController.getRouter());
+app.use('/api/v1', gatewayTaskController.getRouter());
 app.use('/api/v1', gatewayFileController.getRouter());
 app.use('/api/v1', gatewayNotificationController.getRouter());
 app.use('/api/v1', gatewayAnalyticsController.getRouter());

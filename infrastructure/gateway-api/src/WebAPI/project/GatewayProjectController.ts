@@ -21,7 +21,12 @@ export class GatewayProjectController {
     }
 
     private initializeRoutes() {
-        this.router.get("/projects/:id", authenticate, authorize(UserRole.PROJECT_MANAGER, UserRole.ANIMATION_WORKER, UserRole.AUDIO_MUSIC_STAGIST), this.getProjectById.bind(this));
+        this.router.get(
+            "/projects/:id", 
+            authenticate, 
+            authorize(UserRole.PROJECT_MANAGER, UserRole.ANALYTICS_DEVELOPMENT_MANAGER, UserRole.ANIMATION_WORKER, UserRole.AUDIO_MUSIC_STAGIST), 
+            this.getProjectById.bind(this)
+        );
         this.router.post("/projects", authenticate, authorize(UserRole.PROJECT_MANAGER), this.createProject.bind(this));
         this.router.put("/projects/:id", authenticate, authorize(UserRole.PROJECT_MANAGER), this.updateProject.bind(this));
         this.router.delete("/projects/:id", authenticate, authorize(UserRole.PROJECT_MANAGER), this.deleteProject.bind(this));
