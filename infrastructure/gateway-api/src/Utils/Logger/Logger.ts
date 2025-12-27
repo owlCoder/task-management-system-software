@@ -4,6 +4,7 @@ import pretty from "pino-pretty";
 
 const stream = pretty({
   colorize: true,
+  translateTime: 'dd-mm-yyyy HH:MM:ss.l',
   ignore: 'pid,hostname',
   messageFormat: '{service} | {msg} | {code}: {method} {url} {ip}',
   hideObject: true
