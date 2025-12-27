@@ -16,25 +16,24 @@ export const getProjectStatusColor = (status: ProjectStatus): string => {
 };
 
 export const getProjectStatusByDate = (
-  startDate?: string | null
+  startDate?: string | null,
+  currentStatus?: ProjectStatus
 ): ProjectStatus => {
-  if (!startDate) {
-    return ProjectStatus.NOT_STARTED;
-  }
+  if (!startDate) return ProjectStatus.NOT_STARTED;
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
   const start = new Date(startDate);
   start.setHours(0, 0, 0, 0);
-  if (start > today) {
-    return ProjectStatus.NOT_STARTED;
-  }
 
-  if (start.getTime() === today.getTime()) {
-    return ProjectStatus.ACTIVE;
-  }
+  if (start > today) return ProjectStatus.NOT_STARTED;
 
+  if (
+    currentStatus === ProjectStatus.PAUSED ||
+    currentStatus === ProjectStatus.COMPLETED
+  ) {
+    return currentStatus;
+  }
   return ProjectStatus.ACTIVE;
 };
-

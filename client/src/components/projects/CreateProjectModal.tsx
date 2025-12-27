@@ -299,7 +299,12 @@ export const CreateProjectModal: React.FC<Props> = ({
                   });
                 }}
                 onKeyDown={(e) => {
+                  const value = (e.currentTarget as HTMLInputElement).value;
+
                   if (e.key === "+" || e.key === "-") {
+                    e.preventDefault();
+                  }
+                  if (e.key === "." && value.length === 0) {
                     e.preventDefault();
                   }
                   if (
