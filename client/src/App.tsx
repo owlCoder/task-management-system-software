@@ -2,8 +2,6 @@ import { Route, Routes } from "react-router-dom";
 import { AuthPage } from "./pages/AuthPage";
 import { IAuthAPI } from "./api/auth/IAuthAPI";
 import { AuthAPI } from "./api/auth/AuthAPI";
-import { UserAPI } from "./api/users/UserAPI";
-import { IUserAPI } from "./api/users/IUserAPI";
 import ProjectsPage from "./pages/ProjectsPage";
 import MainWindow from "./pages/MainWindow";
 import { ProtectedRoute } from "./components/protected_route/ProtectedRoute";
@@ -15,7 +13,7 @@ import { OtpPage } from "./pages/OTPPage";
 import AnalyticsPage from "./pages/AnalyticsPage";
 
 const auth_api: IAuthAPI = new AuthAPI();
-const user_api: IUserAPI = new UserAPI();
+
 
 const backgroundImageUrl = new URL("../public/bg2.png", import.meta.url).href;
 

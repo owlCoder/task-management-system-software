@@ -9,6 +9,8 @@ import { mockTasks } from "../mocks/TaskMock";
 import TaskBoardListPreview from "../components/task/TaskBoardListPreview";
 // import { TaskDetailPage } from "./TaskDetailPage";
 // import EditTaskModal from "../components/task/EditTaskModal";
+import { UpdateTaskDTO } from "../models/task/UpdateTaskDTO";
+import { TaskStatus } from "../enums/TaskStatus";
 
 interface TaskListPageProps {
   projectId: string;
@@ -22,6 +24,28 @@ const TaskBoardPage: React.FC<TaskListPageProps> = ({ projectId, token }) => {
   const [selectedtaskId, setSelectedTaskId] = useState<number | null>(null);
   const [editOpen, setEditOpen] = useState(false);
   const api = new TaskAPI(import.meta.env.VITE_GATEWAY_URL, token);
+
+  const handleStatusChange = async (taskId: number, newStatus: TaskStatus) => {
+  
+      const taskToUpdate = tasks.find((t) => t.task_id === taskId);
+      if (!taskToUpdate) return;
+  
+      const payload: UpdateTaskDTO = {
+        status: newStatus
+      };
+  
+      const originalTasks = [...tasks];
+      setTasks((prev) =>
+        prev.map((t) => (t.task_id === taskId ? { ...t, task_status: newStatus } : t))
+      );
+  
+      try {
+        await api.updateTask(taskId, payload);
+      } catch (err) {
+        console.error("Failed to update status on server", err);
+        setTasks(originalTasks);
+      }
+    };
 
   useEffect(() => {
     const load = async () => {
@@ -189,6 +213,7 @@ const TaskBoardPage: React.FC<TaskListPageProps> = ({ projectId, token }) => {
               tasks={tasks}
               onSelect={setSelectedTaskId}
               selectedTaskId={selectedtaskId}
+              onStatusChange={handleStatusChange}
             />
           </section>
         </div>

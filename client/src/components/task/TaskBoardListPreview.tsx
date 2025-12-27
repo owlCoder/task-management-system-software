@@ -7,12 +7,14 @@ interface Props {
   tasks: TaskDTO[];
   onSelect: (taskId: number) => void;
   selectedTaskId: number | null;
+  onStatusChange: (taskId: number, newStatus: TaskStatus) => void;
 }
 
 const TaskListPreview: React.FC<Props> = ({
   tasks,
   onSelect,
   selectedTaskId,
+  onStatusChange
 }) => {
   return (
     <div className="flex gap-6 h-full overflow-x-auto pb-6 custom-scrollbar items-start">
@@ -22,6 +24,7 @@ const TaskListPreview: React.FC<Props> = ({
         tasks={tasks}
         onSelect={onSelect}
         selectedTaskId={selectedTaskId}
+        onStatusChange={onStatusChange}
       />
 
       <TaskColumn
@@ -30,6 +33,7 @@ const TaskListPreview: React.FC<Props> = ({
         tasks={tasks}
         onSelect={onSelect}
         selectedTaskId={selectedTaskId}
+        onStatusChange={onStatusChange}
       />
 
       <TaskColumn
@@ -38,6 +42,7 @@ const TaskListPreview: React.FC<Props> = ({
         tasks={tasks}
         onSelect={onSelect}
         selectedTaskId={selectedTaskId}
+        onStatusChange={onStatusChange}
       />
 
       <TaskColumn
@@ -46,6 +51,7 @@ const TaskListPreview: React.FC<Props> = ({
         tasks={tasks}
         onSelect={onSelect}
         selectedTaskId={selectedTaskId}
+        onStatusChange={onStatusChange}
       />
 
       <TaskColumn
@@ -54,6 +60,7 @@ const TaskListPreview: React.FC<Props> = ({
         tasks={tasks}
         onSelect={onSelect}
         selectedTaskId={selectedTaskId}
+        onStatusChange={onStatusChange}
       />
     </div>
   );

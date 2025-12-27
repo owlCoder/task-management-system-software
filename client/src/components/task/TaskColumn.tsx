@@ -9,6 +9,7 @@ interface TaskColumnProps {
   tasks: TaskDTO[];
   onSelect: (taskId: number) => void;
   selectedTaskId: number | null;
+  onStatusChange: (taskId: number, newStatus: TaskStatus) => void;
 }
 
 const TaskColumn: React.FC<TaskColumnProps> = ({ 
@@ -16,14 +17,28 @@ const TaskColumn: React.FC<TaskColumnProps> = ({
   status, 
   tasks, 
   onSelect, 
-  selectedTaskId 
+  selectedTaskId,
+  onStatusChange
 }) => {
   
   const columnTasks = tasks.filter((task) => task.task_status === status);
 
+  const handleDragOver = (e: React.DragEvent) => { e.preventDefault();
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    const taskId = e.dataTransfer.getData("taskId");
+    if(taskId) {
+      onStatusChange(Number(taskId), status);
+    }
+  };
+
   return (
-    <div className="flex flex-col w-[320px] min-w-[320px] bg-black/20 backdrop-blur-md rounded-2xl border border-white/10 h-full max-h-full overflow-hidden shadow-2xl">
-      
+    <div 
+     onDragOver={handleDragOver}
+     onDrop={handleDrop}
+     className="flex flex-col w-[320px] min-w-[320px] bg-black/20 backdrop-blur-md rounded-2xl border border-white/10 h-full max-h-full overflow-hidden shadow-2xl">
       
       <div className="p-4 border-b border-white/5 bg-white/5 flex justify-between items-center">
         <div className="flex items-center gap-2">
@@ -48,6 +63,8 @@ const TaskColumn: React.FC<TaskColumnProps> = ({
           columnTasks.map((task) => (
             <div 
               key={task.task_id}
+              draggable = {true}
+              onDragStart={(e) => e.dataTransfer.setData("taskId", task.task_id.toString())}
               className={`transition-all duration-300 ${
                 selectedTaskId === task.task_id ? 'ring-2 ring-blue-500/50 scale-[1.02] z-10' : ''
               }`}

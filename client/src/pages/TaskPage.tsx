@@ -13,7 +13,8 @@ import TaskSortSelect from "../components/task/TaskSortSelect";
 import { SortOption } from "../types/SortOption";
 import { TaskDetailPage } from "./TaskDetailPage";
 import TaskBoardListPreview from "../components/task/TaskBoardListPreview";
-
+import { UpdateTaskDTO } from "../models/task/UpdateTaskDTO";
+import { TaskStatus } from "../enums/TaskStatus";
 // import EditTaskModal from "../components/task/EditTaskModal";
 
 interface TaskListPageProps {
@@ -32,6 +33,29 @@ const TaskPage: React.FC<TaskListPageProps> = ({ projectId, token }) => {
   const [sortBy, setSortBy] = useState<SortOption>("NEWEST");
   const [showBoard, setShowBoard] = useState(false);
   const api = new TaskAPI(import.meta.env.VITE_GATEWAY_URL, token);
+ 
+  const handleStatusChange = async (taskId: number, newStatus: TaskStatus) => {
+
+    const taskToUpdate = tasks.find((t) => t.task_id === taskId);
+    if (!taskToUpdate) return;
+
+    const payload: UpdateTaskDTO = {
+      status: newStatus
+    };
+
+    const originalTasks = [...tasks];
+    setTasks((prev) =>
+      prev.map((t) => (t.task_id === taskId ? { ...t, task_status: newStatus } : t))
+    );
+
+    try {
+
+      await api.updateTask(taskId, payload);
+    } catch (err) {
+      console.error("Failed to update status on server", err);
+      setTasks(originalTasks);
+    }
+  };
 
   const filteredAndSortedTasks = tasks
     .filter((task) => {
@@ -69,6 +93,7 @@ const TaskPage: React.FC<TaskListPageProps> = ({ projectId, token }) => {
           );
       }
     });
+
 
   useEffect(() => {
     const load = async () => {
@@ -225,6 +250,7 @@ const TaskPage: React.FC<TaskListPageProps> = ({ projectId, token }) => {
                   tasks={filteredAndSortedTasks}
                   onSelect={setSelectedTaskId}
                   selectedTaskId={selectedtaskId}
+                  onStatusChange={handleStatusChange}
                 />
                   
               ) : (
