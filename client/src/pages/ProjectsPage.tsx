@@ -100,11 +100,12 @@ export const ProjectsPage: React.FC = () => {
   };
 
   return (
-    <div className="flex min-h-screen bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-[#0f172a] via-[#020617] to-black">
+    <div className="flex h-screen bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-[#0f172a] via-[#020617] to-black overflow-hidden">
       <Sidebar />
 
-      <div className="flex-1 p-6">
-        <header className="flex items-center justify-between gap-5 mb-6 flex-wrap">
+      <div className="flex-1 p-6 flex flex-col h-screen">
+
+        <header className="flex items-center justify-between gap-5 mb-6 flex-wrap flex-shrink-0">
           <h1 className="text-3xl md:text-4xl font-bold text-white">
             Projects
           </h1>
@@ -169,26 +170,25 @@ export const ProjectsPage: React.FC = () => {
           </div>
         </header>
 
-        <section
-          aria-live="polite"
-          className="
-            grid gap-6
-            [grid-template-columns:repeat(auto-fill,minmax(280px,1fr))]
-          "
-        >
-          {projects.map((p) => (
-            <ProjectCard
-              key={p.id}
-              project={p}
-              selected={String(p.id) === selectedId}
-              onSelect={(id) => handleSelect(String(id))}
-              onView={handleViewProject}
-              onEdit={(proj) => alert(`Edit ${proj.name}`)}
-              onDelete={(proj) => alert(`Delete ${proj.name}`)}
-              canManage={true}
-            />
-          ))}
-        </section>
+        <div className="flex-1 min-h-0 overflow-y-auto bg-white/5 backdrop-blur-xl p-6 rounded-2xl shadow-lg border border-white/10 styled-scrollbar">
+          <section
+            aria-live="polite"
+            className="grid gap-6 [grid-template-columns:repeat(auto-fill,minmax(280px,1fr))]"
+          >
+            {projects.map((p) => (
+              <ProjectCard
+                key={p.id}
+                project={p}
+                selected={String(p.id) === selectedId}
+                onSelect={(id) => handleSelect(String(id))}
+                onView={handleViewProject}
+                onEdit={(proj) => alert(`Edit ${proj.name}`)}
+                onDelete={(proj) => alert(`Delete ${proj.name}`)}
+                canManage={true}
+              />
+            ))}
+          </section>
+        </div>
 
         <ProjectDetailsModal
           project={viewProject}
