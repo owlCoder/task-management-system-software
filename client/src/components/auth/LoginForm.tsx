@@ -8,7 +8,6 @@ import { LoginFormProps } from "../../types/LoginFormProps";
 
 export const LoginForm: React.FC<LoginFormProps> = ({
   authAPI,
-  onSwitchToRegister,
 }) => {
   const [formData, setFormData] = useState<LoginUserDTO>({
     username: "",
@@ -88,7 +87,8 @@ export const LoginForm: React.FC<LoginFormProps> = ({
         {isLoading ? "Loading..." : "Login"}
       </button>
 
-      <p className="mt-4 text-center text-white/70 text-sm">
+   
+      {/*<p className="mt-4 text-center text-white/70 text-sm">
         Don't have an account?{" "}
         <span
           className="text-white font-bold cursor-pointer"
@@ -96,7 +96,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
         >
           Register
         </span>
-      </p>
+      </p>*/}
     </form>
   );
 };

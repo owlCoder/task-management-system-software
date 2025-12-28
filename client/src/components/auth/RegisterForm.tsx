@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+/*import React, { useState } from "react";
 import { IAuthAPI } from "../../api/auth/IAuthAPI";
 import { RegistrationUserDTO } from "../../models/auth/RegistrationUserDTO";
 import { UserRole } from "../../enums/UserRole";
@@ -185,3 +185,4 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
     </form>
   );
 };
+*/

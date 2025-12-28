@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { IAuthAPI } from "../api/auth/IAuthAPI";
 import { LoginForm } from "../components/auth/LoginForm";
-import { RegisterForm } from "../components/auth/RegisterForm";
+//import { RegisterForm } from "../components/auth/RegisterForm";
 
 type AuthPageProps = {
   authAPI: IAuthAPI;
@@ -13,8 +13,6 @@ const backgroundImageUrl = new URL(
 ).href;
 
 export const AuthPage: React.FC<AuthPageProps> = ({ authAPI }) => {
-  const [activeTab, setActiveTab] = useState<"login" | "register">("login");
-
   return (
     <div
       className="w-screen h-screen bg-cover bg-center bg-no-repeat flex"
@@ -34,17 +32,8 @@ export const AuthPage: React.FC<AuthPageProps> = ({ authAPI }) => {
           "
         >
           <div className="px-10 py-12">
-            {activeTab === "login" ? (
-              <LoginForm
-                authAPI={authAPI}
-                onSwitchToRegister={() => setActiveTab("register")}
+              <LoginForm authAPI={authAPI}
               />
-            ) : (
-              <RegisterForm
-                authAPI={authAPI}
-                onSwitchToLogin={() => setActiveTab("login")}
-              />
-            )}
           </div>
         </div>
       </div>
