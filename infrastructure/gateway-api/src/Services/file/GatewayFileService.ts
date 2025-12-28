@@ -16,15 +16,14 @@ import { extractDownloadDTOFromResponse, generateFormData } from "../../Utils/Fi
 import { HTTP_METHODS } from "../../Constants/common/HttpMethods";
 import { FILE_ROUTES } from "../../Constants/routes/file/FileRoutes";
 import { SERVICES } from "../../Constants/services/Services";
+import { API_ENDPOINTS } from "../../Constants/services/APIEndpoints";
 
 export class GatewayFileService implements IGatewayFileService {
     private readonly fileClient: AxiosInstance;
     
     constructor(private readonly errorHandlingService: IErrorHandlingService){
-        const fileBaseURL = process.env.FILE_SERVICE_API;
-        
         this.fileClient = axios.create({
-            baseURL: fileBaseURL,
+            baseURL: API_ENDPOINTS.FILE,
             timeout: 5000,
         });
     }

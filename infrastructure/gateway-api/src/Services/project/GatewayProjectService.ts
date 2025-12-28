@@ -13,15 +13,14 @@ import { Result } from "../../Domain/types/common/Result";
 import { PROJECT_ROUTES } from "../../Constants/routes/project/ProjectRoutes";
 import { HTTP_METHODS } from "../../Constants/common/HttpMethods";
 import { SERVICES } from "../../Constants/services/Services";
+import { API_ENDPOINTS } from "../../Constants/services/APIEndpoints";
 
 export class GatewayProjectService implements IGatewayProjectService {
     private readonly projectClient: AxiosInstance;
     
     constructor(private readonly errorHandlingService: IErrorHandlingService){
-        const projectBaseURL = process.env.PROJECT_SERVICE_API;
-        
         this.projectClient = axios.create({
-            baseURL: projectBaseURL,
+            baseURL: API_ENDPOINTS.PROJECT,
             timeout: 5000,
         });
     }

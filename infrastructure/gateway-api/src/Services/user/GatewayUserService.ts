@@ -14,15 +14,14 @@ import { Result } from "../../Domain/types/common/Result";
 import { USER_ROUTES } from "../../Constants/routes/user/UserRoutes";
 import { HTTP_METHODS } from "../../Constants/common/HttpMethods";
 import { SERVICES } from "../../Constants/services/Services";
+import { API_ENDPOINTS } from "../../Constants/services/APIEndpoints";
 
 export class GatewayUserService implements IGatewayUserService {
     private readonly userClient: AxiosInstance;
 
     constructor(private readonly errorHandlingService: IErrorHandlingService) {
-        const userBaseURL = process.env.USER_SERVICE_API;
-
         this.userClient = axios.create({
-            baseURL: userBaseURL,
+            baseURL: API_ENDPOINTS.USER,
             headers: { "Content-Type": "application/json" },
             timeout: 5000,
         });

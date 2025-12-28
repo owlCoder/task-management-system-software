@@ -14,15 +14,14 @@ import { Result } from "../../Domain/types/common/Result";
 import { SERVICES } from "../../Constants/services/Services";
 import { HTTP_METHODS } from "../../Constants/common/HttpMethods";
 import { TASK_ROUTES } from "../../Constants/routes/task/TaskRoutes";
+import { API_ENDPOINTS } from "../../Constants/services/APIEndpoints";
 
 export class GatewayTaskService implements IGatewayTaskService {
     private readonly taskClient: AxiosInstance;
     
     constructor(private readonly errorHandlingService: IErrorHandlingService){
-        const taskBaseURL = process.env.TASK_SERVICE_API;
-        
         this.taskClient = axios.create({
-            baseURL: taskBaseURL,
+            baseURL: API_ENDPOINTS.TASK,
             timeout: 5000,
         });
     }

@@ -24,7 +24,7 @@ export class ErrorHandlingService implements IErrorHandlingService {
             return this.handleHttpError(axiosError, serviceName, method, url);
         }
 
-        return this.handleInternalError(error, serviceName, method, url);
+        return this.handleInternalError(error, method, url);
     }
 
     private handleTimeout(error: AxiosError, serviceName: string, method: string, url: string): Result<never> {
@@ -68,7 +68,7 @@ export class ErrorHandlingService implements IErrorHandlingService {
         };
     }
 
-    private handleInternalError(error: unknown, serviceName: string, method: string, url: string): Result<never> {
+    private handleInternalError(error: unknown, method: string, url: string): Result<never> {
         this.loggerService.err("Gateway", "GATEWAY_ERROR", url, method, `Gateway error ${error instanceof Error ? `- ${error.message}` : ""}`);
 
         return {

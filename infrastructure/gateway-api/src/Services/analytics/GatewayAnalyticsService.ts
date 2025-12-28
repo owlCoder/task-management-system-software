@@ -15,15 +15,14 @@ import { Result } from "../../Domain/types/common/Result";
 import { SERVICES } from "../../Constants/services/Services";
 import { HTTP_METHODS } from "../../Constants/common/HttpMethods";
 import { ANALYTICS_ROUTES } from "../../Constants/routes/analytics/AnalyticsRoutes";
+import { API_ENDPOINTS } from "../../Constants/services/APIEndpoints";
 
 export class GatewayAnalyticsService implements IGatewayAnalyticsService {
     private readonly analyticsClient: AxiosInstance;
 
     constructor(private readonly errorHandlingService: IErrorHandlingService) {
-        const analyticsBaseURL = process.env.ANALYTICS_SERVICE_API;
-
         this.analyticsClient = axios.create({
-            baseURL: analyticsBaseURL,
+            baseURL: API_ENDPOINTS.ANALYTICS,
             headers: { "Content-Type": "application/json" },
             timeout: 5000,
         });

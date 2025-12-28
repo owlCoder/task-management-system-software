@@ -26,11 +26,16 @@
     - `GET /files/metadata/:fileId`: Get metadata for a specific file.
     - `POST /files/upload`: Upload a new file.
     - `DELETE /files/:fileId`: Delete a specific file.
-- **Project Microservice** (*Accessible to project managers, fetching available for workers*)
-    - `GET /projects/:id`: Get project by id.
+- **Project Microservice** (*Modifications available to project managers, preview available to project related roles*)
+    - `GET /projects/:id`: Get specific project.
     - `POST /projects`: Create new project.
     - `PUT /projects/:id`: Update a specific project.
-    - `DELETE /projects/:id`: Delete a specific project
+    - `DELETE /projects/:id`: Delete a specific project.
+- **Task Microservice** (*Modifications available to project manager, preview available to project related roles*)
+    - `GET /tasks/:taskId`: Get specific task.
+    - `GET /tasks/sprints/:sprintId`: Get tasks for specific sprint.
+    - `POST /tasks/sprints/:sprintId`: Add task to a specific sprint.
+    - `POST /tasks/:taskId/comments`: Add comment to a specific task.
 - **Notification Microservice** (*Accessible to authenticated users*)
     - `GET /notifications/:id`: Get a specific notification.
     - `GET /notifications/user/:userId`: Get a notifications of a specific user.

@@ -15,15 +15,14 @@ import { Result } from "../../Domain/types/common/Result";
 import { AUTH_ROUTES } from "../../Constants/routes/auth/AuthRoutes";
 import { HTTP_METHODS } from "../../Constants/common/HttpMethods";
 import { SERVICES } from "../../Constants/services/Services";
+import { API_ENDPOINTS } from "../../Constants/services/APIEndpoints";
 
 export class GatewayAuthService implements IGatewayAuthService {
     private readonly authClient: AxiosInstance;
 
     constructor(private readonly errorHandlingService: IErrorHandlingService) {
-        const authBaseURL = process.env.AUTH_SERVICE_API;
-
         this.authClient = axios.create({
-            baseURL: authBaseURL,
+            baseURL: API_ENDPOINTS.AUTH,
             headers: { "Content-Type": "application/json" },
             timeout: 5000,
         });

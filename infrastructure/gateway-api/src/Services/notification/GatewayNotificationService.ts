@@ -11,15 +11,14 @@ import { Result } from "../../Domain/types/common/Result";
 import { NOTIFICATION_ROUTES } from "../../Constants/routes/notification/NotificationRoutes";
 import { HTTP_METHODS } from "../../Constants/common/HttpMethods";
 import { SERVICES } from "../../Constants/services/Services";
+import { API_ENDPOINTS } from "../../Constants/services/APIEndpoints";
 
 export class GatewayNotificationService implements IGatewayNotificationService {
     private readonly notificationClient: AxiosInstance;
     
     constructor(private readonly errorHandlingService: IErrorHandlingService) {
-        const notificationBaseURL = process.env.NOTIFICATION_SERVICE_API;
-
         this.notificationClient = axios.create({
-            baseURL: notificationBaseURL,
+            baseURL: API_ENDPOINTS.NOTIFICATION,
             headers: { "Content-Type": "application/json" },
             timeout: 5000,
         });
