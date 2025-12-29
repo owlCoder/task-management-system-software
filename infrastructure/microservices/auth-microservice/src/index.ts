@@ -4,7 +4,7 @@ import { LogerService } from './Services/LogerService';
 import { LoggingServiceEnum } from './Domain/enums/LoggingServiceEnum';
 import { SeverityEnum } from './Domain/enums/SeverityEnum';
 
-const port = process.env.PORT || 5000;
+const port = process.env.PORT || 5544;
 const logger = new LogerService(LoggingServiceEnum.APP_SERVICE);
 
 app.listen(port, () => {

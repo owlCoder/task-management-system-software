@@ -60,14 +60,21 @@ export class AuthService implements IAuthService {
   }
 
   async login(data: LoginUserDTO): Promise<LoginResponseType> {
+    // const hashedInputPassword = await bcrypt.hash(data.password, 10);
+    // console.log("Hashed input password:", hashedInputPassword);
+
     const user = await this.userRepository.findOne({
       where: { username: data.username },
       relations: ["user_role"],
     });
+
+    console.log("Retrieved user from DB:", user);
+
     if (!user || user.is_deleted) {
       this.logger.log(SeverityEnum.WARN, `Login attempt failed: user not found or deleted for username ${data.username}`);
       return { authenticated: false };
     }
+
 
     const passwordMatches = await bcrypt.compare(data.password, user.password_hash);
     if (!passwordMatches) {
