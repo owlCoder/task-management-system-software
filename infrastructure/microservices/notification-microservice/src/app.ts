@@ -16,7 +16,7 @@ export const createApp = (notificationService: INotificationService): Applicatio
   
   // DEBUG MIDDLEWARE - Loguj SVE zahteve
   app.use((req: Request, res: Response, next) => {
-    console.log('🔥 MIDDLEWARE DEBUG:');
+    console.log(' MIDDLEWARE DEBUG:');
     console.log('  Method:', req.method);
     console.log('  Path:', req.path);
     console.log('  URL:', req.url);
