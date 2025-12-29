@@ -3,7 +3,7 @@ import { Request, Response, Router } from "express";
 
 // Domain
 import { IGatewayUserService } from "../../../Domain/services/user/IGatewayUserService";
-import { RegistrationUserDTO } from "../../../Domain/DTOs/auth/RegistrationUserDTO";
+import { RegistrationUserDTO } from "../../../Domain/DTOs/user/RegistrationUserDTO";
 import { UserDTO } from "../../../Domain/DTOs/user/UserDTO";
 import { UpdateUserDTO } from "../../../Domain/DTOs/user/UpdateUserDTO";
 import { UserRoleDTO } from "../../../Domain/DTOs/user/UserRoleDTO";

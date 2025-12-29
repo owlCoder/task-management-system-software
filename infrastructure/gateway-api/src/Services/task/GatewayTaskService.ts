@@ -16,6 +16,9 @@ import { HTTP_METHODS } from "../../Constants/common/HttpMethods";
 import { TASK_ROUTES } from "../../Constants/routes/task/TaskRoutes";
 import { API_ENDPOINTS } from "../../Constants/services/APIEndpoints";
 
+// Infrastructure
+import { makeAPICall } from "../../Infrastructure/axios/APIHelpers";
+
 /**
  * Makes API requests to the Task Microservice.
  */
@@ -37,16 +40,11 @@ export class GatewayTaskService implements IGatewayTaskService {
      * - On failure returns status code and error message.
      */
     async getTaskById(taskId: number): Promise<Result<TaskDTO>> {
-        try {
-            const response = await this.taskClient.get<TaskDTO>(TASK_ROUTES.GET_BY_ID(taskId));
-
-            return {
-                success: true,
-                data: response.data
-            }
-        } catch(error) {
-            return this.errorHandlingService.handle(error, SERVICES.TASK, HTTP_METHODS.GET, TASK_ROUTES.GET_BY_ID(taskId));
-        }
+        return await makeAPICall<TaskDTO>(this.taskClient, this.errorHandlingService, {
+            serviceName: SERVICES.TASK,
+            method: HTTP_METHODS.GET,
+            url: TASK_ROUTES.GET_BY_ID(taskId)
+        });
     }
     
     /**
@@ -57,16 +55,11 @@ export class GatewayTaskService implements IGatewayTaskService {
      * - On failure returns status code and error message.
      */
     async getTasksBySprintId(sprintId: number): Promise<Result<TaskDTO[]>> {
-        try {
-            const response = await this.taskClient.get<TaskDTO[]>(TASK_ROUTES.GET_BY_SPRINT_ID(sprintId));
-
-            return {
-                success: true,
-                data: response.data
-            }
-        } catch(error) {
-            return this.errorHandlingService.handle(error, SERVICES.TASK, HTTP_METHODS.GET, TASK_ROUTES.GET_BY_SPRINT_ID(sprintId));
-        }
+        return await makeAPICall<TaskDTO[]>(this.taskClient, this.errorHandlingService, {
+            serviceName: SERVICES.TASK,
+            method: HTTP_METHODS.GET,
+            url: TASK_ROUTES.GET_BY_SPRINT_ID(sprintId)
+        });
     }
     
     /**
@@ -78,16 +71,12 @@ export class GatewayTaskService implements IGatewayTaskService {
      * - On failure returns status code and error message.
      */
     async addTaskBySprintId(sprintId: number, data: CreateTaskDTO): Promise<Result<TaskDTO>> {
-        try {
-            const response = await this.taskClient.post<TaskDTO>(TASK_ROUTES.ADD_TASK_BY_SPRINT_ID(sprintId), data);
-
-            return {
-                success: true,
-                data: response.data
-            }
-        } catch(error) {
-            return this.errorHandlingService.handle(error, SERVICES.TASK, HTTP_METHODS.POST, TASK_ROUTES.ADD_TASK_BY_SPRINT_ID(sprintId));
-        }
+        return await makeAPICall<TaskDTO, CreateTaskDTO>(this.taskClient, this.errorHandlingService, {
+            serviceName: SERVICES.TASK,
+            method: HTTP_METHODS.POST,
+            url: TASK_ROUTES.ADD_TASK_BY_SPRINT_ID(sprintId),
+            data: data
+        });
     }
     
     /**
@@ -99,16 +88,12 @@ export class GatewayTaskService implements IGatewayTaskService {
      * - On failure returns status code and error message.
      */
     async addCommentByTaskId(taskId: number, data: CreateCommentDTO): Promise<Result<CommentDTO>> {
-        try {
-            const response = await this.taskClient.post<CommentDTO>(TASK_ROUTES.ADD_COMMENT_BY_TASK_ID(taskId), data);
-
-            return {
-                success: true,
-                data: response.data
-            }
-        } catch(error) {
-            return this.errorHandlingService.handle(error, SERVICES.TASK, HTTP_METHODS.POST, TASK_ROUTES.ADD_COMMENT_BY_TASK_ID(taskId));
-        }
+        return await makeAPICall<CommentDTO, CreateCommentDTO>(this.taskClient, this.errorHandlingService, {
+            serviceName: SERVICES.TASK,
+            method: HTTP_METHODS.POST,
+            url: TASK_ROUTES.ADD_COMMENT_BY_TASK_ID(taskId),
+            data: data
+        });
     }
 
 }

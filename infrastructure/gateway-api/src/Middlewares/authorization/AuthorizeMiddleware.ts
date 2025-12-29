@@ -5,7 +5,7 @@ import { Request, Response, NextFunction } from "express";
 import { UserRole } from "../../Domain/enums/user/UserRole";
 import { AuthTokenClaimsType } from "../../Domain/types/auth/AuthTokenClaims";
 
-// Utils
+// Infrastructure
 import { logger } from "../../Infrastructure/logging/Logger";
 
 /**

@@ -38,7 +38,7 @@ import { GatewayAnalyticsController } from './WebAPI/Controllers/analytics/Gatew
 import { logTraffic } from './Middlewares/logger/LoggingMiddleware';
 import { corsPolicy } from './Middlewares/cors/CorsMiddleware';
 
-// Utils
+// Infrastructure
 import { logger } from './Infrastructure/logging/Logger';
 
 const app = express();

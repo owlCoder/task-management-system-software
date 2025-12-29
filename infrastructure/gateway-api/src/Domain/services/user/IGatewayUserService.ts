@@ -1,4 +1,4 @@
-import { RegistrationUserDTO } from "../../DTOs/auth/RegistrationUserDTO";
+import { RegistrationUserDTO } from "../../DTOs/user/RegistrationUserDTO";
 import { UpdateUserDTO } from "../../DTOs/user/UpdateUserDTO";
 import { UserDTO } from "../../DTOs/user/UserDTO";
 import { UserRoleDTO } from "../../DTOs/user/UserRoleDTO";

@@ -1,7 +1,7 @@
 // Framework
 import { Request, Response, NextFunction } from "express";
 
-// Utils
+// Infrastructure
 import { logger } from "../../Infrastructure/logging/Logger";
 
 /**
