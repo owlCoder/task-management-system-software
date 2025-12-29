@@ -1,4 +1,4 @@
-export const NOTIFICATION_ROUTES = {
+export const NOTIFICATION_ROUTES = Object.freeze({
     GET_BY_ID: (id: number) => `/notifications/${id}`,
     GET_BY_USER_ID: (userId: number) => `/notifications/user/${userId}`,
     GET_UNREAD_COUNT: (userId: number) => `/notifications/user/${userId}/unread-count`,
@@ -8,4 +8,4 @@ export const NOTIFICATION_ROUTES = {
     MARK_MULTIPLE_AS_UNREAD: `/notifications/bulk/unread`,
     DELETE: (id: number) => `/notifications/${id}`,
     DELETE_MULTIPLE: `/notifications/bulk`,
-}
+} as const);

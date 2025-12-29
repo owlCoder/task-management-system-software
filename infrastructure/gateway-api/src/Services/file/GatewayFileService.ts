@@ -19,6 +19,9 @@ import { FILE_ROUTES } from "../../Constants/routes/file/FileRoutes";
 import { SERVICES } from "../../Constants/services/Services";
 import { API_ENDPOINTS } from "../../Constants/services/APIEndpoints";
 
+// Infrastructure
+import { makeAPICall, makeAPICallWithTransform } from "../../Infrastructure/axios/APIHelpers";
+
 /**
  * Makes API requests to the File Microservice.
  */
@@ -40,19 +43,13 @@ export class GatewayFileService implements IGatewayFileService {
      * - On failure returns status code and error message.
      */
     async downloadFile(fileId: number): Promise<Result<DownloadFileDTO>> {
-        try {
-            const response = await this.fileClient.get(FILE_ROUTES.DOWNLOAD(fileId), {
-                responseType: "arraybuffer"
-            });
-            const downloadFile = extractDownloadDTOFromResponse(response);
-
-            return {
-                success: true,
-                data: downloadFile
-            };
-        } catch(error){
-            return this.errorHandlingService.handle(error, SERVICES.FILE, HTTP_METHODS.GET, FILE_ROUTES.DOWNLOAD(fileId));
-        }
+        return await makeAPICallWithTransform<DownloadFileDTO>(this.fileClient, this.errorHandlingService, {
+            serviceName: SERVICES.FILE,
+            method: HTTP_METHODS.GET,
+            url: FILE_ROUTES.DOWNLOAD(fileId),
+            responseType: "arraybuffer",
+            timeout: 10000
+        }, extractDownloadDTOFromResponse);
     }
 
     /**
@@ -63,16 +60,11 @@ export class GatewayFileService implements IGatewayFileService {
      * - On failure returns status code and error message.
      */
     async getFilesByAuthorId(authorId: number): Promise<Result<UploadedFileDTO[]>> {
-        try {
-            const response = await this.fileClient.get<UploadedFileDTO[]>(FILE_ROUTES.GET_BY_AUTHOR(authorId));
-
-            return {
-                success: true,
-                data: response.data
-            };
-        } catch(error) {
-            return this.errorHandlingService.handle(error, SERVICES.FILE, HTTP_METHODS.GET, FILE_ROUTES.GET_BY_AUTHOR(authorId));
-        }
+        return await makeAPICall<UploadedFileDTO[]>(this.fileClient, this.errorHandlingService, {
+            serviceName: SERVICES.FILE,
+            method: HTTP_METHODS.GET,
+            url: FILE_ROUTES.GET_BY_AUTHOR(authorId)
+        });
     }
 
     /**
@@ -83,16 +75,11 @@ export class GatewayFileService implements IGatewayFileService {
      * - On failure returns status code and error message.
      */
     async getFileMetadata(fileId: number): Promise<Result<UploadedFileDTO>> {
-        try {
-            const response = await this.fileClient.get<UploadedFileDTO>(FILE_ROUTES.METADATA(fileId));
-
-            return {
-                success: true,
-                data: response.data
-            };
-        } catch(error){
-            return this.errorHandlingService.handle(error, SERVICES.FILE, HTTP_METHODS.GET, FILE_ROUTES.METADATA(fileId));
-        }
+        return await makeAPICall<UploadedFileDTO>(this.fileClient, this.errorHandlingService, {
+            serviceName: SERVICES.FILE,
+            method: HTTP_METHODS.GET,
+            url: FILE_ROUTES.METADATA(fileId)
+        });
     }
 
     /**
@@ -103,17 +90,15 @@ export class GatewayFileService implements IGatewayFileService {
      * - On failure returns status code and error message.
      */
     async uploadFile(fileData: CreateFileDTO): Promise<Result<UploadedFileDTO>> {
-        try{
-            const formData = generateFileFormData(fileData);
-            const response = await this.fileClient.post<UploadedFileDTO>(FILE_ROUTES.UPLOAD, formData);
-
-            return {
-                success: true,
-                data: response.data
-            };
-        } catch(error) {
-            return this.errorHandlingService.handle(error, SERVICES.FILE, HTTP_METHODS.POST, FILE_ROUTES.UPLOAD);
-        }
+        const formData = generateFileFormData(fileData);
+        
+        return await makeAPICall<UploadedFileDTO, FormData>(this.fileClient, this.errorHandlingService, {
+            serviceName: SERVICES.FILE,
+            method: HTTP_METHODS.POST,
+            url: FILE_ROUTES.UPLOAD,
+            data: formData,
+            timeout: 10000
+        });
     }
 
     /**
@@ -124,16 +109,11 @@ export class GatewayFileService implements IGatewayFileService {
      * - On failure returns status code and error message.
      */
     async deleteFile(fileId: number): Promise<Result<void>> {
-        try {
-            await this.fileClient.delete<boolean>(FILE_ROUTES.DELETE(fileId));
-
-            return {
-                success: true,
-                data: undefined
-            };
-        } catch(error) {
-            return this.errorHandlingService.handle(error, SERVICES.FILE, HTTP_METHODS.DELETE, FILE_ROUTES.DELETE(fileId))
-        }
+        return await makeAPICall<void>(this.fileClient, this.errorHandlingService, {
+            serviceName: SERVICES.FILE,
+            method: HTTP_METHODS.DELETE,
+            url: FILE_ROUTES.DELETE(fileId),
+        });
     }
 
 }

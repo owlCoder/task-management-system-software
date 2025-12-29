@@ -13,6 +13,9 @@ import { HTTP_METHODS } from "../../Constants/common/HttpMethods";
 import { SERVICES } from "../../Constants/services/Services";
 import { API_ENDPOINTS } from "../../Constants/services/APIEndpoints";
 
+// Infrastructure
+import { makeAPICall } from "../../Infrastructure/axios/APIHelpers";
+
 /**
  * Makes API requests to the Notification Microservice.
  */
@@ -35,16 +38,11 @@ export class GatewayNotificationService implements IGatewayNotificationService {
      * - On failure returns status code and error message.
      */
     async getNotificationById(id: number): Promise<Result<NotificationDTO>> {
-        try {
-            const response = await this.notificationClient.get<NotificationDTO>(NOTIFICATION_ROUTES.GET_BY_ID(id));
-
-            return { 
-                success: true, 
-                data: response.data 
-            };
-        } catch(error) {
-            return this.errorHandlingService.handle(error, SERVICES.NOTIFICATION, HTTP_METHODS.GET, NOTIFICATION_ROUTES.GET_BY_ID(id));
-        }
+        return await makeAPICall<NotificationDTO>(this.notificationClient, this.errorHandlingService, {
+            serviceName: SERVICES.NOTIFICATION,
+            method: HTTP_METHODS.GET,
+            url: NOTIFICATION_ROUTES.GET_BY_ID(id) 
+        });
     }
 
     /**
@@ -55,16 +53,11 @@ export class GatewayNotificationService implements IGatewayNotificationService {
      * - On failure returns status code and error message.
      */
     async getNotificationsByUserId(userId: number): Promise<Result<NotificationDTO[]>> {
-        try {
-            const response = await this.notificationClient.get<NotificationDTO[]>(NOTIFICATION_ROUTES.GET_BY_USER_ID(userId));
-
-            return { 
-                success: true, 
-                data: response.data 
-            };
-        } catch(error) {
-            return this.errorHandlingService.handle(error, SERVICES.NOTIFICATION, HTTP_METHODS.GET, NOTIFICATION_ROUTES.GET_BY_USER_ID(userId));
-        }
+        return await makeAPICall<NotificationDTO[]>(this.notificationClient, this.errorHandlingService, {
+            serviceName: SERVICES.NOTIFICATION,
+            method: HTTP_METHODS.GET,
+            url: NOTIFICATION_ROUTES.GET_BY_USER_ID(userId) 
+        });
     }
 
     /**
@@ -75,16 +68,11 @@ export class GatewayNotificationService implements IGatewayNotificationService {
      * - On failure returns status code and error message.
      */
     async getUnreadNotificationCount(id: number): Promise<Result<number>> {
-        try {
-            const response = await this.notificationClient.get<number>(NOTIFICATION_ROUTES.GET_UNREAD_COUNT(id));
-
-            return { 
-                success: true, 
-                data: response.data 
-            };
-        } catch(error) {
-            return this.errorHandlingService.handle(error, SERVICES.NOTIFICATION, HTTP_METHODS.GET, NOTIFICATION_ROUTES.GET_UNREAD_COUNT(id));
-        }
+        return await makeAPICall<number>(this.notificationClient, this.errorHandlingService, {
+            serviceName: SERVICES.NOTIFICATION,
+            method: HTTP_METHODS.GET,
+            url: NOTIFICATION_ROUTES.GET_UNREAD_COUNT(id) 
+        });
     }
 
     /**
@@ -95,16 +83,11 @@ export class GatewayNotificationService implements IGatewayNotificationService {
      * - On failure returns status code and error message.
      */
     async markNotificationAsRead(id: number): Promise<Result<void>> {
-        try {
-            await this.notificationClient.patch<void>(NOTIFICATION_ROUTES.MARK_AS_READ(id));
-
-            return { 
-                success: true, 
-                data: undefined 
-            };
-        } catch(error) {
-            return this.errorHandlingService.handle(error, SERVICES.NOTIFICATION, HTTP_METHODS.PATCH, NOTIFICATION_ROUTES.MARK_AS_READ(id));
-        }
+        return await makeAPICall<void>(this.notificationClient, this.errorHandlingService, {
+            serviceName: SERVICES.NOTIFICATION,
+            method: HTTP_METHODS.PATCH,
+            url: NOTIFICATION_ROUTES.MARK_AS_READ(id)
+        });
     }
 
     /**
@@ -115,16 +98,11 @@ export class GatewayNotificationService implements IGatewayNotificationService {
      * - On failure returns status code and error message.
      */
     async markNotificationAsUnread(id: number): Promise<Result<void>> {
-        try {
-            await this.notificationClient.patch<void>(NOTIFICATION_ROUTES.MARK_AS_UNREAD(id));
-
-            return { 
-                success: true, 
-                data: undefined
-            };
-        } catch(error) {
-            return this.errorHandlingService.handle(error, SERVICES.NOTIFICATION, HTTP_METHODS.PATCH, NOTIFICATION_ROUTES.MARK_AS_UNREAD(id));
-        }
+        return await makeAPICall<void>(this.notificationClient, this.errorHandlingService, {
+            serviceName: SERVICES.NOTIFICATION,
+            method: HTTP_METHODS.PATCH,
+            url: NOTIFICATION_ROUTES.MARK_AS_UNREAD(id) 
+        });
     }
     
     /**
@@ -135,16 +113,12 @@ export class GatewayNotificationService implements IGatewayNotificationService {
      * - On failure returns status code and error message.
      */
     async markMultipleNotificationsAsRead(ids: number[]): Promise<Result<void>> {
-        try {
-            await this.notificationClient.patch<void>(NOTIFICATION_ROUTES.MARK_MULTIPLE_AS_READ, ids);
-
-            return { 
-                success: true, 
-                data: undefined
-            };
-        } catch(error) {
-            return this.errorHandlingService.handle(error, SERVICES.NOTIFICATION, HTTP_METHODS.PATCH, NOTIFICATION_ROUTES.MARK_MULTIPLE_AS_READ);
-        }
+        return await makeAPICall<void, number[]>(this.notificationClient, this.errorHandlingService, {
+            serviceName: SERVICES.NOTIFICATION,
+            method: HTTP_METHODS.PATCH,
+            url: NOTIFICATION_ROUTES.MARK_MULTIPLE_AS_READ,
+            data: ids 
+        });
     }
 
     /**
@@ -155,16 +129,12 @@ export class GatewayNotificationService implements IGatewayNotificationService {
      * - On failure returns status code and error message.
      */
     async markMultipleNotificationsAsUnread(ids: number[]): Promise<Result<void>> {
-        try {
-            await this.notificationClient.patch<void>(NOTIFICATION_ROUTES.MARK_MULTIPLE_AS_UNREAD, ids);
-
-            return { 
-                success: true, 
-                data: undefined
-            };
-        } catch(error) {
-            return this.errorHandlingService.handle(error, SERVICES.NOTIFICATION, HTTP_METHODS.PATCH, NOTIFICATION_ROUTES.MARK_MULTIPLE_AS_UNREAD);
-        }
+        return await makeAPICall<void, number[]>(this.notificationClient, this.errorHandlingService, {
+            serviceName: SERVICES.NOTIFICATION,
+            method: HTTP_METHODS.PATCH,
+            url: NOTIFICATION_ROUTES.MARK_MULTIPLE_AS_UNREAD,
+            data: ids 
+        });
     }
 
     /**
@@ -175,16 +145,11 @@ export class GatewayNotificationService implements IGatewayNotificationService {
      * - On failure returns status code and error message.
      */
     async deleteNotification(id: number): Promise<Result<void>> {
-        try {
-            await this.notificationClient.delete<void>(NOTIFICATION_ROUTES.DELETE(id));
-
-            return { 
-                success: true, 
-                data: undefined
-            };
-        } catch(error) {
-            return this.errorHandlingService.handle(error, SERVICES.NOTIFICATION, HTTP_METHODS.DELETE, NOTIFICATION_ROUTES.DELETE(id));
-        }
+        return await makeAPICall<void>(this.notificationClient, this.errorHandlingService, {
+            serviceName: SERVICES.NOTIFICATION,
+            method: HTTP_METHODS.DELETE,
+            url: NOTIFICATION_ROUTES.DELETE(id)
+        });
     }
 
     /**
@@ -195,16 +160,12 @@ export class GatewayNotificationService implements IGatewayNotificationService {
      * - On failure returns status code and error message.
      */
     async deleteMultipleNotifications(ids: number[]): Promise<Result<void>> {
-        try {
-            await this.notificationClient.delete<void>(NOTIFICATION_ROUTES.DELETE_MULTIPLE, { data: ids });
-
-            return { 
-                success: true,
-                data: undefined
-            };
-        } catch(error) {
-            return this.errorHandlingService.handle(error, SERVICES.NOTIFICATION, HTTP_METHODS.DELETE, NOTIFICATION_ROUTES.DELETE_MULTIPLE);
-        }
+        return await makeAPICall<void, number[]>(this.notificationClient, this.errorHandlingService, {
+            serviceName: SERVICES.NOTIFICATION,
+            method: HTTP_METHODS.DELETE,
+            url: NOTIFICATION_ROUTES.DELETE_MULTIPLE,
+            data: ids 
+        });
     }
 
 }

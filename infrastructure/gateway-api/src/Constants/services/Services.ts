@@ -1,4 +1,4 @@
-export const SERVICES = {
+export const SERVICES = Object.freeze({
     AUTH: "Auth Service",
     USER: "User Service",
     PROJECT: "Project Service",
@@ -6,4 +6,4 @@ export const SERVICES = {
     FILE: "File Service",
     NOTIFICATION: "Notification Service",
     ANALYTICS: "Analytics Service"
-}
+} as const);
