@@ -1,8 +1,8 @@
 import { Repository } from "typeorm";
 import { IFinancialAnalyticsService } from "../Domain/services/IFinancialAnalyticsService";
-import { Project } from "../../../project-microservice/src/Domain/models/Project";
-import { Task } from "../../../task-microservice/src/Domain/models/Task";
-import { Sprint } from "../../../project-microservice/src/Domain/models/Sprint";
+import { Project } from "../Domain/models/Project";
+import { Task } from "../Domain/models/Task";
+import { Sprint } from "../Domain/models/Sprint";
 import { BudgetTrackingDto } from "../Domain/DTOs/BudgetTrackingDto";
 import { ResourceCostAllocationDto } from "../Domain/DTOs/ResourceCostAllocationDto";
 import { ResourceCostAllocationItemDto } from "../Domain/DTOs/ResourceCostAllocationItemDto";
@@ -27,7 +27,7 @@ export class FinancialAnalyticsService implements IFinancialAnalyticsService {
       // TODO: CHANGE TO SPRINT
       // trenutno ide po project_id jer Task nema sprint_id
       const sprintTasks = await this.taskRepository.find({
-        where: { project_id: projectId }
+        where: { sprint_id: sprint.sprint_id }
       });
       totalSpent += sprintTasks.reduce((sum, t) => sum + (t.estimated_cost ?? 0), 0);
     }
@@ -54,7 +54,7 @@ export class FinancialAnalyticsService implements IFinancialAnalyticsService {
 
     for (const sprint of sprints) {
       // TODO: CHANGE TO SPRINT
-      const sprintTasks = await this.taskRepository.find({ where: { project_id: projectId } });
+      const sprintTasks = await this.taskRepository.find({ where: { sprint_id: sprint.sprint_id } });
       for (const task of sprintTasks) {
         if (!task.worker_id) continue;
         const current = costPerUser.get(task.worker_id) ?? 0;
@@ -86,7 +86,7 @@ export class FinancialAnalyticsService implements IFinancialAnalyticsService {
 
     for (const sprint of sprints) {
       // TODO: CHANGE TO SPRINT
-      const sprintTasks = await this.taskRepository.find({ where: { project_id: projectId } });
+      const sprintTasks = await this.taskRepository.find({ where: { sprint_id: sprint.sprint_id } });
       totalCost += sprintTasks.reduce((sum, t) => sum + (t.estimated_cost ?? 0), 0);
     }
 

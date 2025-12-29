@@ -1,7 +1,7 @@
 import { Repository, In } from 'typeorm';
 import { Notification } from '../Domain/models/Notification';
 import { INotificationMapper } from '../Utils/converters/INotificationMapper';
-import { INotificationService} from '../Domain/services/INotificationService';
+import { INotificationService} from '../Domain/Services/INotificationService';
 import { Result } from '../Domain/types/common/Result';
 import { ErrorCode } from '../Domain/types/common/ErrorCode';
 import { NotificationCreateDTO } from '../Domain/DTOs/NotificationCreateDTO';

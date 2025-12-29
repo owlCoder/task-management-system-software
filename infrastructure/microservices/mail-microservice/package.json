@@ -7,7 +7,7 @@
       "start": "ts-node src/index.ts",
       "dev": "nodemon --watch src --exec node -r ts-node/register src/index.ts",
       "build": "tsc",
-      "start:dist": "node dist/src/index.js",
+      "start:dist": "node dist/index.js",
       "typecheck": "tsc --noEmit"
    },
    "dependencies": {
