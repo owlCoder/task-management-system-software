@@ -2,16 +2,22 @@
 import { Router, Request, Response } from "express";
 
 // Domain
-import { IGatewayProjectService } from "../../Domain/services/project/IGatewayProjectService";
-import { ProjectCreateDTO } from "../../Domain/DTOs/project/ProjectCreateDTO";
-import { ProjectUpdateDTO } from "../../Domain/DTOs/project/ProjectUpdateDTO";
-import { ProjectDTO } from "../../Domain/DTOs/project/ProjectDTO";
-import { UserRole } from "../../Domain/enums/user/UserRole";
+import { IGatewayProjectService } from "../../../Domain/services/project/IGatewayProjectService";
+import { ProjectCreateDTO } from "../../../Domain/DTOs/project/ProjectCreateDTO";
+import { ProjectUpdateDTO } from "../../../Domain/DTOs/project/ProjectUpdateDTO";
+import { ProjectDTO } from "../../../Domain/DTOs/project/ProjectDTO";
+import { UserRole } from "../../../Domain/enums/user/UserRole";
 
 // Middlewares
-import { authenticate } from "../../Middlewares/authentication/AuthMiddleware";
-import { authorize } from "../../Middlewares/authorization/AuthorizeMiddleware";
+import { authenticate } from "../../../Middlewares/authentication/AuthMiddleware";
+import { authorize } from "../../../Middlewares/authorization/AuthorizeMiddleware";
 
+// Utils
+import { handleEmptyResponse, handleResponse } from "../../Utils/Http/ResponseHandler";
+
+/**
+ * Routes client requests towards the Project Microservice.
+ */
 export class GatewayProjectController {
     private readonly router: Router;
 
@@ -44,11 +50,7 @@ export class GatewayProjectController {
         const id = parseInt(req.params.id);
 
         const result = await this.gatewayProjectService.getProjectById(id);
-        if(result.success){
-            res.status(200).json(result.data);
-            return;
-        }
-        res.status(result.status).json({ message: result.message });
+        handleResponse(res, result);
     }
 
     /**
@@ -63,11 +65,7 @@ export class GatewayProjectController {
         const data = req.body as ProjectCreateDTO;
 
         const result = await this.gatewayProjectService.createProject(data);
-        if(result.success){
-            res.status(201).json(result.data);
-            return;
-        }
-        res.status(result.status).json({ message: result.message });
+        handleResponse(res, result, 201);
     }
 
     /**
@@ -83,11 +81,7 @@ export class GatewayProjectController {
         const data = req.body as ProjectUpdateDTO;
 
         const result = await this.gatewayProjectService.updateProject(id, data);
-        if(result.success){
-            res.status(200).json(result.data);
-            return;
-        }
-        res.status(result.status).json({ message: result.message });
+        handleResponse(res, result);
     }
 
     /**
@@ -102,11 +96,7 @@ export class GatewayProjectController {
         const id = parseInt(req.params.id);
 
         const result = await this.gatewayProjectService.deleteProject(id);
-        if(result.success){
-            res.status(204).send();
-            return;
-        }
-        res.status(result.status).json({ message: result.message });
+        handleEmptyResponse(res, result);
     }
 
     public getRouter(): Router {

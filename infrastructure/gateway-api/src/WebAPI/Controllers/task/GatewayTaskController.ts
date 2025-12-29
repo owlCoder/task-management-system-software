@@ -2,17 +2,23 @@
 import { Router, Request, Response } from "express";
 
 // Domain
-import { IGatewayTaskService } from "../../Domain/services/task/IGatewayTaskService";
-import { CreateTaskDTO } from "../../Domain/DTOs/task/CreateTaskDTO";
-import { CreateCommentDTO } from "../../Domain/DTOs/task/CreateCommentDTO";
-import { TaskDTO } from "../../Domain/DTOs/task/TaskDTO";
-import { CommentDTO } from "../../Domain/DTOs/task/CommentDTO";
-import { UserRole } from "../../Domain/enums/user/UserRole";
+import { IGatewayTaskService } from "../../../Domain/services/task/IGatewayTaskService";
+import { CreateTaskDTO } from "../../../Domain/DTOs/task/CreateTaskDTO";
+import { CreateCommentDTO } from "../../../Domain/DTOs/task/CreateCommentDTO";
+import { TaskDTO } from "../../../Domain/DTOs/task/TaskDTO";
+import { CommentDTO } from "../../../Domain/DTOs/task/CommentDTO";
+import { UserRole } from "../../../Domain/enums/user/UserRole";
 
 // Middlewares
-import { authenticate } from "../../Middlewares/authentication/AuthMiddleware";
-import { authorize } from "../../Middlewares/authorization/AuthorizeMiddleware";
+import { authenticate } from "../../../Middlewares/authentication/AuthMiddleware";
+import { authorize } from "../../../Middlewares/authorization/AuthorizeMiddleware";
 
+// Utils
+import { handleResponse } from "../../Utils/Http/ResponseHandler";
+
+/**
+ * Routes client requests towards the Task Microservice.
+ */
 export class GatewayTaskController {
     private readonly router: Router;
 
@@ -50,11 +56,7 @@ export class GatewayTaskController {
         const taskId = parseInt(req.params.taskId, 10);
 
         const result = await this.gatewayTaskService.getTaskById(taskId);
-        if(result.success){
-            res.status(200).json(result.data);
-            return;
-        }
-        res.status(result.status).json({ message: result.message });
+        handleResponse(res, result);
     }
 
     /**
@@ -69,11 +71,7 @@ export class GatewayTaskController {
         const sprintId = parseInt(req.params.sprintId, 10);
 
         const result = await this.gatewayTaskService.getTasksBySprintId(sprintId);
-        if(result.success){
-            res.status(200).json(result.data);
-            return;
-        }
-        res.status(result.status).json({ message: result.message });
+        handleResponse(res, result);
     }
 
     /**
@@ -89,11 +87,7 @@ export class GatewayTaskController {
         const data = req.body as CreateTaskDTO;
 
         const result = await this.gatewayTaskService.addTaskBySprintId(sprintId, data);
-        if(result.success){
-            res.status(201).json(result.data);
-            return;
-        }
-        res.status(result.status).json({ message: result.message });
+        handleResponse(res, result, 201);
     }
 
     /**
@@ -109,11 +103,7 @@ export class GatewayTaskController {
         const data = req.body as CreateCommentDTO;
 
         const result = await this.gatewayTaskService.addCommentByTaskId(taskId, data);
-        if(result.success){
-            res.status(201).json(result.data);
-            return;
-        }
-        res.status(result.status).json({ message: result.message });
+        handleResponse(res, result, 201);
     }
 
     public getRouter(): Router {

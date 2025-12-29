@@ -2,18 +2,24 @@
 import { Router, Request, Response } from "express";
 
 // Domain
-import { IGatewayAnalyticsService } from "../../Domain/services/analytics/IGatewayAnalyticsService";
-import { BurndownDTO } from "../../Domain/DTOs/analytics/BurndownDTO";
-import { BurnupDTO } from "../../Domain/DTOs/analytics/BurnupDTO";
-import { BudgetTrackingDTO } from "../../Domain/DTOs/analytics/BudgetTrackingDTO";
-import { ResourceCostAllocationDTO } from "../../Domain/DTOs/analytics/ResourceCostAllocationDTO";
-import { ProfitMarginDTO } from "../../Domain/DTOs/analytics/ProfitMarginDTO";
-import { UserRole } from "../../Domain/enums/user/UserRole";
+import { IGatewayAnalyticsService } from "../../../Domain/services/analytics/IGatewayAnalyticsService";
+import { BurndownDTO } from "../../../Domain/DTOs/analytics/BurndownDTO";
+import { BurnupDTO } from "../../../Domain/DTOs/analytics/BurnupDTO";
+import { BudgetTrackingDTO } from "../../../Domain/DTOs/analytics/BudgetTrackingDTO";
+import { ResourceCostAllocationDTO } from "../../../Domain/DTOs/analytics/ResourceCostAllocationDTO";
+import { ProfitMarginDTO } from "../../../Domain/DTOs/analytics/ProfitMarginDTO";
+import { UserRole } from "../../../Domain/enums/user/UserRole";
 
 // Middlewares
-import { authenticate } from "../../Middlewares/authentication/AuthMiddleware";
-import { authorize } from "../../Middlewares/authorization/AuthorizeMiddleware";
+import { authenticate } from "../../../Middlewares/authentication/AuthMiddleware";
+import { authorize } from "../../../Middlewares/authorization/AuthorizeMiddleware";
 
+// Utils
+import { handleResponse } from "../../Utils/Http/ResponseHandler";
+
+/**
+ * Routes client requests towards the Analytics Microservice.
+ */
 export class GatewayAnalyticsController {
     private readonly router: Router;
 
@@ -41,13 +47,9 @@ export class GatewayAnalyticsController {
      */
     private async getBurndownAnalyticsBySprintId(req: Request, res: Response): Promise<void> {
         const sprintId = parseInt(req.params.sprintId, 10);
-
+        
         const result = await this.gatewayAnalyticsService.getBurndownAnalyticsBySprintId(sprintId);
-        if(result.success){
-            res.status(200).json(result.data);
-            return;
-        }
-        res.status(result.status).json({ message: result.message });
+        handleResponse(res, result);
     }
 
     /**
@@ -62,11 +64,7 @@ export class GatewayAnalyticsController {
         const sprintId = parseInt(req.params.sprintId, 10);
 
         const result = await this.gatewayAnalyticsService.getBurnupAnalyticsBySprintId(sprintId);
-        if(result.success){
-            res.status(200).json(result.data);
-            return;
-        }
-        res.status(result.status).json({ message: result.message });
+        handleResponse(res, result);
     }
 
     /**
@@ -81,11 +79,7 @@ export class GatewayAnalyticsController {
         const projectId = parseInt(req.params.projectId, 10);
 
         const result = await this.gatewayAnalyticsService.getVelocityAnalyticsByProjectId(projectId);
-        if(result.success){
-            res.status(200).json(result.data);
-            return;
-        }
-        res.status(result.status).json({ message: result.message });
+        handleResponse(res, result);
     }
 
     /**
@@ -100,11 +94,7 @@ export class GatewayAnalyticsController {
         const projectId = parseInt(req.params.projectId, 10);
 
         const result = await this.gatewayAnalyticsService.getBudgetTrackingByProjectId(projectId);
-        if(result.success){
-            res.status(200).json(result.data);
-            return;
-        }
-        res.status(result.status).json({ message: result.message });
+        handleResponse(res, result);
     }
 
     /**
@@ -119,11 +109,7 @@ export class GatewayAnalyticsController {
         const projectId = parseInt(req.params.projectId, 10);
 
         const result = await this.gatewayAnalyticsService.getResourceCostAllocationByProjectId(projectId);
-        if(result.success){
-            res.status(200).json(result.data);
-            return;
-        }
-        res.status(result.status).json({ message: result.message });
+        handleResponse(res, result);
     }
     
     /**
@@ -138,11 +124,7 @@ export class GatewayAnalyticsController {
         const projectId = parseInt(req.params.projectId, 10);
 
         const result = await this.gatewayAnalyticsService.getProfitMarginByProjectId(projectId);
-        if(result.success){
-            res.status(200).json(result.data);
-            return;
-        }
-        res.status(result.status).json({ message: result.message });
+        handleResponse(res, result)
     }
 
     public getRouter(): Router {

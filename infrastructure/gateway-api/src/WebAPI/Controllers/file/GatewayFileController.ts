@@ -2,16 +2,23 @@
 import { Router, Request, Response } from "express";
 
 // Libraries
-import path from "path";
 import multer, { Multer } from "multer";
 
 // Domain
-import { IGatewayFileService } from "../../Domain/services/file/IGatewayFileService";
-import { UploadedFileDTO } from "../../Domain/DTOs/file/UploadedFileDTO";
+import { IGatewayFileService } from "../../../Domain/services/file/IGatewayFileService";
+import { UploadedFileDTO } from "../../../Domain/DTOs/file/UploadedFileDTO";
+import { CreateFileDTO } from "../../../Domain/DTOs/file/CreateFileDTO";
 
 // Middlewares
-import { authenticate } from "../../Middlewares/authentication/AuthMiddleware";
+import { authenticate } from "../../../Middlewares/authentication/AuthMiddleware";
 
+// Utils
+import { handleDownloadResponse, handleEmptyResponse, handleResponse } from "../../Utils/Http/ResponseHandler";
+import { extractFileDataFromRequest } from "../../Utils/Http/RequestHandler";
+
+/**
+ * Routes client requests towards the File Microservice.
+ */
 export class GatewayFileController {
     private router: Router;
     private upload: Multer;
@@ -39,16 +46,10 @@ export class GatewayFileController {
      * - On failure: A JSON object with an error message and a HTTP status code indicating the failure.
      */
     private async downloadFile(req: Request, res: Response): Promise<void> {
-        const fileId = parseInt(req.params.fileId);
+        const fileId = parseInt(req.params.fileId, 10);
 
         const result = await this.gatewayFileService.downloadFile(fileId);
-        if(result.success){
-            res.setHeader("Content-Type", result.data.contentType);
-            res.setHeader('Content-Disposition', `attachment; filename="${result.data.fileName}"`);
-            res.send(result.data.fileBuffer);
-            return;
-        }
-        res.status(result.status).json({ message: result.message });
+        handleDownloadResponse(res, result);
     }
 
     /**
@@ -60,14 +61,10 @@ export class GatewayFileController {
      * - On failure: A JSON object with an error message and a HTTP status code indicating the failure.
      */
     private async getFilesByAuthorId(req: Request, res: Response): Promise<void> {
-        const authorId = parseInt(req.params.authorId);
+        const authorId = parseInt(req.params.authorId, 10);
 
         const result = await this.gatewayFileService.getFilesByAuthorId(authorId);
-        if(result.success){
-            res.status(200).json(result.data);
-            return;
-        }
-        res.status(result.status).json({ message: result.message });
+        handleResponse(res, result);
     }
 
     /**
@@ -79,45 +76,25 @@ export class GatewayFileController {
      * - On failure: A JSON object with an error message and a HTTP status code indicating the failure.
      */
     private async getFileMetadata(req: Request, res: Response): Promise<void> {
-        const fileId = parseInt(req.params.fileId);
+        const fileId = parseInt(req.params.fileId, 10);
 
         const result = await this.gatewayFileService.getFileMetadata(fileId);
-        if(result.success){
-            res.status(200).json(result.data);
-            return;
-        }
-        res.status(result.status).json({ message: result.message });
+        handleResponse(res, result);
     }
 
     /**
      * POST /api/v1/files/upload
-     * @param {Request} req - the request object, containing the file and author id.
+     * @param {Request} req - the request object, containing the file {@link CreateFileDTO} and author id.
      * @param {Response} res - the response object for the client.
      * @returns {Object}
      * - On success: A JSON object following the {@link UploadedFileDTO} containing the metadata of the uploaded file. 
      * - On failure: A JSON object with an error message and a HTTP status code indicating the failure.
      */
     private async uploadFile(req: Request, res: Response): Promise<void> {
-        const file = req.file;
-        const authorId = parseInt(req.body?.authorId);
-        const originalFileName = req.file?.originalname ?? "";
-        const fileExtension = path.extname(originalFileName);
-        const fileType = req.file?.mimetype ?? "";
+        const fileData: CreateFileDTO = extractFileDataFromRequest(req);
 
-        const result = await this.gatewayFileService.uploadFile({
-            originalFileName: originalFileName,
-            fileType: fileType,
-            fileExtension: fileExtension,
-            authorId: authorId,
-            fileBuffer: file?.buffer
-        });
-
-        if(result.success){
-            res.status(201).json(result.data);
-            return;
-        }
-        res.status(result.status).json({ message: result.message});
-
+        const result = await this.gatewayFileService.uploadFile(fileData);
+        handleResponse(res, result, 201);
     }
 
     /**
@@ -129,14 +106,10 @@ export class GatewayFileController {
      * - On failure: A JSON object with an error message and a HTTP status code indicating the failure.
      */
     private async deleteFile(req: Request, res: Response): Promise<void> {
-        const fileId = parseInt(req.params.fileId);
+        const fileId = parseInt(req.params.fileId, 10);
 
         const result = await this.gatewayFileService.deleteFile(fileId);
-        if(result.success){
-            res.status(204).send();
-            return;
-        }
-        res.status(result.status).json({ message: result.message });
+        handleEmptyResponse(res, result);
     }
 
     public getRouter(): Router {

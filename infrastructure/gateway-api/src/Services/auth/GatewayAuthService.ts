@@ -17,6 +17,9 @@ import { HTTP_METHODS } from "../../Constants/common/HttpMethods";
 import { SERVICES } from "../../Constants/services/Services";
 import { API_ENDPOINTS } from "../../Constants/services/APIEndpoints";
 
+/**
+ * Makes API requests to the Auth Microservice.
+ */
 export class GatewayAuthService implements IGatewayAuthService {
     private readonly authClient: AxiosInstance;
 
@@ -28,6 +31,19 @@ export class GatewayAuthService implements IGatewayAuthService {
         });
     }
 
+    /**
+     * Sends the login data to the auth microservice.
+     * @param {LoginUserDTO} data - login data.
+     * @returns {Promise<Result<AuthResponseType>>} - A promise that resolves to a Result object containing the auth response data.
+     * - On success:
+     *     - `success`: A boolean indicating if the login attempt was successful.
+     *     - `otp_required`: A boolean indicating if OTP is required for further authentication.
+     *     - `session`: A session object if OTP is required, used for continuing the login process.
+     *     - `token`: A JWT token if no OTP is required, used for authentication in future requests.
+     *     - `message`: A message returned by the microservice with details about the login result.
+     * - On failure:
+     *     - The result contains an error message and status code.
+     */
     async login(data: LoginUserDTO): Promise<Result<AuthResponseType>> {
         try {
             const response = await this.authClient.post<AuthResponseType>(AUTH_ROUTES.LOGIN, data);
@@ -47,6 +63,17 @@ export class GatewayAuthService implements IGatewayAuthService {
         }
     }
     
+    /**
+     * Sends the registration data to the auth microservice.
+     * @param {RegistrationUserDTO} data - registration data.
+     * @returns {Promise<Result<AuthResponseType>>} - A promise that resolves to a Result object containing the auth response data.
+     * - On success:
+     *     - `success`: A boolean indicating if the login attempt was successful.
+     *     - `token`: A JWT token if no OTP is required, used for authentication in future requests.
+     *     - `message`: A message returned by the microservice with details about the login result.
+     * - On failure:
+     *     - The result contains an error message and status code.
+     */
     async register(data: RegistrationUserDTO): Promise<Result<AuthResponseType>> {
         try {
             const response = await this.authClient.post<AuthResponseType>(AUTH_ROUTES.REGISTER, data);
@@ -64,6 +91,17 @@ export class GatewayAuthService implements IGatewayAuthService {
         }
     }
 
+    /**
+     * Sends the otp data to the auth microservice.
+     * @param {OTPVerificationDTO} otpData - otp data.
+     * @returns {Promise<Result<AuthResponseType>>} - A promise that resolves to a Result object containing the auth response data.
+     * - On success:
+     *     - `success`: A boolean indicating if the login attempt was successful.
+     *     - `token`: A JWT token if no OTP is required, used for authentication in future requests.
+     *     - `message`: A message returned by the microservice with details about the login result.
+     * - On failure:
+     *     - The result contains an error message and status code.
+     */
     async verifyOtp(otpData: OTPVerificationDTO): Promise<Result<AuthResponseType>> {
         try {
             const response = await this.authClient.post<AuthResponseType>(AUTH_ROUTES.VERIFY_OTP, otpData);
@@ -81,6 +119,19 @@ export class GatewayAuthService implements IGatewayAuthService {
         }
     }
 
+    /**
+     * Sends the request for the new otp code to the auth microservice.
+     * @param {BrowserDataDTO} browserData - browser data.
+     * @returns {Promise<Result<AuthResponseType>>} - A promise that resolves to a Result object containing the auth response data.
+     * - On success:
+     *     - `success`: A boolean indicating if the login attempt was successful.
+     *     - `otp_required`: A boolean indicating if OTP is required for further authentication.
+     *     - `session`: A session object if OTP is required, used for continuing the login process.
+     *     - `token`: A JWT token if no OTP is required, used for authentication in future requests.
+     *     - `message`: A message returned by the microservice with details about the login result.
+     * - On failure:
+     *     - The result contains an error message and status code.
+     */
     async resendOtp(browserData: BrowserDataDTO): Promise<Result<AuthResponseType>> {
         try {
             const response = await this.authClient.post<AuthResponseType>(AUTH_ROUTES.RESEND_OTP, browserData);

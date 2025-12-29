@@ -10,7 +10,8 @@ import { UploadedFileDTO } from "../../Domain/DTOs/file/UploadedFileDTO";
 import { Result } from "../../Domain/types/common/Result";
 
 // Utils
-import { extractDownloadDTOFromResponse, generateFormData } from "../../Utils/File/FileUtils";
+import { generateFileFormData } from "./utils/GenerateData";
+import { extractDownloadDTOFromResponse } from "./utils/ExtractData";
 
 // Constants
 import { HTTP_METHODS } from "../../Constants/common/HttpMethods";
@@ -18,6 +19,9 @@ import { FILE_ROUTES } from "../../Constants/routes/file/FileRoutes";
 import { SERVICES } from "../../Constants/services/Services";
 import { API_ENDPOINTS } from "../../Constants/services/APIEndpoints";
 
+/**
+ * Makes API requests to the File Microservice.
+ */
 export class GatewayFileService implements IGatewayFileService {
     private readonly fileClient: AxiosInstance;
     
@@ -28,6 +32,13 @@ export class GatewayFileService implements IGatewayFileService {
         });
     }
 
+    /**
+     * Fetches the file from file microservice.
+     * @param {number} fileId - id of the file. 
+     * @returns {Promise<Result<DownloadFileDTO>>} - A promise that resolves to a Result object containing the file content and metadata
+     * - On success returns data as {@link DownloadFileDTO}.
+     * - On failure returns status code and error message.
+     */
     async downloadFile(fileId: number): Promise<Result<DownloadFileDTO>> {
         try {
             const response = await this.fileClient.get(FILE_ROUTES.DOWNLOAD(fileId), {
@@ -44,6 +55,13 @@ export class GatewayFileService implements IGatewayFileService {
         }
     }
 
+    /**
+     * Fetches the metadata of all files created by certain author.
+     * @param {number} authorId - id of the author. 
+     * @returns {Promise<Result<UploadedFileDTO[]>>} - A promise that resolves to a Result object containing the list of file metadata.
+     * - On success returns data as {@link UploadedFileDTO[]}.
+     * - On failure returns status code and error message.
+     */
     async getFilesByAuthorId(authorId: number): Promise<Result<UploadedFileDTO[]>> {
         try {
             const response = await this.fileClient.get<UploadedFileDTO[]>(FILE_ROUTES.GET_BY_AUTHOR(authorId));
@@ -57,6 +75,13 @@ export class GatewayFileService implements IGatewayFileService {
         }
     }
 
+    /**
+     * Fetches the metadata of a certain file.
+     * @param {number} fileId - id of the file. 
+     * @returns {Promise<Result<UploadedFileDTO>>} - A promise that resolves to a Result object containing the of file metadata.
+     * - On success returns data as {@link UploadedFileDTO}.
+     * - On failure returns status code and error message.
+     */
     async getFileMetadata(fileId: number): Promise<Result<UploadedFileDTO>> {
         try {
             const response = await this.fileClient.get<UploadedFileDTO>(FILE_ROUTES.METADATA(fileId));
@@ -70,9 +95,16 @@ export class GatewayFileService implements IGatewayFileService {
         }
     }
 
+    /**
+     * Uploads a file to file microservice.
+     * @param {CreateFileDTO} fileData - file metadata and content. 
+     * @returns {Promise<Result<UploadedFileDTO>>} - A promise that resolves to a Result object containing the file metadata.
+     * - On success returns data as {@link UploadedFileDTO}.
+     * - On failure returns status code and error message.
+     */
     async uploadFile(fileData: CreateFileDTO): Promise<Result<UploadedFileDTO>> {
         try{
-            const formData = generateFormData(fileData);
+            const formData = generateFileFormData(fileData);
             const response = await this.fileClient.post<UploadedFileDTO>(FILE_ROUTES.UPLOAD, formData);
 
             return {
@@ -84,13 +116,20 @@ export class GatewayFileService implements IGatewayFileService {
         }
     }
 
-    async deleteFile(fileId: number): Promise<Result<boolean>> {
+    /**
+     * Requests the deletion of a certain file.
+     * @param {number} fileId - id of the file. 
+     * @returns {Promise<Result<void>>} - A promise that resolves to a Result object.
+     * - On success returns void.
+     * - On failure returns status code and error message.
+     */
+    async deleteFile(fileId: number): Promise<Result<void>> {
         try {
-            const response = await this.fileClient.delete<boolean>(FILE_ROUTES.DELETE(fileId));
+            await this.fileClient.delete<boolean>(FILE_ROUTES.DELETE(fileId));
 
             return {
                 success: true,
-                data: response.data
+                data: undefined
             };
         } catch(error) {
             return this.errorHandlingService.handle(error, SERVICES.FILE, HTTP_METHODS.DELETE, FILE_ROUTES.DELETE(fileId))

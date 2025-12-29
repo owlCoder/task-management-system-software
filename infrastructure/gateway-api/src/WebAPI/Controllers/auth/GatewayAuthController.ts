@@ -2,13 +2,19 @@
 import { Request, Response, Router } from "express";
 
 // Domain
-import { IGatewayAuthService } from "../../Domain/services/auth/IGatewayAuthService";
-import { LoginUserDTO } from "../../Domain/DTOs/auth/LoginUserDTO";
-import { RegistrationUserDTO } from "../../Domain/DTOs/auth/RegistrationUserDTO";
-import { BrowserDataDTO } from "../../Domain/DTOs/auth/BrowserDataDTO";
-import { AuthResponseType } from "../../Domain/types/auth/AuthResponse";
-import { OTPVerificationDTO } from "../../Domain/DTOs/auth/OTPVerificationDTO";
+import { IGatewayAuthService } from "../../../Domain/services/auth/IGatewayAuthService";
+import { LoginUserDTO } from "../../../Domain/DTOs/auth/LoginUserDTO";
+import { RegistrationUserDTO } from "../../../Domain/DTOs/auth/RegistrationUserDTO";
+import { BrowserDataDTO } from "../../../Domain/DTOs/auth/BrowserDataDTO";
+import { AuthResponseType } from "../../../Domain/types/auth/AuthResponse";
+import { OTPVerificationDTO } from "../../../Domain/DTOs/auth/OTPVerificationDTO";
 
+// Utils
+import { handleResponse } from "../../Utils/Http/ResponseHandler";
+
+/**
+ * Routes client requests towards the Auth Microservice.
+ */
 export class GatewayAuthController {
     private readonly router: Router;
 
@@ -36,11 +42,7 @@ export class GatewayAuthController {
         const data = req.body as LoginUserDTO;
 
         const result = await this.gatewayAuthService.login(data);
-        if(result.success){
-            res.status(200).json(result.data);
-            return;
-        }
-        res.status(result.status).json({ message: result.message });
+        handleResponse(res, result);
     }
     
     /**
@@ -55,11 +57,7 @@ export class GatewayAuthController {
         const data = req.body as RegistrationUserDTO;
 
         const result = await this.gatewayAuthService.register(data);
-        if(result.success){
-            res.status(201).json(result.data);
-            return;
-        }
-        res.status(result.status).json({ message: result.message });
+        handleResponse(res, result, 201);
     }
 
     /**
@@ -74,11 +72,7 @@ export class GatewayAuthController {
         const browserData = req.body as OTPVerificationDTO;
 
         const result = await this.gatewayAuthService.verifyOtp(browserData);
-        if(result.success){
-            res.status(200).json(result.data);
-            return;
-        }
-        res.status(result.status).json({ message: result.message });
+        handleResponse(res, result);
     }
 
     /**
@@ -93,11 +87,7 @@ export class GatewayAuthController {
         const browserData = req.body as BrowserDataDTO
 
         const result = await this.gatewayAuthService.resendOtp(browserData);
-        if(result.success){
-            res.status(200).json(result.data);
-            return;
-        }
-        res.status(result.status).json({ message: result.message });
+        handleResponse(res, result);
     }
 
     public getRouter(): Router {

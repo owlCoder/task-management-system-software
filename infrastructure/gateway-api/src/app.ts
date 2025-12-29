@@ -26,20 +26,20 @@ import { GatewayNotificationService } from './Services/notification/GatewayNotif
 import { GatewayAnalyticsService } from './Services/analytics/GatewayAnalyticsService';
 
 // Controllers
-import { GatewayAuthController } from './WebAPI/auth/GatewayAuthController';
-import { GatewayUserController } from './WebAPI/user/GatewayUserController';
-import { GatewayProjectController } from './WebAPI/project/GatewayProjectController';
-import { GatewayTaskController } from './WebAPI/task/GatewayTaskController';
-import { GatewayFileController } from './WebAPI/file/GatewayFileController';
-import { GatewayNotificationController } from './WebAPI/notification/GatewayNotificationController';
-import { GatewayAnalyticsController } from './WebAPI/analytics/GatewayAnalyticsController';
+import { GatewayAuthController } from './WebAPI/Controllers/auth/GatewayAuthController';
+import { GatewayUserController } from './WebAPI/Controllers/user/GatewayUserController';
+import { GatewayProjectController } from './WebAPI/Controllers/project/GatewayProjectController';
+import { GatewayTaskController } from './WebAPI/Controllers/task/GatewayTaskController';
+import { GatewayFileController } from './WebAPI/Controllers/file/GatewayFileController';
+import { GatewayNotificationController } from './WebAPI/Controllers/notification/GatewayNotificationController';
+import { GatewayAnalyticsController } from './WebAPI/Controllers/analytics/GatewayAnalyticsController';
 
 // Middlewares
 import { logTraffic } from './Middlewares/logger/LoggingMiddleware';
 import { corsPolicy } from './Middlewares/cors/CorsMiddleware';
 
 // Utils
-import { logger } from './Utils/Logger/Logger';
+import { logger } from './Infrastructure/logging/Logger';
 
 const app = express();
 

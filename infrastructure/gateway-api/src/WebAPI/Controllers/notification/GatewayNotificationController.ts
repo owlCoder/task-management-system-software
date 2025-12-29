@@ -2,12 +2,18 @@
 import { Router, Request, Response } from "express";
 
 // Domain
-import { IGatewayNotificationService } from "../../Domain/services/notification/IGatewayNotificationService";
-import { NotificationDTO } from "../../Domain/DTOs/notification/NotificationDTO";
+import { IGatewayNotificationService } from "../../../Domain/services/notification/IGatewayNotificationService";
+import { NotificationDTO } from "../../../Domain/DTOs/notification/NotificationDTO";
 
 // Middlewares
-import { authenticate } from "../../Middlewares/authentication/AuthMiddleware";
+import { authenticate } from "../../../Middlewares/authentication/AuthMiddleware";
 
+// Utils
+import { handleEmptyResponse, handleResponse } from "../../Utils/Http/ResponseHandler";
+
+/**
+ * Routes client requests towards the Notification Microservice.
+ */
 export class GatewayNotificationController {
     private readonly router: Router;
 
@@ -40,11 +46,7 @@ export class GatewayNotificationController {
         const id = parseInt(req.params.id);
 
         const result = await this.gatewayNotificationService.getNotificationById(id);
-        if(result.success){
-            res.status(200).json(result.data);
-            return;
-        }
-        res.status(result.status).json({ message: result.message });
+        handleResponse(res, result);
     }
 
     /**
@@ -59,11 +61,7 @@ export class GatewayNotificationController {
         const userId = parseInt(req.params.userId);
 
         const result = await this.gatewayNotificationService.getNotificationsByUserId(userId);
-        if(result.success){
-            res.status(200).json(result.data);
-            return;
-        }
-        res.status(result.status).json({ message: result.message });
+        handleResponse(res, result);
     }
 
     /**
@@ -78,11 +76,7 @@ export class GatewayNotificationController {
         const userId = parseInt(req.params.userId);
 
         const result = await this.gatewayNotificationService.getUnreadNotificationCount(userId);
-        if(result.success){
-            res.status(200).json(result.data);
-            return;
-        }
-        res.status(result.status).json({ message: result.message });
+        handleResponse(res, result);
     }
 
     /**
@@ -97,11 +91,7 @@ export class GatewayNotificationController {
         const ids = req.body as number[];
 
         const result = await this.gatewayNotificationService.markMultipleNotificationsAsRead(ids);
-        if(result.success){
-            res.status(204).send();
-            return;
-        }
-        res.status(result.status).json({ message: result.message });
+        handleEmptyResponse(res, result);
     }
 
     /**
@@ -116,11 +106,7 @@ export class GatewayNotificationController {
         const ids = req.body as number[];
 
         const result = await this.gatewayNotificationService.markMultipleNotificationsAsUnread(ids);
-        if(result.success){
-            res.status(204).send();
-            return;
-        }
-        res.status(result.status).json({ message: result.message });
+        handleEmptyResponse(res, result);
     }
 
     /**
@@ -135,11 +121,7 @@ export class GatewayNotificationController {
         const id = parseInt(req.params.id);
         
         const result = await this.gatewayNotificationService.markNotificationAsRead(id);
-        if(result.success){
-            res.status(204).send();
-            return;
-        }
-        res.status(result.status).json({ message: result.message });
+        handleEmptyResponse(res, result);
     }
 
     /**
@@ -154,11 +136,7 @@ export class GatewayNotificationController {
         const id = parseInt(req.params.id);
 
         const result = await this.gatewayNotificationService.markNotificationAsUnread(id);
-        if(result.success){
-            res.status(204).send();
-            return;
-        }
-        res.status(result.status).json({ message: result.message });
+        handleEmptyResponse(res, result);
     }
 
     /**
@@ -173,11 +151,7 @@ export class GatewayNotificationController {
         const ids = req.body as number[];
 
         const result = await this.gatewayNotificationService.deleteMultipleNotifications(ids);
-        if(result.success){
-            res.status(204).send();
-            return;
-        }
-        res.status(result.status).json({ message: result.message });
+        handleEmptyResponse(res, result);
     }
 
     /**
@@ -192,11 +166,7 @@ export class GatewayNotificationController {
         const id = parseInt(req.params.id);
 
         const result = await this.gatewayNotificationService.deleteNotification(id);
-        if(result.success){
-            res.status(204).send();
-            return;
-        }
-        res.status(result.status).json({ message: result.message });
+        handleEmptyResponse(res, result);
     }
 
     public getRouter() {

@@ -8,5 +8,5 @@ export interface IGatewayFileService {
     getFilesByAuthorId(authorId: number): Promise<Result<UploadedFileDTO[]>>;
     getFileMetadata(fileId: number): Promise<Result<UploadedFileDTO>>;
     uploadFile(fileData: CreateFileDTO): Promise<Result<UploadedFileDTO>>;
-    deleteFile(fileId: number): Promise<Result<boolean>>;
+    deleteFile(fileId: number): Promise<Result<void>>;
 }

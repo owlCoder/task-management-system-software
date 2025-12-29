@@ -16,6 +16,9 @@ import { HTTP_METHODS } from "../../Constants/common/HttpMethods";
 import { SERVICES } from "../../Constants/services/Services";
 import { API_ENDPOINTS } from "../../Constants/services/APIEndpoints";
 
+/**
+ * Makes API requests to the User Microservice.
+ */
 export class GatewayUserService implements IGatewayUserService {
     private readonly userClient: AxiosInstance;
 
@@ -27,6 +30,13 @@ export class GatewayUserService implements IGatewayUserService {
         });
     }
 
+    /**
+     * Creates a new user.
+     * @param {RegistrationUserDTO} data - registration data of the user. 
+     * @returns {Promise<Result<UserDTO>>} - A promise that resolves to a Result object containing the data of the user.
+     * - On success returns data as {@link UserDTO}.
+     * - On failure returns status code and error message.
+     */
     async createUser(data: RegistrationUserDTO): Promise<Result<UserDTO>> {
         try {
             const response = await this.userClient.post<UserDTO>(USER_ROUTES.CREATE, data);
@@ -40,6 +50,13 @@ export class GatewayUserService implements IGatewayUserService {
         }
     }
 
+    /**
+     * Fetches a specific user.
+     * @param {number} id - id of the user. 
+     * @returns {Promise<Result<UserDTO>>} - A promise that resolves to a Result object containing the data of the user.
+     * - On success returns data as {@link UserDTO}.
+     * - On failure returns status code and error message.
+     */
     async getUserById(id: number): Promise<Result<UserDTO>> {
         try {
             const response = await this.userClient.get<UserDTO>(USER_ROUTES.GET_BY_ID(id));
@@ -53,6 +70,13 @@ export class GatewayUserService implements IGatewayUserService {
         }
     }
 
+    /**
+     * Fetches multiple users.
+     * @param {number} ids[] - ids of the users. 
+     * @returns {Promise<Result<UserDTO[]>>} - A promise that resolves to a Result object containing the data of the users.
+     * - On success returns data as {@link UserDTO[]}.
+     * - On failure returns status code and error message.
+     */
     async getUsersByIds(ids: number[]): Promise<Result<UserDTO[]>> {
         try {
             const response = await this.userClient.get<UserDTO[]>(USER_ROUTES.GET_BY_IDS, { 
@@ -70,6 +94,12 @@ export class GatewayUserService implements IGatewayUserService {
         }
     }
 
+    /**
+     * Fetches all users.
+     * @returns {Promise<Result<UserDTO[]>>} - A promise that resolves to a Result object containing the data of the users.
+     * - On success returns data as {@link UserDTO[]}.
+     * - On failure returns status code and error message.
+     */
     async getUsers(): Promise<Result<UserDTO[]>> {
         try{
             const response = await this.userClient.get<UserDTO[]>(USER_ROUTES.GET_ALL);
@@ -83,6 +113,14 @@ export class GatewayUserService implements IGatewayUserService {
         }
     }
 
+    /**
+     * Updates data of a specific user.
+     * @param {number} id - id of the user.
+     * @param {UpdateUserDTO} data - updated data of the user. 
+     * @returns {Promise<Result<UserDTO>>} - A promise that resolves to a Result object containing the data of the user.
+     * - On success returns data as {@link UserDTO}.
+     * - On failure returns status code and error message.
+     */
     async updateUserById(id: number, data: UpdateUserDTO): Promise<Result<UserDTO>> {
         try {
             const response = await this.userClient.put<UserDTO>(USER_ROUTES.UPDATE(id), data);
@@ -96,6 +134,13 @@ export class GatewayUserService implements IGatewayUserService {
         }
     }
 
+    /**
+     * Requests the deletion of the user.
+     * @param {number} id - id of the user. 
+     * @returns {Promise<Result<void>>} - A promise that resolves to a Result object.
+     * - On success returns void.
+     * - On failure returns status code and error message.
+     */
     async logicallyDeleteUserById(id: number): Promise<Result<void>> {
         try {
             await this.userClient.delete<void>(USER_ROUTES.DELETE(id));
@@ -109,6 +154,12 @@ export class GatewayUserService implements IGatewayUserService {
         }
     }
 
+    /**
+     * Fetches user roles available for creation of new user.
+     * @returns {Promise<Result<UserRoleDTO[]>>} - A promise that resolves to a Result object containing the data of the user roles.
+     * - On success returns data as {@link UserRoleDTO[]}.
+     * - On failure returns status code and error message.
+     */
     async getCreationRoles(): Promise<Result<UserRoleDTO[]>> {
         try {
             const response = await this.userClient.get<UserRoleDTO[]>(USER_ROUTES.CREATION_ROLES);

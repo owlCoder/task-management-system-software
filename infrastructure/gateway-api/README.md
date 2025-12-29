@@ -2,7 +2,8 @@
 
 ## Architecture
 - **Domain Layer**: DTOs, Types, Enums, Interfaces (*classified by the name of the microservice*).
-- **Middlewares Layer**: Authentication and Authorization.
+- **Infrastructure Layer**: Logger (pino + pino-pretty).
+- **Middlewares Layer**: CORS Policy, Authentication, Authorization, Traffic Logging.
 - **Services Layer**: Handles requests by passing them to the appropriate microservices (*classified by the name of the microservice*).
 - **WebAPI Layer**: Controllers for HTTP request handling (*classified by the name of the microservice*).
 

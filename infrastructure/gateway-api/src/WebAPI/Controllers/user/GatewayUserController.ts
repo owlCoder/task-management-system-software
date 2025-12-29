@@ -2,17 +2,23 @@
 import { Request, Response, Router } from "express";
 
 // Domain
-import { IGatewayUserService } from "../../Domain/services/user/IGatewayUserService";
-import { RegistrationUserDTO } from "../../Domain/DTOs/auth/RegistrationUserDTO";
-import { UserDTO } from "../../Domain/DTOs/user/UserDTO";
-import { UpdateUserDTO } from "../../Domain/DTOs/user/UpdateUserDTO";
-import { UserRoleDTO } from "../../Domain/DTOs/user/UserRoleDTO";
-import { UserRole } from "../../Domain/enums/user/UserRole";
+import { IGatewayUserService } from "../../../Domain/services/user/IGatewayUserService";
+import { RegistrationUserDTO } from "../../../Domain/DTOs/auth/RegistrationUserDTO";
+import { UserDTO } from "../../../Domain/DTOs/user/UserDTO";
+import { UpdateUserDTO } from "../../../Domain/DTOs/user/UpdateUserDTO";
+import { UserRoleDTO } from "../../../Domain/DTOs/user/UserRoleDTO";
+import { UserRole } from "../../../Domain/enums/user/UserRole";
 
 // Middlewares
-import { authenticate } from "../../Middlewares/authentication/AuthMiddleware";
-import { authorize } from "../../Middlewares/authorization/AuthorizeMiddleware";
+import { authenticate } from "../../../Middlewares/authentication/AuthMiddleware";
+import { authorize } from "../../../Middlewares/authorization/AuthorizeMiddleware";
 
+// Utils
+import { handleEmptyResponse, handleResponse } from "../../Utils/Http/ResponseHandler";
+
+/**
+ * Routes client requests towards the User Microservice.
+ */
 export class GatewayUserController {
     private readonly router: Router;
 
@@ -42,11 +48,7 @@ export class GatewayUserController {
         const data = req.body as RegistrationUserDTO;
 
         const result = await this.gatewayUserService.createUser(data);
-        if(result.success){
-            res.status(201).json(result.data);
-            return;
-        }
-        res.status(result.status).json({ message: result.message });
+        handleResponse(res, result, 201);
     }
 
     /**
@@ -61,11 +63,7 @@ export class GatewayUserController {
         const id = parseInt(req.params.id, 10);
 
         const result = await this.gatewayUserService.getUserById(id);
-        if(result.success){
-            res.status(200).json(result.data);
-            return;
-        }
-        res.status(result.status).json({ message: result.message })
+        handleResponse(res, result);
     }
     
     /**
@@ -73,16 +71,12 @@ export class GatewayUserController {
      * @param {Request} req - the request object.
      * @param {Response} res - the response object for the client.
      * @returns {Object}
-     * - On success: A JSON object following the list of {@link UserDTO} structure containing the result of the get users operation. 
+     * - On success: A JSON object following the structure {@link UserDTO[]} containing the result of the get users operation. 
      * - On failure: A JSON object with an error message and a HTTP status code indicating the failure.
      */
     private async getUsers(req: Request, res: Response): Promise<void> {
         const result = await this.gatewayUserService.getUsers();
-        if(result.success){
-            res.status(200).json(result.data);
-            return;
-        }
-        res.status(result.status).json({ message: result.message });
+        handleResponse(res, result);
     }
 
     /**
@@ -98,11 +92,7 @@ export class GatewayUserController {
         const data = req.body as UpdateUserDTO;
 
         const result = await this.gatewayUserService.updateUserById(id, data);
-        if(result.success){
-            res.status(200).json(result.data);
-            return;
-        }
-        res.status(result.status).json({ message: result.message });
+        handleResponse(res, result);
     }
 
     /**
@@ -117,11 +107,7 @@ export class GatewayUserController {
         const id = parseInt(req.params.id, 10);
 
         const result = await this.gatewayUserService.logicallyDeleteUserById(id);
-        if(result.success){
-            res.status(204).send();
-            return;
-        }
-        res.status(result.status).json({ message: result.message });
+        handleEmptyResponse(res, result);
     }
 
     /**
@@ -129,16 +115,12 @@ export class GatewayUserController {
      * @param {Request} _req - the request object, unused.
      * @param {Response} res - the response object for the client.
      * @returns {Object}
-     * - On success: A JSON object following the list of {@link UserRoleDTO} structure containing the result of the get creation roles operation. 
+     * - On success: A JSON object following the structure {@link UserRoleDTO[]} containing the result of the get creation roles operation. 
      * - On failure: A JSON object with an error message and a HTTP status code indicating the failure.
      */
     private async getCreationRoles(_req: Request, res: Response): Promise<void> {
         const result = await this.gatewayUserService.getCreationRoles();
-        if(result.success){
-            res.status(200).json(result.data);
-            return;
-        }
-        res.status(result.status).json({ message: result.message });
+        handleResponse(res, result);
     }
 
     public getRouter(): Router {
