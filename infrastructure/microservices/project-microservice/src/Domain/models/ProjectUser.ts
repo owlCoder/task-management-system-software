@@ -21,4 +21,7 @@ export class ProjectUser {
 
   @Column({ unique: false })
   user_id!: number;
+
+  @Column({ type: "int", nullable: false })
+  weekly_hours!: number;
 }

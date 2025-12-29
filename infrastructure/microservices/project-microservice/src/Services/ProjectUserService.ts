@@ -28,6 +28,21 @@ export class ProjectUserService implements IProjectUserService{
             throw new Error("User is already assigned to this project");
         }
 
+        const assignments = await this.projectUserRepository.find({
+            where: {user_id: data.user_id},
+        });
+
+        const currentTotal = assignments.reduce(
+            (sum, a) => sum + a.weekly_hours,
+            0
+        );
+
+        const newTotal = currentTotal + data.weekly_hours;
+
+        if(newTotal > 40) {
+            throw new Error(`User total weekly hours (${newTotal}) exceed allowed 40 hours`);
+        }
+
         const pu = this.projectUserRepository.create({
             project: project,
             user_id: data.user_id,
