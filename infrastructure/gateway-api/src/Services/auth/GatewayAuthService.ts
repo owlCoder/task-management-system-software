@@ -5,7 +5,6 @@ import axios, { AxiosInstance } from "axios";
 import { IErrorHandlingService } from "../../Domain/services/common/IErrorHandlingService";
 import { IGatewayAuthService } from "../../Domain/services/auth/IGatewayAuthService";
 import { LoginUserDTO } from "../../Domain/DTOs/auth/LoginUserDTO";
-import { RegistrationUserDTO } from "../../Domain/DTOs/auth/RegistrationUserDTO";
 import { AuthResponseType } from "../../Domain/types/auth/AuthResponse";
 import { BrowserDataDTO } from "../../Domain/DTOs/auth/BrowserDataDTO";
 import { OTPVerificationDTO } from "../../Domain/DTOs/auth/OTPVerificationDTO";
@@ -16,6 +15,9 @@ import { AUTH_ROUTES } from "../../Constants/routes/auth/AuthRoutes";
 import { HTTP_METHODS } from "../../Constants/common/HttpMethods";
 import { SERVICES } from "../../Constants/services/Services";
 import { API_ENDPOINTS } from "../../Constants/services/APIEndpoints";
+
+// Infrastructure
+import { makeAPICall } from "../../Infrastructure/axios/APIHelpers";
 
 /**
  * Makes API requests to the Auth Microservice.
@@ -45,54 +47,16 @@ export class GatewayAuthService implements IGatewayAuthService {
      *     - The result contains an error message and status code.
      */
     async login(data: LoginUserDTO): Promise<Result<AuthResponseType>> {
-        try {
-            const response = await this.authClient.post<AuthResponseType>(AUTH_ROUTES.LOGIN, data);
-
-            return {
-                success: true,
-                data: {
-                    success: response.data.success,
-                    otp_required: response.data.otp_required,
-                    session: response.data.otp_required ? response.data.session : undefined,
-                    token: !response.data.otp_required ? response.data.token : undefined,
-                    message: response.data.message
-                }
-            };
-        } catch(error) {
-            return this.errorHandlingService.handle(error, SERVICES.AUTH, HTTP_METHODS.POST, AUTH_ROUTES.LOGIN);
-        }
-    }
-    
-    /**
-     * Sends the registration data to the auth microservice.
-     * @param {RegistrationUserDTO} data - registration data.
-     * @returns {Promise<Result<AuthResponseType>>} - A promise that resolves to a Result object containing the auth response data.
-     * - On success:
-     *     - `success`: A boolean indicating if the login attempt was successful.
-     *     - `token`: A JWT token if no OTP is required, used for authentication in future requests.
-     *     - `message`: A message returned by the microservice with details about the login result.
-     * - On failure:
-     *     - The result contains an error message and status code.
-     */
-    async register(data: RegistrationUserDTO): Promise<Result<AuthResponseType>> {
-        try {
-            const response = await this.authClient.post<AuthResponseType>(AUTH_ROUTES.REGISTER, data);
-
-            return { 
-                success: true, 
-                data: {
-                    success: response.data.success,
-                    token: response.data.token,
-                    message: response.data.message
-                }
-            };
-        } catch(error) {
-            return this.errorHandlingService.handle(error, SERVICES.AUTH, HTTP_METHODS.POST, AUTH_ROUTES.REGISTER);
-        }
+        return await makeAPICall<AuthResponseType, LoginUserDTO>(this.authClient, this.errorHandlingService, {
+            serviceName: SERVICES.AUTH,
+            method: HTTP_METHODS.POST,
+            url: AUTH_ROUTES.LOGIN,
+            data: data
+        });
     }
 
     /**
-     * Sends the otp data to the auth microservice.
+     * Requests the otp data verification from the auth microservice.
      * @param {OTPVerificationDTO} otpData - otp data.
      * @returns {Promise<Result<AuthResponseType>>} - A promise that resolves to a Result object containing the auth response data.
      * - On success:
@@ -103,20 +67,12 @@ export class GatewayAuthService implements IGatewayAuthService {
      *     - The result contains an error message and status code.
      */
     async verifyOtp(otpData: OTPVerificationDTO): Promise<Result<AuthResponseType>> {
-        try {
-            const response = await this.authClient.post<AuthResponseType>(AUTH_ROUTES.VERIFY_OTP, otpData);
-
-            return {
-                success: true,
-                data: {
-                    success: response.data.success,
-                    token: response.data.token,
-                    message: response.data.message
-                }
-            };
-        } catch(error) {
-            return this.errorHandlingService.handle(error, SERVICES.AUTH, HTTP_METHODS.POST, AUTH_ROUTES.VERIFY_OTP);
-        }
+        return await makeAPICall<AuthResponseType, OTPVerificationDTO>(this.authClient, this.errorHandlingService, {
+            serviceName: SERVICES.AUTH,
+            method: HTTP_METHODS.POST,
+            url: AUTH_ROUTES.VERIFY_OTP,
+            data: otpData
+        });
     }
 
     /**
@@ -133,22 +89,12 @@ export class GatewayAuthService implements IGatewayAuthService {
      *     - The result contains an error message and status code.
      */
     async resendOtp(browserData: BrowserDataDTO): Promise<Result<AuthResponseType>> {
-        try {
-            const response = await this.authClient.post<AuthResponseType>(AUTH_ROUTES.RESEND_OTP, browserData);
-
-            return {
-                success: true,
-                data: {
-                    success: response.data.success,
-                    otp_required: response.data.otp_required,
-                    session: response.data.otp_required ? response.data.session : undefined,
-                    token: !response.data.otp_required ? response.data.token : undefined,
-                    message: response.data.message
-                }
-            };
-        } catch(error) {
-            return this.errorHandlingService.handle(error, SERVICES.AUTH, HTTP_METHODS.POST, AUTH_ROUTES.RESEND_OTP);
-        }
+        return await makeAPICall<AuthResponseType, BrowserDataDTO>(this.authClient, this.errorHandlingService, {
+            serviceName: SERVICES.AUTH,
+            method: HTTP_METHODS.POST,
+            url: AUTH_ROUTES.RESEND_OTP,
+            data: browserData
+        });
     }
 
 }

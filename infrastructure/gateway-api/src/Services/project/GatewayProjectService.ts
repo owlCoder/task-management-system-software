@@ -15,6 +15,9 @@ import { HTTP_METHODS } from "../../Constants/common/HttpMethods";
 import { SERVICES } from "../../Constants/services/Services";
 import { API_ENDPOINTS } from "../../Constants/services/APIEndpoints";
 
+// Infrastructure
+import { makeAPICall } from "../../Infrastructure/axios/APIHelpers";
+
 /**
  * Makes API requests to the Project Microservice
  */
@@ -36,16 +39,11 @@ export class GatewayProjectService implements IGatewayProjectService {
      * - On failure returns status code and error message.
      */
     async getProjectById(id: number): Promise<Result<ProjectDTO>> {
-        try {
-            const response = await this.projectClient.get<ProjectDTO>(PROJECT_ROUTES.GET_BY_ID(id));
-
-            return {
-                success: true,
-                data: response.data
-            };
-        } catch(error) {
-            return this.errorHandlingService.handle(error, SERVICES.PROJECT, HTTP_METHODS.GET, PROJECT_ROUTES.GET_BY_ID(id));
-        }
+        return await makeAPICall<ProjectDTO>(this.projectClient, this.errorHandlingService, {
+            serviceName: SERVICES.PROJECT,
+            method: HTTP_METHODS.GET,
+            url: PROJECT_ROUTES.GET_BY_ID(id)
+        });
     }
 
     /**
@@ -56,16 +54,12 @@ export class GatewayProjectService implements IGatewayProjectService {
      * - On failure returns status code and error message.
      */
     async createProject(data: ProjectCreateDTO): Promise<Result<ProjectDTO>> {
-        try {
-            const response = await this.projectClient.post<ProjectDTO>(PROJECT_ROUTES.CREATE, data);
-
-            return {
-                success: true,
-                data: response.data
-            };
-        } catch(error) {
-            return this.errorHandlingService.handle(error, SERVICES.PROJECT, HTTP_METHODS.POST, PROJECT_ROUTES.CREATE);
-        }
+        return await makeAPICall<ProjectDTO, ProjectCreateDTO>(this.projectClient, this.errorHandlingService, {
+            serviceName: SERVICES.PROJECT,
+            method: HTTP_METHODS.POST,
+            url: PROJECT_ROUTES.CREATE,
+            data: data
+        });
     }
 
     /**
@@ -77,16 +71,12 @@ export class GatewayProjectService implements IGatewayProjectService {
      * - On failure returns status code and error message.
      */
     async updateProject(id: number, data: ProjectUpdateDTO): Promise<Result<ProjectDTO>> {
-        try {
-            const response = await this.projectClient.put<ProjectDTO>(PROJECT_ROUTES.UPDATE(id), data);
-
-            return {
-                success: true,
-                data: response.data
-            };
-        } catch(error) {
-            return this.errorHandlingService.handle(error, SERVICES.PROJECT, HTTP_METHODS.PUT, PROJECT_ROUTES.UPDATE(id));
-        }
+        return await makeAPICall<ProjectDTO, ProjectUpdateDTO>(this.projectClient, this.errorHandlingService, {
+            serviceName: SERVICES.PROJECT,
+            method: HTTP_METHODS.PUT,
+            url: PROJECT_ROUTES.UPDATE(id),
+            data: data
+        });
     }
 
     /**
@@ -97,16 +87,11 @@ export class GatewayProjectService implements IGatewayProjectService {
      * - On failure returns status code and error message.
      */
     async deleteProject(id: number): Promise<Result<void>> {
-        try {
-            await this.projectClient.delete<boolean>(PROJECT_ROUTES.DELETE(id));
-
-            return {
-                success: true,
-                data: undefined
-            };
-        } catch(error) {
-            return this.errorHandlingService.handle(error, SERVICES.PROJECT, HTTP_METHODS.DELETE, PROJECT_ROUTES.DELETE(id));
-        }
+        return await makeAPICall<void>(this.projectClient, this.errorHandlingService, {
+            serviceName: SERVICES.PROJECT,
+            method: HTTP_METHODS.DELETE,
+            url: PROJECT_ROUTES.DELETE(id)
+        });
     }
 
 }

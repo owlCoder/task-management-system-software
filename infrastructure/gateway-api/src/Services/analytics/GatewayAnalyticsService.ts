@@ -17,6 +17,9 @@ import { HTTP_METHODS } from "../../Constants/common/HttpMethods";
 import { ANALYTICS_ROUTES } from "../../Constants/routes/analytics/AnalyticsRoutes";
 import { API_ENDPOINTS } from "../../Constants/services/APIEndpoints";
 
+// Infrastructure
+import { makeAPICall } from "../../Infrastructure/axios/APIHelpers";
+
 /**
  * Makes API requests to the Analytics Microservice.
  */
@@ -39,16 +42,11 @@ export class GatewayAnalyticsService implements IGatewayAnalyticsService {
      * - On failure returns status code and error message.
      */
     async getBurndownAnalyticsBySprintId(sprintId: number): Promise<Result<BurndownDTO>> {
-        try {
-            const response = await this.analyticsClient.get<BurndownDTO>(ANALYTICS_ROUTES.BURNDOWN_BY_SPRINT(sprintId));
-
-            return {
-                success: true,
-                data: response.data
-            }
-        } catch(error) {
-            return this.errorHandlingService.handle(error, SERVICES.ANALYTICS, HTTP_METHODS.GET, ANALYTICS_ROUTES.BURNDOWN_BY_SPRINT(sprintId));
-        }
+        return await makeAPICall<BurndownDTO>(this.analyticsClient, this.errorHandlingService, {
+            serviceName: SERVICES.ANALYTICS,
+            method: HTTP_METHODS.GET,
+            url: ANALYTICS_ROUTES.BURNDOWN_BY_SPRINT(sprintId)
+        });
     }
 
     /**
@@ -59,16 +57,11 @@ export class GatewayAnalyticsService implements IGatewayAnalyticsService {
      * - On failure returns status code and error message.
      */
     async getBurnupAnalyticsBySprintId(sprintId: number): Promise<Result<BurnupDTO>> {
-        try {
-            const response = await this.analyticsClient.get<BurnupDTO>(ANALYTICS_ROUTES.BURNUP_BY_SPRINT(sprintId));
-
-            return {
-                success: true,
-                data: response.data
-            }
-        } catch(error) {
-            return this.errorHandlingService.handle(error, SERVICES.ANALYTICS, HTTP_METHODS.GET, ANALYTICS_ROUTES.BURNUP_BY_SPRINT(sprintId));
-        }
+        return await makeAPICall<BurnupDTO>(this.analyticsClient, this.errorHandlingService, {
+            serviceName: SERVICES.ANALYTICS,
+            method: HTTP_METHODS.GET,
+            url: ANALYTICS_ROUTES.BURNUP_BY_SPRINT(sprintId)
+        });
     }
 
     /**
@@ -79,16 +72,11 @@ export class GatewayAnalyticsService implements IGatewayAnalyticsService {
      * - On failure returns status code and error message.
      */
     async getVelocityAnalyticsByProjectId(projectId: number): Promise<Result<number>> {
-        try {
-            const response = await this.analyticsClient.get<number>(ANALYTICS_ROUTES.VELOCITY_BY_PROJECT(projectId));
-
-            return {
-                success: true,
-                data: response.data
-            }
-        } catch(error) {
-            return this.errorHandlingService.handle(error, SERVICES.ANALYTICS, HTTP_METHODS.GET, ANALYTICS_ROUTES.VELOCITY_BY_PROJECT(projectId));
-        }
+        return await makeAPICall<number>(this.analyticsClient, this.errorHandlingService, {
+            serviceName: SERVICES.ANALYTICS,
+            method: HTTP_METHODS.GET,
+            url: ANALYTICS_ROUTES.VELOCITY_BY_PROJECT(projectId)
+        });
     }
 
     /**
@@ -99,16 +87,11 @@ export class GatewayAnalyticsService implements IGatewayAnalyticsService {
      * - On failure returns status code and error message.
      */
     async getBudgetTrackingByProjectId(projectId: number): Promise<Result<BudgetTrackingDTO>> {
-        try {
-            const response = await this.analyticsClient.get<BudgetTrackingDTO>(ANALYTICS_ROUTES.BUDGET_BY_PROJECT(projectId));
-
-            return {
-                success: true,
-                data: response.data
-            }
-        } catch(error) {
-            return this.errorHandlingService.handle(error, SERVICES.ANALYTICS, HTTP_METHODS.GET, ANALYTICS_ROUTES.BUDGET_BY_PROJECT(projectId));
-        }
+        return await makeAPICall<BudgetTrackingDTO>(this.analyticsClient, this.errorHandlingService, {
+            serviceName: SERVICES.ANALYTICS,
+            method: HTTP_METHODS.GET,
+            url: ANALYTICS_ROUTES.BUDGET_BY_PROJECT(projectId)
+        });
     }
 
     /**
@@ -119,16 +102,11 @@ export class GatewayAnalyticsService implements IGatewayAnalyticsService {
      * - On failure returns status code and error message.
      */
     async getResourceCostAllocationByProjectId(projectId: number): Promise<Result<ResourceCostAllocationDTO>> {
-        try {
-            const response = await this.analyticsClient.get<ResourceCostAllocationDTO>(ANALYTICS_ROUTES.RESOURCE_COST_BY_PROJECT(projectId));
-
-            return {
-                success: true,
-                data: response.data
-            }
-        } catch(error) {
-            return this.errorHandlingService.handle(error, SERVICES.ANALYTICS, HTTP_METHODS.GET, ANALYTICS_ROUTES.RESOURCE_COST_BY_PROJECT(projectId));
-        }
+        return await makeAPICall<ResourceCostAllocationDTO>(this.analyticsClient, this.errorHandlingService, {
+            serviceName: SERVICES.ANALYTICS,
+            method: HTTP_METHODS.GET,
+            url: ANALYTICS_ROUTES.RESOURCE_COST_BY_PROJECT(projectId)
+        });
     }
 
     /**
@@ -139,16 +117,11 @@ export class GatewayAnalyticsService implements IGatewayAnalyticsService {
      * - On failure returns status code and error message.
      */
     async getProfitMarginByProjectId(projectId: number): Promise<Result<ProfitMarginDTO>> {
-        try {
-            const response = await this.analyticsClient.get<ProfitMarginDTO>(ANALYTICS_ROUTES.PROFIT_MARGIN_BY_PROJECT(projectId));
-
-            return {
-                success: true,
-                data: response.data
-            }
-        } catch(error) {
-            return this.errorHandlingService.handle(error, SERVICES.ANALYTICS, HTTP_METHODS.GET, ANALYTICS_ROUTES.PROFIT_MARGIN_BY_PROJECT(projectId));
-        }
+        return await makeAPICall<ProfitMarginDTO>(this.analyticsClient, this.errorHandlingService, {
+            serviceName: SERVICES.ANALYTICS,
+            method: HTTP_METHODS.GET,
+            url: ANALYTICS_ROUTES.PROFIT_MARGIN_BY_PROJECT(projectId)
+        });
     }
 
 }

@@ -7,7 +7,7 @@ import jwt from "jsonwebtoken";
 // Domain
 import { AuthTokenClaimsType } from "../../Domain/types/auth/AuthTokenClaims";
 
-// Utils
+// Infrastructure
 import { logger } from "../../Infrastructure/logging/Logger";
 
 declare global {

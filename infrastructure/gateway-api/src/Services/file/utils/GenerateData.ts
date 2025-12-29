@@ -14,7 +14,10 @@ export function generateFileFormData(fileData: CreateFileDTO): FormData {
         const blob = new Blob([dataArray], {type: fileData.fileType });
         formData.append('file', blob, fileData.originalFileName);
     }
-    formData.append('authorId', fileData.authorId.toString());
+
+    if(fileData.authorId){
+        formData.append('authorId', fileData.authorId.toString());
+    }
 
     return formData;
 }
