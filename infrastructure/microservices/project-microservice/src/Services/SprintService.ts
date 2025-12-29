@@ -5,6 +5,7 @@ import { SprintUpdateDTO } from "../Domain/DTOs/SprintUpdateDTO";
 import { Project } from "../Domain/models/Project";
 import { Sprint } from "../Domain/models/Sprint";
 import { ISprintService } from "../Domain/services/ISprintService";
+import { SprintMapper } from "../Utils/Mappers/SprintMapper";
 
 
 export class SprintService implements ISprintService {
@@ -31,14 +32,15 @@ export class SprintService implements ISprintService {
         });
 
         const saved = await this.sprintRepository.save(sprint);
-        return this.toDTO(saved);
+        return SprintMapper.toDTO(saved);
     }
+
     async getSprintsByProject(project_id: number): Promise<SprintDTO[]> {
         const sprints = await this.sprintRepository.find({
             where: { project: { project_id } },
             relations: ["project"],
         });
-        return sprints.map((s) => this.toDTO(s));
+        return sprints.map((s) => SprintMapper.toDTO(s));
     }
 
     async getSprintById(sprint_id: number): Promise<SprintDTO> {
@@ -46,10 +48,12 @@ export class SprintService implements ISprintService {
             where: { sprint_id },
             relations: ["project"],
         });
+
         if(!sprint) {
             throw new Error(`Sprint with id ${sprint_id} not found`);
         }
-        return this.toDTO(sprint);
+
+        return SprintMapper.toDTO(sprint);
     }
 
     async updateSprint(sprint_id: number, data: SprintUpdateDTO): Promise<SprintDTO> {
@@ -66,22 +70,11 @@ export class SprintService implements ISprintService {
         if (data.sprint_description !== undefined) sprint.sprint_description = data.sprint_description;
 
         const saved = await this.sprintRepository.save(sprint);
-        return this.toDTO(saved);
+        return SprintMapper.toDTO(saved);
     }
 
     async deleteSprint(sprint_id: number): Promise<boolean> {
         const result = await this.sprintRepository.delete(sprint_id);
         return !!result.affected && result.affected > 0;
-    }
-
-    private toDTO(s: Sprint): SprintDTO {
-        return {
-            sprint_id: s.sprint_id,
-            project_id: (s.project as any).project_id,
-            sprint_title: s.sprint_title,
-            sprint_description: s.sprint_description,
-            start_date: s.start_date,
-            end_date: s.end_date,
-        };
     }
 }

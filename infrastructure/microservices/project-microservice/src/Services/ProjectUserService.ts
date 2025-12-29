@@ -4,6 +4,7 @@ import { ProjectUserDTO } from "../Domain/DTOs/ProjectUserDTO";
 import { IProjectUserService } from "../Domain/services/IProjectUserService";
 import { Project } from "../Domain/models/Project";
 import { ProjectUser } from "../Domain/models/ProjectUser";
+import { ProjectUserMapper } from "../Utils/Mappers/ProjectUserMapper";
 
 export class ProjectUserService implements IProjectUserService{
     constructor(
@@ -33,7 +34,7 @@ export class ProjectUserService implements IProjectUserService{
         });
 
         const saved = await this.projectUserRepository.save(pu);
-        return this.toDTO(saved);
+        return ProjectUserMapper.toDTO(saved);
     }
 
     async removeUserFromProject(project_id: number, user_id: number): Promise<boolean> {
@@ -49,14 +50,6 @@ export class ProjectUserService implements IProjectUserService{
             where: { project: { project_id } },
             relations: ["project"],
         });
-        return list.map(pu => this.toDTO(pu));
-    }
-
-    private toDTO(pu: ProjectUser): ProjectUserDTO {
-        return {
-            pu_id: pu.pu_id,
-            project_id: (pu.project).project_id,
-            user_id: pu.user_id,
-        }
+        return list.map(pu => ProjectUserMapper.toDTO(pu));
     }
 }
