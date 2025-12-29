@@ -1,5 +1,5 @@
 import express from 'express';
-import { MailsController } from "./WebAPI/contollers/MailsController";
+import { MailsController } from "./WebAPI/controllers/MailsController";
 import { SendService } from "./Services/SendService";
 import { AliveService } from "./Services/AliveService";
 import cors from "cors";
