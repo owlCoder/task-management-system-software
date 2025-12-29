@@ -1,7 +1,7 @@
-import { Notification } from '../Domain/models/Notification';
-import { NotificationCreateDTO } from '../Domain/DTOs/NotificationCreateDTO';
-import { NotificationResponseDTO } from '../Domain/DTOs/NotificationDTO';
-import { INotificationMapper } from '../Domain/services/INotificationMapper';
+import { Notification } from '../../Domain/models/Notification';
+import { NotificationCreateDTO } from '../../Domain/DTOs/NotificationCreateDTO';
+import { NotificationResponseDTO } from '../../Domain/DTOs/NotificationDTO';
+import { INotificationMapper } from './INotificationMapper';
 
 export class NotificationMapper implements INotificationMapper {
   

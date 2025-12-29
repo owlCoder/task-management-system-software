@@ -1,4 +1,4 @@
-import { ErrorCode } from '../Domain/types/common/ErrorCode';
+import { ErrorCode } from '../../Domain/types/common/ErrorCode';
 
 export function mapErrorCodeToHttpStatus(errorCode: ErrorCode): number {
   switch (errorCode) {

@@ -3,7 +3,6 @@ import { ISocketManager } from "./ISocketManager";
 import { SocketConfig } from "../../config/socket.config";
 import { SocketEvents } from "../../constants/SocketEvents";
 
-// Socket Manager
 // Event handling je izdvojen u SocketEventService
 export class SocketManager implements ISocketManager {
   private socket: Socket | null = null;

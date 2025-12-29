@@ -1,6 +1,5 @@
 import { Socket } from "socket.io-client";
 
-// Interfejs za Socket Manager
 // Definise osnovne operacije za upravljanje WebSocket konekcijom
 export interface ISocketManager {
   connect(): void;

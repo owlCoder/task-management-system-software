@@ -1,7 +1,5 @@
 import type { Notification } from "../../models/notification/NotificationCardDTO";
 
-// Interfejs za Socket Event Service
-// Definiše operacije za event handling (SRP - Single Responsibility)
 export interface ISocketEventService {
   // Notification event handlers
   onNotificationCreated(callback: (notification: Notification) => void): void;
