@@ -3,7 +3,9 @@ import Sidebar from "../components/dashboard/sidebar/Sidebar";
 import TaskListItem from "../components/task/TaskListItem";
 import TaskListPreview from "../components/task/TaskListPreview";
 import { TaskDTO } from "../models/task/TaskDTO";
+import { UserDTO } from "../models/users/UserDTO";
 import { TaskAPI } from "../api/task/TaskAPI";
+import { UserAPI } from "../api/users/UserAPI";
 import CreateTaskModal from "../components/task/CreateTaskModal";
 import EditTaskModal from "../components/task/EditTaskModal";
 import { mockTasks } from "../mocks/TaskMock";
@@ -15,15 +17,12 @@ import { TaskDetailPage } from "./TaskDetailPage";
 import TaskBoardListPreview from "../components/task/TaskBoardListPreview";
 import { UpdateTaskDTO } from "../models/task/UpdateTaskDTO";
 import { TaskStatus } from "../enums/TaskStatus";
+import { TaskListPageProps } from "../types/props";
 // import EditTaskModal from "../components/task/EditTaskModal";
-
-interface TaskListPageProps {
-  projectId: string;
-  token: string;
-}
 
 const TaskPage: React.FC<TaskListPageProps> = ({ projectId, token }) => {
   const [tasks, setTasks] = useState<TaskDTO[]>([]);
+  const [users, setUsers] = useState<UserDTO[]>([]);
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
   const [selectedtaskId, setSelectedTaskId] = useState<number | null>(null);
@@ -33,23 +32,24 @@ const TaskPage: React.FC<TaskListPageProps> = ({ projectId, token }) => {
   const [sortBy, setSortBy] = useState<SortOption>("NEWEST");
   const [showBoard, setShowBoard] = useState(false);
   const api = new TaskAPI(import.meta.env.VITE_GATEWAY_URL, token);
- 
-  const handleStatusChange = async (taskId: number, newStatus: TaskStatus) => {
+  const userAPI = new UserAPI();
 
+  const handleStatusChange = async (taskId: number, newStatus: TaskStatus) => {
     const taskToUpdate = tasks.find((t) => t.task_id === taskId);
     if (!taskToUpdate) return;
 
     const payload: UpdateTaskDTO = {
-      status: newStatus
+      status: newStatus,
     };
 
     const originalTasks = [...tasks];
     setTasks((prev) =>
-      prev.map((t) => (t.task_id === taskId ? { ...t, task_status: newStatus } : t))
+      prev.map((t) =>
+        t.task_id === taskId ? { ...t, task_status: newStatus } : t
+      )
     );
 
     try {
-
       await api.updateTask(taskId, payload);
     } catch (err) {
       console.error("Failed to update status on server", err);
@@ -94,12 +94,15 @@ const TaskPage: React.FC<TaskListPageProps> = ({ projectId, token }) => {
       }
     });
 
-
   useEffect(() => {
     const load = async () => {
       try {
-        const data = await api.getTasksByProject(projectId);
-        setTasks(data);
+        const [tasksData, usersData] = await Promise.all([
+          api.getTasksByProject(projectId),
+          userAPI.getAllUsers(token),
+        ]);
+        setTasks(tasksData);
+        setUsers(usersData);
       } catch (err) {
         console.error("Failed to fetch tasks", err);
         setTasks(mockTasks);
@@ -109,11 +112,7 @@ const TaskPage: React.FC<TaskListPageProps> = ({ projectId, token }) => {
     };
 
     load();
-  }, [projectId]);
-
-  // useEffect(() => {
-  //   console.log("SELECTED TASK ID STATE:", selectedtaskId);
-  // }, [selectedtaskId]);
+  }, [projectId, token]);
 
   if (loading) {
     return <div className="text-white p-6">Loading tasks...</div>;
@@ -179,47 +178,14 @@ const TaskPage: React.FC<TaskListPageProps> = ({ projectId, token }) => {
 
                 <button
                   type="button"
-                  className="
-                  group
-                  w-[48px] sm:w-[140px] h-[48px] sm:h-[50px]
-                  rounded-[3em]
-                  flex items-center justify-center gap-[12px]
-                  bg-white/10 backdrop-blur-xl
-                  transition-all duration-500
-                  hover:bg-gradient-to-t hover:from-[var(--palette-medium-blue)] hover:to-[var(--palette-deep-blue)]
-                  border border-white/15 shadow-lg
-                  hover:-translate-y-1
-                  cursor-pointer
-                  disabled:cursor-not-allowed disabled:opacity-50 disabled:pointer-events-none disabled:bg-white/5 disabled:border-white/5 disabled:shadow-none
-                "
-                  onClick={() => setEditOpen(true)}
-                  disabled={selectedtaskId === null}
-                >
-                  <svg
-                    className="w-5 h-5 text-white/60 group-hover:text-white transform transition-transform duration-300 group-hover:scale-110"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    aria-hidden="true"
-                  >
-                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                  </svg>
-
-                  <span className="hidden sm:inline font-semibold text-white/60 group-hover:text-white transition-colors duration-300 text-base">
-                    Edit Task
-                  </span>
-                </button>
-
-                <button
-                  type="button"
                   className={`
                     w-[140px] h-[50px] rounded-[3em] flex items-center justify-center 
                     transition-all duration-500 border border-white/15 shadow-lg hover:-translate-y-1
-                    ${showBoard ? 'bg-red-500/20 hover:bg-red-500/40' : 'bg-white/10 hover:bg-white/20'}
+                    ${
+                      showBoard
+                        ? "bg-red-500/20 hover:bg-red-500/40"
+                        : "bg-white/10 hover:bg-white/20"
+                    }
                   `}
                   onClick={() => setShowBoard(!showBoard)}
                 >
@@ -228,48 +194,82 @@ const TaskPage: React.FC<TaskListPageProps> = ({ projectId, token }) => {
                   </span>
                 </button>
 
-
                 <TaskStatusFilter
                   value={statusFilter}
                   onChange={setStatusFilter}
                 />
 
-                <TaskSortSelect value={sortBy} onChange={setSortBy} />
+                <TaskSortSelect
+                  value={sortBy}
+                  onChange={(value) => setSortBy(value as SortOption)}
+                />
               </div>
             </div>
           </header>
 
           {selectedtaskId !== null && (
-            <TaskDetailPage taskId={selectedtaskId} token={token} 
-              setClose={() => setSelectedTaskId(null)}/>)}
+            <TaskDetailPage
+              taskId={selectedtaskId}
+              token={token}
+              setClose={() => setSelectedTaskId(null)}
+              onEdit={() => {
+                setEditOpen(true);
+              }}
+            />
+          )}
 
-          <section
-            className="bg-white/5 backdrop-blur-xl rounded-2xl p-6 shadow-lg border border-white/10 flex-1 overflow-y-auto styled-scrollbar">
-              {showBoard ? (
-                <TaskBoardListPreview
-                  tasks={filteredAndSortedTasks}
-                  onSelect={setSelectedTaskId}
-                  selectedTaskId={selectedtaskId}
-                  onStatusChange={handleStatusChange}
-                />
-                  
-              ) : (
-                <>
-                {
-              filteredAndSortedTasks.length  === 0 ? (
-                <TaskListPreview onSelect={setSelectedTaskId}/>
-              ) : (
-              <div className="flex flex-col gap-3">
-                {filteredAndSortedTasks.map((task) => (
-                  <TaskListItem key={task.task_id} task={task}
-                    onSelect={() => setSelectedTaskId(task.task_id)}
-                  />
-                ))}
-              </div>
-              )}
+          <section className="bg-white/5 backdrop-blur-xl rounded-2xl p-6 shadow-lg border border-white/10 flex-1 overflow-y-auto styled-scrollbar">
+            {showBoard ? (
+              <TaskBoardListPreview
+                tasks={filteredAndSortedTasks}
+                onSelect={setSelectedTaskId}
+                selectedTaskId={selectedtaskId}
+                onStatusChange={handleStatusChange}
+              />
+            ) : (
+              <>
+                {filteredAndSortedTasks.length === 0 &&
+                search.trim() === "" &&
+                !statusFilter ? (
+                  <TaskListPreview onSelect={setSelectedTaskId} />
+                ) : filteredAndSortedTasks.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center h-full text-white/40">
+                    <svg
+                      className="w-16 h-16 mb-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+                      />
+                    </svg>
+                    <p className="text-lg">
+                      {search.trim() !== ""
+                        ? `No tasks found matching "${search}"`
+                        : statusFilter
+                        ? `No tasks with this status`
+                        : "No tasks available"}
+                    </p>
+                  </div>
+                ) : (
+                  <div className="flex flex-col gap-3">
+                    {filteredAndSortedTasks.map((task) => (
+                      <TaskListItem
+                        key={task.task_id}
+                        task={task}
+                        onSelect={() => setSelectedTaskId(task.task_id)}
+                        onStatusChange={handleStatusChange}
+                        users={users}
+                      />
+                    ))}
+                  </div>
+                )}
               </>
-            )
-          }
+            )}
           </section>
         </div>
       </main>

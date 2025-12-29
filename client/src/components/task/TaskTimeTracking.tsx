@@ -1,9 +1,5 @@
 import React from "react";
-import { TaskDTO } from "../../models/task/TaskDTO";
-
-interface TaskTimeTrackingProps {
-  task: TaskDTO;
-}
+import { TaskTimeTrackingProps } from "../../types/props";
 
 export const TaskTimeTracking: React.FC<TaskTimeTrackingProps> = ({ task }) => {
   return (

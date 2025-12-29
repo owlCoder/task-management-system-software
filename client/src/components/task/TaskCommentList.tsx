@@ -1,31 +1,29 @@
-import React, {useState} from "react"
+import React, { useState } from "react";
+import { TaskCommentListProps } from "../../types/props";
 
-interface CommentProps {
-   onSubmit : (comment : string) => void;
-}
+export const TaskCommentList: React.FC<TaskCommentListProps> = ({
+  onSubmit,
+}) => {
+  const [comment, setComment] = useState("");
 
-export const TaskCommentList : React.FC<CommentProps> = ({onSubmit}) => {
+  <textarea
+    className="w-full p-2 bg-white/10 border border-white/20 rounded-lg text-white outline-none"
+    value={comment}
+    placeholder="Put in comment"
+    onChange={(e) => setComment(e.target.value)}
+  />;
 
-    const [comment,setComment] = useState("");
-
-     <textarea 
-        className="w-full p-2 bg-white/10 border border-white/20 rounded-lg text-white outline-none"
-        value={comment}
-        placeholder="Put in comment"
-        onChange={(e) => setComment(e.target.value)}
-    />
-    
-return (
+  return (
     <div className="bg-white/5 border border-white/10 rounded-xl p-3">
       <h3 className="text-[11px] uppercase tracking-wider text-white/50 mb-1">
         Comment
       </h3>
-    
-            <input
-              type="number"
-              value={comment}
-              onChange={(e) => setComment(e.target.value)}
-              className="
+
+      <input
+        type="text"
+        value={comment}
+        onChange={(e) => setComment(e.target.value)}
+        className="
                 w-full
                 bg-black/30
                 border border-white/10
@@ -35,14 +33,14 @@ return (
                 outline-none
                 focus:ring-2 focus:ring-blue-500/40
               "
-            />
-    
-    <div className="flex gap-3 mt-4">
-      <button
-        onClick={async () => {
-          await onSubmit(comment);
-        }}
-        className="
+      />
+
+      <div className="flex gap-3 mt-4">
+        <button
+          onClick={async () => {
+            await onSubmit(comment);
+          }}
+          className="
           px-4 py-1.5
           rounded-lg
           text-xs font-semibold
@@ -54,15 +52,15 @@ return (
           transition-all duration-200
           shadow-lg shadow-blue-500/20
         "
-      >
-        Save
-      </button>
-    
-      <button
-        onClick={() => {
-          setComment("");
-        }}
-        className="
+        >
+          Save
+        </button>
+
+        <button
+          onClick={() => {
+            setComment("");
+          }}
+          className="
           px-4 py-1.5
           rounded-lg
           text-xs
@@ -73,11 +71,10 @@ return (
           hover:text-white
           transition-all duration-200
         "
-      >
-        Cancel
-      </button>
-    </div> 
-        )
+        >
+          Cancel
+        </button>
+      </div>
     </div>
-    );
-}
+  );
+};

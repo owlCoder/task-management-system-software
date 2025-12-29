@@ -1,13 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { CreateTaskModalProps } from "../../types/props";
 import { CreateTaskDTO } from "../../models/task/CreateTaskDTO";
 import { TaskAPI } from "../../api/task/TaskAPI";
-
-interface CreateTaskModalProps {
-  open: boolean;
-  onClose: () => void;
-  projectId: string;
-  token: string;
-}
+import { UserAPI } from "../../api/users/UserAPI";
+import { UserDTO } from "../../models/users/UserDTO";
 
 const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
   open,
@@ -18,11 +14,28 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [estimatedCost, setEstimatedCost] = useState(0);
+  const [assignedTo, setAssignedTo] = useState<number | undefined>(undefined);
+  const [users, setUsers] = useState<UserDTO[]>([]);
   const [loading, setLoading] = useState(false);
 
-  if (!open) return null;
-
   const api = new TaskAPI(import.meta.env.VITE_GATEWAY_URL, token);
+  const userAPI = new UserAPI();
+
+  useEffect(() => {
+    if (open) {
+      const fetchUsers = async () => {
+        try {
+          const fetchedUsers = await userAPI.getAllUsers(token);
+          setUsers(fetchedUsers);
+        } catch (err) {
+          console.error("Failed to fetch users:", err);
+        }
+      };
+      fetchUsers();
+    }
+  }, [open, token]);
+
+  if (!open) return null;
 
   const handleSubmit = async () => {
     if (!title.trim()) return;
@@ -32,6 +45,7 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
       description,
       estimatedCost,
       projectId: Number(projectId),
+      assignedTo: assignedTo,
     };
 
     try {
@@ -81,6 +95,25 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
             value={estimatedCost}
             onChange={(e) => setEstimatedCost(Number(e.target.value))}
           />
+        </div>
+
+        {/* Assigned To */}
+        <div className="mb-4">
+          <label className="block text-sm mb-1">Assign To</label>
+          <select
+            className="w-full p-2 bg-white/10 border border-white/20 rounded-lg text-white outline-none"
+            value={assignedTo ?? ""}
+            onChange={(e) =>
+              setAssignedTo(e.target.value ? Number(e.target.value) : undefined)
+            }
+          >
+            <option value="">Unassigned</option>
+            {users.map((user) => (
+              <option key={user.user_id} value={user.user_id}>
+                {user.username} ({user.email})
+              </option>
+            ))}
+          </select>
         </div>
 
         {/* Buttons */}

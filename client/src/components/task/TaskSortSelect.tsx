@@ -1,10 +1,6 @@
 import React from "react";
+import { TaskSortSelectProps } from "../../types/props";
 import { SortOption } from "../../types/SortOption";
-
-interface TaskSortSelectProps {
-  value: SortOption;
-  onChange: (value: SortOption) => void;
-}
 
 const TaskSortSelect: React.FC<TaskSortSelectProps> = ({ value, onChange }) => {
   return (

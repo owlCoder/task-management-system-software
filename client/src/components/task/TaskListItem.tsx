@@ -1,30 +1,55 @@
 import React from "react";
-import { TaskDTO } from "../../models/task/TaskDTO";
-//import { TaskStatus } from "../../enums/TaskStatus";
+import { TaskListItemProps } from "../../types/props";
+import { TaskStatus } from "../../enums/TaskStatus";
+import StatusDropdown from "./StatusDropdown";
 import { StatusBadge } from "./StatusBadge";
 
-interface TaskListItemProps {
-  task: TaskDTO;
-  onSelect?: (taskId: number) => void;
-}
-
-const TaskListItem: React.FC<TaskListItemProps> = ({ task,onSelect }) => {
+const TaskListItem: React.FC<TaskListItemProps> = ({
+  task,
+  onSelect,
+  onStatusChange,
+  users = [],
+}) => {
+  const getWorkerName = () => {
+    if (!task.worker_id) return "Unassigned";
+    const worker = users.find((u) => u.user_id === task.worker_id);
+    return worker ? worker.username : `User #${task.worker_id}`;
+  };
   return (
-    <div onClick={() => {
-  if (onSelect) {
-    onSelect(task.task_id);
-  }
-}} className="bg-white/10 p-4 rounded-lg border border-white/20 hover:bg-white/20 transition cursor-pointer">
-      <div  className="flex justify-between items-center">
+    <div
+      onClick={() => {
+        if (onSelect) {
+          onSelect(task.task_id);
+        }
+      }}
+      className="bg-white/10 p-4 rounded-lg border border-white/20 hover:bg-white/20 transition cursor-pointer"
+    >
+      <div className="flex justify-between items-center">
         <span className="font-bold text-white text-xl">{task.title}</span>
 
-        <StatusBadge status={task.task_status} />
+        {onStatusChange ? (
+          <div onClick={(e) => e.stopPropagation()}>
+            <StatusDropdown
+              currentStatus={task.task_status as TaskStatus}
+              onStatusChange={(newStatus) => {
+                if (onStatusChange) {
+                  onStatusChange(task.task_id, newStatus);
+                }
+              }}
+            />
+          </div>
+        ) : (
+          <StatusBadge status={task.task_status} />
+        )}
       </div>
 
       <p className="text-white/70 mt-1 text-sm">{task.task_description}</p>
 
       <div className="flex justify-between mt-3 text-xs text-white/50">
-        <span>Cost: {task.estimated_cost}¥</span>
+        <div className="flex gap-4">
+          <span>Cost: {task.estimated_cost}¥</span>
+          <span className="text-white/50">Assigned to: {getWorkerName()}</span>
+        </div>
         <span className="flex items-center gap-1">
           <svg
             className="w-3 h-3"
