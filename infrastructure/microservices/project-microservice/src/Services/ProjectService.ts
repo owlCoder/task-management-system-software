@@ -50,4 +50,9 @@ export class ProjectService implements IProjectService {
         const result = await this.projectRepository.delete(project_id);
         return !!result.affected && result.affected > 0;
     }
+
+    async projectExists(project_id: number): Promise<boolean> {
+        const count = await this.projectRepository.count({ where: { project_id } });
+        return count > 0;
+    }
 }

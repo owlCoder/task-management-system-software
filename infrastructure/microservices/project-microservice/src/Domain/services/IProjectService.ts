@@ -8,4 +8,5 @@ export interface IProjectService {
     getProjectById(project_id: number): Promise<ProjectDTO>;
     updateProject(project_id: number, data: ProjectUpdateDTO): Promise<ProjectDTO>;
     deleteProject(project_id: number): Promise<boolean>;
+    projectExists(project_id: number): Promise<boolean>;
 }

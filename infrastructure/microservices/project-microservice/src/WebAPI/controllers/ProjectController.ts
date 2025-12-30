@@ -19,6 +19,7 @@ export class ProjectController {
         this.router.post("/projects", this.createProject.bind(this));
         this.router.put("/projects/:id", this.updateProject.bind(this));
         this.router.delete("/projects/:id", this.deleteProject.bind(this));
+        this.router.get("/projects/:id/exists", this.projectExists.bind(this));
     }
 
     private async getProjects(req: Request, res: Response) : Promise<void> {
@@ -97,6 +98,21 @@ export class ProjectController {
             }
             res.status(204).send();
         } catch (err) {
+            res.status(500).json({ message: (err as Error).message });
+        }
+    }
+
+    private async projectExists(req: Request, res: Response) : Promise<void> {
+        try{
+            const id = parseInt(req.params.id, 10);
+            if(isNaN(id)){
+                res.status(400).json({ message: "Invalid project ID" });
+                return;
+            }
+
+            const exists = await this.projectService.projectExists(id);
+            res.status(200).json({ exists });
+        }catch (err) {
             res.status(500).json({ message: (err as Error).message });
         }
     }
