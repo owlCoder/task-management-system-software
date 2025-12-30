@@ -46,6 +46,7 @@ export class ProjectUserService implements IProjectUserService{
         const pu = this.projectUserRepository.create({
             project: project,
             user_id: data.user_id,
+            weekly_hours: data.weekly_hours,
         });
 
         const saved = await this.projectUserRepository.save(pu);

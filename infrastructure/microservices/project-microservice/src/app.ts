@@ -23,9 +23,12 @@ dotenv.config({ quiet: true });
 const app = express();
 
 const corsOrigin = process.env.CORS_ORIGIN ?? "*";
-const corsMethods = process.env.CORS_METHODS?.split(".").map((m) =>
-  m.trim()
-) ?? ["POST"];
+const corsMethods = process.env.CORS_METHODS?.split(".").map((m) => m.trim()) ?? [
+    "GET",
+    "POST",
+    "PUT",
+    "DELETE",
+  ];
 
 app.use(
   cors({

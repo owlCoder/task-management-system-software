@@ -2,6 +2,7 @@ import { Router, Request, Response } from "express";
 import { IProjectService } from "../../Domain/services/IProjectService";
 import { ProjectCreateDTO } from "../../Domain/DTOs/ProjectCreateDTO";
 import { ProjectUpdateDTO } from "../../Domain/DTOs/ProjectUpdateDTO";
+import { validateCreateProject, validateUpdateProject } from "../validators/ProjectValidator";
 
 
 export class ProjectController {
@@ -46,6 +47,13 @@ export class ProjectController {
     private async createProject(req: Request, res: Response) : Promise<void> {
         try{
             const data = req.body as ProjectCreateDTO;
+
+            const valdiation = validateCreateProject(data);
+            if(!valdiation.success){
+                res.status(400).json({ message: valdiation.message });
+                return;
+            }
+
             const created = await this.projectService.CreateProject(data);
             res.status(201).json(created);
         } catch (err) {
@@ -61,6 +69,13 @@ export class ProjectController {
                 return;
             }
             const data = req.body as ProjectUpdateDTO;
+
+            const validation = validateUpdateProject(data);
+            if(!validation.success){
+                res.status(400).json({ message: validation.message });
+                return;
+            }
+
             const updated = await this.projectService.updateProject(id, data);
             res.status(200).json(updated);
         } catch (err) {
