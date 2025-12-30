@@ -10,6 +10,7 @@ export const SprintMapper = {
       sprint_description: s.sprint_description,
       start_date: s.start_date,
       end_date: s.end_date,
+      story_points: s.story_points
     };
   },
 };

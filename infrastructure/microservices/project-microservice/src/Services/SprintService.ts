@@ -29,6 +29,7 @@ export class SprintService implements ISprintService {
             sprint_description: data.sprint_description,
             start_date: new Date(data.start_date),
             end_date: new Date(data.end_date),
+            story_points: data.story_points,
         });
 
         const saved = await this.sprintRepository.save(sprint);
