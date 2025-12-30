@@ -15,6 +15,7 @@ export class ProjectController {
 
     private initializeRoutes(): void {
         this.router.get("/projects", this.getProjects.bind(this));
+        this.router.get("/users/:userId/projects", this.getProjectsByUserId.bind(this));
         this.router.get("/projects/:id", this.getProjectById.bind(this));
         this.router.post("/projects", this.createProject.bind(this));
         this.router.put("/projects/:id", this.updateProject.bind(this));
@@ -25,6 +26,21 @@ export class ProjectController {
     private async getProjects(req: Request, res: Response) : Promise<void> {
         try{
             const projects = await this.projectService.getProjects();
+            res.status(200).json(projects);
+        } catch (err) {
+            res.status(500).json({ message: (err as Error).message });
+        }
+    }
+
+    private async getProjectsByUserId(req: Request, res: Response): Promise<void> {
+        try {
+            const userId = parseInt(req.params.userId, 10);
+            if(isNaN(userId)) {
+                res.status(400).json({ message: "Invalid user ID" });
+                return;
+            }
+
+            const projects = await this.projectService.getProjectsByUserId(userId);
             res.status(200).json(projects);
         } catch (err) {
             res.status(500).json({ message: (err as Error).message });

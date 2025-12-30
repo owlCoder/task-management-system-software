@@ -27,6 +27,11 @@ export class ProjectService implements IProjectService {
         const projects = await this.projectRepository.find();
         return projects.map((p) => ProjectMapper.toDTO(p));
     }
+
+    async getProjectsByUserId(user_id: number): Promise<ProjectDTO[]> {
+        const projects = await this.projectRepository.createQueryBuilder("project").innerJoin("project.project_users", "pu").where("pu.user_id = :user_id", { user_id }).getMany();
+        return projects.map((p) => ProjectMapper.toDTO(p));
+    }
     
     async getProjectById(project_id: number): Promise<ProjectDTO> {
         const project = await this.projectRepository.findOne({ where: { project_id } });
