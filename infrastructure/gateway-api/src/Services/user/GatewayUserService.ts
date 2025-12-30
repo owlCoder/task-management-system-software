@@ -44,7 +44,7 @@ export class GatewayUserService implements IGatewayUserService {
         return await makeAPICall<UserDTO, RegistrationUserDTO>(this.userClient, this.errorHandlingService, {
             serviceName: SERVICES.USER,
             method: HTTP_METHODS.POST,
-            url: USER_ROUTES.CREATE,
+            url: USER_ROUTES.REGISTER_USER,
             data: data
         });
     }
@@ -60,7 +60,7 @@ export class GatewayUserService implements IGatewayUserService {
         return await makeAPICall<UserDTO>(this.userClient, this.errorHandlingService, {
             serviceName: SERVICES.USER,
             method: HTTP_METHODS.GET,
-            url: USER_ROUTES.GET_BY_ID(id)
+            url: USER_ROUTES.GET_USER(id)
         });
     }
 
@@ -75,7 +75,7 @@ export class GatewayUserService implements IGatewayUserService {
         return await makeAPICall<UserDTO[], undefined, { ids: string }>(this.userClient, this.errorHandlingService, {
             serviceName: SERVICES.USER,
             method: HTTP_METHODS.GET,
-            url: USER_ROUTES.GET_BY_IDS,
+            url: USER_ROUTES.GET_MULTIPLE_USERS,
             params: {ids: ids.join(',')}
         });
     }
@@ -90,7 +90,7 @@ export class GatewayUserService implements IGatewayUserService {
         return await makeAPICall<UserDTO[]>(this.userClient, this.errorHandlingService, {
             serviceName: SERVICES.USER,
             method: HTTP_METHODS.GET,
-            url: USER_ROUTES.GET_ALL
+            url: USER_ROUTES.GET_ALL_USERS
         });
     }
 
@@ -106,7 +106,7 @@ export class GatewayUserService implements IGatewayUserService {
         return await makeAPICall<UserDTO, UpdateUserDTO>(this.userClient, this.errorHandlingService, {
             serviceName: SERVICES.USER,
             method: HTTP_METHODS.PUT,
-            url: USER_ROUTES.UPDATE(id),
+            url: USER_ROUTES.UPDATE_USER(id),
             data: data
         });
     }
@@ -122,7 +122,7 @@ export class GatewayUserService implements IGatewayUserService {
         return await makeAPICall<void>(this.userClient, this.errorHandlingService, {
             serviceName: SERVICES.USER,
             method: HTTP_METHODS.DELETE,
-            url: USER_ROUTES.DELETE(id)
+            url: USER_ROUTES.DELETE_USER(id)
         });
     }
 
@@ -136,7 +136,7 @@ export class GatewayUserService implements IGatewayUserService {
         return await makeAPICall<UserRoleDTO[]>(this.userClient, this.errorHandlingService, {
             serviceName: SERVICES.USER,
             method: HTTP_METHODS.GET,
-            url: USER_ROUTES.CREATION_ROLES
+            url: USER_ROUTES.GET_REGISTRATION_ROLES
         });
     }
 

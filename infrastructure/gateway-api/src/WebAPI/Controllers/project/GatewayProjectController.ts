@@ -6,6 +6,11 @@ import { IGatewayProjectService } from "../../../Domain/services/project/IGatewa
 import { ProjectCreateDTO } from "../../../Domain/DTOs/project/ProjectCreateDTO";
 import { ProjectUpdateDTO } from "../../../Domain/DTOs/project/ProjectUpdateDTO";
 import { ProjectDTO } from "../../../Domain/DTOs/project/ProjectDTO";
+import { SprintDTO } from "../../../Domain/DTOs/project/SprintDTO";
+import { SprintCreateDTO } from "../../../Domain/DTOs/project/SprintCreateDTO";
+import { SprintUpdateDTO } from "../../../Domain/DTOs/project/SprintUpdateDTO";
+import { ProjectUserAssignDTO } from "../../../Domain/DTOs/project/ProjectUserAssignDTO";
+import { ProjectUserDTO } from "../../../Domain/DTOs/project/ProjectUserDTO";
 import { UserRole } from "../../../Domain/enums/user/UserRole";
 
 // Middlewares
@@ -28,18 +33,43 @@ export class GatewayProjectController {
 
     private initializeRoutes() {
         this.router.get(
-            "/projects/:id", 
+            "/projects/:projectId", 
             authenticate, 
             authorize(UserRole.PROJECT_MANAGER, UserRole.ANALYTICS_DEVELOPMENT_MANAGER, UserRole.ANIMATION_WORKER, UserRole.AUDIO_MUSIC_STAGIST), 
             this.getProjectById.bind(this)
         );
         this.router.post("/projects", authenticate, authorize(UserRole.PROJECT_MANAGER), this.createProject.bind(this));
-        this.router.put("/projects/:id", authenticate, authorize(UserRole.PROJECT_MANAGER), this.updateProject.bind(this));
-        this.router.delete("/projects/:id", authenticate, authorize(UserRole.PROJECT_MANAGER), this.deleteProject.bind(this));
+        this.router.put("/projects/:projectId", authenticate, authorize(UserRole.PROJECT_MANAGER), this.updateProject.bind(this));
+        this.router.delete("/projects/:projectId", authenticate, authorize(UserRole.PROJECT_MANAGER), this.deleteProject.bind(this));
+
+        this.router.get(
+            "/projects/:projectId/sprints",
+            authenticate,
+            authorize(UserRole.PROJECT_MANAGER, UserRole.ANALYTICS_DEVELOPMENT_MANAGER, UserRole.ANIMATION_WORKER, UserRole.AUDIO_MUSIC_STAGIST),
+            this.getSprintsByProject.bind(this)
+        );
+        this.router.get(
+            "/sprints/:sprintId",
+            authenticate,
+            authorize(UserRole.PROJECT_MANAGER, UserRole.ANALYTICS_DEVELOPMENT_MANAGER, UserRole.ANIMATION_WORKER, UserRole.AUDIO_MUSIC_STAGIST),
+            this.getSprintById.bind(this)
+        );
+        this.router.post("/projects/:projectId/sprints", authenticate, authorize(UserRole.PROJECT_MANAGER), this.createSprint.bind(this));
+        this.router.put("/sprints/:sprintId", authenticate, authorize(UserRole.PROJECT_MANAGER), this.updateSprint.bind(this));
+        this.router.delete("/sprints/:sprintId", authenticate, authorize(UserRole.PROJECT_MANAGER), this.deleteSprint.bind(this));
+
+        this.router.get(
+            "/projects/:projectId/users",
+            authenticate,
+            authorize(UserRole.PROJECT_MANAGER, UserRole.ANALYTICS_DEVELOPMENT_MANAGER, UserRole.ANIMATION_WORKER, UserRole.AUDIO_MUSIC_STAGIST),
+            this.getUsersFromProject.bind(this)
+        );
+        this.router.post("/projects/:projectId/users", authenticate, authorize(UserRole.PROJECT_MANAGER), this.assignUser.bind(this));
+        this.router.delete("/projects/:projectId/users/:userId", authenticate, authorize(UserRole.PROJECT_MANAGER), this.removeUser.bind(this));
     }
 
     /**
-     * GET /api/v1/projects/:id
+     * GET /api/v1/projects/:projectId
      * @param {Request} req - the request object, containing the id of the project in params.
      * @param {Response} res - the response object for the client.
      * @returns {Object}
@@ -47,9 +77,9 @@ export class GatewayProjectController {
      * - On failure: A JSON object with an error message and a HTTP status code indicating the failure.
      */
     private async getProjectById(req: Request, res: Response): Promise<void> {
-        const id = parseInt(req.params.id);
+        const projectId = parseInt(req.params.projectId, 10);
 
-        const result = await this.gatewayProjectService.getProjectById(id);
+        const result = await this.gatewayProjectService.getProjectById(projectId);
         handleResponse(res, result);
     }
 
@@ -69,7 +99,7 @@ export class GatewayProjectController {
     }
 
     /**
-     * PUT /api/v1/projects/:id
+     * PUT /api/v1/projects/:projectId
      * @param {Request} req - the request object, containing the id in params and data of the project as {@link ProjectUpdateDTO} in body.
      * @param {Response} res - the response object for the client.
      * @returns {Object}
@@ -77,15 +107,15 @@ export class GatewayProjectController {
      * - On failure: A JSON object with an error message and a HTTP status code indicating the failure.
      */
     private async updateProject(req: Request, res: Response): Promise<void> {
-        const id = parseInt(req.params.id);
+        const projectId = parseInt(req.params.projectId, 10);
         const data = req.body as ProjectUpdateDTO;
 
-        const result = await this.gatewayProjectService.updateProject(id, data);
+        const result = await this.gatewayProjectService.updateProject(projectId, data);
         handleResponse(res, result);
     }
 
     /**
-     * DELETE /api/v1/projects/:id
+     * DELETE /api/v1/projects/:projectId
      * @param {Request} req - the request object, containing the id of the project in params.
      * @param {Response} res - the response object for the client.
      * @returns {Object}
@@ -93,9 +123,133 @@ export class GatewayProjectController {
      * - On failure: A JSON object with an error message and a HTTP status code indicating the failure.
      */
     private async deleteProject(req: Request, res: Response): Promise<void> {
-        const id = parseInt(req.params.id);
+        const projectId = parseInt(req.params.projectId, 10);
 
-        const result = await this.gatewayProjectService.deleteProject(id);
+        const result = await this.gatewayProjectService.deleteProject(projectId);
+        handleEmptyResponse(res, result);
+    }
+
+    /**
+     * GET /api/v1/projects/:projectId/sprints
+     * @param {Request} req - the request object, containing the id of the project in params.
+     * @param {Response} res - the response object for the client.
+     * @returns {Object}
+     * - On success: A JSON object following the {@link SprintDTO[]} structure containing the result of the get sprints by project operation. 
+     * - On failure: A JSON object with an error message and a HTTP status code indicating the failure.
+     */
+    private async getSprintsByProject(req: Request, res: Response): Promise<void> {
+        const projectId = parseInt(req.params.projectId, 10);
+
+        const result = await this.gatewayProjectService.getSprintsByProject(projectId);
+        handleResponse(res, result);
+    }
+
+    /**
+     * GET /api/v1/sprints/:sprintId
+     * @param {Request} req - the request object, containing the id of the sprint in params.
+     * @param {Response} res - the response object for the client.
+     * @returns {Object}
+     * - On success: A JSON object following the {@link SprintDTO} structure containing the result of the get sprint by id operation. 
+     * - On failure: A JSON object with an error message and a HTTP status code indicating the failure.
+     */
+    private async getSprintById(req: Request, res: Response): Promise<void> {
+        const sprintId = parseInt(req.params.sprintId, 10);
+        
+        const result = await this.gatewayProjectService.getSprintById(sprintId);
+        handleResponse(res, result);
+    }
+
+    /**
+     * POST /api/v1/projects/:projectId/sprints
+     * @param {Request} req - the request object, containing the id of the project in params and data of the sprint as {@link SprintCreateDTO} in body.
+     * @param {Response} res - the response object for the client.
+     * @returns {Object}
+     * - On success: A JSON object following the {@link SprintDTO} structure containing the result of the create sprint operation. 
+     * - On failure: A JSON object with an error message and a HTTP status code indicating the failure.
+     */
+    private async createSprint(req: Request, res: Response): Promise<void> {
+        const projectId = parseInt(req.params.projectId, 10);
+        const data = req.body as SprintCreateDTO;
+
+        const result = await this.gatewayProjectService.createSprint(projectId, data);
+        handleResponse(res, result, 201);
+    }
+
+    /**
+     * PUT /api/v1/sprints/:sprintId
+     * @param {Request} req - the request object, containing the id of the sprint in params and data of the sprint as {@link SprintUpdateDTO} in body.
+     * @param {Response} res - the response object for the client.
+     * @returns {Object}
+     * - On success: A JSON object following the {@link SprintDTO} structure containing the result of the update sprint operation. 
+     * - On failure: A JSON object with an error message and a HTTP status code indicating the failure.
+     */
+    private async updateSprint(req: Request, res: Response): Promise<void> {
+        const sprintId = parseInt(req.params.sprintId, 10);
+        const data = req.body as SprintUpdateDTO;
+
+        const result = await this.gatewayProjectService.updateSprint(sprintId, data);
+        handleResponse(res, result);
+    }
+
+    /**
+     * DELETE /api/v1/sprints/:sprintId
+     * @param {Request} req - the request object, containing the id of the sprint in params.
+     * @param {Response} res - the response object for the client.
+     * @returns {Object}
+     * - On success: 204 No Content. 
+     * - On failure: A JSON object with an error message and a HTTP status code indicating the failure.
+     */
+    private async deleteSprint(req: Request, res: Response): Promise<void> {
+        const sprintId = parseInt(req.params.sprintId, 10);
+
+        const result = await this.gatewayProjectService.deleteSprint(sprintId);
+        handleEmptyResponse(res, result);
+    }
+
+    /**
+     * GET /api/v1/projects/:projectId/users
+     * @param {Request} req - the request object, containing the id of the project in params.
+     * @param {Response} res - the response object for the client.
+     * @returns {Object}
+     * - On success: A JSON object following the {@link ProjectUserDTO[]} structure containing the result of the get users from project operation. 
+     * - On failure: A JSON object with an error message and a HTTP status code indicating the failure.
+     */
+    private async getUsersFromProject(req: Request, res: Response): Promise<void> {
+        const projectId = parseInt(req.params.projectId, 10);
+
+        const result = await this.gatewayProjectService.getUsersFromProject(projectId);
+        handleResponse(res, result);
+    }
+
+    /**
+     * POST /api/v1/projects/:projectId/users
+     * @param {Request} req - the request object, containing the id of the project in params and the data of the user as {@link ProjectUserAssignDTO} in body.
+     * @param {Response} res - the response object for the client.
+     * @returns {Object}
+     * - On success: A JSON object following the {@link ProjectUserDTO} structure containing the result of the assign user to project operation. 
+     * - On failure: A JSON object with an error message and a HTTP status code indicating the failure.
+     */
+    private async assignUser(req: Request, res: Response): Promise<void> {
+        const projectId = parseInt(req.params.projectId, 10);
+        const data = req.body as ProjectUserAssignDTO;
+
+        const result = await this.gatewayProjectService.assignUserToProject(projectId, data);
+        handleResponse(res, result, 201);
+    }
+
+    /**
+     * DELETE /api/v1/projects/:projectId/users/:userId
+     * @param {Request} req - the request object, containing the id of the project and the id of the user in params.
+     * @param {Response} res - the response object for the client.
+     * @returns {Object}
+     * - On success: 204 No Content. 
+     * - On failure: A JSON object with an error message and a HTTP status code indicating the failure.
+     */
+    private async removeUser(req: Request, res: Response): Promise<void> {
+        const projectId = parseInt(req.params.projectId, 10);
+        const userId = parseInt(req.params.userId, 10);
+
+        const result = await this.gatewayProjectService.removeUserFromProject(projectId, userId);
         handleEmptyResponse(res, result);
     }
 

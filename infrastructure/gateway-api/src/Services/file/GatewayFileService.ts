@@ -46,7 +46,7 @@ export class GatewayFileService implements IGatewayFileService {
         return await makeAPICallWithTransform<DownloadFileDTO>(this.fileClient, this.errorHandlingService, {
             serviceName: SERVICES.FILE,
             method: HTTP_METHODS.GET,
-            url: FILE_ROUTES.DOWNLOAD(fileId),
+            url: FILE_ROUTES.DOWNLOAD_FILE(fileId),
             responseType: "arraybuffer",
             timeout: 10000
         }, extractDownloadDTOFromResponse);
@@ -63,7 +63,7 @@ export class GatewayFileService implements IGatewayFileService {
         return await makeAPICall<UploadedFileDTO[]>(this.fileClient, this.errorHandlingService, {
             serviceName: SERVICES.FILE,
             method: HTTP_METHODS.GET,
-            url: FILE_ROUTES.GET_BY_AUTHOR(authorId)
+            url: FILE_ROUTES.GET_FILES_FROM_AUTHOR(authorId)
         });
     }
 
@@ -78,7 +78,7 @@ export class GatewayFileService implements IGatewayFileService {
         return await makeAPICall<UploadedFileDTO>(this.fileClient, this.errorHandlingService, {
             serviceName: SERVICES.FILE,
             method: HTTP_METHODS.GET,
-            url: FILE_ROUTES.METADATA(fileId)
+            url: FILE_ROUTES.GET_FILE_METADATA(fileId)
         });
     }
 
@@ -95,7 +95,7 @@ export class GatewayFileService implements IGatewayFileService {
         return await makeAPICall<UploadedFileDTO, FormData>(this.fileClient, this.errorHandlingService, {
             serviceName: SERVICES.FILE,
             method: HTTP_METHODS.POST,
-            url: FILE_ROUTES.UPLOAD,
+            url: FILE_ROUTES.UPLOAD_FILE,
             data: formData,
             timeout: 10000
         });
@@ -112,7 +112,7 @@ export class GatewayFileService implements IGatewayFileService {
         return await makeAPICall<void>(this.fileClient, this.errorHandlingService, {
             serviceName: SERVICES.FILE,
             method: HTTP_METHODS.DELETE,
-            url: FILE_ROUTES.DELETE(fileId),
+            url: FILE_ROUTES.DELETE_FILE(fileId),
         });
     }
 

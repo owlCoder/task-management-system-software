@@ -41,7 +41,7 @@ export class GatewayNotificationService implements IGatewayNotificationService {
         return await makeAPICall<NotificationDTO>(this.notificationClient, this.errorHandlingService, {
             serviceName: SERVICES.NOTIFICATION,
             method: HTTP_METHODS.GET,
-            url: NOTIFICATION_ROUTES.GET_BY_ID(id) 
+            url: NOTIFICATION_ROUTES.GET_NOTIFICATION(id) 
         });
     }
 
@@ -56,7 +56,7 @@ export class GatewayNotificationService implements IGatewayNotificationService {
         return await makeAPICall<NotificationDTO[]>(this.notificationClient, this.errorHandlingService, {
             serviceName: SERVICES.NOTIFICATION,
             method: HTTP_METHODS.GET,
-            url: NOTIFICATION_ROUTES.GET_BY_USER_ID(userId) 
+            url: NOTIFICATION_ROUTES.GET_NOTIFICATIONS_FROM_USER(userId) 
         });
     }
 
@@ -71,7 +71,7 @@ export class GatewayNotificationService implements IGatewayNotificationService {
         return await makeAPICall<number>(this.notificationClient, this.errorHandlingService, {
             serviceName: SERVICES.NOTIFICATION,
             method: HTTP_METHODS.GET,
-            url: NOTIFICATION_ROUTES.GET_UNREAD_COUNT(id) 
+            url: NOTIFICATION_ROUTES.GET_UNREAD_NOTIFICATIONS_COUNT(id) 
         });
     }
 
@@ -86,7 +86,7 @@ export class GatewayNotificationService implements IGatewayNotificationService {
         return await makeAPICall<void>(this.notificationClient, this.errorHandlingService, {
             serviceName: SERVICES.NOTIFICATION,
             method: HTTP_METHODS.PATCH,
-            url: NOTIFICATION_ROUTES.MARK_AS_READ(id)
+            url: NOTIFICATION_ROUTES.MARK_NOTIFICATION_AS_READ(id)
         });
     }
 
@@ -101,7 +101,7 @@ export class GatewayNotificationService implements IGatewayNotificationService {
         return await makeAPICall<void>(this.notificationClient, this.errorHandlingService, {
             serviceName: SERVICES.NOTIFICATION,
             method: HTTP_METHODS.PATCH,
-            url: NOTIFICATION_ROUTES.MARK_AS_UNREAD(id) 
+            url: NOTIFICATION_ROUTES.MARK_NOTIFICATION_AS_UNREAD(id) 
         });
     }
     
@@ -116,7 +116,7 @@ export class GatewayNotificationService implements IGatewayNotificationService {
         return await makeAPICall<void, number[]>(this.notificationClient, this.errorHandlingService, {
             serviceName: SERVICES.NOTIFICATION,
             method: HTTP_METHODS.PATCH,
-            url: NOTIFICATION_ROUTES.MARK_MULTIPLE_AS_READ,
+            url: NOTIFICATION_ROUTES.MARK_MULTIPLE_NOTIFICATIONS_AS_READ,
             data: ids 
         });
     }
@@ -132,7 +132,7 @@ export class GatewayNotificationService implements IGatewayNotificationService {
         return await makeAPICall<void, number[]>(this.notificationClient, this.errorHandlingService, {
             serviceName: SERVICES.NOTIFICATION,
             method: HTTP_METHODS.PATCH,
-            url: NOTIFICATION_ROUTES.MARK_MULTIPLE_AS_UNREAD,
+            url: NOTIFICATION_ROUTES.MARK_MULTIPLE_NOTIFICATIONS_AS_UNREAD,
             data: ids 
         });
     }
@@ -148,7 +148,7 @@ export class GatewayNotificationService implements IGatewayNotificationService {
         return await makeAPICall<void>(this.notificationClient, this.errorHandlingService, {
             serviceName: SERVICES.NOTIFICATION,
             method: HTTP_METHODS.DELETE,
-            url: NOTIFICATION_ROUTES.DELETE(id)
+            url: NOTIFICATION_ROUTES.DELETE_NOTIFICATION(id)
         });
     }
 
@@ -163,7 +163,7 @@ export class GatewayNotificationService implements IGatewayNotificationService {
         return await makeAPICall<void, number[]>(this.notificationClient, this.errorHandlingService, {
             serviceName: SERVICES.NOTIFICATION,
             method: HTTP_METHODS.DELETE,
-            url: NOTIFICATION_ROUTES.DELETE_MULTIPLE,
+            url: NOTIFICATION_ROUTES.DELETE_MULTIPLE_NOTIFICATIONS,
             data: ids 
         });
     }

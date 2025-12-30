@@ -37,14 +37,8 @@ export class GatewayAuthService implements IGatewayAuthService {
      * Sends the login data to the auth microservice.
      * @param {LoginUserDTO} data - login data.
      * @returns {Promise<Result<AuthResponseType>>} - A promise that resolves to a Result object containing the auth response data.
-     * - On success:
-     *     - `success`: A boolean indicating if the login attempt was successful.
-     *     - `otp_required`: A boolean indicating if OTP is required for further authentication.
-     *     - `session`: A session object if OTP is required, used for continuing the login process.
-     *     - `token`: A JWT token if no OTP is required, used for authentication in future requests.
-     *     - `message`: A message returned by the microservice with details about the login result.
-     * - On failure:
-     *     - The result contains an error message and status code.
+     * - On success result contains the {@link AuthResponseType}
+     * - On failure result contains an error message and status code.
      */
     async login(data: LoginUserDTO): Promise<Result<AuthResponseType>> {
         return await makeAPICall<AuthResponseType, LoginUserDTO>(this.authClient, this.errorHandlingService, {
@@ -59,12 +53,8 @@ export class GatewayAuthService implements IGatewayAuthService {
      * Requests the otp data verification from the auth microservice.
      * @param {OTPVerificationDTO} otpData - otp data.
      * @returns {Promise<Result<AuthResponseType>>} - A promise that resolves to a Result object containing the auth response data.
-     * - On success:
-     *     - `success`: A boolean indicating if the login attempt was successful.
-     *     - `token`: A JWT token if no OTP is required, used for authentication in future requests.
-     *     - `message`: A message returned by the microservice with details about the login result.
-     * - On failure:
-     *     - The result contains an error message and status code.
+     * - On success result contains the {@link AuthResponseType}
+     * - On failure result contains an error message and status code.
      */
     async verifyOtp(otpData: OTPVerificationDTO): Promise<Result<AuthResponseType>> {
         return await makeAPICall<AuthResponseType, OTPVerificationDTO>(this.authClient, this.errorHandlingService, {
@@ -79,14 +69,8 @@ export class GatewayAuthService implements IGatewayAuthService {
      * Sends the request for the new otp code to the auth microservice.
      * @param {BrowserDataDTO} browserData - browser data.
      * @returns {Promise<Result<AuthResponseType>>} - A promise that resolves to a Result object containing the auth response data.
-     * - On success:
-     *     - `success`: A boolean indicating if the login attempt was successful.
-     *     - `otp_required`: A boolean indicating if OTP is required for further authentication.
-     *     - `session`: A session object if OTP is required, used for continuing the login process.
-     *     - `token`: A JWT token if no OTP is required, used for authentication in future requests.
-     *     - `message`: A message returned by the microservice with details about the login result.
-     * - On failure:
-     *     - The result contains an error message and status code.
+     * - On success result contains the {@link AuthResponseType}
+     * - On failure result contains an error message and status code.
      */
     async resendOtp(browserData: BrowserDataDTO): Promise<Result<AuthResponseType>> {
         return await makeAPICall<AuthResponseType, BrowserDataDTO>(this.authClient, this.errorHandlingService, {

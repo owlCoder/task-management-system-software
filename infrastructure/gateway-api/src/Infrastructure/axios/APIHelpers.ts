@@ -50,7 +50,7 @@ export async function makeAPICall<T, D = undefined, P = undefined>(
  * @param {AxiosInstance} client - The axios instance used to make the HTTP request.
  * @param {IErrorHandlingService} handler - Service used for handling errors.
  * @param {APICallConfig<D, P>} config - Configuration object containing information on the API request
- * @param {(response: AxiosResponse): T} transformer - 
+ * @param {(response: AxiosResponse) => T} transformer - A function that transforms the Axios response into a desired format.
  * @returns {Promise<Result<T>>} - The result containing the transformed data.
  *     - On success returns the response data from the API call.
  *     - On failure returns status code and error message.
