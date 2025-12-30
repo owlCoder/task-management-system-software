@@ -38,6 +38,12 @@ export class GatewayProjectController {
             authorize(UserRole.PROJECT_MANAGER, UserRole.ANALYTICS_DEVELOPMENT_MANAGER, UserRole.ANIMATION_WORKER, UserRole.AUDIO_MUSIC_STAGIST), 
             this.getProjectById.bind(this)
         );
+        this.router.get(
+            "/users/:userId/projects",
+            authenticate,
+            authorize(UserRole.PROJECT_MANAGER, UserRole.ANALYTICS_DEVELOPMENT_MANAGER, UserRole.ANIMATION_WORKER, UserRole.AUDIO_MUSIC_STAGIST),
+            this.getProjectsFromUser.bind(this)
+        );
         this.router.post("/projects", authenticate, authorize(UserRole.PROJECT_MANAGER), this.createProject.bind(this));
         this.router.put("/projects/:projectId", authenticate, authorize(UserRole.PROJECT_MANAGER), this.updateProject.bind(this));
         this.router.delete("/projects/:projectId", authenticate, authorize(UserRole.PROJECT_MANAGER), this.deleteProject.bind(this));
@@ -80,6 +86,21 @@ export class GatewayProjectController {
         const projectId = parseInt(req.params.projectId, 10);
 
         const result = await this.gatewayProjectService.getProjectById(projectId);
+        handleResponse(res, result);
+    }
+
+    /**
+     * GET /api/v1/users/:userId/projects
+     * @param {Request} req - the request object, containing the id of the user in params.
+     * @param {Response} res - the response object for the client.
+     * @returns {Object}
+     * - On success: A JSON object following the {@link ProjectDTO[]} structure containing the result of the get projects from user operation. 
+     * - On failure: A JSON object with an error message and a HTTP status code indicating the failure.
+     */
+    private async getProjectsFromUser(req: Request, res: Response): Promise<void> {
+        const userId = parseInt(req.params.userId, 10);
+
+        const result = await this.gatewayProjectService.getProjectsFromUser(userId);
         handleResponse(res, result);
     }
 

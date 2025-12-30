@@ -52,6 +52,21 @@ export class GatewayProjectService implements IGatewayProjectService {
     }
 
     /**
+     * Fetches the projects a specific user works on.
+     * @param {number} userId - id of the user. 
+     * @returns {Promise<Result<ProjectDTO[]>>} - A promise that resolves to a Result object containing the data of the projects.
+     * - On success returns data as {@link ProjectDTO[]}.
+     * - On failure returns status code and error message.
+     */
+    async getProjectsFromUser(userId: number): Promise<Result<ProjectDTO[]>> {
+        return await makeAPICall<ProjectDTO[]>(this.projectClient, this.errorHandlingService, {
+            serviceName: SERVICES.PROJECT,
+            method: HTTP_METHODS.GET,
+            url: PROJECT_ROUTES.GET_PROJECTS_FROM_USER(userId)
+        });
+    }
+
+    /**
      * Posts new project.
      * @param {ProjectCreateDTO} data - data of the project. 
      * @returns {Promise<Result<ProjectDTO>>} - A promise that resolves to a Result object containing the data of the project.
