@@ -60,6 +60,7 @@ export class SprintService implements ISprintService {
     async updateSprint(sprint_id: number, data: SprintUpdateDTO): Promise<SprintDTO> {
         const sprint = await this.sprintRepository.findOne({
             where: { sprint_id },
+            relations: ["project"], 
         });
         if(!sprint) {
             throw new Error(`Sprint with id ${sprint_id} not found`);
