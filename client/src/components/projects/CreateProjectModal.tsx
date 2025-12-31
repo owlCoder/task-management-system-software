@@ -15,10 +15,13 @@ export const CreateProjectModal: React.FC<Props> = ({
   const [formData, setFormData] = useState({
     project_name: "",
     project_description: "",
-    image_file_uuid: "",
     total_weekly_hours_required: "" as string | number,
     allowed_budget: "" as string | number,
   });
+
+  // *** DODAJ STATE ZA FILE I PREVIEW ***
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string>("");
 
   const [errors, setErrors] = useState({
     project_name: "",
@@ -30,10 +33,11 @@ export const CreateProjectModal: React.FC<Props> = ({
     setFormData({
       project_name: "",
       project_description: "",
-      image_file_uuid: "",
       total_weekly_hours_required: "",
       allowed_budget: "",
     });
+    setImageFile(null);
+    setImagePreview("");
     setErrors({
       project_name: "",
       total_weekly_hours_required: "",
@@ -78,13 +82,29 @@ export const CreateProjectModal: React.FC<Props> = ({
     return Object.values(newErrors).every((e) => !e);
   };
 
+  // *** IZMENJENI HANDLER ZA SLIKU ***
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      setImageFile(file);
+      
+      // Kreiraj preview za prikaz
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleSubmit = () => {
     if (!validateForm()) return;
 
+    // *** ŠALJEMO FILE OBJEKAT UMESTO BASE64 ***
     const projectData: ProjectCreateDTO = {
       project_name: formData.project_name.trim(),
       project_description: formData.project_description.trim() || "",
-      image_file_uuid: formData.image_file_uuid || "",
+      image_file: imageFile || undefined,  // Šaljemo File objekat
       total_weekly_hours_required: Number(formData.total_weekly_hours_required),
       allowed_budget: Number(formData.allowed_budget),
     };
@@ -158,36 +178,25 @@ export const CreateProjectModal: React.FC<Props> = ({
             )}
           </div>
 
-          {/* Project Image */}
+          {/* Project Image - IZMENJENO */}
           <div>
             <h3 className="text-xs uppercase tracking-wider text-white/60 mb-1">
               Project Image
             </h3>
             <label className="flex items-center gap-2 cursor-pointer px-4 py-2 bg-white/10 border border-white/20 rounded-lg hover:bg-white/20 transition">
               <span className="text-white/90">
-                {formData.image_file_uuid ? "File Selected" : "Choose Image"}
+                {imageFile ? imageFile.name : "Choose Image"}
               </span>
               <input
                 type="file"
                 accept="image/*"
                 className="hidden"
-                onChange={(e) => {
-                  if (e.target.files && e.target.files[0]) {
-                    const file = e.target.files[0];
-                    const reader = new FileReader();
-                    reader.onloadend = () =>
-                      setFormData({
-                        ...formData,
-                        image_file_uuid: reader.result as string,
-                      });
-                    reader.readAsDataURL(file);
-                  }
-                }}
+                onChange={handleImageChange}
               />
             </label>
-            {formData.image_file_uuid && (
+            {imagePreview && (
               <img
-                src={formData.image_file_uuid}
+                src={imagePreview}
                 alt="preview"
                 className="mt-2 w-32 h-32 object-cover rounded-2xl"
               />

@@ -1,3 +1,4 @@
+// api/project/ProjectAPI.ts
 import axios, { AxiosInstance, AxiosError } from "axios";
 import { IProjectAPI } from "./IProjectAPI";
 import { ProjectDTO } from "../../models/project/ProjectDTO";
@@ -13,10 +14,7 @@ class ProjectAPIImpl implements IProjectAPI {
   constructor() {
     this.client = axios.create({
       baseURL: GATEWAY_URL,
-      timeout: 10000,
-      headers: {
-        "Content-Type": "application/json",
-      },
+      timeout: 30000, // Povećaj timeout za upload fajlova
     });
 
     this.client.interceptors.request.use(
@@ -63,9 +61,27 @@ class ProjectAPIImpl implements IProjectAPI {
     }
   }
 
+  // *** IZMENJENA METODA - koristi FormData ***
   async createProject(data: ProjectCreateDTO): Promise<ProjectDTO | null> {
     try {
-      const response = await this.client.post<ProjectDTO>("/projects", data);
+      const formData = new FormData();
+      
+      // Dodaj tekstualna polja
+      formData.append('project_name', data.project_name);
+      formData.append('project_description', data.project_description || '');
+      formData.append('total_weekly_hours_required', data.total_weekly_hours_required.toString());
+      formData.append('allowed_budget', data.allowed_budget.toString());
+      
+      // Dodaj sliku ako postoji
+      if (data.image_file) {
+        formData.append('image_file', data.image_file);
+      }
+
+      const response = await this.client.post<ProjectDTO>("/projects", formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
       return response.data;
     } catch (error) {
       console.error("Error creating project:", error);
@@ -73,9 +89,32 @@ class ProjectAPIImpl implements IProjectAPI {
     }
   }
 
+  // *** IZMENJENA METODA za update - takođe koristi FormData ***
   async updateProject(projectId: number, data: ProjectUpdateDTO): Promise<ProjectDTO | null> {
     try {
-      const response = await this.client.put<ProjectDTO>(`/projects/${projectId}`, data);
+      const formData = new FormData();
+      
+      if (data.project_name !== undefined) {
+        formData.append('project_name', data.project_name);
+      }
+      if (data.project_description !== undefined) {
+        formData.append('project_description', data.project_description);
+      }
+      if (data.total_weekly_hours_required !== undefined) {
+        formData.append('total_weekly_hours_required', data.total_weekly_hours_required.toString());
+      }
+      if (data.allowed_budget !== undefined) {
+        formData.append('allowed_budget', data.allowed_budget.toString());
+      }
+      if (data.image_file) {
+        formData.append('image_file', data.image_file);
+      }
+
+      const response = await this.client.put<ProjectDTO>(`/projects/${projectId}`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
       return response.data;
     } catch (error) {
       console.error("Error updating project:", error);
