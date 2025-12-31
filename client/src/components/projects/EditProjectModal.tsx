@@ -1,8 +1,5 @@
 import React, { useState, useEffect } from "react";
 import type { ProjectDTO } from "../../models/project/ProjectDTO";
-import { mockUsers } from "../../mocks/UsersMock";
-import { ProjectStatus } from "../../enums/ProjectStatus";
-import { getProjectStatusByDate } from "../../helpers/projectStatusHelper";
 
 type Props = {
   project: ProjectDTO | null;
@@ -11,27 +8,34 @@ type Props = {
   onSave: (updated: ProjectDTO) => void;
 };
 
-export const EditProjectModal: React.FC<Props> = ({ project, isOpen, onClose, onSave }) => {
+export const EditProjectModal: React.FC<Props> = ({
+  project,
+  isOpen,
+  onClose,
+  onSave,
+}) => {
   const [formData, setFormData] = useState<ProjectDTO | null>(null);
-  const [selectedMembers, setSelectedMembers] = useState<number[]>([]);
+  const [errors, setErrors] = useState({
+    project_name: "",
+    total_weekly_hours_required: "",
+    allowed_budget: "",
+  });
 
   useEffect(() => {
     if (project) {
       setFormData({ ...project });
-      setSelectedMembers(project.members?.map((m) => m.userId) || []);
+      setErrors({
+        project_name: "",
+        total_weekly_hours_required: "",
+        allowed_budget: "",
+      });
     }
   }, [project]);
 
   if (!isOpen || !formData) return null;
 
-  const updateField = (field: keyof ProjectDTO, value: any) => {
+  const updateField = <K extends keyof ProjectDTO>(field: K, value: ProjectDTO[K]) => {
     setFormData((prev) => (prev ? { ...prev, [field]: value } : prev));
-  };
-
-  const toggleMember = (userId: number) => {
-    setSelectedMembers((prev) =>
-      prev.includes(userId) ? prev.filter((id) => id !== userId) : [...prev, userId]
-    );
   };
 
   const handleBackdropClick = (e: React.MouseEvent) => {
@@ -42,32 +46,35 @@ export const EditProjectModal: React.FC<Props> = ({ project, isOpen, onClose, on
     if (e.key === "Escape") onClose();
   };
 
+  const validateForm = () => {
+    const newErrors = {
+      project_name: "",
+      total_weekly_hours_required: "",
+      allowed_budget: "",
+    };
+
+    if (!formData.project_name.trim()) {
+      newErrors.project_name = "Project name is required";
+    }
+    if (!formData.total_weekly_hours_required || formData.total_weekly_hours_required <= 0) {
+      newErrors.total_weekly_hours_required = "Hours must be a positive number";
+    }
+    if (!formData.allowed_budget || formData.allowed_budget <= 0) {
+      newErrors.allowed_budget = "Budget must be a positive number";
+    }
+
+    setErrors(newErrors);
+    return Object.values(newErrors).every((e) => !e);
+  };
+
   const handleSubmit = () => {
-    if (!formData) return;
+    if (!formData || !validateForm()) return;
 
-    const members = selectedMembers.map((userId) => {
-      const user = mockUsers.find((u) => u.id === userId);
-      return {
-        id: 0,
-        projectId: Number(project?.id) || 0,
-        userId,
-        hoursPerWeek: 0,
-        role: user?.role,
-        user: user
-          ? {
-              user_id: user.id,
-              username: user.username,
-              email: user.email,
-              role_name: user.role,
-              profileImage: user.profileImage,
-            }
-          : undefined,
-      };
+    onSave({
+      ...formData,
+      project_name: formData.project_name.trim(),
+      project_description: formData.project_description.trim(),
     });
-
-    const newStatus = getProjectStatusByDate(formData.startDate, formData.status);
-
-    onSave({ ...formData, members, status: newStatus });
     onClose();
   };
 
@@ -86,68 +93,52 @@ export const EditProjectModal: React.FC<Props> = ({ project, isOpen, onClose, on
         "
         onClick={(e) => e.stopPropagation()}
       >
+        {/* Header */}
         <div className="px-6 py-4 flex items-center justify-between border-b border-white/10">
-          <h2 className="text-2xl font-semibold" style={{ fontFamily: "var(--font-secondary)" }}>
+          <h2
+            className="text-2xl font-semibold"
+            style={{ fontFamily: "var(--font-secondary)" }}
+          >
             Edit Project
           </h2>
           <button
             onClick={onClose}
-            className="text-white/80 hover:text-white transition text-2xl w-8 h-8 flex items-center justify-center"
+            className="text-white/80 hover:text-white transition text-2xl w-8 h-8 flex items-center justify-center cursor-pointer"
           >
             ×
           </button>
         </div>
 
+        {/* Body */}
         <form className="p-6 overflow-y-auto flex-1 styled-scrollbar space-y-4">
+          {/* Project Name */}
           <div>
-            <h3 className="text-xs uppercase tracking-wider text-white/60 mb-1">Project Name</h3>
+            <h3 className="text-xs uppercase tracking-wider text-white/60 mb-1">
+              Project Name *
+            </h3>
             <input
               type="text"
-              value={formData.name}
-              onChange={(e) => updateField("name", e.target.value)}
+              value={formData.project_name}
+              onChange={(e) => updateField("project_name", e.target.value)}
               required
-              className="w-full px-4 py-2 rounded-lg bg-white/10 border border-white/20 focus:outline-none"
+              className={`w-full px-4 py-2 rounded-lg bg-white/10 border focus:outline-none ${
+                errors.project_name ? "border-red-400" : "border-white/20"
+              }`}
             />
+            {errors.project_name && (
+              <p className="text-red-400 text-sm mt-1">{errors.project_name}</p>
+            )}
           </div>
 
+          {/* Project Image */}
           <div>
-            <h3 className="text-xs uppercase tracking-wider text-white/60 mb-2">Status</h3>
-            <div className="flex flex-wrap gap-4">
-              {Object.values(ProjectStatus).map((status) => {
-            const start = new Date(formData.startDate || "");
-            start.setHours(0,0,0,0);
-            const today = new Date(); today.setHours(0,0,0,0);
-
-            let disabled = false;
-            if (status === ProjectStatus.NOT_STARTED && start <= today) disabled = true;
-            if ((status === ProjectStatus.ACTIVE || status === ProjectStatus.PAUSED || status === ProjectStatus.COMPLETED) && start > today) disabled = true;
-
-            return (
-              <label
-                key={status}
-                className={`flex items-center gap-2 cursor-pointer px-2 py-1 rounded ${disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
-              >
-                <input
-                  type="radio"
-                  name="status"
-                  value={status}
-                  checked={formData.status === status}
-                  disabled={disabled}
-                  onChange={() => updateField("status", status)}
-                  className="w-4 h-4 accent-white"
-                />
-                <span className="text-white text-sm">{status}</span>
-              </label>
-            );
-          })}
-
-            </div>
-          </div>
-
-          <div>
-            <h3 className="text-xs uppercase tracking-wider text-white/60 mb-1">Project Image</h3>
+            <h3 className="text-xs uppercase tracking-wider text-white/60 mb-1">
+              Project Image
+            </h3>
             <label className="flex items-center gap-2 cursor-pointer px-4 py-2 bg-white/10 border border-white/20 rounded-lg hover:bg-white/20 transition">
-              <span className="text-white/90">{formData.imageUrl ? "File Selected" : "Choose Image"}</span>
+              <span className="text-white/90">
+                {formData.image_file_uuid ? "File Selected" : "Choose Image"}
+              </span>
               <input
                 type="file"
                 accept="image/*"
@@ -155,81 +146,92 @@ export const EditProjectModal: React.FC<Props> = ({ project, isOpen, onClose, on
                 onChange={(e) => {
                   if (e.target.files && e.target.files[0]) {
                     const reader = new FileReader();
-                    reader.onloadend = () => updateField("imageUrl", reader.result as string);
+                    reader.onloadend = () =>
+                      updateField("image_file_uuid", reader.result as string);
                     reader.readAsDataURL(e.target.files[0]);
                   }
                 }}
               />
             </label>
-            {formData.imageUrl && (
-              <img src={formData.imageUrl} alt="preview" className="mt-2 w-32 h-32 object-cover rounded-2xl" />
+            {formData.image_file_uuid && (
+              <img
+                src={formData.image_file_uuid}
+                alt="preview"
+                className="mt-2 w-32 h-32 object-cover rounded-2xl"
+              />
             )}
           </div>
 
+          {/* Description */}
           <div>
-            <h3 className="text-xs uppercase tracking-wider text-white/60 mb-1">Description</h3>
+            <h3 className="text-xs uppercase tracking-wider text-white/60 mb-1">
+              Description
+            </h3>
             <textarea
-              value={formData.description || ""}
-              onChange={(e) => updateField("description", e.target.value)}
+              value={formData.project_description}
+              onChange={(e) => updateField("project_description", e.target.value)}
               className="w-full px-4 py-2 rounded-lg bg-white/10 border border-white/20 min-h-[100px] focus:outline-none"
             />
           </div>
 
-          {[
-            ["Total Weekly Hours", "totalWeeklyHours"],
-            ["Allowed Budget ($)", "allowedBudget"],
-            ["Number of Sprints", "numberOfSprints"],
-            ["Sprint Duration (days)", "sprintDuration"],
-          ].map(([label, key]) => (
-            <div key={key}>
-              <h3 className="text-xs uppercase tracking-wider text-white/60 mb-1">{label}</h3>
-              <input
-                type="number"
-                value={(formData as any)[key] || ""}
-                onChange={(e) => updateField(key as keyof ProjectDTO, e.target.value)}
-                onKeyDown={(e) => {
-                  const value = (e.currentTarget as HTMLInputElement).value;
-                  if (e.key === "+" || e.key === "-") e.preventDefault();
-                  if (e.key === "." && value.length === 0) e.preventDefault();
-                  if ((key === "numberOfSprints" || key === "sprintDuration") && e.key === ".") e.preventDefault();
-                }}
-                className="
-                  w-full px-4 py-2 rounded-lg bg-white/10 border border-white/20 focus:outline-none
-                  [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none
-                "
-              />
-            </div>
-          ))}
-
+          {/* Total Weekly Hours */}
           <div>
-            <h3 className="text-xs uppercase tracking-wider text-white/60 mb-1">Start Date</h3>
+            <h3 className="text-xs uppercase tracking-wider text-white/60 mb-1">
+              Total Weekly Hours Required *
+            </h3>
             <input
-              type="date"
-              value={formData.startDate ? new Date(formData.startDate).toISOString().split("T")[0] : ""}
-              onChange={(e) => updateField("startDate", e.target.value)}
-              className="w-full px-4 py-2 rounded-lg bg-white/10 border border-white/20"
+              type="number"
+              value={formData.total_weekly_hours_required}
+              onChange={(e) =>
+                updateField("total_weekly_hours_required", Number(e.target.value))
+              }
+              onKeyDown={(e) => {
+                if (e.key === "+" || e.key === "-" || e.key === ".") {
+                  e.preventDefault();
+                }
+              }}
+              className={`
+                w-full px-4 py-2 rounded-lg bg-white/10 border focus:outline-none
+                [&::-webkit-inner-spin-button]:appearance-none
+                [&::-webkit-outer-spin-button]:appearance-none
+                ${errors.total_weekly_hours_required ? "border-red-400" : "border-white/20"}
+              `}
             />
+            {errors.total_weekly_hours_required && (
+              <p className="text-red-400 text-sm mt-1">
+                {errors.total_weekly_hours_required}
+              </p>
+            )}
           </div>
 
+          {/* Allowed Budget */}
           <div>
-            <h3 className="text-xs uppercase tracking-wider text-white/60 mb-2">Members</h3>
-            <div className="flex flex-wrap gap-2">
-              {mockUsers.map((user) => (
-                <button
-                  key={user.id}
-                  type="button"
-                  onClick={() => toggleMember(user.id)}
-                  className={`px-3 py-1 rounded-lg text-sm border transition cursor-pointer ${
-                    selectedMembers.includes(user.id) ? "bg-white/20 border-white/80" : "bg-white/10 border-white/20"
-                  }`}
-                >
-                  {user.username}
-                </button>
-              ))}
-            </div>
+            <h3 className="text-xs uppercase tracking-wider text-white/60 mb-1">
+              Allowed Budget ($) *
+            </h3>
+            <input
+              type="number"
+              value={formData.allowed_budget}
+              onChange={(e) => updateField("allowed_budget", Number(e.target.value))}
+              onKeyDown={(e) => {
+                if (e.key === "+" || e.key === "-") {
+                  e.preventDefault();
+                }
+              }}
+              className={`
+                w-full px-4 py-2 rounded-lg bg-white/10 border focus:outline-none
+                [&::-webkit-inner-spin-button]:appearance-none
+                [&::-webkit-outer-spin-button]:appearance-none
+                ${errors.allowed_budget ? "border-red-400" : "border-white/20"}
+              `}
+            />
+            {errors.allowed_budget && (
+              <p className="text-red-400 text-sm mt-1">{errors.allowed_budget}</p>
+            )}
           </div>
         </form>
 
+        {/* Footer */}
         <div className="px-6 py-4 border-t border-white/10 flex justify-center gap-3">
           <button
             onClick={onClose}
@@ -240,9 +242,10 @@ export const EditProjectModal: React.FC<Props> = ({ project, isOpen, onClose, on
           </button>
           <button
             onClick={handleSubmit}
+            type="button"
             className="px-6 py-2 rounded-lg font-semibold bg-gradient-to-t from-[var(--palette-medium-blue)] to-[var(--palette-deep-blue)] cursor-pointer"
           >
-            Save
+            Save Changes
           </button>
         </div>
       </div>

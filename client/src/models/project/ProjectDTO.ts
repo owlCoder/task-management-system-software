@@ -1,7 +1,13 @@
-import { ProjectStatus } from "../../enums/ProjectStatus";
-import { ProjectUserDTO } from "./ProjectUserDTO";
+export interface ProjectDTO {
+  project_id: number;
+  project_name: string;
+  project_description: string;
+  image_file_uuid: string;
+  total_weekly_hours_required: number;
+  allowed_budget: number;
+}
 
-export type ProjectDTO = {
+/*export type ProjectDTO = {
   id: string;
   name: string;
   description?: string;
@@ -13,4 +19,4 @@ export type ProjectDTO = {
   numberOfSprints?: number;     
   sprintDuration?: number;
   startDate?: string; 
-};
+};*/

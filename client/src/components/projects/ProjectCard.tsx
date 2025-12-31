@@ -1,11 +1,10 @@
 import React from "react";
 import type { ProjectDTO } from "../../models/project/ProjectDTO";
-import { getProjectStatusColor } from "../../helpers/projectStatusHelper";
 
 type Props = {
   project: ProjectDTO;
   selected?: boolean;
-  onSelect?: (id: string) => void;
+  onSelect?: (id: number) => void;
   onView?: (p: ProjectDTO) => void;
   onEdit?: (p: ProjectDTO) => void;
   onDelete?: (p: ProjectDTO) => void;
@@ -21,7 +20,7 @@ export const ProjectCard: React.FC<Props> = ({
   const handleRootKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" || e.key === " ") {
       e.preventDefault();
-      onSelect?.(String(project.id));
+      onSelect?.(project.project_id);
     }
   };
 
@@ -53,17 +52,18 @@ export const ProjectCard: React.FC<Props> = ({
             : "hover:-translate-y-1 hover:shadow-xl"
         }
       `}
-      onClick={() => onSelect?.(String(project.id))}
+      onClick={() => onSelect?.(project.project_id)}
       role="button"
       tabIndex={0}
       onKeyDown={handleRootKeyDown}
     >
+      {/* Image */}
       <div className="p-4 pb-0">
         <div className="w-full h-28 rounded-xl overflow-hidden flex items-center justify-center bg-white/5">
-          {project.imageUrl ? (
+          {project.image_file_uuid ? (
             <img
-              src={project.imageUrl}
-              alt={`${project.name} cover`}
+              src={project.image_file_uuid}
+              alt={`${project.project_name} cover`}
               className="w-full h-full object-cover"
               loading="lazy"
             />
@@ -73,23 +73,16 @@ export const ProjectCard: React.FC<Props> = ({
         </div>
       </div>
 
+      {/* Content */}
       <div className="p-4 flex flex-col gap-2 flex-1">
         <h3
-          id={`project-${project.id}-title`}
+          id={`project-${project.project_id}-title`}
           className="text-white text-lg md:text-xl font-semibold tracking-wide"
         >
-          {project.name}
+          {project.project_name}
         </h3>
-        <div className="flex items-center gap-2">
-          <span
-            className={`w-3 h-3 rounded-full ${getProjectStatusColor(project.status!)}`}
-          ></span>
-          <span className="text-sm font-semibold text-white/90">
-            {project.status}
-          </span>
-        </div>
 
-
+        {/* Weekly Hours */}
         <p className="text-white text-muted text-sm flex items-center gap-2">
           <svg
             width="14"
@@ -102,18 +95,38 @@ export const ProjectCard: React.FC<Props> = ({
             strokeLinejoin="round"
             className="flex-shrink-0 opacity-80"
           >
-            <circle cx="12" cy="8" r="4" />
-            <path d="M20 21a8 8 0 1 0-16 0" />
+            <circle cx="12" cy="12" r="10" />
+            <polyline points="12 6 12 12 16 14" />
           </svg>
-          {(project.members ?? []).length}{" "}
-          {(project.members ?? []).length === 1 ? "member" : "members"}
+          {project.total_weekly_hours_required} hrs/week
         </p>
 
+        {/* Budget */}
+        <p className="text-white text-muted text-sm flex items-center gap-2">
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="flex-shrink-0 opacity-80"
+          >
+            <line x1="12" y1="1" x2="12" y2="23" />
+            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+          </svg>
+          ${project.allowed_budget.toLocaleString()}
+        </p>
+
+        {/* Description */}
         <p className="text-white text-muted text-sm leading-snug line-clamp-3">
-          {project.description ?? "No description"}
+          {project.project_description || "No description"}
         </p>
       </div>
-      
+
+      {/* View Button */}
       <div
         className="
           h-11
@@ -129,7 +142,7 @@ export const ProjectCard: React.FC<Props> = ({
         "
         role="button"
         tabIndex={0}
-        aria-label={`View ${project.name}`}
+        aria-label={`View ${project.project_name}`}
         onClick={handleViewClick}
         onKeyDown={handleViewKeyDown}
       >
