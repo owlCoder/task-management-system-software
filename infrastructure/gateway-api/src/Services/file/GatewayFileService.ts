@@ -1,5 +1,5 @@
 // Libraries
-import axios, { AxiosInstance } from "axios";
+import { AxiosInstance } from "axios";
 
 // Domain
 import { IErrorHandlingService } from "../../Domain/services/common/IErrorHandlingService";
@@ -21,6 +21,7 @@ import { API_ENDPOINTS } from "../../Constants/services/APIEndpoints";
 
 // Infrastructure
 import { makeAPICall, makeAPICallWithTransform } from "../../Infrastructure/axios/APIHelpers";
+import { createAxiosClient } from "../../Infrastructure/axios/client/AxiosClientFactory";
 
 /**
  * Makes API requests to the File Microservice.
@@ -29,10 +30,7 @@ export class GatewayFileService implements IGatewayFileService {
     private readonly fileClient: AxiosInstance;
     
     constructor(private readonly errorHandlingService: IErrorHandlingService){
-        this.fileClient = axios.create({
-            baseURL: API_ENDPOINTS.FILE,
-            timeout: 5000,
-        });
+        this.fileClient = createAxiosClient(API_ENDPOINTS.FILE, { headers: {} });
     }
 
     /**
@@ -84,13 +82,13 @@ export class GatewayFileService implements IGatewayFileService {
 
     /**
      * Uploads a file to file microservice.
-     * @param {CreateFileDTO} fileData - file metadata and content. 
+     * @param {CreateFileDTO} data - file metadata and content. 
      * @returns {Promise<Result<UploadedFileDTO>>} - A promise that resolves to a Result object containing the file metadata.
      * - On success returns data as {@link UploadedFileDTO}.
      * - On failure returns status code and error message.
      */
-    async uploadFile(fileData: CreateFileDTO): Promise<Result<UploadedFileDTO>> {
-        const formData = generateFileFormData(fileData);
+    async uploadFile(data: CreateFileDTO): Promise<Result<UploadedFileDTO>> {
+        const formData = generateFileFormData(data);
         
         return await makeAPICall<UploadedFileDTO, FormData>(this.fileClient, this.errorHandlingService, {
             serviceName: SERVICES.FILE,

@@ -1,5 +1,5 @@
 // Libraries
-import axios, { AxiosInstance } from "axios";
+import { AxiosInstance } from "axios";
 
 // Domain
 import { IErrorHandlingService } from "../../Domain/services/common/IErrorHandlingService";
@@ -18,6 +18,7 @@ import { API_ENDPOINTS } from "../../Constants/services/APIEndpoints";
 
 // Infrastructure
 import { makeAPICall } from "../../Infrastructure/axios/APIHelpers";
+import { createAxiosClient } from "../../Infrastructure/axios/client/AxiosClientFactory";
 
 /**
  * Makes API requests to the Task Microservice.
@@ -26,10 +27,7 @@ export class GatewayTaskService implements IGatewayTaskService {
     private readonly taskClient: AxiosInstance;
     
     constructor(private readonly errorHandlingService: IErrorHandlingService){
-        this.taskClient = axios.create({
-            baseURL: API_ENDPOINTS.TASK,
-            timeout: 5000,
-        });
+        this.taskClient = createAxiosClient(API_ENDPOINTS.TASK);
     }
 
     /**

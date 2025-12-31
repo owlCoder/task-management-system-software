@@ -14,8 +14,9 @@ import { logger } from "../../Infrastructure/logging/Logger";
  * @param {Request} req - The request object, representing the incoming HTTP request.
  * @param {Response} res - The response object, representing the outgoing HTTP response.
  * @param {NextFunction} next - The next middleware function in the request-response cycle.
+ * @returns void
  */
-export function logTraffic(req: Request, res: Response, next: NextFunction) {
+export function logTraffic(req: Request, res: Response, next: NextFunction): void {
     logger.info({
         service: "Gateway",
         method: req.method,

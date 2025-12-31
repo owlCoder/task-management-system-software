@@ -9,11 +9,11 @@ import { SprintUpdateDTO } from "../../DTOs/project/SprintUpdateDTO";
 import { Result } from "../../types/common/Result";
 
 export interface IGatewayProjectService {
-    getProjectById(id: number): Promise<Result<ProjectDTO>>;
+    getProjectById(projectId: number): Promise<Result<ProjectDTO>>;
     getProjectsFromUser(userId: number): Promise<Result<ProjectDTO[]>>;
     createProject(data: ProjectCreateDTO): Promise<Result<ProjectDTO>>;
-    updateProject(id: number, data: ProjectUpdateDTO): Promise<Result<ProjectDTO>>;
-    deleteProject(id: number): Promise<Result<void>>;
+    updateProject(projectId: number, data: ProjectUpdateDTO): Promise<Result<ProjectDTO>>;
+    deleteProject(projectId: number): Promise<Result<void>>;
 
     getSprintsByProject(projectId: number): Promise<Result<SprintDTO[]>>;
     getSprintById(sprintId: number): Promise<Result<SprintDTO>>;

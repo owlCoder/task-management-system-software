@@ -1,5 +1,5 @@
 // Libraries
-import axios, { AxiosInstance } from "axios";
+import { AxiosInstance } from "axios";
 
 // Domain
 import { IErrorHandlingService } from "../../Domain/services/common/IErrorHandlingService";
@@ -15,6 +15,7 @@ import { API_ENDPOINTS } from "../../Constants/services/APIEndpoints";
 
 // Infrastructure
 import { makeAPICall } from "../../Infrastructure/axios/APIHelpers";
+import { createAxiosClient } from "../../Infrastructure/axios/client/AxiosClientFactory";
 
 /**
  * Makes API requests to the Notification Microservice.
@@ -23,25 +24,21 @@ export class GatewayNotificationService implements IGatewayNotificationService {
     private readonly notificationClient: AxiosInstance;
     
     constructor(private readonly errorHandlingService: IErrorHandlingService) {
-        this.notificationClient = axios.create({
-            baseURL: API_ENDPOINTS.NOTIFICATION,
-            headers: { "Content-Type": "application/json" },
-            timeout: 5000,
-        });
+        this.notificationClient = createAxiosClient(API_ENDPOINTS.NOTIFICATION);
     }
 
     /**
      * Fetches a specific notification.
-     * @param {number} id - id of the notification. 
+     * @param {number} notificationId - id of the notification. 
      * @returns {Promise<Result<NotificationDTO>>} - A promise that resolves to a Result object containing the notification data.
      * - On success returns data as {@link NotificationDTO}.
      * - On failure returns status code and error message.
      */
-    async getNotificationById(id: number): Promise<Result<NotificationDTO>> {
+    async getNotificationById(notificationId: number): Promise<Result<NotificationDTO>> {
         return await makeAPICall<NotificationDTO>(this.notificationClient, this.errorHandlingService, {
             serviceName: SERVICES.NOTIFICATION,
             method: HTTP_METHODS.GET,
-            url: NOTIFICATION_ROUTES.GET_NOTIFICATION(id) 
+            url: NOTIFICATION_ROUTES.GET_NOTIFICATION(notificationId) 
         });
     }
 
@@ -62,109 +59,109 @@ export class GatewayNotificationService implements IGatewayNotificationService {
 
     /**
      * Fetches the number of the unread notifications for a specific user.
-     * @param {number} id - id of the user. 
+     * @param {number} userId - id of the user. 
      * @returns {Promise<Result<NotificationDTO>>} - A promise that resolves to a Result object containing the number of unread notifications.
      * - On success returns data as number that represents how many notifications are unread.
      * - On failure returns status code and error message.
      */
-    async getUnreadNotificationCount(id: number): Promise<Result<number>> {
+    async getUnreadNotificationCount(userId: number): Promise<Result<number>> {
         return await makeAPICall<number>(this.notificationClient, this.errorHandlingService, {
             serviceName: SERVICES.NOTIFICATION,
             method: HTTP_METHODS.GET,
-            url: NOTIFICATION_ROUTES.GET_UNREAD_NOTIFICATIONS_COUNT(id) 
+            url: NOTIFICATION_ROUTES.GET_UNREAD_NOTIFICATIONS_COUNT(userId) 
         });
     }
 
     /**
      * Marks notification as read.
-     * @param {number} id - id of the notification. 
+     * @param {number} notificationId - id of the notification. 
      * @returns {Promise<Result<void>>} - A promise that resolves to a Result object.
      * - On success returns void.
      * - On failure returns status code and error message.
      */
-    async markNotificationAsRead(id: number): Promise<Result<void>> {
+    async markNotificationAsRead(notificationId: number): Promise<Result<void>> {
         return await makeAPICall<void>(this.notificationClient, this.errorHandlingService, {
             serviceName: SERVICES.NOTIFICATION,
             method: HTTP_METHODS.PATCH,
-            url: NOTIFICATION_ROUTES.MARK_NOTIFICATION_AS_READ(id)
+            url: NOTIFICATION_ROUTES.MARK_NOTIFICATION_AS_READ(notificationId)
         });
     }
 
     /**
      * Marks notification as unread.
-     * @param {number} id - id of the notification. 
+     * @param {number} notificationId - id of the notification. 
      * @returns {Promise<Result<void>>} - A promise that resolves to a Result object.
      * - On success returns void.
      * - On failure returns status code and error message.
      */
-    async markNotificationAsUnread(id: number): Promise<Result<void>> {
+    async markNotificationAsUnread(notificationId: number): Promise<Result<void>> {
         return await makeAPICall<void>(this.notificationClient, this.errorHandlingService, {
             serviceName: SERVICES.NOTIFICATION,
             method: HTTP_METHODS.PATCH,
-            url: NOTIFICATION_ROUTES.MARK_NOTIFICATION_AS_UNREAD(id) 
+            url: NOTIFICATION_ROUTES.MARK_NOTIFICATION_AS_UNREAD(notificationId) 
         });
     }
     
     /**
      * Marks multiple notifications as read.
-     * @param {number[]} ids - ids of the notifications. 
+     * @param {number[]} notificationIds - ids of the notifications. 
      * @returns {Promise<Result<void>>} - A promise that resolves to a Result object.
      * - On success returns void.
      * - On failure returns status code and error message.
      */
-    async markMultipleNotificationsAsRead(ids: number[]): Promise<Result<void>> {
+    async markMultipleNotificationsAsRead(notificationIds: number[]): Promise<Result<void>> {
         return await makeAPICall<void, number[]>(this.notificationClient, this.errorHandlingService, {
             serviceName: SERVICES.NOTIFICATION,
             method: HTTP_METHODS.PATCH,
             url: NOTIFICATION_ROUTES.MARK_MULTIPLE_NOTIFICATIONS_AS_READ,
-            data: ids 
+            data: notificationIds
         });
     }
 
     /**
      * Marks multiple notifications as unread.
-     * @param {number[]} ids - ids of the notifications. 
+     * @param {number[]} notificationIds - ids of the notifications. 
      * @returns {Promise<Result<void>>} - A promise that resolves to a Result object.
      * - On success returns void.
      * - On failure returns status code and error message.
      */
-    async markMultipleNotificationsAsUnread(ids: number[]): Promise<Result<void>> {
+    async markMultipleNotificationsAsUnread(notificationIds: number[]): Promise<Result<void>> {
         return await makeAPICall<void, number[]>(this.notificationClient, this.errorHandlingService, {
             serviceName: SERVICES.NOTIFICATION,
             method: HTTP_METHODS.PATCH,
             url: NOTIFICATION_ROUTES.MARK_MULTIPLE_NOTIFICATIONS_AS_UNREAD,
-            data: ids 
+            data: notificationIds
         });
     }
 
     /**
      * Requests the deletion of a specific notification.
-     * @param {number} id - id of the notification.
+     * @param {number} notificationId - id of the notification.
      * @returns {Promise<Result<void>>} - A promise that resolves to a Result object.
      * - On success returns void.
      * - On failure returns status code and error message.
      */
-    async deleteNotification(id: number): Promise<Result<void>> {
+    async deleteNotification(notificationId: number): Promise<Result<void>> {
         return await makeAPICall<void>(this.notificationClient, this.errorHandlingService, {
             serviceName: SERVICES.NOTIFICATION,
             method: HTTP_METHODS.DELETE,
-            url: NOTIFICATION_ROUTES.DELETE_NOTIFICATION(id)
+            url: NOTIFICATION_ROUTES.DELETE_NOTIFICATION(notificationId)
         });
     }
 
     /**
      * Requests the deletion of multiple notifications.
-     * @param {number[]} ids - ids of the notifications. 
+     * @param {number[]} notificationIds - ids of the notifications. 
      * @returns {Promise<Result<void>>} - A promise that resolves to a Result object.
      * - On success returns void.
      * - On failure returns status code and error message.
      */
-    async deleteMultipleNotifications(ids: number[]): Promise<Result<void>> {
+    async deleteMultipleNotifications(notificationIds: number[]): Promise<Result<void>> {
         return await makeAPICall<void, number[]>(this.notificationClient, this.errorHandlingService, {
             serviceName: SERVICES.NOTIFICATION,
             method: HTTP_METHODS.DELETE,
             url: NOTIFICATION_ROUTES.DELETE_MULTIPLE_NOTIFICATIONS,
-            data: ids 
+            data: notificationIds
         });
     }
 

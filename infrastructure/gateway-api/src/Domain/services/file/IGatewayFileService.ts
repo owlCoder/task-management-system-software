@@ -7,6 +7,6 @@ export interface IGatewayFileService {
     downloadFile(fileId: number): Promise<Result<DownloadFileDTO>>;
     getFilesByAuthorId(authorId: number): Promise<Result<UploadedFileDTO[]>>;
     getFileMetadata(fileId: number): Promise<Result<UploadedFileDTO>>;
-    uploadFile(fileData: CreateFileDTO): Promise<Result<UploadedFileDTO>>;
+    uploadFile(data: CreateFileDTO): Promise<Result<UploadedFileDTO>>;
     deleteFile(fileId: number): Promise<Result<void>>;
 }

@@ -27,21 +27,20 @@ export class GatewayTaskController {
         this.initializeRoutes();
     }
 
+    /**
+     * Registering routes for Task Microservice.
+     */
     private initializeRoutes() {
-        this.router.get(
-            '/tasks/:taskId', 
-            authenticate, 
-            authorize(UserRole.PROJECT_MANAGER, UserRole.ANALYTICS_DEVELOPMENT_MANAGER, UserRole.ANIMATION_WORKER, UserRole.AUDIO_MUSIC_STAGIST), 
-            this.getTaskById.bind(this)
-        );
-        this.router.get(
-            '/tasks/sprints/:sprintId', 
-            authenticate, 
-            authorize(UserRole.PROJECT_MANAGER, UserRole.ANALYTICS_DEVELOPMENT_MANAGER, UserRole.ANIMATION_WORKER, UserRole.AUDIO_MUSIC_STAGIST), 
-            this.getTasksBySprintId.bind(this)
-        );
-        this.router.post('/tasks/sprints/:sprintId', authenticate, authorize(UserRole.PROJECT_MANAGER), this.createTaskBySprintId.bind(this));
-        this.router.post('/tasks/:taskId/comments', authenticate, authorize(UserRole.PROJECT_MANAGER), this.addCommentByTaskId.bind(this));
+        const taskReadonlyAccess = [
+            authenticate,
+            authorize(UserRole.PROJECT_MANAGER, UserRole.ANALYTICS_DEVELOPMENT_MANAGER, UserRole.ANIMATION_WORKER, UserRole.AUDIO_MUSIC_STAGIST)
+        ];
+        const taskWriteAccess = [authenticate, authorize(UserRole.PROJECT_MANAGER)];
+
+        this.router.get('/tasks/:taskId', ...taskReadonlyAccess, this.getTaskById.bind(this));
+        this.router.get('/tasks/sprints/:sprintId', ...taskReadonlyAccess, this.getTasksBySprintId.bind(this));
+        this.router.post('/tasks/sprints/:sprintId', ...taskWriteAccess, this.createTaskBySprintId.bind(this));
+        this.router.post('/tasks/:taskId/comments', ...taskWriteAccess, this.addCommentByTaskId.bind(this));
     }
 
     /**

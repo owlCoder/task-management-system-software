@@ -11,6 +11,7 @@ import { CreateFileDTO } from "../../../Domain/DTOs/file/CreateFileDTO";
 
 // Middlewares
 import { authenticate } from "../../../Middlewares/authentication/AuthMiddleware";
+import { multerHandler } from "../../../Middlewares/multer/MulterMiddleware";
 
 // Utils
 import { handleDownloadResponse, handleEmptyResponse, handleResponse } from "../../Utils/Http/ResponseHandler";
@@ -22,18 +23,22 @@ import { extractFileDataFromRequest } from "../../Utils/Http/RequestHandler";
 export class GatewayFileController {
     private router: Router;
     private upload: Multer;
+    private readonly maxFileSizeMB: number = 10;
 
     constructor(private gatewayFileService: IGatewayFileService) {
         this.router = Router();
-        this.upload = multer({ storage: multer.memoryStorage() })
+        this.upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: this.maxFileSizeMB * 1024 * 1024 } });
         this.initializeRoutes();
     }
 
+    /**
+     * Registering routes for File Microservice.
+     */
     private initializeRoutes(){
         this.router.get("/files/download/:fileId", authenticate, this.downloadFile.bind(this));
         this.router.get("/files/author/:authorId", authenticate, this.getFilesByAuthorId.bind(this));
         this.router.get("/files/metadata/:fileId", authenticate, this.getFileMetadata.bind(this));
-        this.router.post("/files/upload", authenticate, this.upload.single("file"), this.uploadFile.bind(this));
+        this.router.post("/files/upload", authenticate, multerHandler(this.upload, 'file', this.maxFileSizeMB), this.uploadFile.bind(this));
         this.router.delete("/files/:fileId", authenticate, this.deleteFile.bind(this));
     }
 
@@ -91,9 +96,9 @@ export class GatewayFileController {
      * - On failure: A JSON object with an error message and a HTTP status code indicating the failure.
      */
     private async uploadFile(req: Request, res: Response): Promise<void> {
-        const fileData: CreateFileDTO = extractFileDataFromRequest(req);
+        const data: CreateFileDTO = extractFileDataFromRequest(req);
 
-        const result = await this.gatewayFileService.uploadFile(fileData);
+        const result = await this.gatewayFileService.uploadFile(data);
         handleResponse(res, result, 201);
     }
 

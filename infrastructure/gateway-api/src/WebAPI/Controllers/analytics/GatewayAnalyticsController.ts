@@ -28,13 +28,18 @@ export class GatewayAnalyticsController {
         this.initializeRoutes();
     }
 
+    /**
+     * Registering routes for Analytics Microservice.
+     */
     private initializeRoutes() {
-        this.router.get('/analytics/burndown/:sprintId', authenticate, authorize(UserRole.ANALYTICS_DEVELOPMENT_MANAGER), this.getBurndownAnalyticsBySprintId.bind(this));
-        this.router.get('/analytics/burnup/:sprintId', authenticate, authorize(UserRole.ANALYTICS_DEVELOPMENT_MANAGER), this.getBurnupAnalyticsBySprintId.bind(this));
-        this.router.get('/analytics/velocity/:projectId', authenticate, authorize(UserRole.ANALYTICS_DEVELOPMENT_MANAGER), this.getVelocityAnalyticsByProjectId.bind(this));
-        this.router.get('/analytics/budget/:projectId', authenticate, authorize(UserRole.ANALYTICS_DEVELOPMENT_MANAGER), this.getBudgetTrackingByProjectId.bind(this));
-        this.router.get('/analytics/resource-cost/:projectId', authenticate, authorize(UserRole.ANALYTICS_DEVELOPMENT_MANAGER), this.getResourceCostAllocationByProjectId.bind(this));
-        this.router.get('/analytics/profit-margin/:projectId', authenticate, authorize(UserRole.ANALYTICS_DEVELOPMENT_MANAGER), this.getProfitMarginByProjectId.bind(this));
+        const analyticsAccess = [authenticate, authorize(UserRole.ANALYTICS_DEVELOPMENT_MANAGER)];
+
+        this.router.get('/analytics/burndown/:sprintId', ...analyticsAccess, this.getBurndownAnalyticsBySprintId.bind(this));
+        this.router.get('/analytics/burnup/:sprintId', ...analyticsAccess, this.getBurnupAnalyticsBySprintId.bind(this));
+        this.router.get('/analytics/velocity/:projectId', ...analyticsAccess, this.getVelocityAnalyticsByProjectId.bind(this));
+        this.router.get('/analytics/budget/:projectId', ...analyticsAccess, this.getBudgetTrackingByProjectId.bind(this));
+        this.router.get('/analytics/resource-cost/:projectId', ...analyticsAccess, this.getResourceCostAllocationByProjectId.bind(this));
+        this.router.get('/analytics/profit-margin/:projectId', ...analyticsAccess, this.getProfitMarginByProjectId.bind(this));
     }
 
     /**

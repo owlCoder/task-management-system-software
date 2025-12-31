@@ -31,47 +31,31 @@ export class GatewayProjectController {
         this.initializeRoutes();
     }
 
+    /**
+     * Registering routes for Project Microservice.
+     */
     private initializeRoutes() {
-        this.router.get(
-            "/projects/:projectId", 
+        const projectReadonlyAccess = [
             authenticate, 
-            authorize(UserRole.PROJECT_MANAGER, UserRole.ANALYTICS_DEVELOPMENT_MANAGER, UserRole.ANIMATION_WORKER, UserRole.AUDIO_MUSIC_STAGIST), 
-            this.getProjectById.bind(this)
-        );
-        this.router.get(
-            "/users/:userId/projects",
-            authenticate,
-            authorize(UserRole.PROJECT_MANAGER, UserRole.ANALYTICS_DEVELOPMENT_MANAGER, UserRole.ANIMATION_WORKER, UserRole.AUDIO_MUSIC_STAGIST),
-            this.getProjectsFromUser.bind(this)
-        );
-        this.router.post("/projects", authenticate, authorize(UserRole.PROJECT_MANAGER), this.createProject.bind(this));
-        this.router.put("/projects/:projectId", authenticate, authorize(UserRole.PROJECT_MANAGER), this.updateProject.bind(this));
-        this.router.delete("/projects/:projectId", authenticate, authorize(UserRole.PROJECT_MANAGER), this.deleteProject.bind(this));
+            authorize(UserRole.PROJECT_MANAGER, UserRole.ANALYTICS_DEVELOPMENT_MANAGER, UserRole.ANIMATION_WORKER, UserRole.AUDIO_MUSIC_STAGIST)
+        ];
+        const projectWriteAccess = [authenticate, authorize(UserRole.PROJECT_MANAGER)];
 
-        this.router.get(
-            "/projects/:projectId/sprints",
-            authenticate,
-            authorize(UserRole.PROJECT_MANAGER, UserRole.ANALYTICS_DEVELOPMENT_MANAGER, UserRole.ANIMATION_WORKER, UserRole.AUDIO_MUSIC_STAGIST),
-            this.getSprintsByProject.bind(this)
-        );
-        this.router.get(
-            "/sprints/:sprintId",
-            authenticate,
-            authorize(UserRole.PROJECT_MANAGER, UserRole.ANALYTICS_DEVELOPMENT_MANAGER, UserRole.ANIMATION_WORKER, UserRole.AUDIO_MUSIC_STAGIST),
-            this.getSprintById.bind(this)
-        );
-        this.router.post("/projects/:projectId/sprints", authenticate, authorize(UserRole.PROJECT_MANAGER), this.createSprint.bind(this));
-        this.router.put("/sprints/:sprintId", authenticate, authorize(UserRole.PROJECT_MANAGER), this.updateSprint.bind(this));
-        this.router.delete("/sprints/:sprintId", authenticate, authorize(UserRole.PROJECT_MANAGER), this.deleteSprint.bind(this));
+        this.router.get("/projects/:projectId", ...projectReadonlyAccess, this.getProjectById.bind(this));
+        this.router.get("/users/:userId/projects", ...projectReadonlyAccess, this.getProjectsFromUser.bind(this));
+        this.router.post("/projects", ...projectWriteAccess, this.createProject.bind(this));
+        this.router.put("/projects/:projectId", ...projectWriteAccess, this.updateProject.bind(this));
+        this.router.delete("/projects/:projectId", ...projectWriteAccess, this.deleteProject.bind(this));
 
-        this.router.get(
-            "/projects/:projectId/users",
-            authenticate,
-            authorize(UserRole.PROJECT_MANAGER, UserRole.ANALYTICS_DEVELOPMENT_MANAGER, UserRole.ANIMATION_WORKER, UserRole.AUDIO_MUSIC_STAGIST),
-            this.getUsersFromProject.bind(this)
-        );
-        this.router.post("/projects/:projectId/users", authenticate, authorize(UserRole.PROJECT_MANAGER), this.assignUser.bind(this));
-        this.router.delete("/projects/:projectId/users/:userId", authenticate, authorize(UserRole.PROJECT_MANAGER), this.removeUser.bind(this));
+        this.router.get("/projects/:projectId/sprints", ...projectReadonlyAccess, this.getSprintsByProject.bind(this));
+        this.router.get("/sprints/:sprintId", ...projectReadonlyAccess, this.getSprintById.bind(this));
+        this.router.post("/projects/:projectId/sprints", ...projectWriteAccess, this.createSprint.bind(this));
+        this.router.put("/sprints/:sprintId", ...projectWriteAccess, this.updateSprint.bind(this));
+        this.router.delete("/sprints/:sprintId", ...projectWriteAccess, this.deleteSprint.bind(this));
+
+        this.router.get("/projects/:projectId/users", ...projectReadonlyAccess, this.getUsersFromProject.bind(this));
+        this.router.post("/projects/:projectId/users", ...projectWriteAccess, this.assignUser.bind(this));
+        this.router.delete("/projects/:projectId/users/:userId", ...projectWriteAccess, this.removeUser.bind(this));
     }
 
     /**

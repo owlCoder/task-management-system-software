@@ -22,6 +22,9 @@ export class GatewayAuthController {
         this.initializeRoutes();
     }
 
+    /**
+     * Registering routes for Auth Microservice.
+     */
     private initializeRoutes(): void {
         this.router.post("/login", this.login.bind(this));
         this.router.post("/verify-otp", this.verifyOtp.bind(this));
@@ -52,9 +55,9 @@ export class GatewayAuthController {
      * - On failure: A JSON object with an error message and a HTTP status code indicating the failure.
      */
     private async verifyOtp(req: Request, res: Response): Promise<void> {
-        const browserData = req.body as OTPVerificationDTO;
+        const data = req.body as OTPVerificationDTO;
 
-        const result = await this.gatewayAuthService.verifyOtp(browserData);
+        const result = await this.gatewayAuthService.verifyOtp(data);
         handleResponse(res, result);
     }
 
@@ -67,9 +70,9 @@ export class GatewayAuthController {
      * - On failure: A JSON object with an error message and a HTTP status code indicating the failure.
      */
     private async resendOtp(req: Request, res: Response): Promise<void> {
-        const browserData = req.body as BrowserDataDTO
+        const data = req.body as BrowserDataDTO
 
-        const result = await this.gatewayAuthService.resendOtp(browserData);
+        const result = await this.gatewayAuthService.resendOtp(data);
         handleResponse(res, result);
     }
 

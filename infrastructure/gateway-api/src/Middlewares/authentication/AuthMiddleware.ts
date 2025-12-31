@@ -31,15 +31,17 @@ export const authenticate = (req: Request, res: Response, next: NextFunction): v
   const authHeader = req.headers.authorization;
 
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    const message = "Token is missing";
+
     logger.warn({
         service: "Gateway",
         code: "AUTHENTICATION_ERR",
         method: req.method,
         url: req.url,
         ip: req.ip
-    }, "Token is missing");
+    }, message);
 
-    res.status(401).json({ success: false, message: "Token is missing!" });
+    res.status(401).json({ message: message });
     return;
   }
 
@@ -55,14 +57,16 @@ export const authenticate = (req: Request, res: Response, next: NextFunction): v
 
     next();
   } catch (err) {
+    const message = "Invalid token provided";
+
     logger.warn({
         service: "Gateway",
         code: "AUTHENTICATION_ERR",
         method: req.method,
         url: req.url,
         ip: req.ip
-    }, "Invalid token provided");
+    }, message);
 
-    res.status(401).json({ success: false, message: "Invalid token provided!" });
+    res.status(401).json({ message: message });
   }
 };
