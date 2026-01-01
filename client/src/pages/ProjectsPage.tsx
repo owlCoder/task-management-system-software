@@ -100,7 +100,7 @@ export const ProjectsPage: React.FC = () => {
       }
     } catch (err) {
       console.error("Failed to create project:", err);
-      alert("USKORO! Failed to create project. Please try again.");
+      alert("Failed to create project. Please try again.");
     }
   };
 
@@ -126,18 +126,18 @@ export const ProjectsPage: React.FC = () => {
       }
     } catch (err) {
       console.error("Failed to delete project:", err);
-      alert("USKORO! Failed to delete project. Please try again.");
+      alert("Failed to delete project. Please try again.");
     }
   };
 
-  const handleUpdateProject = async (updatedProject: ProjectDTO) => {
+  const handleUpdateProject = async (updatedProject: ProjectDTO, imageFile?: File) => {
     try {
       const updated = await projectAPI.updateProject(updatedProject.project_id, {
         project_name: updatedProject.project_name,
         project_description: updatedProject.project_description,
-        image_file_uuid: updatedProject.image_file_uuid,
         total_weekly_hours_required: updatedProject.total_weekly_hours_required,
         allowed_budget: updatedProject.allowed_budget,
+        image_file: imageFile,
       });
       if (updated) {
         await fetchProjects();

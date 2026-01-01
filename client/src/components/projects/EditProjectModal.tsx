@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from "react";
 import type { ProjectDTO } from "../../models/project/ProjectDTO";
+import { getProjectImageUrl } from "../../helpers/image_url";
 
 type Props = {
   project: ProjectDTO | null;
   isOpen: boolean;
   onClose: () => void;
-  onSave: (updated: ProjectDTO) => void;
+  onSave: (updated: ProjectDTO, imageFile?: File) => void;
 };
 
 export const EditProjectModal: React.FC<Props> = ({
@@ -15,6 +16,8 @@ export const EditProjectModal: React.FC<Props> = ({
   onSave,
 }) => {
   const [formData, setFormData] = useState<ProjectDTO | null>(null);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string>("");
   const [errors, setErrors] = useState({
     project_name: "",
     total_weekly_hours_required: "",
@@ -24,6 +27,8 @@ export const EditProjectModal: React.FC<Props> = ({
   useEffect(() => {
     if (project) {
       setFormData({ ...project });
+      setImageFile(null);
+      setImagePreview(project.image_file_uuid ? getProjectImageUrl(project.image_file_uuid) : "");
       setErrors({
         project_name: "",
         total_weekly_hours_required: "",
@@ -67,14 +72,30 @@ export const EditProjectModal: React.FC<Props> = ({
     return Object.values(newErrors).every((e) => !e);
   };
 
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      setImageFile(file);
+
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleSubmit = () => {
     if (!formData || !validateForm()) return;
 
-    onSave({
-      ...formData,
-      project_name: formData.project_name.trim(),
-      project_description: formData.project_description.trim(),
-    });
+    onSave(
+      {
+        ...formData,
+        project_name: formData.project_name.trim(),
+        project_description: formData.project_description.trim(),
+      },
+      imageFile || undefined
+    );
     onClose();
   };
 
@@ -137,25 +158,18 @@ export const EditProjectModal: React.FC<Props> = ({
             </h3>
             <label className="flex items-center gap-2 cursor-pointer px-4 py-2 bg-white/10 border border-white/20 rounded-lg hover:bg-white/20 transition">
               <span className="text-white/90">
-                {formData.image_file_uuid ? "File Selected" : "Choose Image"}
+                {imageFile ? imageFile.name : formData.image_file_uuid ? "Change Image" : "Choose Image"}
               </span>
               <input
                 type="file"
                 accept="image/*"
                 className="hidden"
-                onChange={(e) => {
-                  if (e.target.files && e.target.files[0]) {
-                    const reader = new FileReader();
-                    reader.onloadend = () =>
-                      updateField("image_file_uuid", reader.result as string);
-                    reader.readAsDataURL(e.target.files[0]);
-                  }
-                }}
+                onChange={handleImageChange}
               />
             </label>
-            {formData.image_file_uuid && (
+            {imagePreview && (
               <img
-                src={formData.image_file_uuid}
+                src={imagePreview}
                 alt="preview"
                 className="mt-2 w-32 h-32 object-cover rounded-2xl"
               />

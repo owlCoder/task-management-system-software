@@ -1,5 +1,6 @@
 import React from "react";
 import type { ProjectDTO } from "../../models/project/ProjectDTO";
+import { getProjectImageUrl } from "../../helpers/image_url";
 
 type Props = {
   project: ProjectDTO | null;
@@ -75,7 +76,7 @@ export const ProjectDetailsModal: React.FC<Props> = ({
           {project.image_file_uuid && (
             <div className="mb-6 rounded-xl overflow-hidden border border-white/10">
               <img
-                src={project.image_file_uuid}
+                src={getProjectImageUrl(project.image_file_uuid)}
                 alt={`${project.project_name} cover`}
                 className="w-full h-64 object-cover"
               />
