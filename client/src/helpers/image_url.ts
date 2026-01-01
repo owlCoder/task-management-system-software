@@ -1,22 +1,20 @@
-const GATEWAY_URL = import.meta.env.VITE_GATEWAY_URL;
+import type { ProjectDTO } from "../models/project/ProjectDTO";
 
 /**
- * Vraća pun URL za sliku projekta PREKO GATEWAY-a
- * @param imageFilename - Ime fajla slike (npr. "abc123-uuid.jpg")
- * @returns Pun URL do slike ili prazan string ako nema slike
+ * Vraća data URL za sliku projekta iz base64 podataka
+ * @param project - ProjectDTO objekat sa image_data i image_content_type
+ * @returns Data URL za sliku ili prazan string ako nema slike
  */
-export function getProjectImageUrl(imageFilename: string | null | undefined): string {
-    if (!imageFilename) {
-        return '';
+export function getProjectImageUrl(project: Pick<ProjectDTO, 'image_data' | 'image_content_type'>): string {
+    if (project.image_data && project.image_content_type) {
+        return `data:${project.image_content_type};base64,${project.image_data}`;
     }
-    
-    // Ako je već pun URL ili base64, vrati kao što jeste (backward compatibility)
-    if (imageFilename.startsWith('http') || imageFilename.startsWith('data:')) {
-        return imageFilename;
-    }
-    
-    // Konstruiši URL preko Gateway-a
-    // GATEWAY_URL je "http://localhost:4000/api/v1"
-    // Treba nam "http://localhost:4000/api/v1/uploads/filename.jpg"
-    return `${GATEWAY_URL}/uploads/${imageFilename}`;
+    return '';
+}
+
+/**
+ * Proverava da li projekat ima sliku
+ */
+export function hasProjectImage(project: Pick<ProjectDTO, 'image_data' | 'image_content_type'>): boolean {
+    return !!(project.image_data && project.image_content_type);
 }

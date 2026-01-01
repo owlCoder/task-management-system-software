@@ -2,19 +2,17 @@ import { Router, Request, Response } from "express";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
-import { v4 as uuidv4 } from "uuid";  // npm install uuid && npm install --save-dev @types/uuid
+import { v4 as uuidv4 } from "uuid";
 import { IProjectService } from "../../Domain/services/IProjectService";
 import { ProjectCreateDTO } from "../../Domain/DTOs/ProjectCreateDTO";
 import { ProjectUpdateDTO } from "../../Domain/DTOs/ProjectUpdateDTO";
 import { validateCreateProject, validateUpdateProject } from "../validators/ProjectValidator";
 
-// Kreiraj uploads folder ako ne postoji
 const uploadsDir = path.join(__dirname, '../../uploads');
 if (!fs.existsSync(uploadsDir)) {
     fs.mkdirSync(uploadsDir, { recursive: true });
 }
 
-// Multer konfiguracija za čuvanje na disku
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
         cb(null, uploadsDir);
@@ -55,48 +53,6 @@ export class ProjectController {
         this.router.put("/projects/:id", upload.single('image_file'), this.updateProject.bind(this));
         this.router.delete("/projects/:id", this.deleteProject.bind(this));
         this.router.get("/projects/:id/exists", this.projectExists.bind(this));
-        
-        // *** NOVI ENDPOINT: Serviranje slika ***
-        this.router.get("/uploads/:filename", this.getImage.bind(this));
-    }
-
-    // *** NOVA METODA: Vraća sliku po filename-u ***
-    private async getImage(req: Request, res: Response): Promise<void> {
-        try {
-            const filename = req.params.filename;
-            
-            // Sanitizacija - spreči path traversal napade
-            const sanitizedFilename = path.basename(filename);
-            const filePath = path.join(uploadsDir, sanitizedFilename);
-
-            // Proveri da li fajl postoji
-            if (!fs.existsSync(filePath)) {
-                res.status(404).json({ message: "Image not found" });
-                return;
-            }
-
-            // Odredi content type na osnovu ekstenzije
-            const ext = path.extname(sanitizedFilename).toLowerCase();
-            const mimeTypes: { [key: string]: string } = {
-                '.jpg': 'image/jpeg',
-                '.jpeg': 'image/jpeg',
-                '.png': 'image/png',
-                '.gif': 'image/gif',
-                '.webp': 'image/webp',
-                '.svg': 'image/svg+xml',
-            };
-
-            const contentType = mimeTypes[ext] || 'application/octet-stream';
-            
-            res.setHeader('Content-Type', contentType);
-            res.setHeader('Cache-Control', 'public, max-age=31536000'); // Cache 1 godina
-            
-            const fileStream = fs.createReadStream(filePath);
-            fileStream.pipe(res);
-        } catch (err) {
-            console.error('Error serving image:', err);
-            res.status(500).json({ message: (err as Error).message });
-        }
     }
 
     private async getProjects(req: Request, res: Response): Promise<void> {

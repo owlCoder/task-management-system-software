@@ -1,6 +1,6 @@
 import React from "react";
 import type { ProjectDTO } from "../../models/project/ProjectDTO";
-import { getProjectImageUrl } from "../../helpers/image_url";
+import { getProjectImageUrl, hasProjectImage } from "../../helpers/image_url";
 
 type Props = {
   project: ProjectDTO;
@@ -61,9 +61,9 @@ export const ProjectCard: React.FC<Props> = ({
       {/* Image */}
       <div className="p-4 pb-0">
         <div className="w-full h-28 rounded-xl overflow-hidden flex items-center justify-center bg-white/5">
-          {project.image_file_uuid ? (
+          {hasProjectImage(project) ? (
             <img
-              src={getProjectImageUrl(project.image_file_uuid)}
+              src={getProjectImageUrl(project)}
               alt={`${project.project_name} cover`}
               className="w-full h-full object-cover"
               loading="lazy"

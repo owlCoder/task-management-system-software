@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import type { ProjectDTO } from "../../models/project/ProjectDTO";
-import { getProjectImageUrl } from "../../helpers/image_url";
+import { getProjectImageUrl, hasProjectImage } from "../../helpers/image_url";
 
 type Props = {
   project: ProjectDTO | null;
@@ -28,7 +28,8 @@ export const EditProjectModal: React.FC<Props> = ({
     if (project) {
       setFormData({ ...project });
       setImageFile(null);
-      setImagePreview(project.image_file_uuid ? getProjectImageUrl(project.image_file_uuid) : "");
+      // Koristi base64 iz projekta za preview
+      setImagePreview(hasProjectImage(project) ? getProjectImageUrl(project) : "");
       setErrors({
         project_name: "",
         total_weekly_hours_required: "",
@@ -158,7 +159,7 @@ export const EditProjectModal: React.FC<Props> = ({
             </h3>
             <label className="flex items-center gap-2 cursor-pointer px-4 py-2 bg-white/10 border border-white/20 rounded-lg hover:bg-white/20 transition">
               <span className="text-white/90">
-                {imageFile ? imageFile.name : formData.image_file_uuid ? "Change Image" : "Choose Image"}
+                {imageFile ? imageFile.name : imagePreview ? "Change Image" : "Choose Image"}
               </span>
               <input
                 type="file"
