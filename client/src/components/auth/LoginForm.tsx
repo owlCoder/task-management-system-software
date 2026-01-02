@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { IAuthAPI } from "../../api/auth/IAuthAPI";
+//import { IAuthAPI } from "../../api/auth/IAuthAPI";
 import { LoginUserDTO } from "../../models/auth/LoginUserDTO";
 import { useAuth } from "../../hooks/useAuthHook";
 import { useNavigate } from "react-router-dom";
@@ -31,8 +31,24 @@ export const LoginForm: React.FC<LoginFormProps> = ({
 
     try {
       const res = await authAPI.login(formData);
-      login(res.token ?? "");
-      navigate("/mainwindow");
+      const r: any = res;
+      if(!r.success) {
+        setError(r.message || "Login failed");
+        return;
+      }
+
+      if(r.otp_required) {
+        navigate("/otp", { state: { session: r.session } });
+        return;
+      }
+
+      if(r.token) {
+        login(r.token);
+        navigate("/mainwindow");
+        return;
+      }
+
+      setError("No token/session received.");
     } catch (err: any) {
       setError(
         err.response?.data?.message ||
