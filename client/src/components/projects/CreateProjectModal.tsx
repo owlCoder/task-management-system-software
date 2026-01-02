@@ -1,12 +1,10 @@
-import React, { useState , useEffect} from "react";
-import type { ProjectDTO } from "../../models/project/ProjectDTO";
-import { mockUsers } from "../../mocks/UsersMock";
-import { getProjectStatusByDate } from "../../helpers/projectStatusHelper";
+import React, { useState, useEffect } from "react";
+import type { ProjectCreateDTO } from "../../models/project/ProjectCreateDTO";
 
 type Props = {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (project: Omit<ProjectDTO, "id">) => void;
+  onSave: (project: ProjectCreateDTO) => void;
 };
 
 export const CreateProjectModal: React.FC<Props> = ({
@@ -15,46 +13,38 @@ export const CreateProjectModal: React.FC<Props> = ({
   onSave,
 }) => {
   const [formData, setFormData] = useState({
-    name: "",
-    description: "",
-    imageUrl: "",
-    totalWeeklyHours: "" as any,
-    allowedBudget: "" as any,
-    numberOfSprints: "" as any,
-    sprintDuration: "" as any,
-    startDate: "",
+    project_name: "",
+    project_description: "",
+    total_weekly_hours_required: "" as string | number,
+    allowed_budget: "" as string | number,
   });
 
-  const [selectedMembers, setSelectedMembers] = useState<number[]>([]);
+  // *** DODAJ STATE ZA FILE I PREVIEW ***
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string>("");
+
   const [errors, setErrors] = useState({
-    name: "",
-    totalWeeklyHours: "",
-    allowedBudget: "",
-    numberOfSprints: "",
-    sprintDuration: "",
+    project_name: "",
+    total_weekly_hours_required: "",
+    allowed_budget: "",
   });
 
   const resetForm = () => {
     setFormData({
-      name: "",
-      description: "",
-      imageUrl: "",
-      totalWeeklyHours: "" as any,
-      allowedBudget: "" as any,
-      numberOfSprints: "" as any,
-      sprintDuration: "" as any,
-      startDate: "",
+      project_name: "",
+      project_description: "",
+      total_weekly_hours_required: "",
+      allowed_budget: "",
     });
-    setSelectedMembers([]);
+    setImageFile(null);
+    setImagePreview("");
     setErrors({
-      name: "",
-      totalWeeklyHours: "",
-      allowedBudget: "",
-      numberOfSprints: "",
-      sprintDuration: "",
+      project_name: "",
+      total_weekly_hours_required: "",
+      allowed_budget: "",
     });
   };
-  
+
   useEffect(() => {
     if (isOpen) {
       resetForm();
@@ -71,67 +61,55 @@ export const CreateProjectModal: React.FC<Props> = ({
     if (e.key === "Escape") handleClose();
   };
 
-  const toggleMember = (userId: number) => {
-    setSelectedMembers((prev) =>
-      prev.includes(userId)
-        ? prev.filter((id) => id !== userId)
-        : [...prev, userId]
-    );
-  };
-
   const validateForm = () => {
     const newErrors = {
-      name: "",
-      totalWeeklyHours: "",
-      allowedBudget: "",
-      numberOfSprints: "",
-      sprintDuration: "",
+      project_name: "",
+      total_weekly_hours_required: "",
+      allowed_budget: "",
     };
 
-    if (!formData.name.trim()) newErrors.name = "Project name is required";
-    if (!formData.totalWeeklyHours || Number(formData.totalWeeklyHours) <= 0)
-      newErrors.totalWeeklyHours = "Hours must be positive";
-    if (!formData.allowedBudget || Number(formData.allowedBudget) <= 0)
-      newErrors.allowedBudget = "Budget must be positive";
-    if (!formData.numberOfSprints || Number(formData.numberOfSprints) <= 0)
-      newErrors.numberOfSprints = "Number of sprints must be positive";
-    if (!formData.sprintDuration || Number(formData.sprintDuration) <= 0)
-      newErrors.sprintDuration = "Sprint duration must be positive";
+    if (!formData.project_name.trim()) {
+      newErrors.project_name = "Project name is required";
+    }
+    if (!formData.total_weekly_hours_required || Number(formData.total_weekly_hours_required) <= 0) {
+      newErrors.total_weekly_hours_required = "Hours must be a positive number";
+    }
+    if (!formData.allowed_budget || Number(formData.allowed_budget) <= 0) {
+      newErrors.allowed_budget = "Budget must be a positive number";
+    }
 
     setErrors(newErrors);
     return Object.values(newErrors).every((e) => !e);
   };
 
+  // *** IZMENJENI HANDLER ZA SLIKU ***
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      setImageFile(file);
+      
+      // Kreiraj preview za prikaz
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleSubmit = () => {
     if (!validateForm()) return;
 
-    const members = selectedMembers.map((userId) => {
-      const user = mockUsers.find((u) => u.id === userId);
-      return {
-        id: 0,
-        projectId: 0,
-        userId,
-        hoursPerWeek: 0,
-        role: user?.role || null,
-        user: user || null,
-      };
-    });
+    // *** ŠALJEMO FILE OBJEKAT UMESTO BASE64 ***
+    const projectData: ProjectCreateDTO = {
+      project_name: formData.project_name.trim(),
+      project_description: formData.project_description.trim() || "",
+      image_file: imageFile || undefined,  // Šaljemo File objekat
+      total_weekly_hours_required: Number(formData.total_weekly_hours_required),
+      allowed_budget: Number(formData.allowed_budget),
+    };
 
-    const status = getProjectStatusByDate(formData.startDate);
-
-    onSave({
-      name: formData.name,
-      description: formData.description || undefined,
-      imageUrl: formData.imageUrl || undefined,
-      totalWeeklyHours: Number(formData.totalWeeklyHours),
-      allowedBudget: Number(formData.allowedBudget),
-      members: members as any,
-      numberOfSprints: Number(formData.numberOfSprints),
-      sprintDuration: Number(formData.sprintDuration),
-      startDate: formData.startDate,
-      status,
-    });
-
+    onSave(projectData);
     handleClose();
   };
 
@@ -160,6 +138,7 @@ export const CreateProjectModal: React.FC<Props> = ({
         "
         onClick={(e) => e.stopPropagation()}
       >
+        {/* Header */}
         <div className="px-6 py-4 flex items-center justify-between border-b border-white/10">
           <h2
             className="text-2xl font-semibold"
@@ -175,185 +154,150 @@ export const CreateProjectModal: React.FC<Props> = ({
           </button>
         </div>
 
+        {/* Body */}
         <div className="p-6 overflow-y-auto flex-1 styled-scrollbar space-y-4">
-        
-          {[["Project Name *", "name", "text"]].map(([label, key, type]) => (
-            <div key={key}>
-              <h3 className="text-xs uppercase tracking-wider text-white/60 mb-1">
-                {label}
-              </h3>
-              <input
-                type={type}
-                required
-                value={(formData as any)[key]}
-                onChange={(e) =>
-                  setFormData({ ...formData, [key]: e.target.value })
-                }
-                className={`w-full px-4 py-2 rounded-lg bg-white/10 border ${
-                  (errors as any)[key] ? "border-red-400" : "border-white/20"
-                } focus:outline-none`}
-              />
-              {(errors as any)[key] && (
-                <p className="text-red-400 text-sm mt-1">{(errors as any)[key]}</p>
-              )}
-            </div>
-          ))}
+          {/* Project Name */}
+          <div>
+            <h3 className="text-xs uppercase tracking-wider text-white/60 mb-1">
+              Project Name *
+            </h3>
+            <input
+              type="text"
+              required
+              value={formData.project_name}
+              onChange={(e) =>
+                setFormData({ ...formData, project_name: e.target.value })
+              }
+              className={`w-full px-4 py-2 rounded-lg bg-white/10 border ${
+                errors.project_name ? "border-red-400" : "border-white/20"
+              } focus:outline-none`}
+              placeholder="Enter project name"
+            />
+            {errors.project_name && (
+              <p className="text-red-400 text-sm mt-1">{errors.project_name}</p>
+            )}
+          </div>
 
+          {/* Project Image - IZMENJENO */}
           <div>
             <h3 className="text-xs uppercase tracking-wider text-white/60 mb-1">
               Project Image
             </h3>
-
             <label className="flex items-center gap-2 cursor-pointer px-4 py-2 bg-white/10 border border-white/20 rounded-lg hover:bg-white/20 transition">
               <span className="text-white/90">
-                {formData.imageUrl ? "File Selected" : "Choose Image"}
+                {imageFile ? imageFile.name : "Choose Image"}
               </span>
               <input
                 type="file"
                 accept="image/*"
                 className="hidden"
-                onChange={(e) => {
-                  if (e.target.files && e.target.files[0]) {
-                    const file = e.target.files[0];
-                    const reader = new FileReader();
-                    reader.onloadend = () =>
-                      setFormData({ ...formData, imageUrl: reader.result as string });
-                    reader.readAsDataURL(file);
-                  }
-                }}
+                onChange={handleImageChange}
               />
             </label>
-
-            {formData.imageUrl && (
+            {imagePreview && (
               <img
-                src={formData.imageUrl}
+                src={imagePreview}
                 alt="preview"
-                className="mt-2 w-32 h-32 object-cover rounded-2xl "
+                className="mt-2 w-32 h-32 object-cover rounded-2xl"
               />
             )}
           </div>
 
-
+          {/* Description */}
           <div>
             <h3 className="text-xs uppercase tracking-wider text-white/60 mb-1">
               Description
             </h3>
             <textarea
-              value={formData.description}
+              value={formData.project_description}
               onChange={(e) =>
-                setFormData({ ...formData, description: e.target.value })
+                setFormData({ ...formData, project_description: e.target.value })
               }
               className="
                 w-full px-4 py-2 rounded-lg
                 bg-white/10 border border-white/20
                 min-h-[100px] focus:outline-none
               "
+              placeholder="Enter project description"
             />
           </div>
 
-          <div>
-            <h3 className="text-xs uppercase tracking-wider text-white/60 mb-2">
-              Members
-            </h3>
-            <div className="flex flex-wrap gap-2">
-              {mockUsers.map((user) => (
-                <button
-                  key={user.id}
-                  type="button"
-                  onClick={() => toggleMember(user.id)}
-                  className={`
-                    px-3 py-1 rounded-lg text-sm
-                    border transition cursor-pointer
-                    ${
-                      selectedMembers.includes(user.id)
-                        ? "bg-white/20 border-white/80"
-                        : "bg-white/10 border-white/20"
-                    }
-                  `}
-                >
-                  {user.username}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* obavezna polja*/}
-          {[
-            ["Total Weekly Hours *", "totalWeeklyHours"],
-            ["Allowed Budget ($) *", "allowedBudget"],
-            ["Number of Sprints *", "numberOfSprints"],
-            ["Sprint Duration (days) *", "sprintDuration"],
-          ].map(([label, key]) => (
-            <div key={key}>
-              <h3 className="text-xs uppercase tracking-wider text-white/60 mb-1">
-                {label}
-              </h3>
-              <input
-                type="number"
-                required
-                value={(formData as any)[key]}
-                onChange={(e) => {
-                  setFormData({
-                    ...formData,
-                    [key]: e.target.value,
-                  });
-                }}
-                onKeyDown={(e) => {
-                  const value = (e.currentTarget as HTMLInputElement).value;
-
-                  if (e.key === "+" || e.key === "-") {
-                    e.preventDefault();
-                  }
-                  if (e.key === "." && value.length === 0) {
-                    e.preventDefault();
-                  }
-                  if (
-                    (key === "numberOfSprints" || key === "sprintDuration") &&
-                    e.key === "."
-                  ) {
-                    e.preventDefault();
-                  }
-                }}
-                className={`
-                  w-full px-4 py-2 rounded-lg
-                  bg-white/10
-                  [&::-webkit-inner-spin-button]:appearance-none
-                  [&::-webkit-outer-spin-button]:appearance-none
-                  border focus:outline-none
-                  ${
-                    (errors as any)[key]
-                      ? "border-red-400"
-                      : "border-white/20"
-                  }
-                `}
-              />
-              {(errors as any)[key] && (
-                <p className="text-red-400 text-sm mt-1">
-                  {(errors as any)[key]}
-                </p>
-              )}
-            </div>
-          ))}
-
+          {/* Total Weekly Hours */}
           <div>
             <h3 className="text-xs uppercase tracking-wider text-white/60 mb-1">
-              Start Date
+              Total Weekly Hours Required *
             </h3>
             <input
-              type="date"
-              value={formData.startDate}
-              min={new Date().toISOString().split("T")[0]}
+              type="number"
+              required
+              min="1"
+              value={formData.total_weekly_hours_required}
               onChange={(e) =>
-                setFormData({ ...formData, startDate: e.target.value })
+                setFormData({
+                  ...formData,
+                  total_weekly_hours_required: e.target.value,
+                })
               }
-              className="
+              onKeyDown={(e) => {
+                if (e.key === "+" || e.key === "-" || e.key === ".") {
+                  e.preventDefault();
+                }
+              }}
+              className={`
                 w-full px-4 py-2 rounded-lg
-                bg-white/10 border border-white/20 
-              "
+                bg-white/10
+                [&::-webkit-inner-spin-button]:appearance-none
+                [&::-webkit-outer-spin-button]:appearance-none
+                border focus:outline-none
+                ${errors.total_weekly_hours_required ? "border-red-400" : "border-white/20"}
+              `}
+              placeholder="e.g., 40"
             />
+            {errors.total_weekly_hours_required && (
+              <p className="text-red-400 text-sm mt-1">
+                {errors.total_weekly_hours_required}
+              </p>
+            )}
+          </div>
+
+          {/* Allowed Budget */}
+          <div>
+            <h3 className="text-xs uppercase tracking-wider text-white/60 mb-1">
+              Allowed Budget ($) *
+            </h3>
+            <input
+              type="number"
+              required
+              min="1"
+              value={formData.allowed_budget}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  allowed_budget: e.target.value,
+                })
+              }
+              onKeyDown={(e) => {
+                if (e.key === "+" || e.key === "-") {
+                  e.preventDefault();
+                }
+              }}
+              className={`
+                w-full px-4 py-2 rounded-lg
+                bg-white/10
+                [&::-webkit-inner-spin-button]:appearance-none
+                [&::-webkit-outer-spin-button]:appearance-none
+                border focus:outline-none
+                ${errors.allowed_budget ? "border-red-400" : "border-white/20"}
+              `}
+              placeholder="e.g., 50000"
+            />
+            {errors.allowed_budget && (
+              <p className="text-red-400 text-sm mt-1">{errors.allowed_budget}</p>
+            )}
           </div>
         </div>
 
+        {/* Footer */}
         <div className="px-6 py-4 border-t border-white/10 flex justify-center gap-3">
           <button
             onClick={handleClose}

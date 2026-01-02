@@ -61,5 +61,4 @@ export class NotificationAPI implements INotificationAPI {
   }
 }
 
-// Export instance
 export const notificationAPI = new NotificationAPI();

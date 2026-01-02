@@ -31,4 +31,7 @@ export class Sprint {
     
     @Column({ type: "date", nullable: false })
     end_date!: Date;
+
+    @Column({ type: "int", nullable: false, default: 0})
+    story_points!: number;
 }

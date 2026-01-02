@@ -1,11 +1,10 @@
 // Libraries
-import axios, { AxiosInstance } from "axios";
+import { AxiosInstance } from "axios";
 
 // Domain
 import { IErrorHandlingService } from "../../Domain/services/common/IErrorHandlingService";
 import { IGatewayAuthService } from "../../Domain/services/auth/IGatewayAuthService";
 import { LoginUserDTO } from "../../Domain/DTOs/auth/LoginUserDTO";
-import { RegistrationUserDTO } from "../../Domain/DTOs/auth/RegistrationUserDTO";
 import { AuthResponseType } from "../../Domain/types/auth/AuthResponse";
 import { BrowserDataDTO } from "../../Domain/DTOs/auth/BrowserDataDTO";
 import { OTPVerificationDTO } from "../../Domain/DTOs/auth/OTPVerificationDTO";
@@ -17,87 +16,66 @@ import { HTTP_METHODS } from "../../Constants/common/HttpMethods";
 import { SERVICES } from "../../Constants/services/Services";
 import { API_ENDPOINTS } from "../../Constants/services/APIEndpoints";
 
+// Infrastructure
+import { makeAPICall } from "../../Infrastructure/axios/APIHelpers";
+import { createAxiosClient } from "../../Infrastructure/axios/client/AxiosClientFactory";
+
+/**
+ * Makes API requests to the Auth Microservice.
+ */
 export class GatewayAuthService implements IGatewayAuthService {
     private readonly authClient: AxiosInstance;
 
     constructor(private readonly errorHandlingService: IErrorHandlingService) {
-        this.authClient = axios.create({
-            baseURL: API_ENDPOINTS.AUTH,
-            headers: { "Content-Type": "application/json" },
-            timeout: 5000,
+        this.authClient = createAxiosClient(API_ENDPOINTS.AUTH);
+    }
+
+    /**
+     * Sends the login data to the auth microservice.
+     * @param {LoginUserDTO} data - login data.
+     * @returns {Promise<Result<AuthResponseType>>} - A promise that resolves to a Result object containing the auth response data.
+     * - On success result contains the {@link AuthResponseType}
+     * - On failure result contains an error message and status code.
+     */
+    async login(data: LoginUserDTO): Promise<Result<AuthResponseType>> {
+        return await makeAPICall<AuthResponseType, LoginUserDTO>(this.authClient, this.errorHandlingService, {
+            serviceName: SERVICES.AUTH,
+            method: HTTP_METHODS.POST,
+            url: AUTH_ROUTES.LOGIN,
+            data: data
         });
     }
 
-    async login(data: LoginUserDTO): Promise<Result<AuthResponseType>> {
-        try {
-            const response = await this.authClient.post<AuthResponseType>(AUTH_ROUTES.LOGIN, data);
-
-            return {
-                success: true,
-                data: {
-                    success: response.data.success,
-                    otp_required: response.data.otp_required,
-                    session: response.data.otp_required ? response.data.session : undefined,
-                    token: !response.data.otp_required ? response.data.token : undefined,
-                    message: response.data.message
-                }
-            };
-        } catch(error) {
-            return this.errorHandlingService.handle(error, SERVICES.AUTH, HTTP_METHODS.POST, AUTH_ROUTES.LOGIN);
-        }
-    }
-    
-    async register(data: RegistrationUserDTO): Promise<Result<AuthResponseType>> {
-        try {
-            const response = await this.authClient.post<AuthResponseType>(AUTH_ROUTES.REGISTER, data);
-
-            return { 
-                success: true, 
-                data: {
-                    success: response.data.success,
-                    token: response.data.token,
-                    message: response.data.message
-                }
-            };
-        } catch(error) {
-            return this.errorHandlingService.handle(error, SERVICES.AUTH, HTTP_METHODS.POST, AUTH_ROUTES.REGISTER);
-        }
+    /**
+     * Requests the otp data verification from the auth microservice.
+     * @param {OTPVerificationDTO} data - data needed for the verification of the otp.
+     * @returns {Promise<Result<AuthResponseType>>} - A promise that resolves to a Result object containing the auth response data.
+     * - On success result contains the {@link AuthResponseType}
+     * - On failure result contains an error message and status code.
+     */
+    async verifyOtp(data: OTPVerificationDTO): Promise<Result<AuthResponseType>> {
+        return await makeAPICall<AuthResponseType, OTPVerificationDTO>(this.authClient, this.errorHandlingService, {
+            serviceName: SERVICES.AUTH,
+            method: HTTP_METHODS.POST,
+            url: AUTH_ROUTES.VERIFY_OTP,
+            data: data
+        });
     }
 
-    async verifyOtp(otpData: OTPVerificationDTO): Promise<Result<AuthResponseType>> {
-        try {
-            const response = await this.authClient.post<AuthResponseType>(AUTH_ROUTES.VERIFY_OTP, otpData);
-
-            return {
-                success: true,
-                data: {
-                    success: response.data.success,
-                    token: response.data.token,
-                    message: response.data.message
-                }
-            };
-        } catch(error) {
-            return this.errorHandlingService.handle(error, SERVICES.AUTH, HTTP_METHODS.POST, AUTH_ROUTES.VERIFY_OTP);
-        }
-    }
-
-    async resendOtp(browserData: BrowserDataDTO): Promise<Result<AuthResponseType>> {
-        try {
-            const response = await this.authClient.post<AuthResponseType>(AUTH_ROUTES.RESEND_OTP, browserData);
-
-            return {
-                success: true,
-                data: {
-                    success: response.data.success,
-                    otp_required: response.data.otp_required,
-                    session: response.data.otp_required ? response.data.session : undefined,
-                    token: !response.data.otp_required ? response.data.token : undefined,
-                    message: response.data.message
-                }
-            };
-        } catch(error) {
-            return this.errorHandlingService.handle(error, SERVICES.AUTH, HTTP_METHODS.POST, AUTH_ROUTES.RESEND_OTP);
-        }
+    /**
+     * Sends the request for the new otp code to the auth microservice.
+     * @param {BrowserDataDTO} data - browser data.
+     * @returns {Promise<Result<AuthResponseType>>} - A promise that resolves to a Result object containing the auth response data.
+     * - On success result contains the {@link AuthResponseType}
+     * - On failure result contains an error message and status code.
+     */
+    async resendOtp(data: BrowserDataDTO): Promise<Result<AuthResponseType>> {
+        return await makeAPICall<AuthResponseType, BrowserDataDTO>(this.authClient, this.errorHandlingService, {
+            serviceName: SERVICES.AUTH,
+            method: HTTP_METHODS.POST,
+            url: AUTH_ROUTES.RESEND_OTP,
+            data: data
+        });
     }
 
 }

@@ -1,10 +1,5 @@
 import React from "react";
-
-interface TaskSearchBarProps {
-  value: string;
-  onChange: (value: string) => void;
-  placeholder?: string;
-}
+import { TaskSearchBarProps } from "../../types/props";
 
 const TaskSearchBar: React.FC<TaskSearchBarProps> = ({
   value,

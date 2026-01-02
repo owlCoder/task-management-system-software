@@ -14,7 +14,6 @@ import AnalyticsPage from "./pages/AnalyticsPage";
 
 const auth_api: IAuthAPI = new AuthAPI();
 
-
 const backgroundImageUrl = new URL("../public/bg2.png", import.meta.url).href;
 
 function App() {

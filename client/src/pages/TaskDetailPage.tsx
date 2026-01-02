@@ -11,10 +11,11 @@ import { TaskCostInfo } from "../components/task/TaskCostInfo";
 import { decodeJWT } from "../helpers/decode_jwt";
 import { TaskStatus } from "../enums/TaskStatus";
 import { TaskCommentList } from "../components/task/TaskCommentList";
+import { TaskDetailPageProps } from "../types/props";
 
 const MOCK_TASK: TaskDTO = {
   task_id: 1,
-  sprint_id: 1,   // nije project_id nego sprint_id dto ti je bacao gresku
+  sprint_id: 1, // nije project_id nego sprint_id dto ti je bacao gresku
   project_manager_id: 10,
   worker_id: 5,
   title: "Create character animation",
@@ -26,13 +27,12 @@ const MOCK_TASK: TaskDTO = {
   attachment_file_uuid: undefined,
 };
 
-interface TaskDetailPageProps {
-  token: string;
-  taskId: number;
-  setClose: () => void;
-}
-
-export const TaskDetailPage: React.FC<TaskDetailPageProps> = ({token,taskId,setClose,}) => {
+export const TaskDetailPage: React.FC<TaskDetailPageProps> = ({
+  token,
+  taskId,
+  setClose,
+  onEdit,
+}) => {
   const [view, setView] = useState<"upload" | "preview">("upload");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [uploadedFileName, setUploadedFileName] = useState<string | null>(null);
@@ -41,7 +41,6 @@ export const TaskDetailPage: React.FC<TaskDetailPageProps> = ({token,taskId,setC
   const [userId, setUserId] = useState<number>(0);
 
   const apiTask = new TaskAPI(import.meta.env.VITE_GATEWAY_URL, token);
-
 
   const handleUpload = async () => {
     if (!selectedFile) return;
@@ -56,15 +55,15 @@ export const TaskDetailPage: React.FC<TaskDetailPageProps> = ({token,taskId,setC
     }
   };
 
-  const handleAddComments = async (text : string) => {
-    if(!text.trim()) return;
+  const handleAddComments = async (text: string) => {
+    if (!text.trim()) return;
 
     try {
-      await apiTask.uploadComment(taskId,userId,text);
-    }catch {
+      await apiTask.uploadComment(taskId, userId, text);
+    } catch {
       alert("Failed");
     }
-  }
+  };
 
   useEffect(() => {
     const decoded = decodeJWT(token);
@@ -91,7 +90,16 @@ export const TaskDetailPage: React.FC<TaskDetailPageProps> = ({token,taskId,setC
                    max-w-2xl w-full max-h-[90vh] flex flex-col text-white"
         onClick={(e) => e.stopPropagation()}
       >
-        {task && role && <TaskHeader task={task} role={role} token={token} onStatusUpdate={(newStatus) => setTask({...task, task_status: newStatus})} />}
+        {task && role && (
+          <TaskHeader
+            task={task}
+            role={role}
+            token={token}
+            onStatusUpdate={(newStatus) =>
+              setTask({ ...task, task_status: newStatus })
+            }
+          />
+        )}
 
         <div className="p-5 overflow-y-auto flex-1 flex flex-col gap-3">
           {task && role && (
@@ -112,15 +120,13 @@ export const TaskDetailPage: React.FC<TaskDetailPageProps> = ({token,taskId,setC
                 task={task}
               />
 
-              <TaskCommentList
-                onSubmit={handleAddComments}
-              />
+              <TaskCommentList onSubmit={handleAddComments} />
 
               {view === "upload" && (
                 <FileUpload
                   setFile={(file) => {
                     setSelectedFile(file);
-                    setView("preview"); 
+                    setView("preview");
                   }}
                   uploadedFileName={uploadedFileName}
                 />
@@ -136,13 +142,22 @@ export const TaskDetailPage: React.FC<TaskDetailPageProps> = ({token,taskId,setC
                   }}
                 />
               )}
-
-
             </>
           )}
         </div>
 
-        <div className="px-6 py-4 border-t border-white/10 flex justify-end">
+        <div className="px-6 py-4 border-t border-white/10 flex justify-end gap-3">
+          {onEdit && (
+            <button
+              onClick={onEdit}
+              className="px-6 py-2 rounded-lg text-sm font-semibold
+                         bg-gradient-to-t from-[var(--palette-medium-blue)] to-[var(--palette-deep-blue)]
+                         hover:scale-[1.02] transition-all duration-200"
+            >
+              Edit Task
+            </button>
+          )}
+
           <button
             onClick={setClose}
             className="px-6 py-2 rounded-lg text-sm font-semibold

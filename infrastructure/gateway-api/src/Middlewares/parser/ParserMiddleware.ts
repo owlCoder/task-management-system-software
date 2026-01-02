@@ -1,0 +1,46 @@
+// Framework
+import { Request, Response, NextFunction } from "express";
+
+// Infrastructure
+import { logger } from "../../Infrastructure/logging/Logger";
+
+/**
+ * Captures errors caused by express json parser.
+ * @param {unknown} err - Error that has occured. 
+ * @param {Request} req - The request object. 
+ * @param {Response} res - The response object.
+ * @param {NextFunction} next - Next middleware. 
+ * @returns void
+ */
+export function bodyParserErrorHandler(err: unknown, req: Request, res: Response, next: NextFunction): void {
+    if (err instanceof Error && 'status' in err && typeof err.status === 'number') {
+        const status = err.status;
+        let message: string | undefined;
+
+        switch (status) {
+            case 400:
+                message = 'The request body syntax is incorrect';
+                break;
+            case 413:
+                message = 'The data sent exceeds the server limit';
+                break;
+            case 415:
+                message = 'The content encoding is not supported';
+                break;
+        }
+
+        if (message) {
+            logger.warn({
+                service: "Gateway",
+                code: "JSON_PARSER_ERR",
+                method: req.method,
+                url: req.url,
+                ip: req.ip
+            }, message);
+            
+            res.status(status).json({ message: message });
+            return; 
+        }
+    }
+    next(err);
+}

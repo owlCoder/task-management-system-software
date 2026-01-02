@@ -1,12 +1,18 @@
+// Framework
+import { Request } from "express";
+
 // Libraries
-import axios, { AxiosInstance } from "axios";
+import { AxiosInstance } from "axios";
 
 // Domain
 import { IErrorHandlingService } from "../../Domain/services/common/IErrorHandlingService";
 import { IGatewayProjectService } from "../../Domain/services/project/IGatewayProjectService";
-import { ProjectCreateDTO } from "../../Domain/DTOs/project/ProjectCreateDTO";
 import { ProjectDTO } from "../../Domain/DTOs/project/ProjectDTO";
-import { ProjectUpdateDTO } from "../../Domain/DTOs/project/ProjectUpdateDTO";
+import { ProjectUserAssignDTO } from "../../Domain/DTOs/project/ProjectUserAssignDTO";
+import { ProjectUserDTO } from "../../Domain/DTOs/project/ProjectUserDTO";
+import { SprintCreateDTO } from "../../Domain/DTOs/project/SprintCreateDTO";
+import { SprintDTO } from "../../Domain/DTOs/project/SprintDTO";
+import { SprintUpdateDTO } from "../../Domain/DTOs/project/SprintUpdateDTO";
 import { Result } from "../../Domain/types/common/Result";
 
 // Constants
@@ -15,66 +21,232 @@ import { HTTP_METHODS } from "../../Constants/common/HttpMethods";
 import { SERVICES } from "../../Constants/services/Services";
 import { API_ENDPOINTS } from "../../Constants/services/APIEndpoints";
 
+// Infrastructure
+import { makeAPICall } from "../../Infrastructure/axios/APIHelpers";
+import { createAxiosClient } from "../../Infrastructure/axios/client/AxiosClientFactory";
+
+/**
+ * Makes API requests to the Project Microservice
+ */
 export class GatewayProjectService implements IGatewayProjectService {
     private readonly projectClient: AxiosInstance;
     
     constructor(private readonly errorHandlingService: IErrorHandlingService){
-        this.projectClient = axios.create({
-            baseURL: API_ENDPOINTS.PROJECT,
-            timeout: 5000,
+        this.projectClient = createAxiosClient(API_ENDPOINTS.PROJECT, { headers: {} });
+    }
+
+    /**
+     * Fetches the specific project.
+     * @param {number} projectId - id of the project. 
+     * @returns {Promise<Result<ProjectDTO>>} - A promise that resolves to a Result object containing the data of the project.
+     * - On success returns data as {@link ProjectDTO}.
+     * - On failure returns status code and error message.
+     */
+    async getProjectById(projectId: number): Promise<Result<ProjectDTO>> {
+        return await makeAPICall<ProjectDTO>(this.projectClient, this.errorHandlingService, {
+            serviceName: SERVICES.PROJECT,
+            method: HTTP_METHODS.GET,
+            url: PROJECT_ROUTES.GET_PROJECT(projectId)
         });
     }
 
-    async getProjectById(id: number): Promise<Result<ProjectDTO>> {
-        try {
-            const response = await this.projectClient.get<ProjectDTO>(PROJECT_ROUTES.GET_BY_ID(id));
-
-            return {
-                success: true,
-                data: response.data
-            };
-        } catch(error) {
-            return this.errorHandlingService.handle(error, SERVICES.PROJECT, HTTP_METHODS.GET, PROJECT_ROUTES.GET_BY_ID(id));
-        }
+    /**
+     * Fetches the projects a specific user works on.
+     * @param {number} userId - id of the user. 
+     * @returns {Promise<Result<ProjectDTO[]>>} - A promise that resolves to a Result object containing the data of the projects.
+     * - On success returns data as {@link ProjectDTO[]}.
+     * - On failure returns status code and error message.
+     */
+    async getProjectsFromUser(userId: number): Promise<Result<ProjectDTO[]>> {
+        return await makeAPICall<ProjectDTO[]>(this.projectClient, this.errorHandlingService, {
+            serviceName: SERVICES.PROJECT,
+            method: HTTP_METHODS.GET,
+            url: PROJECT_ROUTES.GET_PROJECTS_FROM_USER(userId)
+        });
     }
 
-    async createProject(data: ProjectCreateDTO): Promise<Result<ProjectDTO>> {
-        try {
-            const response = await this.projectClient.post<ProjectDTO>(PROJECT_ROUTES.CREATE, data);
-
-            return {
-                success: true,
-                data: response.data
-            };
-        } catch(error) {
-            return this.errorHandlingService.handle(error, SERVICES.PROJECT, HTTP_METHODS.POST, PROJECT_ROUTES.CREATE);
-        }
+    /**
+     * Posts new project.
+     * @param {Request} req - The request object containing the project data. 
+     * @returns {Promise<Result<ProjectDTO>>} - A promise that resolves to a Result object containing the data of the project.
+     * - On success returns data as {@link ProjectDTO}.
+     * - On failure returns status code and error message.
+     */
+    async createProject(req: Request): Promise<Result<ProjectDTO>> {
+        return await makeAPICall<ProjectDTO, Request>(this.projectClient, this.errorHandlingService, {
+            serviceName: SERVICES.PROJECT,
+            method: HTTP_METHODS.POST,
+            url: PROJECT_ROUTES.CREATE_PROJECT,
+            data: req,
+            headers: {
+                "Content-Type": req.headers["content-type"]!,
+            },
+            maxBodyLength: Infinity,
+            maxContentLength: Infinity
+        });
     }
 
-    async updateProject(id: number, data: ProjectUpdateDTO): Promise<Result<ProjectDTO>> {
-        try {
-            const response = await this.projectClient.put<ProjectDTO>(PROJECT_ROUTES.UPDATE(id), data);
-
-            return {
-                success: true,
-                data: response.data
-            };
-        } catch(error) {
-            return this.errorHandlingService.handle(error, SERVICES.PROJECT, HTTP_METHODS.PUT, PROJECT_ROUTES.UPDATE(id));
-        }
+    /**
+     * Updates the existing project.
+     * @param {number} projectId - id of the project. 
+     * @param {Request} req - the request object containing the update data for the project.
+     * @returns {Promise<Result<ProjectDTO>>} - A promise that resolves to a Result object containing the data of the project.
+     * - On success returns data as {@link ProjectDTO}.
+     * - On failure returns status code and error message.
+     */
+    async updateProject(projectId: number, req: Request): Promise<Result<ProjectDTO>> {
+        return await makeAPICall<ProjectDTO, Request>(this.projectClient, this.errorHandlingService, {
+            serviceName: SERVICES.PROJECT,
+            method: HTTP_METHODS.PUT,
+            url: PROJECT_ROUTES.UPDATE_PROJECT(projectId),
+            data: req,
+            headers: {
+                "Content-Type": req.headers["content-type"]!
+            },
+            maxBodyLength: Infinity,
+            maxContentLength: Infinity
+        });
     }
 
-    async deleteProject(id: number): Promise<Result<boolean>> {
-        try {
-            const response = await this.projectClient.delete<boolean>(PROJECT_ROUTES.DELETE(id));
-
-            return {
-                success: true,
-                data: response.data
-            };
-        } catch(error) {
-            return this.errorHandlingService.handle(error, SERVICES.PROJECT, HTTP_METHODS.DELETE, PROJECT_ROUTES.DELETE(id));
-        }
+    /**
+     * Requests the deletion of a specific project.
+     * @param {number} projectId - id of the project. 
+     * @returns {Promise<Result<void>>} - A promise that resolves to a Result object.
+     * - On success returns void.
+     * - On failure returns status code and error message.
+     */
+    async deleteProject(projectId: number): Promise<Result<void>> {
+        return await makeAPICall<void>(this.projectClient, this.errorHandlingService, {
+            serviceName: SERVICES.PROJECT,
+            method: HTTP_METHODS.DELETE,
+            url: PROJECT_ROUTES.DELETE_PROJECT(projectId)
+        });
     }
 
+    /**
+     * Fetches the sprints from the project.
+     * @param {number} projectId - id of the project. 
+     * @returns {Promise<Result<SprintDTO[]>>} - A promise that resolves to a Result object containing the sprints from a specific project.
+     * - On success returns data as {@link SprintDTO[]}.
+     * - On failure returns status code and error message.
+     */
+    async getSprintsByProject(projectId: number): Promise<Result<SprintDTO[]>> {
+        return await makeAPICall<SprintDTO[]>(this.projectClient, this.errorHandlingService, {
+            serviceName: SERVICES.PROJECT,
+            method: HTTP_METHODS.GET,
+            url: PROJECT_ROUTES.GET_SPRINTS_FROM_PROJECT(projectId)
+        });
+    }
+
+    /**
+     * Fetches the specific sprint.
+     * @param {number} sprintId - id of the sprint. 
+     * @returns {Promise<Result<SprintDTO>>} - A promise that resolves to a Result object containing the data of the sprint.
+     * - On success returns data as {@link SprintDTO}.
+     * - On failure returns status code and error message.
+     */
+    async getSprintById(sprintId: number): Promise<Result<SprintDTO>> {
+        return await makeAPICall<SprintDTO>(this.projectClient, this.errorHandlingService, {
+            serviceName: SERVICES.PROJECT,
+            method: HTTP_METHODS.GET,
+            url: PROJECT_ROUTES.GET_SPRINT(sprintId)
+        });
+    }
+
+    /**
+     * Adds a new sprint to a specific project.
+     * @param {number} projectId - id of the project. 
+     * @param {SprintCreateDTO} data - data of the new sprint.
+     * @returns {Promise<Result<SprintDTO>>} - A promise that resolves to a Result object containing the data of the sprint.
+     * - On success returns data as {@link SprintDTO}.
+     * - On failure returns status code and error message.
+     */
+    async createSprint(projectId: number, data: SprintCreateDTO): Promise<Result<SprintDTO>> {
+        return await makeAPICall<SprintDTO, SprintCreateDTO>(this.projectClient, this.errorHandlingService, {
+            serviceName: SERVICES.PROJECT,
+            method: HTTP_METHODS.POST,
+            url: PROJECT_ROUTES.CREATE_SPRINT_FOR_PROJECT(projectId),
+            data: data
+        });
+    }
+
+    /**
+     * Updates the data of a specific sprint.
+     * @param {number} sprintId - id of the sprint. 
+     * @param {SprintUpdateDTO} data - new data for a specific sprint.
+     * @returns {Promise<Result<SprintDTO>>} - A promise that resolves to a Result object containing the data of the sprint.
+     * - On success returns data as {@link SprintDTO}.
+     * - On failure returns status code and error message.
+     */
+    async updateSprint(sprintId: number, data: SprintUpdateDTO): Promise<Result<SprintDTO>> {
+        return await makeAPICall<SprintDTO, SprintUpdateDTO>(this.projectClient, this.errorHandlingService, {
+            serviceName: SERVICES.PROJECT,
+            method: HTTP_METHODS.PUT,
+            url: PROJECT_ROUTES.UPDATE_SPRINT(sprintId),
+            data: data
+        });
+    }
+
+    /**
+     * Requests a deletion of a specific sprint.
+     * @param {number} sprintId - id of the sprint. 
+     * @returns {Promise<Result<void>>} - A promise that resolves to a Result object.
+     * - On success returns void.
+     * - On failure returns status code and error message.
+     */
+    async deleteSprint(sprintId: number): Promise<Result<void>> {
+        return await makeAPICall<void>(this.projectClient, this.errorHandlingService, {
+            serviceName: SERVICES.PROJECT,
+            method: HTTP_METHODS.DELETE,
+            url: PROJECT_ROUTES.DELETE_SPRINT(sprintId)
+        });
+    }
+
+    /**
+     * Fetches the users working on a specific project.
+     * @param {number} projectId - id of the project. 
+     * @returns {Promise<Result<ProjectUserDTO[]>>} - A promise that resolves to a Result object containing the users working on a project.
+     * - On success returns data as {@link ProjectUserDTO[]}.
+     * - On failure returns status code and error message.
+     */
+    async getUsersFromProject(projectId: number): Promise<Result<ProjectUserDTO[]>> {
+        return await makeAPICall<ProjectUserDTO[]>(this.projectClient, this.errorHandlingService, {
+            serviceName: SERVICES.PROJECT,
+            method: HTTP_METHODS.GET,
+            url: PROJECT_ROUTES.GET_USERS_FROM_PROJECT(projectId)
+        });
+    }
+
+    /**
+     * Assigns a user to a project.
+     * @param {number} projectId - id of the project.
+     * @param {ProjectUserDTO} data - user data required for assignation.
+     * @returns {Promise<Result<ProjectUserDTO>>} - A promise that resolves to a Result object containing the data of the assigned user.
+     * - On success returns data as {@link ProjectUserDTO}.
+     * - On failure returns status code and error message.
+     */
+    async assignUserToProject(projectId: number, data: ProjectUserAssignDTO): Promise<Result<ProjectUserDTO>> {
+        return await makeAPICall<ProjectUserDTO, ProjectUserAssignDTO>(this.projectClient, this.errorHandlingService, {
+            serviceName: SERVICES.PROJECT,
+            method: HTTP_METHODS.POST,
+            url: PROJECT_ROUTES.ASSIGN_USER_TO_PROJECT(projectId),
+            data: data
+        });
+    }
+
+    /**
+     * Removes a user from the project.
+     * @param {number} projectId - id of the project. 
+     * @param {number} userId - id of the user.
+     * @returns {Promise<Result<void>>} - A promise that resolves to a Result object.
+     * - On success returns void.
+     * - On failure returns status code and error message.
+     */
+    async removeUserFromProject(projectId: number, userId: number): Promise<Result<void>> {
+        return await makeAPICall<void>(this.projectClient, this.errorHandlingService, {
+            serviceName: SERVICES.PROJECT,
+            method: HTTP_METHODS.DELETE,
+            url: PROJECT_ROUTES.REMOVE_USER_FROM_PROJECT(projectId, userId)
+        });
+    }
 }

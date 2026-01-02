@@ -7,7 +7,7 @@ import NotificationSendPopUp from "../components/notification/NotificationSendPo
 import type { Notification } from "../models/notification/NotificationCardDTO";
 import { NotificationType } from "../enums/NotificationType";
 import { notificationAPI } from "../api/notification/NotificationAPI";
-import { socketManager } from "../api/notification/SocketManager";
+import { socketManager, socketEventService } from "../api/notification/socketInstance";
 
 const backgroundImageUrl = "/background.png";
 
@@ -67,28 +67,28 @@ const NotificationPage: React.FC = () => {
     socketManager.joinUserRoom(currentUserId);
 
     // NOTIFICATION CREATED - Nova notifikacija
-    socketManager.onNotificationCreated((notification: Notification) => {
-      console.log("🔔 New notification received:", notification);
+    socketEventService.onNotificationCreated((notification: Notification) => {
+      console.log(" New notification received:", notification);
       setAllNotifications((prev) => [notification, ...prev]);
     });
 
     // NOTIFICATION DELETED - Obrisana notifikacija
-    socketManager.onNotificationDeleted((data: { id: number }) => {
-      console.log("🗑️ Notification deleted:", data.id);
+    socketEventService.onNotificationDeleted((data: { id: number }) => {
+      console.log(" Notification deleted:", data.id);
       setAllNotifications((prev) => prev.filter((n) => n.id !== data.id));
     });
 
     // NOTIFICATION MARKED READ - Označena kao pročitana
-    socketManager.onNotificationMarkedRead((notification: Notification) => {
-      console.log("✅ Notification marked as read:", notification.id);
+    socketEventService.onNotificationMarkedRead((notification: Notification) => {
+      console.log(" Notification marked as read:", notification.id);
       setAllNotifications((prev) =>
         prev.map((n) => (n.id === notification.id ? { ...n, isRead: true } : n))
       );
     });
 
     // NOTIFICATION MARKED UNREAD - Označena kao nepročitana
-    socketManager.onNotificationMarkedUnread((notification: Notification) => {
-      console.log("📭 Notification marked as unread:", notification.id);
+    socketEventService.onNotificationMarkedUnread((notification: Notification) => {
+      console.log(" Notification marked as unread:", notification.id);
       setAllNotifications((prev) =>
         prev.map((n) =>
           n.id === notification.id ? { ...n, isRead: false } : n
@@ -97,24 +97,24 @@ const NotificationPage: React.FC = () => {
     });
 
     // BULK DELETED - Više notifikacija obrisano
-    socketManager.onNotificationsBulkDeleted((data: { ids: number[] }) => {
-      console.log("🗑️ Bulk delete:", data.ids);
+    socketEventService.onNotificationsBulkDeleted((data: { ids: number[] }) => {
+      console.log(" Bulk delete:", data.ids);
       setAllNotifications((prev) =>
         prev.filter((n) => !data.ids.includes(n.id))
       );
     });
 
     // BULK MARKED READ - Više notifikacija označeno kao pročitano
-    socketManager.onNotificationsBulkMarkedRead((data: { ids: number[] }) => {
-      console.log("✅ Bulk marked as read:", data.ids);
+    socketEventService.onNotificationsBulkMarkedRead((data: { ids: number[] }) => {
+      console.log(" Bulk marked as read:", data.ids);
       setAllNotifications((prev) =>
         prev.map((n) => (data.ids.includes(n.id) ? { ...n, isRead: true } : n))
       );
     });
 
     // BULK MARKED UNREAD - Više notifikacija označeno kao nepročitano
-    socketManager.onNotificationsBulkMarkedUnread((data: { ids: number[] }) => {
-      console.log("📭 Bulk marked as unread:", data.ids);
+    socketEventService.onNotificationsBulkMarkedUnread((data: { ids: number[] }) => {
+      console.log(" Bulk marked as unread:", data.ids);
       setAllNotifications((prev) =>
         prev.map((n) => (data.ids.includes(n.id) ? { ...n, isRead: false } : n))
       );
@@ -204,7 +204,7 @@ const NotificationPage: React.FC = () => {
       setSelectedNotifications([]);
       setIsAllSelected(false);
     } catch (err: any) {
-      console.error("❌ Frontend handleMarkAsRead error:", err);
+      console.error(" Frontend handleMarkAsRead error:", err);
       alert(
         `Failed to mark notifications as read: ${
           err.response?.data?.message || err.message

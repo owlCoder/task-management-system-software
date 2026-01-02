@@ -1,46 +1,131 @@
-import type { ProjectDTO } from "../../models/project/ProjectDTO";
+import axios, { AxiosInstance, AxiosError } from "axios";
 import { IProjectAPI } from "./IProjectAPI";
-import { mockProjects } from "../../mocks/ProjectsMock";
+import { ProjectDTO } from "../../models/project/ProjectDTO";
+import { ProjectCreateDTO } from "../../models/project/ProjectCreateDTO";
+import { ProjectUpdateDTO } from "../../models/project/ProjectUpdateDTO";
+import { readValueByKey } from "../../helpers/local_storage";
 
-class ProjectAPI implements IProjectAPI {
-  private projects: ProjectDTO[] = [...mockProjects];
+const GATEWAY_URL = import.meta.env.VITE_GATEWAY_URL;
 
-  async getAllProjects(): Promise<ProjectDTO[]> {
-    await this.delay(200);
-    return [...this.projects];
-  }
+class ProjectAPIImpl implements IProjectAPI {
+    private readonly client: AxiosInstance;
 
-  async getProjectById(id: string): Promise<ProjectDTO | undefined> {
-    await this.delay(100);
-    return this.projects.find((p) => p.id === id);
-  }
+    constructor() {
+        this.client = axios.create({
+            baseURL: GATEWAY_URL,
+            timeout: 30000,
+        });
 
-  async createProject(project: ProjectDTO): Promise<ProjectDTO> {
-    const newProject = { ...project, id: Date.now().toString() };
-    this.projects.push(newProject);
-    await this.delay(150);
-    return newProject;
-  }
+        this.client.interceptors.request.use(
+            (config) => {
+                const token = readValueByKey("authToken");
+                if (token) {
+                    config.headers.Authorization = `Bearer ${token}`;
+                }
+                return config;
+            },
+            (error) => Promise.reject(error)
+        );
 
-  async updateProject(id: string, updatedData: Partial<ProjectDTO>): Promise<ProjectDTO | undefined> {
-    const index = this.projects.findIndex((p) => p.id === id);
-    if (index === -1) return undefined;
+        this.client.interceptors.response.use(
+            (response) => response,
+            (error: AxiosError) => {
+                if (error.response?.status === 401) {
+                    console.error("Unauthorized - token expired or invalid");
+                } else if (error.response?.status === 403) {
+                    console.error("Forbidden - insufficient permissions");
+                }
+                return Promise.reject(error);
+            }
+        );
+    }
 
-    this.projects[index] = { ...this.projects[index], ...updatedData };
-    await this.delay(150);
-    return this.projects[index];
-  }
+    async getProjectsByUserId(userId: number): Promise<ProjectDTO[]> {
+        try {
+            const response = await this.client.get<ProjectDTO[]>(`/users/${userId}/projects`);
+            return response.data;
+        } catch (error) {
+            console.error("Error fetching projects by user ID:", error);
+            throw error;
+        }
+    }
 
-  async deleteProject(id: string): Promise<boolean> {
-    const lengthBefore = this.projects.length;
-    this.projects = this.projects.filter((p) => p.id !== id);
-    await this.delay(100);
-    return this.projects.length < lengthBefore;
-  }
+    async getProjectById(projectId: number): Promise<ProjectDTO | null> {
+        try {
+            const response = await this.client.get<ProjectDTO>(`/projects/${projectId}`);
+            return response.data;
+        } catch (error) {
+            console.error("Error fetching project by ID:", error);
+            return null;
+        }
+    }
 
-  private delay(ms: number): Promise<void> {
-    return new Promise((resolve) => setTimeout(resolve, ms));
-  }
+    async createProject(data: ProjectCreateDTO): Promise<ProjectDTO | null> {
+        try {
+            const formData = new FormData();
+
+            formData.append("project_name", data.project_name);
+            formData.append("project_description", data.project_description || "");
+            formData.append("total_weekly_hours_required", data.total_weekly_hours_required.toString());
+            formData.append("allowed_budget", data.allowed_budget.toString());
+
+            if (data.image_file) {
+                formData.append("image_file", data.image_file);
+            }
+
+            const response = await this.client.post<ProjectDTO>("/projects", formData, {
+                headers: {
+                    "Content-Type": "multipart/form-data",
+                },
+            });
+            return response.data;
+        } catch (error) {
+            console.error("Error creating project:", error);
+            throw error;
+        }
+    }
+
+    async updateProject(projectId: number, data: ProjectUpdateDTO): Promise<ProjectDTO | null> {
+        try {
+            const formData = new FormData();
+
+            if (data.project_name !== undefined) {
+                formData.append("project_name", data.project_name);
+            }
+            if (data.project_description !== undefined) {
+                formData.append("project_description", data.project_description);
+            }
+            if (data.total_weekly_hours_required !== undefined) {
+                formData.append("total_weekly_hours_required", data.total_weekly_hours_required.toString());
+            }
+            if (data.allowed_budget !== undefined) {
+                formData.append("allowed_budget", data.allowed_budget.toString());
+            }
+            if (data.image_file) {
+                formData.append("image_file", data.image_file);
+            }
+
+            const response = await this.client.put<ProjectDTO>(`/projects/${projectId}`, formData, {
+                headers: {
+                    "Content-Type": "multipart/form-data",
+                },
+            });
+            return response.data;
+        } catch (error) {
+            console.error("Error updating project:", error);
+            throw error;
+        }
+    }
+
+    async deleteProject(projectId: number): Promise<boolean> {
+        try {
+            await this.client.delete(`/projects/${projectId}`);
+            return true;
+        } catch (error) {
+            console.error("Error deleting project:", error);
+            return false;
+        }
+    }
 }
 
-export const projectAPI = new ProjectAPI();
+export const projectAPI: IProjectAPI = new ProjectAPIImpl();

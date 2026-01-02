@@ -1,5 +1,6 @@
-import { INotificationRepository } from '../Domain/services/INotificationRepository';
-import { INotificationMapper } from '../Domain/services/INotificationMapper';
+import { Repository, In } from 'typeorm';
+import { Notification } from '../Domain/models/Notification';
+import { INotificationMapper } from '../Utils/converters/INotificationMapper';
 import { INotificationService} from '../Domain/services/INotificationService';
 import { Result } from '../Domain/types/common/Result';
 import { ErrorCode } from '../Domain/types/common/ErrorCode';
@@ -9,11 +10,11 @@ import { SocketService } from '../WebSocket/SocketService';
 
 export class NotificationService implements INotificationService {
 
-  private repository: INotificationRepository;
+  private repository: Repository<Notification>;
   private mapper: INotificationMapper;
   private socketService?: SocketService;
 
-  constructor(repository: INotificationRepository, mapper: INotificationMapper) {
+  constructor(repository: Repository<Notification>, mapper: INotificationMapper) {
     this.repository = repository;
     this.mapper = mapper;
   }
@@ -48,7 +49,7 @@ export class NotificationService implements INotificationService {
 
   async getNotificationById(id: number): Promise<Result<NotificationResponseDTO>> {
     try {
-      const notification = await this.repository.findOne(id);
+      const notification = await this.repository.findOne({ where: { id } });
 
       if (!notification) {
         return { success: false, errorCode: ErrorCode.NOT_FOUND, message: 'Notification not found' };
@@ -63,7 +64,10 @@ export class NotificationService implements INotificationService {
 
   async getNotificationsByUserId(userId: number): Promise<Result<NotificationResponseDTO[]>> {
     try {
-      const notifications = await this.repository.findByUserId(userId);
+      const notifications = await this.repository.find({
+        where: { userId },
+        order: { createdAt: 'DESC' }
+      });
       return { success: true, data: this.mapper.toResponseDTOArray(notifications) };
     } catch (error) {
       console.error(' Service.getNotificationsByUserId error:', error);
@@ -73,7 +77,7 @@ export class NotificationService implements INotificationService {
 
   async markAsRead(id: number): Promise<Result<void>> {
     try {
-      const notification = await this.repository.findOne(id);
+      const notification = await this.repository.findOne({ where: { id } });
 
       if (!notification) {
         return { success: false, errorCode: ErrorCode.NOT_FOUND, message: 'Notification not found' };
@@ -102,7 +106,7 @@ export class NotificationService implements INotificationService {
 
   async markAsUnread(id: number): Promise<Result<void>> {
     try {
-      const notification = await this.repository.findOne(id);
+      const notification = await this.repository.findOne({ where: { id } });
 
       if (!notification) {
         return { success: false, errorCode: ErrorCode.NOT_FOUND, message: 'Notification not found' };
@@ -135,15 +139,15 @@ export class NotificationService implements INotificationService {
         return { success: false, errorCode: ErrorCode.INVALID_INPUT, message: 'No notification IDs provided' };
       }
 
-      const firstNotification = await this.repository.findOne(ids[0]);
+      const firstNotification = await this.repository.findOne({ where: { id: ids[0] } });
       if (!firstNotification) {
         return { success: false, errorCode: ErrorCode.NOT_FOUND, message: 'Notifications not found' };
       }
 
       const userId = firstNotification.userId;
-      const updated = await this.repository.updateMultiple(ids, { isRead: true });
+      const result = await this.repository.update({ id: In(ids) }, { isRead: true });
 
-      if (!updated) {
+      if (result.affected === 0) {
         console.error(' Service.markMultipleAsRead: Failed to update notifications');
         return { success: false, errorCode: ErrorCode.INTERNAL_ERROR, message: 'Failed to update notifications' };
       }
@@ -165,15 +169,15 @@ export class NotificationService implements INotificationService {
         return { success: false, errorCode: ErrorCode.INVALID_INPUT, message: 'No notification IDs provided' };
       }
 
-      const firstNotification = await this.repository.findOne(ids[0]);
+      const firstNotification = await this.repository.findOne({ where: { id: ids[0] } });
       if (!firstNotification) {
         return { success: false, errorCode: ErrorCode.NOT_FOUND, message: 'Notifications not found' };
       }
 
       const userId = firstNotification.userId;
-      const updated = await this.repository.updateMultiple(ids, { isRead: false });
+      const result = await this.repository.update({ id: In(ids) }, { isRead: false });
 
-      if (!updated) {
+      if (result.affected === 0) {
         console.error(' Service.markMultipleAsUnread: Failed to update notifications');
         return { success: false, errorCode: ErrorCode.INTERNAL_ERROR, message: 'Failed to update notifications' };
       }
@@ -191,15 +195,15 @@ export class NotificationService implements INotificationService {
 
   async deleteNotification(id: number): Promise<Result<void>> {
     try {
-      const notification = await this.repository.findOne(id);
+      const notification = await this.repository.findOne({ where: { id } });
       if (!notification) {
         return { success: false, errorCode: ErrorCode.NOT_FOUND, message: 'Notification not found' };
       }
 
       const userId = notification.userId;
-      const deleted = await this.repository.delete(id);
+      const result = await this.repository.delete(id);
 
-      if (!deleted) {
+      if (result.affected === 0) {
         console.error(' Service.deleteNotification: Failed to delete notification');
         return { success: false, errorCode: ErrorCode.INTERNAL_ERROR, message: 'Failed to delete notification' };
       }
@@ -221,15 +225,15 @@ export class NotificationService implements INotificationService {
         return { success: false, errorCode: ErrorCode.INVALID_INPUT, message: 'No notification IDs provided' };
       }
 
-      const firstNotification = await this.repository.findOne(ids[0]);
+      const firstNotification = await this.repository.findOne({ where: { id: ids[0] } });
       if (!firstNotification) {
         return { success: false, errorCode: ErrorCode.NOT_FOUND, message: 'Notifications not found' };
       }
 
       const userId = firstNotification.userId;
-      const deleted = await this.repository.deleteMultiple(ids);
+      const result = await this.repository.delete(ids);
 
-      if (!deleted) {
+      if (result.affected === 0) {
         console.error(' Service.deleteMultipleNotifications: Failed to delete notifications');
         return { success: false, errorCode: ErrorCode.INTERNAL_ERROR, message: 'Failed to delete notifications' };
       }
@@ -247,7 +251,9 @@ export class NotificationService implements INotificationService {
 
   async getUnreadCount(userId: number): Promise<Result<number>> {
     try {
-      const count = await this.repository.countUnread(userId);
+      const count = await this.repository.count({
+        where: { userId, isRead: false }
+      });
       return { success: true, data: count };
     } catch (error) {
       console.error(' Service.getUnreadCount error:', error);

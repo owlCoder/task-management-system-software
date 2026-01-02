@@ -1,11 +1,7 @@
 import React, { useState } from "react";
+import { FileUploadProps } from "../../types/props";
 
-interface UploadFileProps {
-  setFile: (file: File) => void;
-  uploadedFileName?: string | null;
-}
-
-export const FileUpload: React.FC<UploadFileProps> = ({
+export const FileUpload: React.FC<FileUploadProps> = ({
   setFile,
   uploadedFileName,
 }) => {

@@ -7,9 +7,8 @@ import { createServer } from "http";
 import { DataSource } from "typeorm";
 import { createApp } from "./app";
 import { Notification } from "./Domain/models/Notification";
-import { NotificationRepository } from "./Service/NotificationRepository";
 import { NotificationService } from "./Service/NotificationService";
-import { NotificationMapper } from "./Service/NotificationMapper";
+import { NotificationMapper } from "./Utils/converters/NotificationMapper";
 import { SocketService } from "./WebSocket/SocketService";
 
 // ENVIRONMENT VARIABLES
@@ -45,16 +44,13 @@ const startServer = async () => {
     await AppDataSource.initialize();
     console.log("Database connected successfully!");
 
-    // 2. Kreiraj Repository (TypeORM)
-    const notificationTypeOrmRepository = AppDataSource.getRepository(Notification);
+    // 2. Kreiraj TypeORM Repository
+    const notificationRepository = AppDataSource.getRepository(Notification);
 
-    // 3. Kreiraj NotificationRepository (implementacija)
-    const notificationRepository = new NotificationRepository(notificationTypeOrmRepository);
-
-    // 4. Kreiraj NotificationMapper
+    // 3. Kreiraj NotificationMapper
     const notificationMapper = new NotificationMapper();
 
-    // 5. Kreiraj NotificationService (injektuj dependencies)
+    // 4. Kreiraj NotificationService (injektuj TypeORM repository direktno)
     const notificationService = new NotificationService(
       notificationRepository,
       notificationMapper

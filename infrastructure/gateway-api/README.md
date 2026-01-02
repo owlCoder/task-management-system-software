@@ -2,7 +2,8 @@
 
 ## Architecture
 - **Domain Layer**: DTOs, Types, Enums, Interfaces (*classified by the name of the microservice*).
-- **Middlewares Layer**: Authentication and Authorization.
+- **Infrastructure Layer**: Logger (pino + pino-pretty).
+- **Middlewares Layer**: CORS Policy, Authentication, Authorization, Traffic Logging.
 - **Services Layer**: Handles requests by passing them to the appropriate microservices (*classified by the name of the microservice*).
 - **WebAPI Layer**: Controllers for HTTP request handling (*classified by the name of the microservice*).
 
@@ -10,7 +11,6 @@
 (Locally mounted under `/api/v1`)
 - **Auth Microservice**
     - `POST /login`: Authenticate user and issue JWT.
-    - `POST /register`: Register user and issue JWT.
     - `POST /verify-otp`: Verify one-time password for user authentication.
     - `POST /resend-otp`: Request for the new otp code.
 - **User Microservice** (*Accessible to admin users only*)

@@ -1,40 +1,72 @@
+import dotenv from "dotenv";
 import express from "express";
 import cors from "cors";
-import "reflect-metadata";
-import dotenv from "dotenv";
 import { initialize_database } from "./Database/InitializeConnection";
-import { LogerService } from "./Services/LogerService";
-import { ProjectsController } from "./WebAPI/controllers/ProjectsController";
+import { Repository } from "typeorm";
+import { Project } from "./Domain/models/Project";
+import { ProjectUser } from "./Domain/models/ProjectUser";
+import { Sprint } from "./Domain/models/Sprint";
+import { Db } from "./Database/DbConnectionPool";
+import { IProjectService } from "./Domain/services/IProjectService";
+import { ProjectService } from "./Services/ProjectService";
+import { IProjectUserService } from "./Domain/services/IProjectUserService";
+import { ProjectUserService } from "./Services/ProjectUserService";
+import { ISprintService } from "./Domain/services/ISprintService";
+import { SprintService } from "./Services/SprintService";
+import { ProjectController } from "./WebAPI/controllers/ProjectController";
+import { ProjectUserController } from "./WebAPI/controllers/ProjectUserController";
+import { SprintController } from "./WebAPI/controllers/SprintController";
+import { R2StorageService, IR2StorageService } from "./Storage/R2StorageService";
 
-dotenv.config(/*{ quiet: true }*/);
-console.clear();
+dotenv.config({ quiet: true });
 
 const app = express();
-const PORT = process.env.PORT || 5000;
 
-// Middleware
-app.use(express.json());
+const corsOrigin = process.env.CORS_ORIGIN ?? "*";
+const corsMethods = process.env.CORS_METHODS?.split(",").map((m) => m.trim()) ?? [
+    "GET",
+    "POST",
+    "PUT",
+    "DELETE",
+];
+
 app.use(
-  cors({
-    origin: process.env.CORS_ORIGIN ?? "*",
-    methods: ["GET", "POST", "PUT", "DELETE"],
-  })
+    cors({
+        origin: corsOrigin,
+        methods: corsMethods,
+    })
 );
 
-initialize_database();
+app.use(express.json());
 
-const logger = new LogerService();
+(async () => {
+    await initialize_database();
 
-const projectsController = new ProjectsController(logger);
+    // Storage Service
+    const storageService: IR2StorageService = new R2StorageService();
 
-app.use("/api/v1", projectsController.getRouter());
+    // Repos
+    const projectRepository: Repository<Project> = Db.getRepository(Project);
+    const projectUserRepository: Repository<ProjectUser> = Db.getRepository(ProjectUser);
+    const sprintRepository: Repository<Sprint> = Db.getRepository(Sprint);
 
-app.get("/", (_req, res) => {
-  res.send("Project Microservice up and running!");
-});
+    // Services
+    const projectService: IProjectService = new ProjectService(projectRepository, storageService);
+    const projectUserService: IProjectUserService = new ProjectUserService(
+        projectUserRepository,
+        projectRepository
+    );
+    const sprintService: ISprintService = new SprintService(sprintRepository, projectRepository);
 
-app.listen(PORT, () => {
-  logger.log(`Project microservice listening on port ${PORT}`);
-});
+    // Controllers - DODAJ storageService
+    const projectController = new ProjectController(projectService, storageService);
+    const projectUserController = new ProjectUserController(projectUserService);
+    const sprintController = new SprintController(sprintService);
+
+    // Routes
+    app.use("/api/v1", projectController.getRouter());
+    app.use("/api/v1", projectUserController.getRouter());
+    app.use("/api/v1", sprintController.getRouter());
+})();
 
 export default app;

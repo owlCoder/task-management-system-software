@@ -1,9 +1,5 @@
 import React from "react";
-
-interface TaskStatusFilterProps {
-  value: string | null;
-  onChange: (value: string | null) => void;
-}
+import { TaskStatusFilterProps } from "../../types/props";
 
 const TaskStatusFilter: React.FC<TaskStatusFilterProps> = ({
   value,

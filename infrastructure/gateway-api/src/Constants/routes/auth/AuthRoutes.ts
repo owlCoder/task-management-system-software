@@ -1,6 +1,5 @@
-export const AUTH_ROUTES = {
+export const AUTH_ROUTES = Object.freeze({
     LOGIN: "/auth/login",
-    REGISTER: "/auth/register",
     VERIFY_OTP: "/auth/verify-otp",
     RESEND_OTP: "/auth/resend-otp"
-}
+} as const);

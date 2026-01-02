@@ -1,20 +1,13 @@
 import React from "react";
-import { TaskDTO } from "../../models/task/TaskDTO";
+import { TaskBoardListPreviewProps } from "../../types/props";
 import { TaskStatus } from "../../enums/TaskStatus";
 import TaskColumn from "./TaskColumn";
 
-interface Props {
-  tasks: TaskDTO[];
-  onSelect: (taskId: number) => void;
-  selectedTaskId: number | null;
-  onStatusChange: (taskId: number, newStatus: TaskStatus) => void;
-}
-
-const TaskListPreview: React.FC<Props> = ({
+const TaskListPreview: React.FC<TaskBoardListPreviewProps> = ({
   tasks,
   onSelect,
   selectedTaskId,
-  onStatusChange
+  onStatusChange,
 }) => {
   return (
     <div className="flex gap-6 h-full overflow-x-auto pb-6 custom-scrollbar items-start">

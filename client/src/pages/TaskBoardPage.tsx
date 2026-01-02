@@ -11,13 +11,9 @@ import TaskBoardListPreview from "../components/task/TaskBoardListPreview";
 // import EditTaskModal from "../components/task/EditTaskModal";
 import { UpdateTaskDTO } from "../models/task/UpdateTaskDTO";
 import { TaskStatus } from "../enums/TaskStatus";
+import { TaskBoardPageProps } from "../types/props";
 
-interface TaskListPageProps {
-  projectId: string;
-  token: string;
-}
-
-const TaskBoardPage: React.FC<TaskListPageProps> = ({ projectId, token }) => {
+const TaskBoardPage: React.FC<TaskBoardPageProps> = ({ projectId, token }) => {
   const [tasks, setTasks] = useState<TaskDTO[]>(mockTasks);
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
@@ -26,26 +22,27 @@ const TaskBoardPage: React.FC<TaskListPageProps> = ({ projectId, token }) => {
   const api = new TaskAPI(import.meta.env.VITE_GATEWAY_URL, token);
 
   const handleStatusChange = async (taskId: number, newStatus: TaskStatus) => {
-  
-      const taskToUpdate = tasks.find((t) => t.task_id === taskId);
-      if (!taskToUpdate) return;
-  
-      const payload: UpdateTaskDTO = {
-        status: newStatus
-      };
-  
-      const originalTasks = [...tasks];
-      setTasks((prev) =>
-        prev.map((t) => (t.task_id === taskId ? { ...t, task_status: newStatus } : t))
-      );
-  
-      try {
-        await api.updateTask(taskId, payload);
-      } catch (err) {
-        console.error("Failed to update status on server", err);
-        setTasks(originalTasks);
-      }
+    const taskToUpdate = tasks.find((t) => t.task_id === taskId);
+    if (!taskToUpdate) return;
+
+    const payload: UpdateTaskDTO = {
+      status: newStatus,
     };
+
+    const originalTasks = [...tasks];
+    setTasks((prev) =>
+      prev.map((t) =>
+        t.task_id === taskId ? { ...t, task_status: newStatus } : t
+      )
+    );
+
+    try {
+      await api.updateTask(taskId, payload);
+    } catch (err) {
+      console.error("Failed to update status on server", err);
+      setTasks(originalTasks);
+    }
+  };
 
   useEffect(() => {
     const load = async () => {

@@ -1,9 +1,9 @@
-export const USER_ROUTES = {
-    CREATE: "/users",
-    GET_BY_ID: (id: number) => `/users/${id}`,
-    GET_BY_IDS: "/users/ids",
-    GET_ALL: "/users",
-    UPDATE: (id: number) => `/users/${id}`,
-    DELETE: (id: number) => `/users/${id}`,
-    CREATION_ROLES: "/user-roles/userCreation"
-}
+export const USER_ROUTES = Object.freeze({
+    REGISTER_USER: "/users",
+    GET_USER: (id: number) => `/users/${id}`,
+    GET_MULTIPLE_USERS: "/users/ids",
+    GET_ALL_USERS: "/users",
+    UPDATE_USER: (id: number) => `/users/${id}`,
+    DELETE_USER: (id: number) => `/users/${id}`,
+    GET_REGISTRATION_ROLES: "/user-roles/userCreation"
+} as const);

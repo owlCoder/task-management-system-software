@@ -1,9 +1,11 @@
-import type { ProjectDTO } from "../../models/project/ProjectDTO";
+import { ProjectDTO } from "../../models/project/ProjectDTO";
+import { ProjectCreateDTO } from "../../models/project/ProjectCreateDTO";
+import { ProjectUpdateDTO } from "../../models/project/ProjectUpdateDTO";
 
 export interface IProjectAPI {
-  getAllProjects(): Promise<ProjectDTO[]>;
-  getProjectById(id: string): Promise<ProjectDTO | undefined>;
-  createProject(project: ProjectDTO): Promise<ProjectDTO>;
-  updateProject(id: string, updatedData: Partial<ProjectDTO>): Promise<ProjectDTO | undefined>;
-  deleteProject(id: string): Promise<boolean>;
+  getProjectsByUserId(userId: number): Promise<ProjectDTO[]>;
+  getProjectById(projectId: number): Promise<ProjectDTO | null>;
+  createProject(data: ProjectCreateDTO): Promise<ProjectDTO | null>;
+  updateProject(projectId: number, data: ProjectUpdateDTO): Promise<ProjectDTO | null>;
+  deleteProject(projectId: number): Promise<boolean>;
 }
