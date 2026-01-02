@@ -1,46 +1,33 @@
 import { Router, Request, Response } from "express";
 import multer from "multer";
-import path from "path";
-import fs from "fs";
-import { v4 as uuidv4 } from "uuid";
 import { IProjectService } from "../../Domain/services/IProjectService";
 import { ProjectCreateDTO } from "../../Domain/DTOs/ProjectCreateDTO";
 import { ProjectUpdateDTO } from "../../Domain/DTOs/ProjectUpdateDTO";
 import { validateCreateProject, validateUpdateProject } from "../validators/ProjectValidator";
+import { IR2StorageService } from "../../Storage/R2StorageService";
 
-const uploadsDir = path.join(__dirname, '../../uploads');
-if (!fs.existsSync(uploadsDir)) {
-    fs.mkdirSync(uploadsDir, { recursive: true });
-}
-
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, uploadsDir);
-    },
-    filename: (req, file, cb) => {
-        const uniqueName = `${uuidv4()}${path.extname(file.originalname)}`;
-        cb(null, uniqueName);
-    }
-});
-
-const upload = multer({ 
-    storage: storage,
+// Koristi memory storage umesto disk storage
+const upload = multer({
+    storage: multer.memoryStorage(),
     limits: {
-        fileSize: 10 * 1024 * 1024,
+        fileSize: 10 * 1024 * 1024, // 10MB
     },
     fileFilter: (req, file, cb) => {
-        if (file.mimetype.startsWith('image/')) {
+        if (file.mimetype.startsWith("image/")) {
             cb(null, true);
         } else {
-            cb(new Error('Only image files are allowed'));
+            cb(new Error("Only image files are allowed"));
         }
-    }
+    },
 });
 
 export class ProjectController {
     private readonly router: Router;
 
-    constructor(private readonly projectService: IProjectService) {
+    constructor(
+        private readonly projectService: IProjectService,
+        private readonly storageService: IR2StorageService
+    ) {
         this.router = Router();
         this.initializeRoutes();
     }
@@ -49,8 +36,8 @@ export class ProjectController {
         this.router.get("/projects", this.getProjects.bind(this));
         this.router.get("/users/:userId/projects", this.getProjectsByUserId.bind(this));
         this.router.get("/projects/:id", this.getProjectById.bind(this));
-        this.router.post("/projects", upload.single('image_file'), this.createProject.bind(this));
-        this.router.put("/projects/:id", upload.single('image_file'), this.updateProject.bind(this));
+        this.router.post("/projects", upload.single("image_file"), this.createProject.bind(this));
+        this.router.put("/projects/:id", upload.single("image_file"), this.updateProject.bind(this));
         this.router.delete("/projects/:id", this.deleteProject.bind(this));
         this.router.get("/projects/:id/exists", this.projectExists.bind(this));
     }
@@ -97,20 +84,27 @@ export class ProjectController {
         try {
             const data: ProjectCreateDTO = {
                 project_name: req.body.project_name,
-                project_description: req.body.project_description || '',
-                image_file_uuid: '',
+                project_description: req.body.project_description || "",
                 total_weekly_hours_required: parseInt(req.body.total_weekly_hours_required, 10),
                 allowed_budget: parseFloat(req.body.allowed_budget),
             };
 
+            // Ako je uploadovana slika, sačuvaj je na R2
             if (req.file) {
-                data.image_file_uuid = req.file.filename;
+                const uploadResult = await this.storageService.uploadImage(
+                    req.file.buffer,
+                    req.file.originalname,
+                    req.file.mimetype
+                );
+                data.image_key = uploadResult.key;
+                data.image_url = uploadResult.url;
             }
 
             const validation = validateCreateProject(data);
             if (!validation.success) {
-                if (req.file) {
-                    fs.unlinkSync(req.file.path);
+                // Ako validacija ne prođe, obriši uploadovanu sliku
+                if (data.image_key) {
+                    await this.storageService.deleteImage(data.image_key);
                 }
                 res.status(400).json({ message: validation.message });
                 return;
@@ -119,14 +113,7 @@ export class ProjectController {
             const created = await this.projectService.CreateProject(data);
             res.status(201).json(created);
         } catch (err) {
-            if (req.file) {
-                try {
-                    fs.unlinkSync(req.file.path);
-                } catch (e) {
-                    console.error('Error deleting uploaded file:', e);
-                }
-            }
-            console.error('Create project error:', err);
+            console.error("Create project error:", err);
             res.status(500).json({ message: (err as Error).message });
         }
     }
@@ -154,25 +141,22 @@ export class ProjectController {
                 data.allowed_budget = parseFloat(req.body.allowed_budget);
             }
 
+            // Ako je uploadovana nova slika
             if (req.file) {
-                try {
-                    const oldProject = await this.projectService.getProjectById(id);
-                    if (oldProject.image_file_uuid) {
-                        const oldFilePath = path.join(uploadsDir, oldProject.image_file_uuid);
-                        if (fs.existsSync(oldFilePath)) {
-                            fs.unlinkSync(oldFilePath);
-                        }
-                    }
-                } catch (e) {
-                    console.error('Error deleting old image:', e);
-                }
-                data.image_file_uuid = req.file.filename;
+                const uploadResult = await this.storageService.uploadImage(
+                    req.file.buffer,
+                    req.file.originalname,
+                    req.file.mimetype
+                );
+                data.image_key = uploadResult.key;
+                data.image_url = uploadResult.url;
             }
 
             const validation = validateUpdateProject(data);
             if (!validation.success) {
-                if (req.file) {
-                    fs.unlinkSync(req.file.path);
+                // Ako validacija ne prođe, obriši novu uploadovanu sliku
+                if (data.image_key) {
+                    await this.storageService.deleteImage(data.image_key);
                 }
                 res.status(400).json({ message: validation.message });
                 return;
@@ -181,14 +165,7 @@ export class ProjectController {
             const updated = await this.projectService.updateProject(id, data);
             res.status(200).json(updated);
         } catch (err) {
-            if (req.file) {
-                try {
-                    fs.unlinkSync(req.file.path);
-                } catch (e) {
-                    console.error('Error deleting uploaded file:', e);
-                }
-            }
-            console.error('Update project error:', err);
+            console.error("Update project error:", err);
             res.status(500).json({ message: (err as Error).message });
         }
     }
@@ -199,18 +176,6 @@ export class ProjectController {
             if (isNaN(id)) {
                 res.status(400).json({ message: "Invalid project ID" });
                 return;
-            }
-
-            try {
-                const project = await this.projectService.getProjectById(id);
-                if (project.image_file_uuid) {
-                    const filePath = path.join(uploadsDir, project.image_file_uuid);
-                    if (fs.existsSync(filePath)) {
-                        fs.unlinkSync(filePath);
-                    }
-                }
-            } catch (e) {
-                console.error('Error deleting project image:', e);
             }
 
             const ok = await this.projectService.deleteProject(id);
