@@ -10,6 +10,8 @@ import { ResponseType } from "axios";
  * @field headers - HTTP Headers (optional).
  * @field responseType - Expected type of the response (optional).
  * @field timeout - Request timeout (optional).
+ * @field maxBodyLength - maximum length of the body (optional).
+ * @field maxContentLength - maximum length of the body (optional).
  */
 export interface APICallConfig<D = undefined, P = undefined> {
     serviceName: string,
@@ -20,4 +22,6 @@ export interface APICallConfig<D = undefined, P = undefined> {
     headers?: Record<string, string>;
     responseType?: ResponseType;
     timeout?: number;
+    maxBodyLength?: number;
+    maxContentLength?: number;
 };

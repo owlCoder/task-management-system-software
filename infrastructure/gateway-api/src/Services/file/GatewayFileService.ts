@@ -1,17 +1,14 @@
+import { Request } from "express";
+
 // Libraries
 import { AxiosInstance } from "axios";
 
 // Domain
 import { IErrorHandlingService } from "../../Domain/services/common/IErrorHandlingService";
 import { IGatewayFileService } from "../../Domain/services/file/IGatewayFileService";
-import { CreateFileDTO } from "../../Domain/DTOs/file/CreateFileDTO";
-import { DownloadFileDTO } from "../../Domain/DTOs/file/DownloadFileDTO";
 import { UploadedFileDTO } from "../../Domain/DTOs/file/UploadedFileDTO";
 import { Result } from "../../Domain/types/common/Result";
-
-// Utils
-import { generateFileFormData } from "./utils/GenerateData";
-import { extractDownloadDTOFromResponse } from "./utils/ExtractData";
+import { StreamResponse } from "../../Domain/types/common/StreamResponse";
 
 // Constants
 import { HTTP_METHODS } from "../../Constants/common/HttpMethods";
@@ -20,7 +17,7 @@ import { SERVICES } from "../../Constants/services/Services";
 import { API_ENDPOINTS } from "../../Constants/services/APIEndpoints";
 
 // Infrastructure
-import { makeAPICall, makeAPICallWithTransform } from "../../Infrastructure/axios/APIHelpers";
+import { makeAPICall, makeAPIStreamCall } from "../../Infrastructure/axios/APIHelpers";
 import { createAxiosClient } from "../../Infrastructure/axios/client/AxiosClientFactory";
 
 /**
@@ -34,20 +31,21 @@ export class GatewayFileService implements IGatewayFileService {
     }
 
     /**
-     * Fetches the file from file microservice.
-     * @param {number} fileId - id of the file. 
-     * @returns {Promise<Result<DownloadFileDTO>>} - A promise that resolves to a Result object containing the file content and metadata
-     * - On success returns data as {@link DownloadFileDTO}.
+     * Downloads a file from the file microservice by its ID.
+     * @param {number} fileId - id of the file.
+     * @returns {Promise<Result<StreamResponse>>} A promise that resolves to a Result object containing:
+     * - On success StreamResponse object containing the Readable stream and headers.
      * - On failure returns status code and error message.
      */
-    async downloadFile(fileId: number): Promise<Result<DownloadFileDTO>> {
-        return await makeAPICallWithTransform<DownloadFileDTO>(this.fileClient, this.errorHandlingService, {
+    async downloadFile(fileId: number): Promise<Result<StreamResponse>> {
+        return await makeAPIStreamCall<StreamResponse>(this.fileClient, this.errorHandlingService, {
             serviceName: SERVICES.FILE,
             method: HTTP_METHODS.GET,
             url: FILE_ROUTES.DOWNLOAD_FILE(fileId),
-            responseType: "arraybuffer",
+            responseType: "stream",
+            maxContentLength: Infinity,
             timeout: 10000
-        }, extractDownloadDTOFromResponse);
+        });
     }
 
     /**
@@ -82,19 +80,20 @@ export class GatewayFileService implements IGatewayFileService {
 
     /**
      * Uploads a file to file microservice.
-     * @param {CreateFileDTO} data - file metadata and content. 
+     * @param {Request} req - The request object containing the file. 
      * @returns {Promise<Result<UploadedFileDTO>>} - A promise that resolves to a Result object containing the file metadata.
      * - On success returns data as {@link UploadedFileDTO}.
      * - On failure returns status code and error message.
      */
-    async uploadFile(data: CreateFileDTO): Promise<Result<UploadedFileDTO>> {
-        const formData = generateFileFormData(data);
-        
-        return await makeAPICall<UploadedFileDTO, FormData>(this.fileClient, this.errorHandlingService, {
+    async uploadFile(req: Request): Promise<Result<UploadedFileDTO>> {
+        return await makeAPICall<UploadedFileDTO, Request>(this.fileClient, this.errorHandlingService, {
             serviceName: SERVICES.FILE,
             method: HTTP_METHODS.POST,
             url: FILE_ROUTES.UPLOAD_FILE,
-            data: formData,
+            data: req,
+            headers: {
+                'Content-Type': req.headers["content-type"]!,
+            },
             timeout: 10000
         });
     }

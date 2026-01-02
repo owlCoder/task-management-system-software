@@ -3,8 +3,6 @@ import { Router, Request, Response } from "express";
 
 // Domain
 import { IGatewayProjectService } from "../../../Domain/services/project/IGatewayProjectService";
-import { ProjectCreateDTO } from "../../../Domain/DTOs/project/ProjectCreateDTO";
-import { ProjectUpdateDTO } from "../../../Domain/DTOs/project/ProjectUpdateDTO";
 import { ProjectDTO } from "../../../Domain/DTOs/project/ProjectDTO";
 import { SprintDTO } from "../../../Domain/DTOs/project/SprintDTO";
 import { SprintCreateDTO } from "../../../Domain/DTOs/project/SprintCreateDTO";
@@ -90,32 +88,38 @@ export class GatewayProjectController {
 
     /**
      * POST /api/v1/projects
-     * @param {Request} req - the request object, containing the data of the project as {@link ProjectCreateDTO} in body.
+     * @param {Request} req - the request object, containing the data of the project in body.
      * @param {Response} res - the response object for the client.
      * @returns {Object}
      * - On success: A JSON object following the {@link ProjectDTO} structure containing the result of the create project operation. 
      * - On failure: A JSON object with an error message and a HTTP status code indicating the failure.
      */
     private async createProject(req: Request, res: Response): Promise<void> {
-        const data = req.body as ProjectCreateDTO;
+        if(!req.headers['content-type']?.includes('multipart/form-data')){
+            res.status(400).json({ message: "Bad request" });
+            return;
+        }
 
-        const result = await this.gatewayProjectService.createProject(data);
+        const result = await this.gatewayProjectService.createProject(req);
         handleResponse(res, result, 201);
     }
 
     /**
      * PUT /api/v1/projects/:projectId
-     * @param {Request} req - the request object, containing the id in params and data of the project as {@link ProjectUpdateDTO} in body.
+     * @param {Request} req - the request object, containing the id in params and data of the project in body.
      * @param {Response} res - the response object for the client.
      * @returns {Object}
      * - On success: A JSON object following the {@link ProjectDTO} structure containing the result of the update project operation. 
      * - On failure: A JSON object with an error message and a HTTP status code indicating the failure.
      */
     private async updateProject(req: Request, res: Response): Promise<void> {
+        if(!req.headers['content-type']?.includes('multipart/form-data')){
+            res.status(400).json({ message: "Bad request" });
+            return;
+        }
         const projectId = parseInt(req.params.projectId, 10);
-        const data = req.body as ProjectUpdateDTO;
 
-        const result = await this.gatewayProjectService.updateProject(projectId, data);
+        const result = await this.gatewayProjectService.updateProject(projectId, req);
         handleResponse(res, result);
     }
 

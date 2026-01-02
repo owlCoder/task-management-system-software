@@ -1,6 +1,7 @@
-import { ProjectCreateDTO } from "../../DTOs/project/ProjectCreateDTO";
+// Framework
+import { Request } from "express";
+
 import { ProjectDTO } from "../../DTOs/project/ProjectDTO";
-import { ProjectUpdateDTO } from "../../DTOs/project/ProjectUpdateDTO";
 import { ProjectUserAssignDTO } from "../../DTOs/project/ProjectUserAssignDTO";
 import { ProjectUserDTO } from "../../DTOs/project/ProjectUserDTO";
 import { SprintCreateDTO } from "../../DTOs/project/SprintCreateDTO";
@@ -11,8 +12,8 @@ import { Result } from "../../types/common/Result";
 export interface IGatewayProjectService {
     getProjectById(projectId: number): Promise<Result<ProjectDTO>>;
     getProjectsFromUser(userId: number): Promise<Result<ProjectDTO[]>>;
-    createProject(data: ProjectCreateDTO): Promise<Result<ProjectDTO>>;
-    updateProject(projectId: number, data: ProjectUpdateDTO): Promise<Result<ProjectDTO>>;
+    createProject(req: Request): Promise<Result<ProjectDTO>>;
+    updateProject(projectId: number, req: Request): Promise<Result<ProjectDTO>>;
     deleteProject(projectId: number): Promise<Result<void>>;
 
     getSprintsByProject(projectId: number): Promise<Result<SprintDTO[]>>;

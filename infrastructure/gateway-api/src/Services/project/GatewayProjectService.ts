@@ -1,12 +1,13 @@
+// Framework
+import { Request } from "express";
+
 // Libraries
 import { AxiosInstance } from "axios";
 
 // Domain
 import { IErrorHandlingService } from "../../Domain/services/common/IErrorHandlingService";
 import { IGatewayProjectService } from "../../Domain/services/project/IGatewayProjectService";
-import { ProjectCreateDTO } from "../../Domain/DTOs/project/ProjectCreateDTO";
 import { ProjectDTO } from "../../Domain/DTOs/project/ProjectDTO";
-import { ProjectUpdateDTO } from "../../Domain/DTOs/project/ProjectUpdateDTO";
 import { ProjectUserAssignDTO } from "../../Domain/DTOs/project/ProjectUserAssignDTO";
 import { ProjectUserDTO } from "../../Domain/DTOs/project/ProjectUserDTO";
 import { SprintCreateDTO } from "../../Domain/DTOs/project/SprintCreateDTO";
@@ -31,7 +32,7 @@ export class GatewayProjectService implements IGatewayProjectService {
     private readonly projectClient: AxiosInstance;
     
     constructor(private readonly errorHandlingService: IErrorHandlingService){
-        this.projectClient = createAxiosClient(API_ENDPOINTS.PROJECT);
+        this.projectClient = createAxiosClient(API_ENDPOINTS.PROJECT, { headers: {} });
     }
 
     /**
@@ -66,34 +67,44 @@ export class GatewayProjectService implements IGatewayProjectService {
 
     /**
      * Posts new project.
-     * @param {ProjectCreateDTO} data - data of the project. 
+     * @param {Request} req - The request object containing the project data. 
      * @returns {Promise<Result<ProjectDTO>>} - A promise that resolves to a Result object containing the data of the project.
      * - On success returns data as {@link ProjectDTO}.
      * - On failure returns status code and error message.
      */
-    async createProject(data: ProjectCreateDTO): Promise<Result<ProjectDTO>> {
-        return await makeAPICall<ProjectDTO, ProjectCreateDTO>(this.projectClient, this.errorHandlingService, {
+    async createProject(req: Request): Promise<Result<ProjectDTO>> {
+        return await makeAPICall<ProjectDTO, Request>(this.projectClient, this.errorHandlingService, {
             serviceName: SERVICES.PROJECT,
             method: HTTP_METHODS.POST,
             url: PROJECT_ROUTES.CREATE_PROJECT,
-            data: data
+            data: req,
+            headers: {
+                "Content-Type": req.headers["content-type"]!,
+            },
+            maxBodyLength: Infinity,
+            maxContentLength: Infinity
         });
     }
 
     /**
      * Updates the existing project.
      * @param {number} projectId - id of the project. 
-     * @param {ProjectUpdateDTO} data - update data for the project.
+     * @param {Request} req - the request object containing the update data for the project.
      * @returns {Promise<Result<ProjectDTO>>} - A promise that resolves to a Result object containing the data of the project.
      * - On success returns data as {@link ProjectDTO}.
      * - On failure returns status code and error message.
      */
-    async updateProject(projectId: number, data: ProjectUpdateDTO): Promise<Result<ProjectDTO>> {
-        return await makeAPICall<ProjectDTO, ProjectUpdateDTO>(this.projectClient, this.errorHandlingService, {
+    async updateProject(projectId: number, req: Request): Promise<Result<ProjectDTO>> {
+        return await makeAPICall<ProjectDTO, Request>(this.projectClient, this.errorHandlingService, {
             serviceName: SERVICES.PROJECT,
             method: HTTP_METHODS.PUT,
             url: PROJECT_ROUTES.UPDATE_PROJECT(projectId),
-            data: data
+            data: req,
+            headers: {
+                "Content-Type": req.headers["content-type"]!
+            },
+            maxBodyLength: Infinity,
+            maxContentLength: Infinity
         });
     }
 

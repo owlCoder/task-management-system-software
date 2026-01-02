@@ -1,33 +1,24 @@
 // Framework
 import { Router, Request, Response } from "express";
 
-// Libraries
-import multer, { Multer } from "multer";
-
 // Domain
 import { IGatewayFileService } from "../../../Domain/services/file/IGatewayFileService";
 import { UploadedFileDTO } from "../../../Domain/DTOs/file/UploadedFileDTO";
-import { CreateFileDTO } from "../../../Domain/DTOs/file/CreateFileDTO";
 
 // Middlewares
 import { authenticate } from "../../../Middlewares/authentication/AuthMiddleware";
-import { multerHandler } from "../../../Middlewares/multer/MulterMiddleware";
 
 // Utils
 import { handleDownloadResponse, handleEmptyResponse, handleResponse } from "../../Utils/Http/ResponseHandler";
-import { extractFileDataFromRequest } from "../../Utils/Http/RequestHandler";
 
 /**
  * Routes client requests towards the File Microservice.
  */
 export class GatewayFileController {
     private router: Router;
-    private upload: Multer;
-    private readonly maxFileSizeMB: number = 10;
 
     constructor(private gatewayFileService: IGatewayFileService) {
         this.router = Router();
-        this.upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: this.maxFileSizeMB * 1024 * 1024 } });
         this.initializeRoutes();
     }
 
@@ -38,7 +29,7 @@ export class GatewayFileController {
         this.router.get("/files/download/:fileId", authenticate, this.downloadFile.bind(this));
         this.router.get("/files/author/:authorId", authenticate, this.getFilesByAuthorId.bind(this));
         this.router.get("/files/metadata/:fileId", authenticate, this.getFileMetadata.bind(this));
-        this.router.post("/files/upload", authenticate, multerHandler(this.upload, 'file', this.maxFileSizeMB), this.uploadFile.bind(this));
+        this.router.post("/files/upload", authenticate, this.uploadFile.bind(this));
         this.router.delete("/files/:fileId", authenticate, this.deleteFile.bind(this));
     }
 
@@ -89,16 +80,19 @@ export class GatewayFileController {
 
     /**
      * POST /api/v1/files/upload
-     * @param {Request} req - the request object, containing the file {@link CreateFileDTO} and author id.
+     * @param {Request} req - the request object, containing the file data and author id.
      * @param {Response} res - the response object for the client.
      * @returns {Object}
      * - On success: A JSON object following the {@link UploadedFileDTO} containing the metadata of the uploaded file. 
      * - On failure: A JSON object with an error message and a HTTP status code indicating the failure.
      */
     private async uploadFile(req: Request, res: Response): Promise<void> {
-        const data: CreateFileDTO = extractFileDataFromRequest(req);
-
-        const result = await this.gatewayFileService.uploadFile(data);
+        if(!req.headers['content-type']?.includes('multipart/form-data')){
+            res.status(400).json({ message: "Bad request" });
+            return;
+        }
+        
+        const result = await this.gatewayFileService.uploadFile(req);
         handleResponse(res, result, 201);
     }
 
