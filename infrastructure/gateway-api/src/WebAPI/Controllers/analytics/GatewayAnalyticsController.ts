@@ -8,7 +8,7 @@ import { BurnupDTO } from "../../../Domain/DTOs/analytics/BurnupDTO";
 import { BudgetTrackingDTO } from "../../../Domain/DTOs/analytics/BudgetTrackingDTO";
 import { ResourceCostAllocationDTO } from "../../../Domain/DTOs/analytics/ResourceCostAllocationDTO";
 import { ProfitMarginDTO } from "../../../Domain/DTOs/analytics/ProfitMarginDTO";
-import { UserRole } from "../../../Domain/enums/user/UserRole";
+import { AnalyticsPolicies } from "../../../Domain/access-policies/analytics/AnalyticsPolicies";
 
 // Middlewares
 import { authenticate } from "../../../Middlewares/authentication/AuthMiddleware";
@@ -32,14 +32,14 @@ export class GatewayAnalyticsController {
      * Registering routes for Analytics Microservice.
      */
     private initializeRoutes() {
-        const analyticsAccess = [authenticate, authorize(UserRole.ANALYTICS_DEVELOPMENT_MANAGER)];
+        const analyticsReadonlyAccess = [authenticate, authorize(...AnalyticsPolicies.READONLY)];
 
-        this.router.get('/analytics/burndown/:sprintId', ...analyticsAccess, this.getBurndownAnalyticsBySprintId.bind(this));
-        this.router.get('/analytics/burnup/:sprintId', ...analyticsAccess, this.getBurnupAnalyticsBySprintId.bind(this));
-        this.router.get('/analytics/velocity/:projectId', ...analyticsAccess, this.getVelocityAnalyticsByProjectId.bind(this));
-        this.router.get('/analytics/budget/:projectId', ...analyticsAccess, this.getBudgetTrackingByProjectId.bind(this));
-        this.router.get('/analytics/resource-cost/:projectId', ...analyticsAccess, this.getResourceCostAllocationByProjectId.bind(this));
-        this.router.get('/analytics/profit-margin/:projectId', ...analyticsAccess, this.getProfitMarginByProjectId.bind(this));
+        this.router.get('/analytics/burndown/:sprintId', ...analyticsReadonlyAccess, this.getBurndownAnalyticsBySprintId.bind(this));
+        this.router.get('/analytics/burnup/:sprintId', ...analyticsReadonlyAccess, this.getBurnupAnalyticsBySprintId.bind(this));
+        this.router.get('/analytics/velocity/:projectId', ...analyticsReadonlyAccess, this.getVelocityAnalyticsByProjectId.bind(this));
+        this.router.get('/analytics/budget/:projectId', ...analyticsReadonlyAccess, this.getBudgetTrackingByProjectId.bind(this));
+        this.router.get('/analytics/resource-cost/:projectId', ...analyticsReadonlyAccess, this.getResourceCostAllocationByProjectId.bind(this));
+        this.router.get('/analytics/profit-margin/:projectId', ...analyticsReadonlyAccess, this.getProfitMarginByProjectId.bind(this));
     }
 
     /**

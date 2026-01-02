@@ -81,6 +81,7 @@ export class GatewayProjectService implements IGatewayProjectService {
             headers: {
                 "Content-Type": req.headers["content-type"]!,
             },
+            timeout: 20000,
             maxBodyLength: Infinity,
             maxContentLength: Infinity
         });
@@ -103,6 +104,7 @@ export class GatewayProjectService implements IGatewayProjectService {
             headers: {
                 "Content-Type": req.headers["content-type"]!
             },
+            timeout: 20000,
             maxBodyLength: Infinity,
             maxContentLength: Infinity
         });

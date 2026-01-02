@@ -9,7 +9,7 @@ import { SprintCreateDTO } from "../../../Domain/DTOs/project/SprintCreateDTO";
 import { SprintUpdateDTO } from "../../../Domain/DTOs/project/SprintUpdateDTO";
 import { ProjectUserAssignDTO } from "../../../Domain/DTOs/project/ProjectUserAssignDTO";
 import { ProjectUserDTO } from "../../../Domain/DTOs/project/ProjectUserDTO";
-import { UserRole } from "../../../Domain/enums/user/UserRole";
+import { ProjectPolicies } from "../../../Domain/access-policies/project/ProjectPolicies";
 
 // Middlewares
 import { authenticate } from "../../../Middlewares/authentication/AuthMiddleware";
@@ -33,11 +33,8 @@ export class GatewayProjectController {
      * Registering routes for Project Microservice.
      */
     private initializeRoutes() {
-        const projectReadonlyAccess = [
-            authenticate, 
-            authorize(UserRole.PROJECT_MANAGER, UserRole.ANALYTICS_DEVELOPMENT_MANAGER, UserRole.ANIMATION_WORKER, UserRole.AUDIO_MUSIC_STAGIST)
-        ];
-        const projectWriteAccess = [authenticate, authorize(UserRole.PROJECT_MANAGER)];
+        const projectReadonlyAccess = [authenticate, authorize(...ProjectPolicies.READONLY)];
+        const projectWriteAccess = [authenticate, authorize(...ProjectPolicies.WRITE)];
 
         this.router.get("/projects/:projectId", ...projectReadonlyAccess, this.getProjectById.bind(this));
         this.router.get("/users/:userId/projects", ...projectReadonlyAccess, this.getProjectsFromUser.bind(this));

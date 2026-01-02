@@ -7,7 +7,7 @@ import { CreateTaskDTO } from "../../../Domain/DTOs/task/CreateTaskDTO";
 import { CreateCommentDTO } from "../../../Domain/DTOs/task/CreateCommentDTO";
 import { TaskDTO } from "../../../Domain/DTOs/task/TaskDTO";
 import { CommentDTO } from "../../../Domain/DTOs/task/CommentDTO";
-import { UserRole } from "../../../Domain/enums/user/UserRole";
+import { TaskPolicies } from "../../../Domain/access-policies/task/TaskPolicies";
 
 // Middlewares
 import { authenticate } from "../../../Middlewares/authentication/AuthMiddleware";
@@ -31,11 +31,8 @@ export class GatewayTaskController {
      * Registering routes for Task Microservice.
      */
     private initializeRoutes() {
-        const taskReadonlyAccess = [
-            authenticate,
-            authorize(UserRole.PROJECT_MANAGER, UserRole.ANALYTICS_DEVELOPMENT_MANAGER, UserRole.ANIMATION_WORKER, UserRole.AUDIO_MUSIC_STAGIST)
-        ];
-        const taskWriteAccess = [authenticate, authorize(UserRole.PROJECT_MANAGER)];
+        const taskReadonlyAccess = [authenticate, authorize(...TaskPolicies.READONLY)];
+        const taskWriteAccess = [authenticate, authorize(...TaskPolicies.WRITE)];
 
         this.router.get('/tasks/:taskId', ...taskReadonlyAccess, this.getTaskById.bind(this));
         this.router.get('/tasks/sprints/:sprintId', ...taskReadonlyAccess, this.getTasksBySprintId.bind(this));

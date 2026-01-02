@@ -7,7 +7,7 @@ import { RegistrationUserDTO } from "../../../Domain/DTOs/user/RegistrationUserD
 import { UserDTO } from "../../../Domain/DTOs/user/UserDTO";
 import { UpdateUserDTO } from "../../../Domain/DTOs/user/UpdateUserDTO";
 import { UserRoleDTO } from "../../../Domain/DTOs/user/UserRoleDTO";
-import { UserRole } from "../../../Domain/enums/user/UserRole";
+import { UserPolicies } from "../../../Domain/access-policies/user/UserPolicies";
 
 // Middlewares
 import { authenticate } from "../../../Middlewares/authentication/AuthMiddleware";
@@ -31,14 +31,15 @@ export class GatewayUserController {
      * Registering routes for User Microservice.
      */
     private initializeRoutes() {
-        const userAccess = [authenticate, authorize(UserRole.ADMIN)];
+        const userReadonlyAccess = [authenticate, authorize(...UserPolicies.READONLY)];
+        const userWriteAccess = [authenticate, authorize(...UserPolicies.WRITE)];
 
-        this.router.post("/users", ...userAccess, this.createUser.bind(this));
-        this.router.get("/users/:userId", ...userAccess, this.getUserById.bind(this));
-        this.router.get("/users", ...userAccess, this.getUsers.bind(this));
-        this.router.put("/users/:userId", ...userAccess, this.updateUserById.bind(this));
-        this.router.delete("/users/:userId", ...userAccess, this.logicallyDeleteUserById.bind(this));
-        this.router.get("/user-roles/userCreation", ...userAccess, this.getCreationRoles.bind(this));
+        this.router.post("/users", ...userWriteAccess, this.createUser.bind(this));
+        this.router.get("/users/:userId", ...userReadonlyAccess, this.getUserById.bind(this));
+        this.router.get("/users", ...userReadonlyAccess, this.getUsers.bind(this));
+        this.router.put("/users/:userId", ...userWriteAccess, this.updateUserById.bind(this));
+        this.router.delete("/users/:userId", ...userWriteAccess, this.logicallyDeleteUserById.bind(this));
+        this.router.get("/user-roles/userCreation", ...userReadonlyAccess, this.getCreationRoles.bind(this));
     }
 
     /**

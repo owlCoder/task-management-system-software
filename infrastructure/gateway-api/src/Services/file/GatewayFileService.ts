@@ -44,7 +44,7 @@ export class GatewayFileService implements IGatewayFileService {
             url: FILE_ROUTES.DOWNLOAD_FILE(fileId),
             responseType: "stream",
             maxContentLength: Infinity,
-            timeout: 10000
+            timeout: 20000
         });
     }
 
@@ -94,7 +94,7 @@ export class GatewayFileService implements IGatewayFileService {
             headers: {
                 'Content-Type': req.headers["content-type"]!,
             },
-            timeout: 10000
+            timeout: 20000
         });
     }
 
