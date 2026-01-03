@@ -27,6 +27,9 @@ export function bodyParserErrorHandler(err: unknown, req: Request, res: Response
             case 415:
                 message = 'The content encoding is not supported';
                 break;
+            default:
+                message = 'Invalid request';
+                break;
         }
 
         if (message) {

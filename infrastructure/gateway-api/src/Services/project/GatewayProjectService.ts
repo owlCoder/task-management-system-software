@@ -22,7 +22,7 @@ import { SERVICES } from "../../Constants/services/Services";
 import { API_ENDPOINTS } from "../../Constants/services/APIEndpoints";
 
 // Infrastructure
-import { makeAPICall } from "../../Infrastructure/axios/APIHelpers";
+import { makeAPICall, makeAPIUploadStreamCall } from "../../Infrastructure/axios/APIHelpers";
 import { createAxiosClient } from "../../Infrastructure/axios/client/AxiosClientFactory";
 
 /**
@@ -73,17 +73,16 @@ export class GatewayProjectService implements IGatewayProjectService {
      * - On failure returns status code and error message.
      */
     async createProject(req: Request): Promise<Result<ProjectDTO>> {
-        return await makeAPICall<ProjectDTO, Request>(this.projectClient, this.errorHandlingService, {
+        return await makeAPIUploadStreamCall<ProjectDTO, Request>(this.projectClient, this.errorHandlingService, {
             serviceName: SERVICES.PROJECT,
             method: HTTP_METHODS.POST,
             url: PROJECT_ROUTES.CREATE_PROJECT,
             data: req,
             headers: {
                 "Content-Type": req.headers["content-type"]!,
+                ...(req.headers["content-length"] && { 'Content-Length': req.headers["content-length"] })
             },
-            timeout: 20000,
-            maxBodyLength: Infinity,
-            maxContentLength: Infinity
+            timeout: 20000
         });
     }
 
@@ -96,17 +95,16 @@ export class GatewayProjectService implements IGatewayProjectService {
      * - On failure returns status code and error message.
      */
     async updateProject(projectId: number, req: Request): Promise<Result<ProjectDTO>> {
-        return await makeAPICall<ProjectDTO, Request>(this.projectClient, this.errorHandlingService, {
+        return await makeAPIUploadStreamCall<ProjectDTO, Request>(this.projectClient, this.errorHandlingService, {
             serviceName: SERVICES.PROJECT,
             method: HTTP_METHODS.PUT,
             url: PROJECT_ROUTES.UPDATE_PROJECT(projectId),
             data: req,
             headers: {
-                "Content-Type": req.headers["content-type"]!
+                "Content-Type": req.headers["content-type"]!,
+                ...(req.headers["content-length"] && { 'Content-Length': req.headers["content-length"] })
             },
-            timeout: 20000,
-            maxBodyLength: Infinity,
-            maxContentLength: Infinity
+            timeout: 20000
         });
     }
 

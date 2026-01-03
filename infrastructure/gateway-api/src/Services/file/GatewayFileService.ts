@@ -17,7 +17,7 @@ import { SERVICES } from "../../Constants/services/Services";
 import { API_ENDPOINTS } from "../../Constants/services/APIEndpoints";
 
 // Infrastructure
-import { makeAPICall, makeAPIStreamCall } from "../../Infrastructure/axios/APIHelpers";
+import { makeAPICall, makeAPIDownloadStreamCall, makeAPIUploadStreamCall } from "../../Infrastructure/axios/APIHelpers";
 import { createAxiosClient } from "../../Infrastructure/axios/client/AxiosClientFactory";
 
 /**
@@ -38,12 +38,10 @@ export class GatewayFileService implements IGatewayFileService {
      * - On failure returns status code and error message.
      */
     async downloadFile(fileId: number): Promise<Result<StreamResponse>> {
-        return await makeAPIStreamCall<StreamResponse>(this.fileClient, this.errorHandlingService, {
+        return await makeAPIDownloadStreamCall(this.fileClient, this.errorHandlingService, {
             serviceName: SERVICES.FILE,
             method: HTTP_METHODS.GET,
             url: FILE_ROUTES.DOWNLOAD_FILE(fileId),
-            responseType: "stream",
-            maxContentLength: Infinity,
             timeout: 20000
         });
     }
@@ -86,13 +84,14 @@ export class GatewayFileService implements IGatewayFileService {
      * - On failure returns status code and error message.
      */
     async uploadFile(req: Request): Promise<Result<UploadedFileDTO>> {
-        return await makeAPICall<UploadedFileDTO, Request>(this.fileClient, this.errorHandlingService, {
+        return await makeAPIUploadStreamCall<UploadedFileDTO, Request>(this.fileClient, this.errorHandlingService, {
             serviceName: SERVICES.FILE,
             method: HTTP_METHODS.POST,
             url: FILE_ROUTES.UPLOAD_FILE,
             data: req,
             headers: {
                 'Content-Type': req.headers["content-type"]!,
+                ...(req.headers["content-length"] && { 'Content-Length': req.headers["content-length"] })
             },
             timeout: 20000
         });
