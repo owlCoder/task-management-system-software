@@ -7,8 +7,8 @@ import {
 import { v4 as uuidv4 } from "uuid";
 
 export interface UploadResult {
-    key: string;      // Jedinstveni ključ fajla u bucket-u
-    url: string;      // Javni URL za pristup slici
+    key: string;
+    url: string;
 }
 
 export interface IR2StorageService {
@@ -56,7 +56,6 @@ export class R2StorageService implements IR2StorageService {
         originalFilename: string,
         mimeType: string
     ): Promise<UploadResult> {
-        // Generiši jedinstveno ime fajla
         const extension = this.getExtension(originalFilename);
         const key = `projects/${uuidv4()}${extension}`;
 
@@ -65,7 +64,6 @@ export class R2StorageService implements IR2StorageService {
             Key: key,
             Body: fileBuffer,
             ContentType: mimeType,
-            // Cache control za optimizaciju
             CacheControl: "public, max-age=31536000",
         };
 
@@ -83,7 +81,7 @@ export class R2StorageService implements IR2StorageService {
     }
 
     /**
-     * Briše sliku sa R2 storage-a
+     * Brise sliku sa R2 storage-a
      */
     async deleteImage(key: string): Promise<boolean> {
         if (!key) return true;
@@ -103,7 +101,7 @@ export class R2StorageService implements IR2StorageService {
     }
 
     /**
-     * Vraća javni URL za sliku
+     * Vraca javni URL za sliku
      */
     getPublicUrl(key: string): string {
         if (!key) return "";

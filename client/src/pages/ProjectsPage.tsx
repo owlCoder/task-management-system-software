@@ -92,7 +92,12 @@ export const ProjectsPage: React.FC = () => {
 
   const handleCreateProject = async (newProject: ProjectCreateDTO) => {
     try {
-      const created = await projectAPI.createProject(newProject);
+      const projectData: ProjectCreateDTO = {
+        ...newProject,
+        user_id: user?.id,
+      };
+
+      const created = await projectAPI.createProject(projectData);
       if (created) {
         await fetchProjects();
         setIsCreateModalOpen(false);

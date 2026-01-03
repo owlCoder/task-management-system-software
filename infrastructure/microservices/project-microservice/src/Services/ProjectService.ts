@@ -55,12 +55,10 @@ export class ProjectService implements IProjectService {
             throw new Error(`Project with id ${project_id} not found`);
         }
 
-        // Ako se menja slika, obriši staru sa R2
         if (data.image_key !== undefined && project.image_key) {
             await this.storageService.deleteImage(project.image_key);
         }
 
-        // Ažuriraj polja
         if (data.project_name !== undefined) project.project_name = data.project_name;
         if (data.project_description !== undefined) project.project_description = data.project_description;
         if (data.image_key !== undefined) project.image_key = data.image_key;
@@ -78,7 +76,6 @@ export class ProjectService implements IProjectService {
         const project = await this.projectRepository.findOne({ where: { project_id } });
         
         if (project && project.image_key) {
-            // Obriši sliku sa R2 pre brisanja projekta
             await this.storageService.deleteImage(project.image_key);
         }
 

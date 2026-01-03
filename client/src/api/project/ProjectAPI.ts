@@ -69,15 +69,15 @@ class ProjectAPIImpl implements IProjectAPI {
             formData.append("total_weekly_hours_required", data.total_weekly_hours_required.toString());
             formData.append("allowed_budget", data.allowed_budget.toString());
 
+            if (data.user_id) {
+                formData.append("user_id", data.user_id.toString());
+            }
+
             if (data.image_file) {
                 formData.append("image_file", data.image_file);
             }
 
-            const response = await this.client.post<ProjectDTO>("/projects", formData, {
-                headers: {
-                    "Content-Type": "multipart/form-data",
-                },
-            });
+            const response = await this.client.post<ProjectDTO>("/projects", formData);
             return response.data;
         } catch (error) {
             console.error("Error creating project:", error);
@@ -105,11 +105,7 @@ class ProjectAPIImpl implements IProjectAPI {
                 formData.append("image_file", data.image_file);
             }
 
-            const response = await this.client.put<ProjectDTO>(`/projects/${projectId}`, formData, {
-                headers: {
-                    "Content-Type": "multipart/form-data",
-                },
-            });
+            const response = await this.client.put<ProjectDTO>(`/projects/${projectId}`, formData);
             return response.data;
         } catch (error) {
             console.error("Error updating project:", error);

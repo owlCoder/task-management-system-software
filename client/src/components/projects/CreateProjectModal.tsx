@@ -19,7 +19,6 @@ export const CreateProjectModal: React.FC<Props> = ({
     allowed_budget: "" as string | number,
   });
 
-  // *** DODAJ STATE ZA FILE I PREVIEW ***
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string>("");
 
@@ -82,13 +81,11 @@ export const CreateProjectModal: React.FC<Props> = ({
     return Object.values(newErrors).every((e) => !e);
   };
 
-  // *** IZMENJENI HANDLER ZA SLIKU ***
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
       setImageFile(file);
       
-      // Kreiraj preview za prikaz
       const reader = new FileReader();
       reader.onloadend = () => {
         setImagePreview(reader.result as string);
@@ -100,7 +97,6 @@ export const CreateProjectModal: React.FC<Props> = ({
   const handleSubmit = () => {
     if (!validateForm()) return;
 
-    // *** ŠALJEMO FILE OBJEKAT UMESTO BASE64 ***
     const projectData: ProjectCreateDTO = {
       project_name: formData.project_name.trim(),
       project_description: formData.project_description.trim() || "",
@@ -178,7 +174,7 @@ export const CreateProjectModal: React.FC<Props> = ({
             )}
           </div>
 
-          {/* Project Image - IZMENJENO */}
+          {/* Project Image*/}
           <div>
             <h3 className="text-xs uppercase tracking-wider text-white/60 mb-1">
               Project Image

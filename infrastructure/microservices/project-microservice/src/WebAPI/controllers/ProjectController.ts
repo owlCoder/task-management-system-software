@@ -1,12 +1,13 @@
 import { Router, Request, Response } from "express";
 import multer from "multer";
 import { IProjectService } from "../../Domain/services/IProjectService";
+import { IProjectUserService } from "../../Domain/services/IProjectUserService";
 import { ProjectCreateDTO } from "../../Domain/DTOs/ProjectCreateDTO";
 import { ProjectUpdateDTO } from "../../Domain/DTOs/ProjectUpdateDTO";
 import { validateCreateProject, validateUpdateProject } from "../validators/ProjectValidator";
 import { IR2StorageService } from "../../Storage/R2StorageService";
 
-// Koristi memory storage umesto disk storage
+// Koristimo memory storage
 const upload = multer({
     storage: multer.memoryStorage(),
     limits: {
@@ -26,7 +27,8 @@ export class ProjectController {
 
     constructor(
         private readonly projectService: IProjectService,
-        private readonly storageService: IR2StorageService
+        private readonly storageService: IR2StorageService,
+        private readonly projectUserService: IProjectUserService
     ) {
         this.router = Router();
         this.initializeRoutes();
@@ -82,14 +84,17 @@ export class ProjectController {
 
     private async createProject(req: Request, res: Response): Promise<void> {
         try {
+            const userId = req.body.user_id ? parseInt(req.body.user_id, 10) : undefined;
+            const totalWeeklyHours = parseInt(req.body.total_weekly_hours_required, 10);
+
             const data: ProjectCreateDTO = {
                 project_name: req.body.project_name,
                 project_description: req.body.project_description || "",
-                total_weekly_hours_required: parseInt(req.body.total_weekly_hours_required, 10),
+                total_weekly_hours_required: totalWeeklyHours,
                 allowed_budget: parseFloat(req.body.allowed_budget),
+                user_id: userId,
             };
 
-            // Ako je uploadovana slika, sačuvaj je na R2
             if (req.file) {
                 const uploadResult = await this.storageService.uploadImage(
                     req.file.buffer,
@@ -102,7 +107,6 @@ export class ProjectController {
 
             const validation = validateCreateProject(data);
             if (!validation.success) {
-                // Ako validacija ne prođe, obriši uploadovanu sliku
                 if (data.image_key) {
                     await this.storageService.deleteImage(data.image_key);
                 }
@@ -111,6 +115,20 @@ export class ProjectController {
             }
 
             const created = await this.projectService.CreateProject(data);
+
+            if (userId && created.project_id) {
+                try {
+                    await this.projectUserService.assignUserToProject({
+                        project_id: created.project_id,
+                        user_id: userId,
+                        weekly_hours: totalWeeklyHours,
+                    });
+                    console.log(`User ${userId} automatically assigned to project ${created.project_id} with ${totalWeeklyHours} weekly hours`);
+                } catch (assignError) {
+                    console.error("Failed to auto-assign user to project:", assignError);
+                }
+            }
+
             res.status(201).json(created);
         } catch (err) {
             console.error("Create project error:", err);
@@ -141,7 +159,6 @@ export class ProjectController {
                 data.allowed_budget = parseFloat(req.body.allowed_budget);
             }
 
-            // Ako je uploadovana nova slika
             if (req.file) {
                 const uploadResult = await this.storageService.uploadImage(
                     req.file.buffer,
@@ -154,7 +171,6 @@ export class ProjectController {
 
             const validation = validateUpdateProject(data);
             if (!validation.success) {
-                // Ako validacija ne prođe, obriši novu uploadovanu sliku
                 if (data.image_key) {
                     await this.storageService.deleteImage(data.image_key);
                 }

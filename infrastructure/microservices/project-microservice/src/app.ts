@@ -58,8 +58,8 @@ app.use(express.json());
     );
     const sprintService: ISprintService = new SprintService(sprintRepository, projectRepository);
 
-    // Controllers - DODAJ storageService
-    const projectController = new ProjectController(projectService, storageService);
+    // Controllers
+    const projectController = new ProjectController(projectService, storageService, projectUserService);
     const projectUserController = new ProjectUserController(projectUserService);
     const sprintController = new SprintController(sprintService);
 

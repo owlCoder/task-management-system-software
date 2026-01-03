@@ -71,7 +71,7 @@ export const ProjectDetailsModal: React.FC<Props> = ({
 
                 {/* Body */}
                 <div className="p-6 overflow-y-auto flex-1 styled-scrollbar">
-                    {/* Image - DIREKTNO KORISTI URL */}
+                    {/* Image*/}
                     {hasProjectImage(project) && (
                         <div className="mb-6 rounded-xl overflow-hidden border border-white/10">
                             <img

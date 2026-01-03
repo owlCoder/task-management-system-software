@@ -1,6 +1,6 @@
 import React from "react";
 import type { ProjectDTO } from "../../models/project/ProjectDTO";
-import { getProjectImageUrl, hasProjectImage } from "../../helpers/image_url";
+import { hasProjectImage } from "../../helpers/image_url";
 
 type Props = {
     project: ProjectDTO;

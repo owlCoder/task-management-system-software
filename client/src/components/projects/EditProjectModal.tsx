@@ -28,7 +28,6 @@ export const EditProjectModal: React.FC<Props> = ({
         if (project) {
             setFormData({ ...project });
             setImageFile(null);
-            // Koristi image_url direktno za preview
             setImagePreview(hasProjectImage(project) ? project.image_url : "");
             setErrors({
                 project_name: "",
@@ -78,7 +77,6 @@ export const EditProjectModal: React.FC<Props> = ({
             const file = e.target.files[0];
             setImageFile(file);
 
-            // Kreiraj lokalni preview za novu sliku
             const reader = new FileReader();
             reader.onloadend = () => {
                 setImagePreview(reader.result as string);
