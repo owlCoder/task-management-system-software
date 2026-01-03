@@ -1,10 +1,10 @@
-import { UserDTO } from "../Domain/DTOs/UserDTO";
-import { User } from "../Domain/models/User";
+import { UserDTO } from "../../Domain/DTOs/UserDTO";
+import { User } from "../../Domain/models/User";
 
 /**
  * Convert User entity to UserDTO
  */
-export function toDTO(user: User): UserDTO {
+export function toUserDTO(user: User): UserDTO {
   return {
     user_id: user.user_id,
     username: user.username,

@@ -1,9 +1,10 @@
 import { In, Repository } from "typeorm";
 import { UserRole } from "../Domain/models/UserRole";
 import { IUserRoleService } from "../Domain/services/IUserRoleService";
-import { UserRoleDTO } from "../Domain/DTOs/UserRoleDTO";
+import { DefaultUserRoleDTO, UserRoleDTO } from "../Domain/DTOs/UserRoleDTO";
 import { Result } from "../Domain/types/Result";
 import { ErrorCode } from "../Domain/enums/ErrorCode";
+import { toUserRoleDTO } from "../Helpers/Converter/toUserRoleDTO";
 
 export class UserRoleService implements IUserRoleService {
   constructor(private userRoleRepository: Repository<UserRole>) {}
@@ -100,6 +101,10 @@ export class UserRoleService implements IUserRoleService {
       where: { role_name: role_name },
     });
 
-    return new UserRoleDTO(userRole?.user_role_id, userRole?.role_name);
+    if (userRole) {
+      return toUserRoleDTO(userRole);
+    } else {
+      return DefaultUserRoleDTO;
+    }
   }
 }
