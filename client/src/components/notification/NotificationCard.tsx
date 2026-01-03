@@ -1,12 +1,12 @@
 import React from 'react';
 import type { NotificationCardProps } from '../../models/notification/NotificationCardDTO';
 
-const NotificationCard: React.FC<NotificationCardProps> = ({ 
-  notification, 
-  onClick, 
+const NotificationCard: React.FC<NotificationCardProps> = ({
+  notification,
+  onClick,
   isSelected = false,
   onSelectChange,
-  className = "" 
+  className = ""
 }) => {
   
   // handler za checkbox - sprecava propagaciju klika na celu karticu
@@ -51,22 +51,24 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
 
         {/* content - sredina */}
         <div className="flex-1">
-          <h3 className={`font-bold text-lg transition ${
+          <h3 className={`font-bold text-lg transition break-words ${
             isSelected ? 'text-slate-50' : 'text-slate-100'
-          }`}>
+          }`}
+          style={{ wordBreak: 'break-word', overflowWrap: 'anywhere' }}>
             {notification.title}
           </h3>
-          
-          <p className={`mt-2 text-sm leading-relaxed transition ${
+
+          <p className={`mt-2 text-sm leading-relaxed transition break-words overflow-wrap-anywhere ${
             isSelected ? 'text-slate-300' : 'text-slate-400'
-          }`}>
+          }`}
+          style={{ wordBreak: 'break-word', overflowWrap: 'anywhere' }}>
             {notification.content}
           </p>
-          
+
           <div className={`mt-3 text-xs transition ${
             isSelected ? 'text-slate-400' : 'text-slate-500'
           }`}>
-            {new Date(notification.createdAt).toLocaleString('sr-RS', {
+            {new Date(notification.createdAt).toLocaleString('en-US', {
               year: 'numeric',
               month: 'long',
               day: 'numeric',

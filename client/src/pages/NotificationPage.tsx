@@ -9,8 +9,6 @@ import { NotificationType } from "../enums/NotificationType";
 import { notificationAPI } from "../api/notification/NotificationAPI";
 import { socketManager, socketEventService } from "../api/notification/socketInstance";
 
-const backgroundImageUrl = "/background.png";
-
 const NotificationPage: React.FC = () => {
   const [activeFilter, setActiveFilter] = useState<"all" | "unread">("all");
   const [sortBy, setSortBy] = useState<"newest" | "oldest" | "unread" | "read">(
@@ -316,8 +314,11 @@ const NotificationPage: React.FC = () => {
   // LOADING STATE
   if (loading) {
     return (
-      <div className="min-h-screen w-screen flex items-center justify-center bg-slate-900">
-        <p className="text-white text-xl">Loading notifications...</p>
+      <div className="flex h-screen bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-[#0f172a] via-[#020617] to-black">
+        <Sidebar />
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-white text-xl">Loading notifications...</div>
+        </div>
       </div>
     );
   }
@@ -325,12 +326,13 @@ const NotificationPage: React.FC = () => {
   // ERROR STATE
   if (error) {
     return (
-      <div className="min-h-screen w-screen flex items-center justify-center bg-slate-900">
-        <div className="text-center">
-          <p className="text-red-500 text-xl mb-4">{error}</p>
+      <div className="flex h-screen bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-[#0f172a] via-[#020617] to-black">
+        <Sidebar />
+        <div className="flex-1 flex flex-col items-center justify-center gap-4">
+          <div className="text-red-400 text-xl">{error}</div>
           <button
             onClick={loadNotifications}
-            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+            className="px-4 py-2 bg-white text-black rounded-lg hover:bg-gray-200 transition"
           >
             Retry
           </button>
@@ -340,85 +342,74 @@ const NotificationPage: React.FC = () => {
   }
 
   return (
-    <div
-      className="min-h-screen w-screen bg-cover bg-center bg-no-repeat"
-      style={{ backgroundImage: `url(${backgroundImageUrl})` }}
-    >
-      <div className="fixed left-0 top-0 h-screen z-40">
-        <Sidebar
-        //username="John Doe"       // baca gresku TO DO
-        //role="Project Manager"
-        />
-      </div>
+    <div className="flex h-screen bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-[#0f172a] via-[#020617] to-black overflow-hidden">
+      <Sidebar />
 
-      <div className="ml-48 pl-8">
-        <div className="fixed top-0 z-50" style={{ left: "224px", right: 0 }}>
+      <div className="flex-1 p-6 flex flex-col h-screen overflow-hidden">
+        {/* Header */}
+        <div className="flex-shrink-0">
+          <NotificationHeader onSendClick={handleSendNotificationClick} />
         </div>
 
-        <div className="pt-[50px]">
-          <div className="max-w-7xl mx-auto px-6 py-8">
-            <NotificationHeader onSendClick={handleSendNotificationClick} />
+        {/* Filters */}
+        <div className="flex-shrink-0 mb-6">
+          <NotificationFilters
+            activeFilter={activeFilter}
+            unreadCount={unreadCount}
+            onFilterChange={handleFilterChange}
+            sortBy={sortBy}
+            onSortChange={handleSortChange}
+            isAllSelected={isAllSelected}
+            onSelectAll={handleSelectAll}
+            selectedCount={selectedNotifications.length}
+            onMarkAsRead={handleMarkAsRead}
+            onMarkAsUnread={handleMarkAsUnread}
+            onDeleteSelected={handleDeleteSelected}
+          />
+        </div>
 
-            <div className="mb-6">
-              <NotificationFilters
-                activeFilter={activeFilter}
-                unreadCount={unreadCount}
-                onFilterChange={handleFilterChange}
-                sortBy={sortBy}
-                onSortChange={handleSortChange}
-                isAllSelected={isAllSelected}
-                onSelectAll={handleSelectAll}
-                selectedCount={selectedNotifications.length}
-                onMarkAsRead={handleMarkAsRead}
-                onMarkAsUnread={handleMarkAsUnread}
-                onDeleteSelected={handleDeleteSelected}
-              />
-            </div>
-
-            <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-6 shadow-lg">
-              <div
-                className="space-y-4 overflow-y-auto pr-2"
-                style={{ maxHeight: "calc(100vh - 300px)" }}
-              >
-                {filteredNotifications.length === 0 ? (
-                  <div className="text-center py-16">
-                    <div className="mb-4">
-                      <p className="text-slate-100 text-lg font-semibold">
-                        No notifications to display
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-slate-300 text-sm">
-                        {activeFilter === "unread"
-                          ? "You have no unread notifications"
-                          : "No notifications available"}
-                      </p>
-                    </div>
+        {/* Notification List*/}
+        <div className="flex-1 bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-6 shadow-lg overflow-hidden flex flex-col">
+          <div className="flex-1 overflow-y-auto pr-2 styled-scrollbar">
+            <div className="space-y-4">
+              {filteredNotifications.length === 0 ? (
+                <div className="text-center py-16">
+                  <div className="mb-4">
+                    <p className="text-slate-100 text-lg font-semibold">
+                      No notifications to display
+                    </p>
                   </div>
-                ) : (
-                  filteredNotifications.map((notification) => (
-                    <NotificationCard
-                      key={notification.id}
-                      notification={notification}
-                      onClick={handleNotificationClick}
-                      isSelected={selectedNotifications.includes(
-                        notification.id
-                      )}
-                      onSelectChange={handleSelectChange}
-                    />
-                  ))
-                )}
-              </div>
+                  <div>
+                    <p className="text-slate-300 text-sm">
+                      {activeFilter === "unread"
+                        ? "You have no unread notifications"
+                        : "No notifications available"}
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                filteredNotifications.map((notification) => (
+                  <NotificationCard
+                    key={notification.id}
+                    notification={notification}
+                    onClick={handleNotificationClick}
+                    isSelected={selectedNotifications.includes(
+                      notification.id
+                    )}
+                    onSelectChange={handleSelectChange}
+                  />
+                ))
+              )}
             </div>
           </div>
         </div>
-      </div>
 
-      <NotificationSendPopUp
-        isOpen={isPopUpOpen}
-        onClose={() => setIsPopUpOpen(false)}
-        onSend={handleSendNotification}
-      />
+        <NotificationSendPopUp
+          isOpen={isPopUpOpen}
+          onClose={() => setIsPopUpOpen(false)}
+          onSend={handleSendNotification}
+        />
+      </div>
     </div>
   );
 };
