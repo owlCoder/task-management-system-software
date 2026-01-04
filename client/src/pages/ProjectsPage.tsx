@@ -9,7 +9,7 @@ import { useAuth } from "../hooks/useAuthHook";
 import type { ProjectDTO } from "../models/project/ProjectDTO";
 import type { ProjectCreateDTO } from "../models/project/ProjectCreateDTO";
 import { toast } from 'react-hot-toast';
-import { confirmToast } from '../helpers/toastHelper';
+import { confirmToast } from '../components/toast/toastHelper';
 
 
 export const ProjectsPage: React.FC = () => {
