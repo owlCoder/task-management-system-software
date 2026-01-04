@@ -68,6 +68,13 @@ class ProjectAPIImpl implements IProjectAPI {
             formData.append("project_description", data.project_description || "");
             formData.append("total_weekly_hours_required", data.total_weekly_hours_required.toString());
             formData.append("allowed_budget", data.allowed_budget.toString());
+            formData.append("sprint_count", data.sprint_count.toString());
+            formData.append("sprint_duration", data.sprint_duration.toString());
+            formData.append("status", data.status);
+
+            if (data.start_date) {
+                formData.append("start_date", data.start_date);
+            }
 
             if (data.user_id) {
                 formData.append("user_id", data.user_id.toString());
@@ -100,6 +107,18 @@ class ProjectAPIImpl implements IProjectAPI {
             }
             if (data.allowed_budget !== undefined) {
                 formData.append("allowed_budget", data.allowed_budget.toString());
+            }
+            if (data.sprint_count !== undefined) {
+                formData.append("sprint_count", data.sprint_count.toString());
+            }
+            if (data.sprint_duration !== undefined) {
+                formData.append("sprint_duration", data.sprint_duration.toString());
+            }
+            if (data.status !== undefined) {
+                formData.append("status", data.status);
+            }
+            if (data.start_date !== undefined) {
+                formData.append("start_date", data.start_date || "");
             }
             if (data.image_file) {
                 formData.append("image_file", data.image_file);

@@ -4,10 +4,10 @@ import { IProjectService } from "../../Domain/services/IProjectService";
 import { IProjectUserService } from "../../Domain/services/IProjectUserService";
 import { ProjectCreateDTO } from "../../Domain/DTOs/ProjectCreateDTO";
 import { ProjectUpdateDTO } from "../../Domain/DTOs/ProjectUpdateDTO";
+import { ProjectStatus } from "../../Domain/enums/ProjectStatus";
 import { validateCreateProject, validateUpdateProject } from "../validators/ProjectValidator";
 import { IR2StorageService } from "../../Storage/R2StorageService";
 
-// Koristimo memory storage
 const upload = multer({
     storage: multer.memoryStorage(),
     limits: {
@@ -82,6 +82,19 @@ export class ProjectController {
         }
     }
 
+    private parseStatus(statusStr: string | undefined): ProjectStatus {
+        if (!statusStr) return ProjectStatus.NOT_STARTED;
+        
+        const statusMap: { [key: string]: ProjectStatus } = {
+            "Active": ProjectStatus.ACTIVE,
+            "Paused": ProjectStatus.PAUSED,
+            "Completed": ProjectStatus.COMPLETED,
+            "Not Started": ProjectStatus.NOT_STARTED,
+        };
+        
+        return statusMap[statusStr] || ProjectStatus.NOT_STARTED;
+    }
+
     private async createProject(req: Request, res: Response): Promise<void> {
         try {
             const userId = req.body.user_id ? parseInt(req.body.user_id, 10) : undefined;
@@ -93,6 +106,10 @@ export class ProjectController {
                 total_weekly_hours_required: totalWeeklyHours,
                 allowed_budget: parseFloat(req.body.allowed_budget),
                 user_id: userId,
+                start_date: req.body.start_date || null,
+                sprint_count: parseInt(req.body.sprint_count, 10),
+                sprint_duration: parseInt(req.body.sprint_duration, 10),
+                status: this.parseStatus(req.body.status),
             };
 
             if (req.file) {
@@ -157,6 +174,18 @@ export class ProjectController {
             }
             if (req.body.allowed_budget !== undefined) {
                 data.allowed_budget = parseFloat(req.body.allowed_budget);
+            }
+            if (req.body.start_date !== undefined) {
+                data.start_date = req.body.start_date || null;
+            }
+            if (req.body.sprint_count !== undefined) {
+                data.sprint_count = parseInt(req.body.sprint_count, 10);
+            }
+            if (req.body.sprint_duration !== undefined) {
+                data.sprint_duration = parseInt(req.body.sprint_duration, 10);
+            }
+            if (req.body.status !== undefined) {
+                data.status = this.parseStatus(req.body.status);
             }
 
             if (req.file) {

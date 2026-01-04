@@ -6,6 +6,7 @@ import { IProjectService } from "../Domain/services/IProjectService";
 import { Project } from "../Domain/models/Project";
 import { ProjectMapper } from "../Utils/Mappers/ProjectMapper";
 import { IR2StorageService } from "../Storage/R2StorageService";
+import { ProjectStatus } from "../Domain/enums/ProjectStatus";
 
 export class ProjectService implements IProjectService {
     constructor(
@@ -21,6 +22,10 @@ export class ProjectService implements IProjectService {
             image_url: data.image_url || "",
             total_weekly_hours_required: data.total_weekly_hours_required,
             allowed_budget: data.allowed_budget,
+            start_date: data.start_date ? new Date(data.start_date) : null,
+            sprint_count: data.sprint_count,
+            sprint_duration: data.sprint_duration,
+            status: data.status || ProjectStatus.NOT_STARTED,
         });
 
         const saved = await this.projectRepository.save(project);
@@ -67,6 +72,12 @@ export class ProjectService implements IProjectService {
             project.total_weekly_hours_required = data.total_weekly_hours_required;
         }
         if (data.allowed_budget !== undefined) project.allowed_budget = data.allowed_budget;
+        if (data.start_date !== undefined) {
+            project.start_date = data.start_date ? new Date(data.start_date) : null;
+        }
+        if (data.sprint_count !== undefined) project.sprint_count = data.sprint_count;
+        if (data.sprint_duration !== undefined) project.sprint_duration = data.sprint_duration;
+        if (data.status !== undefined) project.status = data.status;
 
         const saved = await this.projectRepository.save(project);
         return ProjectMapper.toDTO(saved);

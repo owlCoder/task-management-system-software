@@ -1,5 +1,6 @@
 import React from "react";
 import type { ProjectDTO } from "../../models/project/ProjectDTO";
+import { ProjectStatus } from "../../enums/ProjectStatus";
 import { hasProjectImage } from "../../helpers/image_url";
 
 type Props = {
@@ -10,6 +11,31 @@ type Props = {
     onEdit?: (p: ProjectDTO) => void;
     onDelete?: (p: ProjectDTO) => void;
     canManage?: boolean;
+};
+
+const getStatusColor = (status: ProjectStatus): string => {
+    switch (status) {
+        case ProjectStatus.ACTIVE:
+            return "bg-green-500";
+        case ProjectStatus.PAUSED:
+            return "bg-yellow-500";
+        case ProjectStatus.COMPLETED:
+            return "bg-blue-500";
+        case ProjectStatus.NOT_STARTED:
+            return "bg-gray-500";
+        default:
+            return "bg-gray-500";
+    }
+};
+
+const formatDate = (dateString: string | null): string => {
+    if (!dateString) return "Not set";
+    const date = new Date(dateString);
+    return date.toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+    });
 };
 
 export const ProjectCard: React.FC<Props> = ({
@@ -60,7 +86,7 @@ export const ProjectCard: React.FC<Props> = ({
         >
             {/* Image */}
             <div className="p-4 pb-0">
-                <div className="w-full h-28 rounded-xl overflow-hidden flex items-center justify-center bg-white/5">
+                <div className="w-full h-28 rounded-xl overflow-hidden flex items-center justify-center bg-white/5 relative">
                     {hasProjectImage(project) ? (
                         <img
                             src={project.image_url}
@@ -71,6 +97,17 @@ export const ProjectCard: React.FC<Props> = ({
                     ) : (
                         <span className="text-muted text-sm">No image</span>
                     )}
+                    {/* Status Badge */}
+                    <div className="absolute top-2 right-2">
+                        <span
+                            className={`
+                                px-2 py-1 rounded-full text-xs font-semibold
+                                ${getStatusColor(project.status)} text-white
+                            `}
+                        >
+                            {project.status}
+                        </span>
+                    </div>
                 </div>
             </div>
 
@@ -83,6 +120,46 @@ export const ProjectCard: React.FC<Props> = ({
                     {project.project_name}
                 </h3>
 
+                {/* Start Date */}
+                <p className="text-white text-muted text-sm flex items-center gap-2">
+                    <svg
+                        width="14"
+                        height="14"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        className="flex-shrink-0 opacity-80"
+                    >
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                        <line x1="16" y1="2" x2="16" y2="6" />
+                        <line x1="8" y1="2" x2="8" y2="6" />
+                        <line x1="3" y1="10" x2="21" y2="10" />
+                    </svg>
+                    {formatDate(project.start_date)}
+                </p>
+
+                {/* Sprints Info */}
+                <p className="text-white text-muted text-sm flex items-center gap-2">
+                    <svg
+                        width="14"
+                        height="14"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        className="flex-shrink-0 opacity-80"
+                    >
+                        <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+                    </svg>
+                    {project.sprint_count} sprints × {project.sprint_duration} days
+                </p>
+
+                {/* Weekly Hours */}
                 <p className="text-white text-muted text-sm flex items-center gap-2">
                     <svg
                         width="14"
@@ -101,6 +178,7 @@ export const ProjectCard: React.FC<Props> = ({
                     {project.total_weekly_hours_required} hrs/week
                 </p>
 
+                {/* Budget */}
                 <p className="text-white text-muted text-sm flex items-center gap-2">
                     <svg
                         width="14"
@@ -116,10 +194,10 @@ export const ProjectCard: React.FC<Props> = ({
                         <line x1="12" y1="1" x2="12" y2="23" />
                         <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
                     </svg>
-                    {project.allowed_budget.toLocaleString()}
+                    ${project.allowed_budget.toLocaleString()}
                 </p>
 
-                <p className="text-white text-muted text-sm leading-snug line-clamp-3">
+                <p className="text-white text-muted text-sm leading-snug line-clamp-2">
                     {project.project_description || "No description"}
                 </p>
             </div>

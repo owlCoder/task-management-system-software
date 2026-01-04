@@ -1,5 +1,6 @@
 import React from "react";
 import type { ProjectDTO } from "../../models/project/ProjectDTO";
+import { ProjectStatus } from "../../enums/ProjectStatus";
 import { hasProjectImage } from "../../helpers/image_url";
 
 type Props = {
@@ -7,6 +8,32 @@ type Props = {
     isOpen: boolean;
     onClose: () => void;
     onEdit?: (project: ProjectDTO) => void;
+};
+
+const getStatusColor = (status: ProjectStatus): string => {
+    switch (status) {
+        case ProjectStatus.ACTIVE:
+            return "bg-green-500";
+        case ProjectStatus.PAUSED:
+            return "bg-yellow-500";
+        case ProjectStatus.COMPLETED:
+            return "bg-blue-500";
+        case ProjectStatus.NOT_STARTED:
+            return "bg-gray-500";
+        default:
+            return "bg-gray-500";
+    }
+};
+
+const formatDate = (dateString: string | null): string => {
+    if (!dateString) return "Not set";
+    const date = new Date(dateString);
+    return date.toLocaleDateString("en-US", {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+    });
 };
 
 export const ProjectDetailsModal: React.FC<Props> = ({
@@ -71,7 +98,7 @@ export const ProjectDetailsModal: React.FC<Props> = ({
 
                 {/* Body */}
                 <div className="p-6 overflow-y-auto flex-1 styled-scrollbar">
-                    {/* Image*/}
+                    {/* Image */}
                     {hasProjectImage(project) && (
                         <div className="mb-6 rounded-xl overflow-hidden border border-white/10">
                             <img
@@ -82,14 +109,30 @@ export const ProjectDetailsModal: React.FC<Props> = ({
                         </div>
                     )}
 
-                    {/* Project Name */}
-                    <div className="mb-4">
-                        <h3 className="text-xs uppercase tracking-wider text-white/60 mb-1">
-                            Project Name
-                        </h3>
-                        <p className="text-2xl font-semibold break-words">
-                            {project.project_name}
-                        </p>
+                    {/* Project Name & Status */}
+                    <div className="mb-4 flex items-start justify-between gap-4">
+                        <div className="flex-1">
+                            <h3 className="text-xs uppercase tracking-wider text-white/60 mb-1">
+                                Project Name
+                            </h3>
+                            <p className="text-2xl font-semibold break-words">
+                                {project.project_name}
+                            </p>
+                        </div>
+                        <div>
+                            <h3 className="text-xs uppercase tracking-wider text-white/60 mb-1">
+                                Status
+                            </h3>
+                            <span
+                                className={`
+                                    inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-semibold
+                                    ${getStatusColor(project.status)} text-white
+                                `}
+                            >
+                                <span className="w-2 h-2 rounded-full bg-white/30"></span>
+                                {project.status}
+                            </span>
+                        </div>
                     </div>
 
                     {/* Description */}
@@ -112,6 +155,36 @@ export const ProjectDetailsModal: React.FC<Props> = ({
                         </p>
                     </div>
 
+                    {/* Start Date */}
+                    <div className="mb-4">
+                        <h3 className="text-xs uppercase tracking-wider text-white/60 mb-1">
+                            Start Date
+                        </h3>
+                        <p className="text-sm text-white font-mono">
+                            {formatDate(project.start_date)}
+                        </p>
+                    </div>
+
+                    {/* Sprint Information */}
+                    <div className="mb-4 grid grid-cols-2 gap-4">
+                        <div>
+                            <h3 className="text-xs uppercase tracking-wider text-white/60 mb-1">
+                                Number of Sprints
+                            </h3>
+                            <p className="text-sm text-white font-mono">
+                                {project.sprint_count} sprints
+                            </p>
+                        </div>
+                        <div>
+                            <h3 className="text-xs uppercase tracking-wider text-white/60 mb-1">
+                                Sprint Duration
+                            </h3>
+                            <p className="text-sm text-white font-mono">
+                                {project.sprint_duration} days
+                            </p>
+                        </div>
+                    </div>
+
                     {/* Weekly Hours */}
                     <div className="mb-4">
                         <h3 className="text-xs uppercase tracking-wider text-white/60 mb-1">
@@ -129,6 +202,19 @@ export const ProjectDetailsModal: React.FC<Props> = ({
                         </h3>
                         <p className="text-sm text-white font-mono">
                             ${project.allowed_budget.toLocaleString()}
+                        </p>
+                    </div>
+
+                    {/* Calculated Total Duration */}
+                    <div className="mb-4 p-4 bg-white/5 rounded-xl border border-white/10">
+                        <h3 className="text-xs uppercase tracking-wider text-white/60 mb-2">
+                            Estimated Project Duration
+                        </h3>
+                        <p className="text-lg text-white font-semibold">
+                            {project.sprint_count * project.sprint_duration} days
+                            <span className="text-sm text-white/60 ml-2">
+                                ({Math.round((project.sprint_count * project.sprint_duration) / 7)} weeks)
+                            </span>
                         </p>
                     </div>
                 </div>

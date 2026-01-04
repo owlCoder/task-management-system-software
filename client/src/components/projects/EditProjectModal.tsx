@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import type { ProjectDTO } from "../../models/project/ProjectDTO";
+import { ProjectStatus } from "../../enums/ProjectStatus";
 import { hasProjectImage } from "../../helpers/image_url";
 
 type Props = {
@@ -22,6 +23,8 @@ export const EditProjectModal: React.FC<Props> = ({
         project_name: "",
         total_weekly_hours_required: "",
         allowed_budget: "",
+        sprint_count: "",
+        sprint_duration: "",
     });
 
     useEffect(() => {
@@ -33,6 +36,8 @@ export const EditProjectModal: React.FC<Props> = ({
                 project_name: "",
                 total_weekly_hours_required: "",
                 allowed_budget: "",
+                sprint_count: "",
+                sprint_duration: "",
             });
         }
     }, [project]);
@@ -56,6 +61,8 @@ export const EditProjectModal: React.FC<Props> = ({
             project_name: "",
             total_weekly_hours_required: "",
             allowed_budget: "",
+            sprint_count: "",
+            sprint_duration: "",
         };
 
         if (!formData.project_name.trim()) {
@@ -66,6 +73,12 @@ export const EditProjectModal: React.FC<Props> = ({
         }
         if (!formData.allowed_budget || formData.allowed_budget <= 0) {
             newErrors.allowed_budget = "Budget must be a positive number";
+        }
+        if (!formData.sprint_count || formData.sprint_count <= 0) {
+            newErrors.sprint_count = "Sprint count must be a positive number";
+        }
+        if (!formData.sprint_duration || formData.sprint_duration <= 0) {
+            newErrors.sprint_duration = "Sprint duration must be a positive number";
         }
 
         setErrors(newErrors);
@@ -97,6 +110,27 @@ export const EditProjectModal: React.FC<Props> = ({
             imageFile || undefined
         );
         onClose();
+    };
+
+    const getStatusColor = (status: ProjectStatus): string => {
+        switch (status) {
+            case ProjectStatus.ACTIVE:
+                return "bg-green-500";
+            case ProjectStatus.PAUSED:
+                return "bg-yellow-500";
+            case ProjectStatus.COMPLETED:
+                return "bg-blue-500";
+            case ProjectStatus.NOT_STARTED:
+                return "bg-gray-500";
+            default:
+                return "bg-gray-500";
+        }
+    };
+
+    const formatDateForInput = (dateString: string | null): string => {
+        if (!dateString) return "";
+        const date = new Date(dateString);
+        return date.toISOString().split("T")[0];
     };
 
     return (
@@ -186,6 +220,110 @@ export const EditProjectModal: React.FC<Props> = ({
                             onChange={(e) => updateField("project_description", e.target.value)}
                             className="w-full px-4 py-2 rounded-lg bg-white/10 border border-white/20 min-h-[100px] focus:outline-none"
                         />
+                    </div>
+
+                    {/* Start Date */}
+                    <div>
+                        <h3 className="text-xs uppercase tracking-wider text-white/60 mb-1">
+                            Start Date
+                        </h3>
+                        <input
+                            type="date"
+                            value={formatDateForInput(formData.start_date)}
+                            onChange={(e) => updateField("start_date", e.target.value || null)}
+                            className="
+                                w-full px-4 py-2 rounded-lg
+                                bg-white/10 border border-white/20
+                                focus:outline-none
+                                [color-scheme:dark]
+                            "
+                        />
+                    </div>
+
+                    {/* Status */}
+                    <div>
+                        <h3 className="text-xs uppercase tracking-wider text-white/60 mb-1">
+                            Status
+                        </h3>
+                        <div className="relative">
+                            <select
+                                value={formData.status}
+                                onChange={(e) => updateField("status", e.target.value as ProjectStatus)}
+                                className="
+                                    w-full px-4 py-2 rounded-lg
+                                    bg-white/10 border border-white/20
+                                    focus:outline-none
+                                    appearance-none cursor-pointer
+                                "
+                            >
+                                {Object.values(ProjectStatus).map((status) => (
+                                    <option key={status} value={status} className="bg-gray-800 text-white">
+                                        {status}
+                                    </option>
+                                ))}
+                            </select>
+                            <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                                <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor">
+                                    <path d="M2 4L6 8L10 4" stroke="currentColor" strokeWidth="2" fill="none" />
+                                </svg>
+                            </div>
+                        </div>
+                        <div className="mt-2 flex items-center gap-2">
+                            <span className={`w-3 h-3 rounded-full ${getStatusColor(formData.status)}`}></span>
+                            <span className="text-sm text-white/70">{formData.status}</span>
+                        </div>
+                    </div>
+
+                    {/* Sprint Count */}
+                    <div>
+                        <h3 className="text-xs uppercase tracking-wider text-white/60 mb-1">
+                            Number of Sprints *
+                        </h3>
+                        <input
+                            type="number"
+                            value={formData.sprint_count}
+                            onChange={(e) => updateField("sprint_count", Number(e.target.value))}
+                            onKeyDown={(e) => {
+                                if (e.key === "+" || e.key === "-" || e.key === ".") {
+                                    e.preventDefault();
+                                }
+                            }}
+                            className={`
+                                w-full px-4 py-2 rounded-lg bg-white/10 border focus:outline-none
+                                [&::-webkit-inner-spin-button]:appearance-none
+                                [&::-webkit-outer-spin-button]:appearance-none
+                                ${errors.sprint_count ? "border-red-400" : "border-white/20"}
+                            `}
+                        />
+                        {errors.sprint_count && (
+                            <p className="text-red-400 text-sm mt-1">{errors.sprint_count}</p>
+                        )}
+                    </div>
+
+                    {/* Sprint Duration */}
+                    <div>
+                        <h3 className="text-xs uppercase tracking-wider text-white/60 mb-1">
+                            Sprint Duration (days) *
+                        </h3>
+                        <input
+                            type="number"
+                            value={formData.sprint_duration}
+                            onChange={(e) => updateField("sprint_duration", Number(e.target.value))}
+                            onKeyDown={(e) => {
+                                if (e.key === "+" || e.key === "-" || e.key === ".") {
+                                    e.preventDefault();
+                                }
+                            }}
+                            className={`
+                                w-full px-4 py-2 rounded-lg bg-white/10 border focus:outline-none
+                                [&::-webkit-inner-spin-button]:appearance-none
+                                [&::-webkit-outer-spin-button]:appearance-none
+                                ${errors.sprint_duration ? "border-red-400" : "border-white/20"}
+                            `}
+                        />
+                        {errors.sprint_duration && (
+                            <p className="text-red-400 text-sm mt-1">{errors.sprint_duration}</p>
+                        )}
                     </div>
 
                     {/* Total Weekly Hours */}

@@ -1,6 +1,7 @@
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { ProjectUser } from "./ProjectUser";
 import { Sprint } from "./Sprint";
+import { ProjectStatus } from "../enums/ProjectStatus";
 
 @Entity("projects")
 export class Project {
@@ -14,16 +15,32 @@ export class Project {
     project_description!: string;
 
     @Column({ type: "varchar", nullable: true, length: 255 })
-    image_key!: string;             // Ključ u R2 (za brisanje)
+    image_key!: string;
 
     @Column({ type: "varchar", nullable: true, length: 500 })
-    image_url!: string;             // Javni URL slike
+    image_url!: string;
 
     @Column({ nullable: false })
     total_weekly_hours_required!: number;
 
     @Column({ nullable: false })
     allowed_budget!: number;
+
+    @Column({ type: "date", nullable: true })
+    start_date!: Date | null;
+
+    @Column({ type: "int", nullable: false, default: 1 })
+    sprint_count!: number;
+
+    @Column({ type: "int", nullable: false, default: 14 })
+    sprint_duration!: number;
+
+    @Column({ 
+        type: "enum", 
+        enum: ProjectStatus, 
+        default: ProjectStatus.NOT_STARTED 
+    })
+    status!: ProjectStatus;
 
     @OneToMany(() => ProjectUser, (project_user) => project_user.project)
     project_users!: ProjectUser[];

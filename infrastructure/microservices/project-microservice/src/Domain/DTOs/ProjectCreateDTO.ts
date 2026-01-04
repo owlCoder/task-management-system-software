@@ -1,3 +1,5 @@
+import { ProjectStatus } from "../enums/ProjectStatus";
+
 export interface ProjectCreateDTO {
     project_name: string;
     project_description: string;
@@ -6,4 +8,8 @@ export interface ProjectCreateDTO {
     total_weekly_hours_required: number;
     allowed_budget: number;
     user_id?: number;
+    start_date?: string | null;
+    sprint_count: number;
+    sprint_duration: number;
+    status: ProjectStatus;
 }

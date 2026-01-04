@@ -1,3 +1,5 @@
+import { ProjectStatus } from "../../enums/ProjectStatus";
+
 export interface ProjectDTO {
     project_id: number;
     project_name: string;
@@ -5,20 +7,8 @@ export interface ProjectDTO {
     image_url: string;
     total_weekly_hours_required: number;
     allowed_budget: number;
+    start_date: string | null;
+    sprint_count: number;
+    sprint_duration: number;
+    status: ProjectStatus;
 }
-
-/*
-MOCK:
-export type ProjectDTO = {
-  id: string;
-  name: string;
-  description?: string;
-  imageUrl?: string;
-  members: ProjectUserDTO[];
-  totalWeeklyHours?: number;
-  allowedBudget?: number;
-  status?: ProjectStatus;
-  numberOfSprints?: number;     
-  sprintDuration?: number;
-  startDate?: string; 
-};*/
