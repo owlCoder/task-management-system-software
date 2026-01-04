@@ -8,6 +8,9 @@ import { projectAPI } from "../api/project/ProjectAPI";
 import { useAuth } from "../hooks/useAuthHook";
 import type { ProjectDTO } from "../models/project/ProjectDTO";
 import type { ProjectCreateDTO } from "../models/project/ProjectCreateDTO";
+import { toast } from 'react-hot-toast';
+import { confirmToast } from '../helpers/toastHelper';
+
 
 export const ProjectsPage: React.FC = () => {
   const { user } = useAuth();
@@ -101,11 +104,11 @@ export const ProjectsPage: React.FC = () => {
       if (created) {
         await fetchProjects();
         setIsCreateModalOpen(false);
-        alert(`Project "${newProject.project_name}" created successfully!`);
+        toast.success(`Project "${newProject.project_name}" created successfully!`);
       }
     } catch (err) {
       console.error("Failed to create project:", err);
-      alert("Failed to create project. Please try again.");
+      toast.error("Failed to create project. Please try again.");
     }
   };
 
@@ -115,23 +118,24 @@ export const ProjectsPage: React.FC = () => {
     const projectToDelete = projects.find((p) => p.project_id === selectedId);
     if (!projectToDelete) return;
 
-    const confirmDelete = window.confirm(
-      `Are you sure you want to delete "${projectToDelete.project_name}"?`
-    );
-    if (!confirmDelete) return;
+    const confirmDelete = await confirmToast(
+  `Are you sure you want to delete "${projectToDelete.project_name}"?`
+);
+if (!confirmDelete) return;
+
 
     try {
       const success = await projectAPI.deleteProject(selectedId);
       if (success) {
         await fetchProjects();
         setSelectedId(null);
-        alert("Project deleted successfully!");
+        toast.success("Project deleted successfully!");
       } else {
-        alert("Failed to delete project.");
+        toast.error("Failed to delete project.");
       }
     } catch (err) {
       console.error("Failed to delete project:", err);
-      alert("Failed to delete project. Please try again.");
+      toast.error("Failed to delete project. Please try again.");
     }
   };
 
@@ -148,11 +152,11 @@ export const ProjectsPage: React.FC = () => {
         await fetchProjects();
         setIsEditModalOpen(false);
         setProjectToEdit(null);
-        alert(`Project "${updatedProject.project_name}" updated successfully!`);
+        toast.success(`Project "${updatedProject.project_name}" updated successfully!`);
       }
     } catch (err) {
       console.error("Failed to update project:", err);
-      alert("Failed to update project. Please try again.");
+      toast.error("Failed to update project. Please try again.");
     }
   };
 

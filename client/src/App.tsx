@@ -11,6 +11,7 @@ import TaskPage from "./pages/TaskPage";
 import { FilePage } from "./pages/FilePage";
 import { OtpPage } from "./pages/OTPPage";
 import AnalyticsPage from "./pages/AnalyticsPage";
+import { Toaster } from 'react-hot-toast';
 
 const auth_api: IAuthAPI = new AuthAPI();
 
@@ -41,6 +42,7 @@ function App() {
           }
         />
       </Routes>
+      <Toaster position="bottom-right" />
     </div>
   );
 }
