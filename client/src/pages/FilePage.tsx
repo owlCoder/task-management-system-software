@@ -11,18 +11,24 @@ export const FilePage = () => {
   const [deleteAction, setDeleteAction] = useState<(() => Promise<void>) | null>(null);
 
   return (
-    <div className="min-h-screen w-screen flex">
-      <Sidebar />
-
-      <div className="flex-1 flex items-center justify-center px-10">
-        <FileList
-          onSelectFile={setSelectedFile}
-          openDeleteModal={(deleteFn) => {
-            setDeleteAction(() => deleteFn);
-            setShowDeleteModal(true);
-          }}
-        />
+    <div className="min-h-screen flex overflow-hidden">
+      
+      <div className="w-[260px] min-w-[260px] shrink-0">
+        <Sidebar />
       </div>
+
+      <div className="flex-1 overflow-auto p-6">
+  <div className="w-full max-w-4xl mx-auto">
+    <FileList
+      onSelectFile={setSelectedFile}
+      openDeleteModal={(deleteFn) => {
+        setDeleteAction(() => deleteFn);
+        setShowDeleteModal(true);
+      }}
+    />
+  </div>
+</div>
+
 
       {showDeleteModal && selectedFile && (
         <FileModalDelete

@@ -6,12 +6,13 @@ export const FilePreview: React.FC<FilePreviewProps> = ({
   file,
   isUpload,
   setClose,
+  role
 }) => {
   const [isValid, setIsValid] = useState(false);
-  const role = UserRole.ANIMATION_WORKER ?? UserRole.AUDIO_MUSIC_STAGIST;
   const isImage = file?.type.startsWith("image/");
   const isVideo = file?.type.startsWith("video/");
   const isAudio = file?.type.startsWith("audio/");
+  
 
   useEffect(() => {
     if (!file) {
