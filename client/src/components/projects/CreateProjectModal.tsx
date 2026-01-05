@@ -2,10 +2,15 @@ import React, { useState, useEffect } from "react";
 import type { ProjectCreateDTO } from "../../models/project/ProjectCreateDTO";
 import { ProjectStatus } from "../../enums/ProjectStatus";
 
+type PendingUser = {
+    user_id: number;
+    weekly_hours: number;
+};
+
 type Props = {
     isOpen: boolean;
     onClose: () => void;
-    onSave: (project: ProjectCreateDTO) => void;
+    onSave: (project: ProjectCreateDTO, usersToAssign: PendingUser[]) => void;
 };
 
 export const CreateProjectModal: React.FC<Props> = ({
@@ -35,6 +40,12 @@ export const CreateProjectModal: React.FC<Props> = ({
         sprint_duration: "",
     });
 
+    // User assignment state
+    const [pendingUsers, setPendingUsers] = useState<PendingUser[]>([]);
+    const [newUserId, setNewUserId] = useState("");
+    const [weeklyHours, setWeeklyHours] = useState("10");
+    const [userError, setUserError] = useState("");
+
     const resetForm = () => {
         setFormData({
             project_name: "",
@@ -55,6 +66,10 @@ export const CreateProjectModal: React.FC<Props> = ({
             sprint_count: "",
             sprint_duration: "",
         });
+        setPendingUsers([]);
+        setNewUserId("");
+        setWeeklyHours("10");
+        setUserError("");
     };
 
     useEffect(() => {
@@ -115,6 +130,33 @@ export const CreateProjectModal: React.FC<Props> = ({
         }
     };
 
+    const handleAddUser = () => {
+        const userId = parseInt(newUserId, 10);
+        const hours = parseInt(weeklyHours, 10);
+
+        if (isNaN(userId) || userId <= 0) {
+            setUserError("Please enter a valid user ID");
+            return;
+        }
+        if (isNaN(hours) || hours <= 0 || hours > 40) {
+            setUserError("Weekly hours must be between 1 and 40");
+            return;
+        }
+        if (pendingUsers.some(u => u.user_id === userId)) {
+            setUserError("User is already in the list");
+            return;
+        }
+
+        setPendingUsers(prev => [...prev, { user_id: userId, weekly_hours: hours }]);
+        setNewUserId("");
+        setWeeklyHours("10");
+        setUserError("");
+    };
+
+    const handleRemoveUser = (userId: number) => {
+        setPendingUsers(prev => prev.filter(u => u.user_id !== userId));
+    };
+
     const handleSubmit = () => {
         if (!validateForm()) return;
 
@@ -130,7 +172,7 @@ export const CreateProjectModal: React.FC<Props> = ({
             status: formData.status,
         };
 
-        onSave(projectData);
+        onSave(projectData, pendingUsers);
         handleClose();
     };
 
@@ -458,6 +500,66 @@ export const CreateProjectModal: React.FC<Props> = ({
                         {errors.allowed_budget && (
                             <p className="text-red-400 text-sm mt-1">{errors.allowed_budget}</p>
                         )}
+                    </div>
+
+                    {/* User Assignment Section */}
+                    <div className="space-y-4 pt-4 border-t border-white/10">
+                        <h3 className="text-xs uppercase tracking-wider text-white/60 mb-1">
+                            Assign Workers (will be assigned after project creation)
+                        </h3>
+                        
+                        {/* Lista pending korisnika */}
+                        {pendingUsers.length > 0 && (
+                            <div className="space-y-2 max-h-32 overflow-y-auto styled-scrollbar">
+                                {pendingUsers.map((user) => (
+                                    <div
+                                        key={user.user_id}
+                                        className="flex items-center justify-between bg-white/5 rounded-lg px-3 py-2"
+                                    >
+                                        <span className="text-sm text-white/80">
+                                            User ID: {user.user_id} ({user.weekly_hours} hrs/week)
+                                        </span>
+                                        <button
+                                            type="button"
+                                            onClick={() => handleRemoveUser(user.user_id)}
+                                            className="text-red-400 hover:text-red-300 text-sm cursor-pointer"
+                                        >
+                                            Remove
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+
+                        {/* Form za dodavanje korisnika */}
+                        <div className="flex gap-2">
+                            <input
+                                type="number"
+                                placeholder="User ID"
+                                value={newUserId}
+                                onChange={(e) => setNewUserId(e.target.value)}
+                                className="flex-1 px-3 py-2 rounded-lg bg-white/10 border border-white/20 focus:outline-none text-sm [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                                min="1"
+                            />
+                            <input
+                                type="number"
+                                placeholder="Hours/week"
+                                value={weeklyHours}
+                                onChange={(e) => setWeeklyHours(e.target.value)}
+                                className="w-28 px-3 py-2 rounded-lg bg-white/10 border border-white/20 focus:outline-none text-sm [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                                min="1"
+                                max="40"
+                            />
+                            <button
+                                type="button"
+                                onClick={handleAddUser}
+                                className="px-4 py-2 rounded-lg bg-white/20 hover:bg-white/30 text-sm font-medium cursor-pointer"
+                            >
+                                Add
+                            </button>
+                        </div>
+
+                        {userError && <p className="text-red-400 text-sm">{userError}</p>}
                     </div>
                 </div>
 

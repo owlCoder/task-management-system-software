@@ -43,6 +43,7 @@ export const ProjectCard: React.FC<Props> = ({
     selected = false,
     onSelect,
     onView,
+    canManage = false,
 }) => {
     const handleRootKeyDown = (e: React.KeyboardEvent) => {
         if (e.key === "Enter" || e.key === " ") {
@@ -74,12 +75,12 @@ export const ProjectCard: React.FC<Props> = ({
                 transition-all duration-300 ease-out
                 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/40
                 ${
-                    selected
+                    selected && canManage
                         ? "ring-2 ring-[var(--accent)]/50 shadow-2xl -translate-y-1"
                         : "hover:-translate-y-1 hover:shadow-xl"
                 }
             `}
-            onClick={() => onSelect?.(project.project_id)}
+            onClick={() => canManage && onSelect?.(project.project_id)}
             role="button"
             tabIndex={0}
             onKeyDown={handleRootKeyDown}

@@ -11,6 +11,14 @@ import type { ProjectCreateDTO } from "../models/project/ProjectCreateDTO";
 import { toast } from 'react-hot-toast';
 import { confirmToast } from '../components/toast/toastHelper';
 
+type PendingUser = {
+    user_id: number;
+    weekly_hours: number;
+};
+
+const canManageProjects = (role?: string): boolean => {
+    return role === "Project Manager";
+};
 
 export const ProjectsPage: React.FC = () => {
     const { user } = useAuth();
@@ -50,7 +58,9 @@ export const ProjectsPage: React.FC = () => {
     }, [fetchProjects]);
 
     const handleSelect = (projectId: number) => {
-        setSelectedId((prev) => (prev === projectId ? null : projectId));
+        if (canManageProjects(user?.role)) {
+            setSelectedId((prev) => (prev === projectId ? null : projectId));
+        }
     };
 
     const handleViewProject = (project: ProjectDTO) => {
@@ -93,7 +103,7 @@ export const ProjectsPage: React.FC = () => {
         setSelectedId(null);
     };
 
-    const handleCreateProject = async (newProject: ProjectCreateDTO) => {
+    const handleCreateProject = async (newProject: ProjectCreateDTO, usersToAssign: PendingUser[]) => {
         try {
             const projectData: ProjectCreateDTO = {
                 ...newProject,
@@ -102,6 +112,20 @@ export const ProjectsPage: React.FC = () => {
 
             const created = await projectAPI.createProject(projectData);
             if (created) {
+                // Assign pending users to the created project
+                for (const pendingUser of usersToAssign) {
+                    try {
+                        await projectAPI.assignUserToProject(
+                            created.project_id,
+                            pendingUser.user_id,
+                            pendingUser.weekly_hours
+                        );
+                    } catch (assignErr) {
+                        console.error(`Failed to assign user ${pendingUser.user_id}:`, assignErr);
+                        toast.error(`Failed to assign user ${pendingUser.user_id}`);
+                    }
+                }
+
                 await fetchProjects();
                 setIsCreateModalOpen(false);
                 toast.success(`Project "${newProject.project_name}" created successfully!`);
@@ -199,69 +223,74 @@ export const ProjectsPage: React.FC = () => {
                 <header className="flex items-center justify-between gap-5 mb-6 flex-wrap flex-shrink-0">
                     <h1 className="text-3xl md:text-4xl font-bold text-white">Projects</h1>
 
-                    <div className="flex gap-2 flex-wrap">
-                        <button
-                            type="button"
-                            className={`
-                                w-[140px] h-[40px] rounded-[3em]
-                                font-semibold transition-all duration-300
-                                ${
-                                    selectedId !== null
-                                        ? "bg-white text-[var(--palette-deep-blue)] hover:-translate-y-1 shadow-lg cursor-pointer"
-                                        : "bg-white/10 text-white/40 cursor-not-allowed"
-                                }
-                            `}
-                            disabled={selectedId === null}
-                            onClick={handleOpenEditModalClick}
-                        >
-                            Edit Project
-                        </button>
+                    {/* Show management buttons only for Project Manager */}
+                    {canManageProjects(user?.role) && (
+                        <div className="flex gap-2 flex-wrap">
+                            <button
+                                type="button"
+                                className={`
+                                    w-[140px] h-[40px] rounded-[3em]
+                                    font-semibold transition-all duration-300
+                                    ${
+                                        selectedId !== null
+                                            ? "bg-white text-[var(--palette-deep-blue)] hover:-translate-y-1 shadow-lg cursor-pointer"
+                                            : "bg-white/10 text-white/40 cursor-not-allowed"
+                                    }
+                                `}
+                                disabled={selectedId === null}
+                                onClick={handleOpenEditModalClick}
+                            >
+                                Edit Project
+                            </button>
 
-                        <button
-                            type="button"
-                            className={`
-                                w-[140px] h-[40px] rounded-[3em]
-                                font-semibold transition-all duration-300
-                                ${
-                                    selectedId !== null
-                                        ? "bg-white text-red-600 hover:-translate-y-1 shadow-lg cursor-pointer"
-                                        : "bg-white/10 text-white/40 cursor-not-allowed"
-                                }
-                            `}
-                            disabled={selectedId === null}
-                            onClick={handleDelete}
-                        >
-                            Delete Project
-                        </button>
+                            <button
+                                type="button"
+                                className={`
+                                    w-[140px] h-[40px] rounded-[3em]
+                                    font-semibold transition-all duration-300
+                                    ${
+                                        selectedId !== null
+                                            ? "bg-white text-red-600 hover:-translate-y-1 shadow-lg cursor-pointer"
+                                            : "bg-white/10 text-white/40 cursor-not-allowed"
+                                    }
+                                `}
+                                disabled={selectedId === null}
+                                onClick={handleDelete}
+                            >
+                                Delete Project
+                            </button>
 
-                        <button
-                            type="button"
-                            onClick={handleOpenCreateModal}
-                            className="
-                                w-[160px] h-[40px] rounded-[3em]
-                                font-semibold
-                                bg-white
-                                text-[var(--palette-deep-blue)]
-                                hover:bg-gradient-to-t
-                                hover:from-[var(--palette-medium-blue)]
-                                hover:to-[var(--palette-deep-blue)]
-                                hover:text-white
-                                transition-all duration-300
-                                hover:-translate-y-1
-                                shadow-lg
-                                cursor-pointer
-                            "
-                        >
-                            Create Project
-                        </button>
-                    </div>
+                            <button
+                                type="button"
+                                onClick={handleOpenCreateModal}
+                                className="
+                                    w-[160px] h-[40px] rounded-[3em]
+                                    font-semibold
+                                    bg-white
+                                    text-[var(--palette-deep-blue)]
+                                    hover:bg-gradient-to-t
+                                    hover:from-[var(--palette-medium-blue)]
+                                    hover:to-[var(--palette-deep-blue)]
+                                    hover:text-white
+                                    transition-all duration-300
+                                    hover:-translate-y-1
+                                    shadow-lg
+                                    cursor-pointer
+                                "
+                            >
+                                Create Project
+                            </button>
+                        </div>
+                    )}
                 </header>
 
                 <div className="flex-1 min-h-0 overflow-y-auto bg-white/5 backdrop-blur-xl p-6 rounded-2xl shadow-lg border border-white/10 styled-scrollbar">
                     {projects.length === 0 ? (
                         <div className="flex items-center justify-center h-full">
                             <p className="text-white/60 text-lg">
-                                No projects found. Create your first project!
+                                {canManageProjects(user?.role) 
+                                    ? "No projects found. Create your first project!"
+                                    : "No projects assigned to you yet."}
                             </p>
                         </div>
                     ) : (
@@ -276,12 +305,12 @@ export const ProjectsPage: React.FC = () => {
                                     selected={project.project_id === selectedId}
                                     onSelect={handleSelect}
                                     onView={handleViewProject}
-                                    onEdit={handleOpenEditModal}
-                                    onDelete={(proj) => {
+                                    onEdit={canManageProjects(user?.role) ? handleOpenEditModal : undefined}
+                                    onDelete={canManageProjects(user?.role) ? (proj) => {
                                         setSelectedId(proj.project_id);
                                         setTimeout(handleDelete, 0);
-                                    }}
-                                    canManage={true}
+                                    } : undefined}
+                                    canManage={canManageProjects(user?.role)}
                                 />
                             ))}
                         </section>
@@ -292,7 +321,7 @@ export const ProjectsPage: React.FC = () => {
                     project={viewProject}
                     isOpen={isDetailsModalOpen}
                     onClose={handleCloseDetailsModal}
-                    onEdit={handleOpenEditModal}
+                    onEdit={canManageProjects(user?.role) ? handleOpenEditModal : undefined}
                 />
 
                 <CreateProjectModal

@@ -2,6 +2,9 @@ import React, { useState, useEffect } from "react";
 import type { ProjectDTO } from "../../models/project/ProjectDTO";
 import { ProjectStatus } from "../../enums/ProjectStatus";
 import { hasProjectImage } from "../../helpers/image_url";
+import { projectAPI } from "../../api/project/ProjectAPI";
+import { ProjectUserDTO } from "../../models/project/ProjectUserDTO";
+import UserAssignmentSection from "./UserAssignmentSection";
 
 type Props = {
     project: ProjectDTO | null;
@@ -27,6 +30,10 @@ export const EditProjectModal: React.FC<Props> = ({
         sprint_duration: "",
     });
 
+    // User assignment state
+    const [assignedUsers, setAssignedUsers] = useState<ProjectUserDTO[]>([]);
+    const [usersLoading, setUsersLoading] = useState(false);
+
     useEffect(() => {
         if (project) {
             setFormData({ ...project });
@@ -41,6 +48,51 @@ export const EditProjectModal: React.FC<Props> = ({
             });
         }
     }, [project]);
+
+    // Load assigned users when modal opens
+    useEffect(() => {
+        if (project && isOpen) {
+            loadAssignedUsers();
+        }
+    }, [project, isOpen]);
+
+    const loadAssignedUsers = async () => {
+        if (!project) return;
+        setUsersLoading(true);
+        try {
+            const users = await projectAPI.getProjectUsers(project.project_id);
+            setAssignedUsers(users);
+        } catch (err) {
+            console.error("Failed to load assigned users:", err);
+        }
+        setUsersLoading(false);
+    };
+
+    const handleAddUser = async (userId: number, weeklyHours: number): Promise<boolean> => {
+        if (!project) return false;
+        try {
+            const newUser = await projectAPI.assignUserToProject(project.project_id, userId, weeklyHours);
+            setAssignedUsers(prev => [...prev, newUser]);
+            return true;
+        } catch (err) {
+            console.error("Failed to assign user:", err);
+            return false;
+        }
+    };
+
+    const handleRemoveUser = async (userId: number): Promise<boolean> => {
+        if (!project) return false;
+        try {
+            const success = await projectAPI.removeUserFromProject(project.project_id, userId);
+            if (success) {
+                setAssignedUsers(prev => prev.filter(u => u.user_id !== userId));
+            }
+            return success;
+        } catch (err) {
+            console.error("Failed to remove user:", err);
+            return false;
+        }
+    };
 
     if (!isOpen || !formData) return null;
 
@@ -380,6 +432,16 @@ export const EditProjectModal: React.FC<Props> = ({
                         {errors.allowed_budget && (
                             <p className="text-red-400 text-sm mt-1">{errors.allowed_budget}</p>
                         )}
+                    </div>
+
+                    {/* User Assignment Section */}
+                    <div className="pt-4 border-t border-white/10">
+                        <UserAssignmentSection
+                            assignedUsers={assignedUsers}
+                            onAddUser={handleAddUser}
+                            onRemoveUser={handleRemoveUser}
+                            isLoading={usersLoading}
+                        />
                     </div>
                 </form>
 

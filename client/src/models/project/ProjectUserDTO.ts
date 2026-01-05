@@ -1,10 +1,6 @@
-import type { UserDTO } from "../users/UserDTO";
-
 export type ProjectUserDTO = {
-  id?: number;
-  projectId: number;
-  userId: number;
-  role?: UserDTO["role_name"];
-  hoursPerWeek: number;
-  user?: UserDTO;
+    pu_id?: number;
+    project_id: number;
+    user_id: number;
+    weekly_hours: number;
 };

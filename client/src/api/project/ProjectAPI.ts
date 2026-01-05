@@ -3,6 +3,7 @@ import { IProjectAPI } from "./IProjectAPI";
 import { ProjectDTO } from "../../models/project/ProjectDTO";
 import { ProjectCreateDTO } from "../../models/project/ProjectCreateDTO";
 import { ProjectUpdateDTO } from "../../models/project/ProjectUpdateDTO";
+import { ProjectUserDTO } from "../../models/project/ProjectUserDTO";
 import { readValueByKey } from "../../helpers/local_storage";
 
 const GATEWAY_URL = import.meta.env.VITE_GATEWAY_URL;
@@ -39,6 +40,8 @@ class ProjectAPIImpl implements IProjectAPI {
             }
         );
     }
+
+    // projects
 
     async getProjectsByUserId(userId: number): Promise<ProjectDTO[]> {
         try {
@@ -138,6 +141,36 @@ class ProjectAPIImpl implements IProjectAPI {
             return true;
         } catch (error) {
             console.error("Error deleting project:", error);
+            return false;
+        }
+    }
+    
+    // project_users
+
+    async getProjectUsers(projectId: number): Promise<ProjectUserDTO[]> {
+        try {
+            const response = await this.client.get<ProjectUserDTO[]>(`/projects/${projectId}/users`);
+            return response.data;
+        } catch (error) {
+            console.error("Error fetching project users:", error);
+            return [];
+        }
+    }
+
+    async assignUserToProject(projectId: number, userId: number, weeklyHours: number): Promise<ProjectUserDTO> {
+        const response = await this.client.post<ProjectUserDTO>(`/projects/${projectId}/users`, {
+            user_id: userId,
+            weekly_hours: weeklyHours
+        });
+        return response.data;
+    }
+
+    async removeUserFromProject(projectId: number, userId: number): Promise<boolean> {
+        try {
+            await this.client.delete(`/projects/${projectId}/users/${userId}`);
+            return true;
+        } catch (error) {
+            console.error("Error removing user from project:", error);
             return false;
         }
     }
