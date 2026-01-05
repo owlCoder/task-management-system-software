@@ -1,3 +1,4 @@
+import { UserRole } from "../../enums/UserRole";
 import { TaskDTO } from "../../models/task/TaskDTO";
 
 // CreateTaskModal Props
@@ -27,4 +28,5 @@ export interface FilePreviewProps {
   file: File | undefined;
   isUpload: () => void;
   setClose: () => void;
+  role : UserRole;
 }

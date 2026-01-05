@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { IFileAPI } from "../../api/file/IFileAPI";
 import { FileAPI } from "../../api/file/FileAPI";
 import { FileDTO } from "../../models/file/FileDTO";
+import { useAuth } from "../../hooks/useAuthHook";
 
 type FileListProps = {
   onSelectFile: (file: FileDTO) => void;
@@ -15,19 +16,57 @@ export const FileList = ({ onSelectFile, openDeleteModal }: FileListProps) => {
   const [selectedFileId, SetSelectedFileId] = useState<number | null>(null);
   const [filteredFiles, setFilteredFiles] = useState<FileDTO[]>([]);
   const [selectedType, setSelectedType] = useState("ALL");
-  const token = localStorage.getItem("token");
+  const { token, user } = useAuth();
+  const authorId = user?.id;
+
+if (!token || !authorId) {
+  return <div className="text-white/50">Not authenticated</div>;
+}
+
+  const normalizeExt = (ext: string) =>
+  ext.replace(".", "").toLowerCase();
+
+const isImage = (ext: string) =>
+  ["jpg", "jpeg", "png", "gif", "webp"].includes(normalizeExt(ext));
+
+const isVideo = (ext: string) =>
+  ["mp4", "mov", "avi", "mkv", "webm"].includes(normalizeExt(ext));
+
+const isAudio = (ext: string) =>
+  ["mp3", "wav", "ogg", "aac"].includes(normalizeExt(ext));
+
+
+useEffect(() => {
+  if (selectedType === "ALL") {
+    setFilteredFiles(files);
+    return;
+  }
+
+  if (selectedType === "image") {
+    setFilteredFiles(files.filter(f => isImage(f.fileExtension)));
+    return;
+  }
+
+  if (selectedType === "video") {
+    setFilteredFiles(files.filter(f => isVideo(f.fileExtension)));
+    return;
+  }
+
+  if (selectedType === "audio") {
+    setFilteredFiles(files.filter(f => isAudio(f.fileExtension)));
+    return;
+  }
+}, [files, selectedType]);
+
 
   const fetchFiles = async () => {
     try {
-      const userIdRaw = localStorage.getItem("userId");
-
-      if (!token || !userIdRaw) {
+      if (!token || !authorId) {
         setFiles([]);
         return;
     }
 
-      const userId = Number(userIdRaw);
-      const data = await fileApi.getFileList(token!, userId);
+      const data = await fileApi.getFileList(token, authorId);
 
       if (Array.isArray(data)) {
         setFiles(data);
@@ -43,31 +82,33 @@ export const FileList = ({ onSelectFile, openDeleteModal }: FileListProps) => {
     fetchFiles();
   }, []);
 
-  useEffect(() => {
-    if (selectedType === "ALL") {
-      setFilteredFiles(files);
-    } else {
-      setFilteredFiles(files.filter((file) => file.fileType === selectedType));
-    }
-  }, [files, selectedType]);
 
-  const handleDownload = async () => {
-    const file = files.find((f) => f.fileId === selectedFileId);
-    if (file) onSelectFile(file);
+const handleDownload = async () => {
+  if (!selectedFileId || !token) return;
 
-    const blob = await fileApi.downloadFile(token!, selectedFileId!);
-    const url = window.URL.createObjectURL(blob);
+  const file = files.find(f => f.fileId === selectedFileId);
+  if (!file) return;
 
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "file";
-    a.click();
-  };
+  const blob = await fileApi.downloadFile(token, selectedFileId);
+
+  const url = window.URL.createObjectURL(blob);
+
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = file.originalFileName;
+  document.body.appendChild(a);
+  a.click();
+
+  a.remove();
+  window.URL.revokeObjectURL(url);
+};
+
+
 
   const handleDelete = async () => {
     const file = files.find((f) => f.fileId === selectedFileId);
     if (file) onSelectFile(file);
-    await fileApi.deleteFile(token!, selectedFileId!);
+    await fileApi.deleteFile(token, selectedFileId!);
     await fetchFiles();
   };
 
@@ -77,8 +118,8 @@ export const FileList = ({ onSelectFile, openDeleteModal }: FileListProps) => {
         bg-white/10 backdrop-blur-xl
         border border-white/20
         rounded-3xl shadow-2xl
-        w-full max-w-5xl
-        max-h-[80vh] md:max-h-[840px]
+        w-full max-w-6xl
+        min-h-[75vh]
         flex flex-col
       "
     >

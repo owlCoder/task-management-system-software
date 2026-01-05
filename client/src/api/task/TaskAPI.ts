@@ -2,6 +2,7 @@ import { CreateTaskDTO } from "../../models/task/CreateTaskDTO";
 import { TaskDTO } from "../../models/task/TaskDTO";
 import { UpdateTaskDTO } from "../../models/task/UpdateTaskDTO";
 import { ITaskAPI } from "./ITaskAPI";
+import { CommentDTO } from "../../models/task/CommentDTO";
 
 export class TaskAPI implements ITaskAPI {
   private baseUrl: string;
@@ -20,15 +21,20 @@ export class TaskAPI implements ITaskAPI {
     };
   }
 
-  async getTasksByProject(projectId: string): Promise<TaskDTO[]> {
-    const res = await fetch(`${this.baseUrl}/task/project/${projectId}`, {
+  async getTasksByProject(sprintId: string): Promise<TaskDTO[]> {
+    const res = await fetch(`${this.baseUrl}/tasks/sprints/${sprintId}`, {
       headers: this.headers,
     });
-    return res.json();
+   if (!res.ok) {
+    throw new Error("Failed to fetch task");
+  }
+
+  const json = await res.json();
+  return json.data ?? json;
   }
 
   async getTask(taskId: number): Promise<TaskDTO> {
-  const res = await fetch(`${this.baseUrl}/api/v1/tasks/${taskId}`, {
+  const res = await fetch(`${this.baseUrl}/tasks/${taskId}`, {
     headers: this.headers,
   });
 
@@ -36,7 +42,8 @@ export class TaskAPI implements ITaskAPI {
     throw new Error("Failed to fetch task");
   }
 
-  return res.json();
+  const json = await res.json();
+  return json.data ?? json;
 }
 
   async createTask(payload: CreateTaskDTO): Promise<TaskDTO> {
@@ -63,39 +70,27 @@ export class TaskAPI implements ITaskAPI {
       headers: this.headers,
     });
   }
-
- async uploadFile(taskId: number, file: File): Promise<void> {
-  const formData = new FormData();
-  formData.append("file", file);
-
-  await fetch(`${this.baseUrl}/task/${taskId}/file`, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${this.token}`,
-    },
-    body: formData
-  });
-}
-
-async uploadComment(taskId: number,userId: number,comment: string): Promise<void> {
-  const response = await fetch(
-    `${this.baseUrl}/tasks/${taskId}/comments`,
+async uploadComment(taskId: number,userId: number,text: string): Promise<CommentDTO> {
+  const res = await fetch(`${this.baseUrl}/tasks/${taskId}/comments`,
     {
       method: "POST",
       headers: {
-        ...this.headers,
         "Content-Type": "application/json",
+        Authorization: `Bearer ${this.token}`,
       },
       body: JSON.stringify({
-        user_id: userId,
-        comment: comment,
+        userId,
+        comment: text,
       }),
     }
   );
 
-  if (!response.ok) {
-    throw new Error("Failed to add comment");
+  if (!res.ok) {
+    throw new Error("Failed to upload comment");
   }
+
+  const json = await res.json();
+  return json; 
 }
 
 }

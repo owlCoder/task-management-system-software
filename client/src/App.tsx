@@ -27,7 +27,7 @@ function App() {
         <Route path="/projects" element={<ProjectsPage />} />
         <Route path="/analytics" element={<AnalyticsPage />} />
         <Route path="/notifications" element={<NotificationPage />} />
-        <Route path="/tasks" element={<TaskPage projectId={""} token={""} />} />
+        <Route path="/tasks" element={<TaskPage projectId={""}  />} />
         <Route path="/auth" element={<AuthPage authAPI={auth_api} />} />
         <Route path="/files" element={<FilePage />} />
         <Route path="/mainwindow" element={<MainWindow />} />

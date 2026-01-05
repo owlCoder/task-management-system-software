@@ -2,6 +2,7 @@ import { TaskDTO } from "../../models/task/TaskDTO";
 import { TaskStatus } from "../../enums/TaskStatus";
 import { UserDTO } from "../../models/users/UserDTO";
 import { UserRole } from "../../enums/UserRole";
+import { CommentDTO } from "../../models/task/CommentDTO";
 
 // TaskListItem Props
 export interface TaskListItemProps {
@@ -71,9 +72,13 @@ export interface TaskCostInfoProps {
   task: TaskDTO;
 }
 
+export interface TaskCommentInputProps {
+  onSubmit: (text: string) => Promise<void>;
+};
+
 // TaskCommentList Props
 export interface TaskCommentListProps {
-  onSubmit: (comment: string) => void;
+  comments : CommentDTO[];
 }
 
 // TaskSearchBar Props

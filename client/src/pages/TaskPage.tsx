@@ -18,9 +18,12 @@ import TaskBoardListPreview from "../components/task/TaskBoardListPreview";
 import { UpdateTaskDTO } from "../models/task/UpdateTaskDTO";
 import { TaskStatus } from "../enums/TaskStatus";
 import { TaskListPageProps } from "../types/props";
-// import EditTaskModal from "../components/task/EditTaskModal";
+import { useAuth } from "../hooks/useAuthHook";
 
-const TaskPage: React.FC<TaskListPageProps> = ({ projectId, token }) => {
+const TaskPage: React.FC<TaskListPageProps> = ({ projectId }) => {
+  const { token } = useAuth();
+  if (!token) return null;
+
   const [tasks, setTasks] = useState<TaskDTO[]>([]);
   const [users, setUsers] = useState<UserDTO[]>([]);
   const [loading, setLoading] = useState(true);
@@ -105,7 +108,9 @@ const TaskPage: React.FC<TaskListPageProps> = ({ projectId, token }) => {
         setUsers(usersData);
       } catch (err) {
         console.error("Failed to fetch tasks", err);
-        setTasks(mockTasks);
+        setTasks(
+          []
+        );
       } finally {
         setLoading(false);
       }
