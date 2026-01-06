@@ -6,6 +6,7 @@ import { Result } from "../types/Result";
 export interface IUsersService {
   getAllUsers(): Promise<Result<UserDTO[]>>;
   getUserById(id: number): Promise<Result<UserDTO>>;
+  getUserByUsername(username: string): Promise<Result<UserDTO>>;
   getUsersByIds(ids: number[]): Promise<Result<UserDTO[]>>;
   createUser(user: UserCreationDTO): Promise<Result<UserDTO>>;
   logicalyDeleteUserById(user_id: number): Promise<Result<void>>;

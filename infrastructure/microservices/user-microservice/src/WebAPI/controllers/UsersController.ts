@@ -2,11 +2,10 @@ import { Router, Request, Response } from "express";
 import { ILogerService } from "../../Domain/services/ILogerService";
 import { IUsersService } from "../../Domain/services/IUsersService";
 import { IUserRoleService } from "../../Domain/services/IUserRoleService";
-import {
-  UserDataUpdateValidation,
-  UserDataValidation,
-} from "../validation/UserDataValidation";
+import { UserDataValidation } from "../validation/UserDataValidation";
 import { parseIds } from "../../Helpers/parseIds";
+import { UserDataUpdateValidation } from "../validation/UserDataUpdateValidation";
+import { UsernameValidation } from "../validation/UsernameValidation";
 
 export class UsersController {
   private readonly router: Router;
@@ -24,15 +23,15 @@ export class UsersController {
     this.router.get("/users", this.getAllUsers.bind(this));
     this.router.get("/users/ids", this.getUsersByIds.bind(this));
     this.router.get("/users/:id", this.getUserById.bind(this));
+    this.router.get(
+      "/users/by-username/:username",
+      this.getUserByUsername.bind(this)
+    );
     this.router.post("/users", this.createUser.bind(this));
     this.router.delete("/users/:id", this.logicalyDeleteUser.bind(this));
     this.router.put("/users/:id", this.updateUser.bind(this));
     this.router.put("/users/:id/working-hours", this.setWeeklyHours.bind(this));
     this.router.get("/user-roles", this.getAllUserRoles.bind(this));
-    this.router.get(
-      "/user-roles/userCreation",
-      this.getUserRolesForUserCreation.bind(this)
-    );
     this.router.get(
       "/user-roles/:impact_level",
       this.getUserRoleByImpactLevel.bind(this)
@@ -80,6 +79,39 @@ export class UsersController {
 
       this.logger.log(`Fetching user with ID ${id}`);
       const result = await this.usersService.getUserById(id);
+
+      if (result.success) {
+        res.status(200).json(result.data);
+      } else {
+        this.logger.log(result.error);
+        res.status(result.code).json(result.error);
+      }
+    } catch (err) {
+      this.logger.log((err as Error).message);
+      res.status(500).json({ message: (err as Error).message });
+    }
+  }
+
+  /**
+   * GET /api/v1/users/:username
+   * @param {username} req.body - User username
+   * @returns {UserDTO} JSON response with success status, session/token, and message
+   * @see {@link UserDTO} for input structure
+   */
+
+  private async getUserByUsername(req: Request, res: Response): Promise<void> {
+    try {
+      const username = req.params.username;
+
+      const rezultat = UsernameValidation(username);
+
+      if (rezultat.uspesno === false) {
+        res.status(400).json({ message: rezultat.poruka });
+        return;
+      }
+
+      this.logger.log(`Fetching user with USERNAME ${username}`);
+      const result = await this.usersService.getUserByUsername(username);
 
       if (result.success) {
         res.status(200).json(result.data);
@@ -295,32 +327,9 @@ export class UsersController {
   }
 
   /**
-   * GET /api/v1/user-roles/userCreation
-   * Get all roles
-   * @returns {UserRoleDTO[]} JSON response with success status, session/token, and message
-   * @see {@link UserRoleDTO} for input structure
-   * */
-
-  private async getUserRolesForUserCreation(
-    req: Request,
-    res: Response
-  ): Promise<void> {
-    try {
-      this.logger.log("Fetching all user roles for user creation");
-
-      const result = await this.userRoleService.getUserRolesForUserCreation();
-      if (result.success) {
-        res.status(200).json(result.data);
-      }
-    } catch (err) {
-      this.logger.log((err as Error).message);
-      res.status(500).json({ message: (err as Error).message });
-    }
-  }
-
-  /**
    * GET /api/v1/user-roles/:impact_level
-   * Get user roles based on their impact level
+   * Get user roles with higher impact level then they has. Example: Admin has imp_lvl: 5, he will get all roles with more then 5 imp_lvl.
+   * Impact levels: SysAdmin - 1, Admin - 5, Analytics & Development Manager - 10, Project Manager - 10, Animation Worker - 15, Audio & Music Stagist - 15
    * @returns {UserRoleDTO[]} JSON response with success status, session/token, and message
    * @see {@link ImpactLevels} for input strucutre
    * */

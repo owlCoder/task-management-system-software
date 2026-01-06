@@ -8,7 +8,7 @@ import { UserRole } from "../Domain/models/UserRole";
 import { UserUpdateDTO } from "../Domain/DTOs/UserUpdateDTO";
 import { Result } from "../Domain/types/Result";
 import { ErrorCode } from "../Domain/enums/ErrorCode";
-import { toUserDTO } from "../Helpers/Converter/toUserDto";
+import { toUserDTO } from "../Helpers/Converter/toUserDTO";
 
 export class UsersService implements IUsersService {
   private readonly saltRounds: number = parseInt(
@@ -48,6 +48,22 @@ export class UsersService implements IUsersService {
         success: false,
         code: ErrorCode.NOT_FOUND,
         error: `User with ID ${user_id} not found`,
+      };
+    }
+    return { success: true, data: toUserDTO(user) };
+  }
+
+  async getUserByUsername(username: string): Promise<Result<UserDTO>> {
+    const user = await this.userRepository.findOne({
+      where: { username, is_deleted: false },
+      relations: ["user_role"],
+    });
+
+    if (!user) {
+      return {
+        success: false,
+        code: ErrorCode.NOT_FOUND,
+        error: `User with USERNAME ${username} not found`,
       };
     }
     return { success: true, data: toUserDTO(user) };
