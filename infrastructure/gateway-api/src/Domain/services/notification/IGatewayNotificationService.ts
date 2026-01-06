@@ -2,13 +2,13 @@ import { NotificationDTO } from "../../DTOs/notification/NotificationDTO";
 import { Result } from "../../types/common/Result";
 
 export interface IGatewayNotificationService {
-    getNotificationById(id: number): Promise<Result<NotificationDTO>>;
+    getNotificationById(notificationId: number): Promise<Result<NotificationDTO>>;
     getNotificationsByUserId(userId: number): Promise<Result<NotificationDTO[]>>;
-    getUnreadNotificationCount(id: number): Promise<Result<number>>;
-    markNotificationAsRead(id: number): Promise<Result<void>>;
-    markNotificationAsUnread(id: number): Promise<Result<void>>;
-    markMultipleNotificationsAsRead(ids: number[]): Promise<Result<void>>;
-    markMultipleNotificationsAsUnread(ids: number[]): Promise<Result<void>>;
-    deleteNotification(id: number): Promise<Result<void>>;
-    deleteMultipleNotifications(ids: number[]): Promise<Result<void>>;
+    getUnreadNotificationCount(userId: number): Promise<Result<number>>;
+    markNotificationAsRead(notificationId: number): Promise<Result<void>>;
+    markNotificationAsUnread(notificationId: number): Promise<Result<void>>;
+    markMultipleNotificationsAsRead(notificationIds: number[]): Promise<Result<void>>;
+    markMultipleNotificationsAsUnread(notificationIds: number[]): Promise<Result<void>>;
+    deleteNotification(notificationId: number): Promise<Result<void>>;
+    deleteMultipleNotifications(notificationIds: number[]): Promise<Result<void>>;
 }

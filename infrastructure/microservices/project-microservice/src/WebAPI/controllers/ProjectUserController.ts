@@ -1,6 +1,7 @@
 import { Router, Request, Response } from "express";
 import { IProjectUserService } from "../../Domain/services/IProjectUserService";
 import { ProjectUserAssignDTO } from "../../Domain/DTOs/ProjectUserAssignDTO";
+import { validateAssignUser } from "../validators/ProjectUserValidator";
 
 
 export class ProjectUserController {
@@ -17,17 +18,21 @@ export class ProjectUserController {
         this.router.delete("/projects/:id/users/:userId", this.removeUser.bind(this));
     }
 
+
     private async assignUser(req: Request, res: Response): Promise<void> {
         try {
             const project_id = parseInt(req.params.id, 10);
             const user_id = parseInt(req.body.user_id, 10);
+            const weekly_hours = parseInt(req.body.weekly_hours, 10);
 
-            if(isNaN(project_id) || isNaN(user_id)){
-                res.status(400).json({ message: "Invalid project ID or user ID" });
-                return;
+            const dto: ProjectUserAssignDTO = { project_id, user_id, weekly_hours };
+
+            const validation = validateAssignUser(dto);
+            if (!validation.success) {
+            res.status(400).json({ message: validation.message });
+            return;
             }
 
-            const dto: ProjectUserAssignDTO = { project_id, user_id };
             const result = await this.projectUserService.assignUserToProject(dto);
             res.status(201).json(result);
         } catch (err) {

@@ -6,7 +6,7 @@ import { logger } from "../../Infrastructure/logging/Logger";
 
 /**
  * Middleware to log incoming and outgoing HTTP traffic.
- * Logs the details of each request and its corresponding response, including the method, URL, status code, and the client’s IP address. 
+ * Logs the details of each request and its corresponding response, including the method, URL, status code, and the client's IP address. 
  * The logs are categorized by the status code range into different log levels:
  * - `info` for successful requests (2xx and 3xx status codes).
  * - `warn` for client errors (4xx status codes).
@@ -14,8 +14,9 @@ import { logger } from "../../Infrastructure/logging/Logger";
  * @param {Request} req - The request object, representing the incoming HTTP request.
  * @param {Response} res - The response object, representing the outgoing HTTP response.
  * @param {NextFunction} next - The next middleware function in the request-response cycle.
+ * @returns void
  */
-export function logTraffic(req: Request, res: Response, next: NextFunction) {
+export function logTraffic(req: Request, res: Response, next: NextFunction): void {
     logger.info({
         service: "Gateway",
         method: req.method,

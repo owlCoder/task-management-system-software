@@ -1,4 +1,6 @@
 import React, { useRef, useState } from "react";
+import { Navigate, useLocation, useNavigate } from "react-router-dom";
+import { useAuth } from "../hooks/useAuthHook";
 
 const backgroundImageUrl = new URL(
   "../../public/pozadina.png",
@@ -7,7 +9,20 @@ const backgroundImageUrl = new URL(
 
 export const OtpPage: React.FC = () => {
   const [otp, setOtp] = useState<string[]>(Array(8).fill(""));
+  const [error, setError] = useState("");
   const inputsRef = useRef<Array<HTMLInputElement | null>>([]);
+
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { login } = useAuth();
+
+  const session = (location.state as any)?.session;
+
+  if (!session) {
+    return <Navigate to="/auth" replace />;
+  }
+
+  const otpValue = otp.join("");
 
   const handleChange = (value: string, index: number) => {
     if (!/^\d?$/.test(value)) return;
@@ -21,7 +36,36 @@ export const OtpPage: React.FC = () => {
     }
   };
 
-  const otpValue = otp.join("");
+  const onVerify = async () => {
+  if (otpValue.length !== 8) return;
+
+  try {
+    setError("");
+
+    const res = await fetch(`${import.meta.env.VITE_GATEWAY_URL}/verify-otp`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ session, code: otpValue }),
+    });
+
+    const data = await res.json().catch(() => ({}));
+
+    if (!res.ok) {
+      throw new Error(data?.message || `HTTP ${res.status}`);
+    }
+
+    if(data?.token) {
+      login(data.token);
+      navigate("/mainwindow");
+      return;
+    }
+        
+    setError("Verification has passed. But no token received.");
+
+  } catch (e: any) {
+    setError(e?.message || "Verification failed.");
+  }
+};
 
   return (
     <div
@@ -76,6 +120,7 @@ export const OtpPage: React.FC = () => {
         </div>
 
         <button
+          onClick={onVerify}
           disabled={otpValue.length !== 8}
           className="
             mt-2 w-[45%] py-2 rounded-md
@@ -85,6 +130,7 @@ export const OtpPage: React.FC = () => {
         >
           Verify Code
         </button>
+        {error && <p className="text-red-400 text-center text-sm">{error}</p>}
       </div>
     </div>
   );

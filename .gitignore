@@ -1,4 +1,5 @@
 .env
+.env.docker
 .DS_Store
 database/docker-compose.yml
 database/output.txt

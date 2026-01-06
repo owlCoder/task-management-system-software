@@ -1,17 +1,14 @@
+import { Request } from "express";
+
 // Libraries
-import axios, { AxiosInstance } from "axios";
+import { AxiosInstance } from "axios";
 
 // Domain
 import { IErrorHandlingService } from "../../Domain/services/common/IErrorHandlingService";
 import { IGatewayFileService } from "../../Domain/services/file/IGatewayFileService";
-import { CreateFileDTO } from "../../Domain/DTOs/file/CreateFileDTO";
-import { DownloadFileDTO } from "../../Domain/DTOs/file/DownloadFileDTO";
 import { UploadedFileDTO } from "../../Domain/DTOs/file/UploadedFileDTO";
 import { Result } from "../../Domain/types/common/Result";
-
-// Utils
-import { generateFileFormData } from "./utils/GenerateData";
-import { extractDownloadDTOFromResponse } from "./utils/ExtractData";
+import { StreamResponse } from "../../Domain/types/common/StreamResponse";
 
 // Constants
 import { HTTP_METHODS } from "../../Constants/common/HttpMethods";
@@ -20,7 +17,8 @@ import { SERVICES } from "../../Constants/services/Services";
 import { API_ENDPOINTS } from "../../Constants/services/APIEndpoints";
 
 // Infrastructure
-import { makeAPICall, makeAPICallWithTransform } from "../../Infrastructure/axios/APIHelpers";
+import { makeAPICall, makeAPIDownloadStreamCall, makeAPIUploadStreamCall } from "../../Infrastructure/axios/APIHelpers";
+import { createAxiosClient } from "../../Infrastructure/axios/client/AxiosClientFactory";
 
 /**
  * Makes API requests to the File Microservice.
@@ -29,27 +27,23 @@ export class GatewayFileService implements IGatewayFileService {
     private readonly fileClient: AxiosInstance;
     
     constructor(private readonly errorHandlingService: IErrorHandlingService){
-        this.fileClient = axios.create({
-            baseURL: API_ENDPOINTS.FILE,
-            timeout: 5000,
-        });
+        this.fileClient = createAxiosClient(API_ENDPOINTS.FILE, { headers: {} });
     }
 
     /**
-     * Fetches the file from file microservice.
-     * @param {number} fileId - id of the file. 
-     * @returns {Promise<Result<DownloadFileDTO>>} - A promise that resolves to a Result object containing the file content and metadata
-     * - On success returns data as {@link DownloadFileDTO}.
+     * Downloads a file from the file microservice by its ID.
+     * @param {number} fileId - id of the file.
+     * @returns {Promise<Result<StreamResponse>>} A promise that resolves to a Result object containing:
+     * - On success StreamResponse object containing the Readable stream and headers.
      * - On failure returns status code and error message.
      */
-    async downloadFile(fileId: number): Promise<Result<DownloadFileDTO>> {
-        return await makeAPICallWithTransform<DownloadFileDTO>(this.fileClient, this.errorHandlingService, {
+    async downloadFile(fileId: number): Promise<Result<StreamResponse>> {
+        return await makeAPIDownloadStreamCall(this.fileClient, this.errorHandlingService, {
             serviceName: SERVICES.FILE,
             method: HTTP_METHODS.GET,
-            url: FILE_ROUTES.DOWNLOAD(fileId),
-            responseType: "arraybuffer",
-            timeout: 10000
-        }, extractDownloadDTOFromResponse);
+            url: FILE_ROUTES.DOWNLOAD_FILE(fileId),
+            timeout: 20000
+        });
     }
 
     /**
@@ -63,7 +57,7 @@ export class GatewayFileService implements IGatewayFileService {
         return await makeAPICall<UploadedFileDTO[]>(this.fileClient, this.errorHandlingService, {
             serviceName: SERVICES.FILE,
             method: HTTP_METHODS.GET,
-            url: FILE_ROUTES.GET_BY_AUTHOR(authorId)
+            url: FILE_ROUTES.GET_FILES_FROM_AUTHOR(authorId)
         });
     }
 
@@ -78,26 +72,28 @@ export class GatewayFileService implements IGatewayFileService {
         return await makeAPICall<UploadedFileDTO>(this.fileClient, this.errorHandlingService, {
             serviceName: SERVICES.FILE,
             method: HTTP_METHODS.GET,
-            url: FILE_ROUTES.METADATA(fileId)
+            url: FILE_ROUTES.GET_FILE_METADATA(fileId)
         });
     }
 
     /**
-     * Uploads a file to file microservice.
-     * @param {CreateFileDTO} fileData - file metadata and content. 
+     * Passes through file data from the request.
+     * @param {Request} req - The request object containing the file. 
      * @returns {Promise<Result<UploadedFileDTO>>} - A promise that resolves to a Result object containing the file metadata.
      * - On success returns data as {@link UploadedFileDTO}.
      * - On failure returns status code and error message.
      */
-    async uploadFile(fileData: CreateFileDTO): Promise<Result<UploadedFileDTO>> {
-        const formData = generateFileFormData(fileData);
-        
-        return await makeAPICall<UploadedFileDTO, FormData>(this.fileClient, this.errorHandlingService, {
+    async uploadFile(req: Request): Promise<Result<UploadedFileDTO>> {
+        return await makeAPIUploadStreamCall<UploadedFileDTO, Request>(this.fileClient, this.errorHandlingService, {
             serviceName: SERVICES.FILE,
             method: HTTP_METHODS.POST,
-            url: FILE_ROUTES.UPLOAD,
-            data: formData,
-            timeout: 10000
+            url: FILE_ROUTES.UPLOAD_FILE,
+            data: req,
+            headers: {
+                'Content-Type': req.headers["content-type"]!,
+                ...(req.headers["content-length"] && { 'Content-Length': req.headers["content-length"] })
+            },
+            timeout: 20000
         });
     }
 
@@ -112,7 +108,7 @@ export class GatewayFileService implements IGatewayFileService {
         return await makeAPICall<void>(this.fileClient, this.errorHandlingService, {
             serviceName: SERVICES.FILE,
             method: HTTP_METHODS.DELETE,
-            url: FILE_ROUTES.DELETE(fileId),
+            url: FILE_ROUTES.DELETE_FILE(fileId),
         });
     }
 

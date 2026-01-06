@@ -1,5 +1,6 @@
 DROP TABLE IF EXISTS users_db.users;
 DROP TABLE IF EXISTS users_db.user_roles;
+DROP TABLE IF EXISTS users_db.user_roles;
 
 CREATE TABLE IF NOT EXISTS users_db.user_roles (
   user_role_id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,

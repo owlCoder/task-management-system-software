@@ -26,6 +26,7 @@ import { GatewayNotificationService } from './Services/notification/GatewayNotif
 import { GatewayAnalyticsService } from './Services/analytics/GatewayAnalyticsService';
 
 // Controllers
+import { HealthController } from './WebAPI/Controllers/health/HealthController';
 import { GatewayAuthController } from './WebAPI/Controllers/auth/GatewayAuthController';
 import { GatewayUserController } from './WebAPI/Controllers/user/GatewayUserController';
 import { GatewayProjectController } from './WebAPI/Controllers/project/GatewayProjectController';
@@ -37,23 +38,27 @@ import { GatewayAnalyticsController } from './WebAPI/Controllers/analytics/Gatew
 // Middlewares
 import { logTraffic } from './Middlewares/logger/LoggingMiddleware';
 import { corsPolicy } from './Middlewares/cors/CorsMiddleware';
+import { bodyParserErrorHandler } from './Middlewares/parser/ParserMiddleware';
+import { globalErrorHandler } from './Middlewares/recovery/GlobalErrorMiddleware';
 
 // Infrastructure
 import { logger } from './Infrastructure/logging/Logger';
 
 const app = express();
 
-// Protectes microservice from unauthorized access
-app.use(corsPolicy);
+/**
+ * corsPolicy - Protects microservice from unauthorized access.
+ * logTraffic - Middleware that logs incoming requests and outgoing responses.
+ * express.json() - JSON parsing middleware.
+ * bodyParserErrorHandler - Prevents invalid JSON formats.
+ */
+app.use(corsPolicy, logTraffic, express.json(), bodyParserErrorHandler);
 
-app.use(express.json());
-
-// Logs incoming requests and outgoing responses
-app.use(logTraffic);
-
-// Services
+// Core infrastructure
 const loggerService: ILoggerService = new LoggerService(logger);
 const errorHandlingService: IErrorHandlingService = new ErrorHandlingService(loggerService);
+
+// Domain services
 const gatewayAuthService: IGatewayAuthService = new GatewayAuthService(errorHandlingService);
 const gatewayUserService: IGatewayUserService = new GatewayUserService(errorHandlingService);
 const gatewayProjectService: IGatewayProjectService = new GatewayProjectService(errorHandlingService);
@@ -62,7 +67,8 @@ const gatewayFileService: IGatewayFileService = new GatewayFileService(errorHand
 const gatewayNotificationService: IGatewayNotificationService = new GatewayNotificationService(errorHandlingService);
 const gatewayAnalyticsService: IGatewayAnalyticsService = new GatewayAnalyticsService(errorHandlingService);
 
-// WebAPI routes
+// Controllers
+const healthController = new HealthController();
 const gatewayAuthController = new GatewayAuthController(gatewayAuthService);
 const gatewayUserController = new GatewayUserController(gatewayUserService);
 const gatewayProjectController = new GatewayProjectController(gatewayProjectService);
@@ -71,7 +77,8 @@ const gatewayFileController = new GatewayFileController(gatewayFileService);
 const gatewayNotificationController = new GatewayNotificationController(gatewayNotificationService);
 const gatewayAnalyticsController = new GatewayAnalyticsController(gatewayAnalyticsService);
 
-// Registering routes
+// Register routes
+app.use('/', healthController.getRouter());
 app.use('/api/v1', gatewayAuthController.getRouter());
 app.use('/api/v1', gatewayUserController.getRouter());
 app.use('/api/v1', gatewayProjectController.getRouter());
@@ -79,5 +86,8 @@ app.use('/api/v1', gatewayTaskController.getRouter());
 app.use('/api/v1', gatewayFileController.getRouter());
 app.use('/api/v1', gatewayNotificationController.getRouter());
 app.use('/api/v1', gatewayAnalyticsController.getRouter());
+
+// Protects the server from unexpected errors.
+app.use(globalErrorHandler);
 
 export default app;

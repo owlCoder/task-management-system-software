@@ -2,8 +2,11 @@
 import { Response } from "express";
 
 // Domain
-import { DownloadFileDTO } from "../../../Domain/DTOs/file/DownloadFileDTO";
 import { Result } from "../../../Domain/types/common/Result";
+import { StreamResponse } from "../../../Domain/types/common/StreamResponse";
+
+// Utils
+import { setupStreamCleanup } from "./StreamCleanup";
 
 /**
  * Handles the response by sending the result from a microservice to the client.
@@ -40,18 +43,27 @@ export function handleEmptyResponse(res: Response, result: Result<void>): void {
 
 /**
  * Handles the response for downloading a file.
- * If the result is successful, it sends the file with appropriate headers for downloading (Content-Type, Content-Disposition).
- * If the result is unsuccessful, it returns the error message and status code.
  * @param {Response} res - Response for the client.
- * @param {Result<DownloadFileDTO>} result - The result containing the file data or error information.
+ * @param {Result<StreamResponse>} result - The result data is streamed to the client.
  * @returns {void} 
+ * - On success it sends the file with appropriate headers for downloading (Content-Type, Content-Disposition).
+ * - On failure it returns the error message and status code.
  */
-export function handleDownloadResponse(res: Response, result: Result<DownloadFileDTO>): void {
+export function handleDownloadResponse(res: Response, result: Result<StreamResponse>): void {
     if(result.success){
-        res.status(200)
-            .setHeader("Content-Type", result.data.contentType)
-            .setHeader('Content-Disposition', `attachment; filename="${result.data.fileName}"`)
-            .send(result.data.fileBuffer);
+        const { stream, headers } = result.data;
+        
+        const contentType = headers["content-type"]?.toString() ?? "application/octet-stream";
+        const contentDisposition = headers["content-disposition"]?.toString() ?? "attachment; filename=file";
+
+        res.status(200).setHeader("Content-Type", contentType).setHeader('Content-Disposition', contentDisposition);
+
+        if (headers["content-length"]) {
+            res.setHeader("Content-Length", headers["content-length"]);
+        }
+        
+        setupStreamCleanup(stream, res);
+        stream.pipe(res);
         return;
     }
     res.status(result.status).json({ message: result.message });

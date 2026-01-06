@@ -1,5 +1,5 @@
 // Libraries
-import axios, { AxiosInstance } from "axios";
+import { AxiosInstance } from "axios";
 
 // Domain
 import { IErrorHandlingService } from "../../Domain/services/common/IErrorHandlingService";
@@ -19,6 +19,7 @@ import { API_ENDPOINTS } from "../../Constants/services/APIEndpoints";
 
 // Infrastructure
 import { makeAPICall } from "../../Infrastructure/axios/APIHelpers";
+import { createAxiosClient } from "../../Infrastructure/axios/client/AxiosClientFactory";
 
 /**
  * Makes API requests to the Analytics Microservice.
@@ -27,11 +28,7 @@ export class GatewayAnalyticsService implements IGatewayAnalyticsService {
     private readonly analyticsClient: AxiosInstance;
 
     constructor(private readonly errorHandlingService: IErrorHandlingService) {
-        this.analyticsClient = axios.create({
-            baseURL: API_ENDPOINTS.ANALYTICS,
-            headers: { "Content-Type": "application/json" },
-            timeout: 5000,
-        });
+        this.analyticsClient = createAxiosClient(API_ENDPOINTS.ANALYTICS);
     }
 
     /**

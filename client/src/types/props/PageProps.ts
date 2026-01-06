@@ -1,8 +1,6 @@
-import { TaskDTO } from "../../models/task/TaskDTO";
 
 export interface TaskListPageProps {
   projectId: string;
-  token: string;
 }
 
 export interface TaskDetailPageProps {

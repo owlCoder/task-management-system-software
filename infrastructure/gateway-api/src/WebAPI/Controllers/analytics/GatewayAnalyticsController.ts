@@ -8,7 +8,7 @@ import { BurnupDTO } from "../../../Domain/DTOs/analytics/BurnupDTO";
 import { BudgetTrackingDTO } from "../../../Domain/DTOs/analytics/BudgetTrackingDTO";
 import { ResourceCostAllocationDTO } from "../../../Domain/DTOs/analytics/ResourceCostAllocationDTO";
 import { ProfitMarginDTO } from "../../../Domain/DTOs/analytics/ProfitMarginDTO";
-import { UserRole } from "../../../Domain/enums/user/UserRole";
+import { AnalyticsPolicies } from "../../../Domain/access-policies/analytics/AnalyticsPolicies";
 
 // Middlewares
 import { authenticate } from "../../../Middlewares/authentication/AuthMiddleware";
@@ -28,22 +28,27 @@ export class GatewayAnalyticsController {
         this.initializeRoutes();
     }
 
+    /**
+     * Registering routes for Analytics Microservice.
+     */
     private initializeRoutes() {
-        this.router.get('/analytics/burndown/:sprintId', authenticate, authorize(UserRole.ANALYTICS_DEVELOPMENT_MANAGER), this.getBurndownAnalyticsBySprintId.bind(this));
-        this.router.get('/analytics/burnup/:sprintId', authenticate, authorize(UserRole.ANALYTICS_DEVELOPMENT_MANAGER), this.getBurnupAnalyticsBySprintId.bind(this));
-        this.router.get('/analytics/velocity/:projectId', authenticate, authorize(UserRole.ANALYTICS_DEVELOPMENT_MANAGER), this.getVelocityAnalyticsByProjectId.bind(this));
-        this.router.get('/analytics/budget/:projectId', authenticate, authorize(UserRole.ANALYTICS_DEVELOPMENT_MANAGER), this.getBudgetTrackingByProjectId.bind(this));
-        this.router.get('/analytics/resource-cost/:projectId', authenticate, authorize(UserRole.ANALYTICS_DEVELOPMENT_MANAGER), this.getResourceCostAllocationByProjectId.bind(this));
-        this.router.get('/analytics/profit-margin/:projectId', authenticate, authorize(UserRole.ANALYTICS_DEVELOPMENT_MANAGER), this.getProfitMarginByProjectId.bind(this));
+        const analyticsReadonlyAccess = [authenticate, authorize(...AnalyticsPolicies.READONLY)];
+
+        this.router.get('/analytics/burndown/:sprintId', ...analyticsReadonlyAccess, this.getBurndownAnalyticsBySprintId.bind(this));
+        this.router.get('/analytics/burnup/:sprintId', ...analyticsReadonlyAccess, this.getBurnupAnalyticsBySprintId.bind(this));
+        this.router.get('/analytics/velocity/:projectId', ...analyticsReadonlyAccess, this.getVelocityAnalyticsByProjectId.bind(this));
+        this.router.get('/analytics/budget/:projectId', ...analyticsReadonlyAccess, this.getBudgetTrackingByProjectId.bind(this));
+        this.router.get('/analytics/resource-cost/:projectId', ...analyticsReadonlyAccess, this.getResourceCostAllocationByProjectId.bind(this));
+        this.router.get('/analytics/profit-margin/:projectId', ...analyticsReadonlyAccess, this.getProfitMarginByProjectId.bind(this));
     }
 
     /**
      * GET /api/v1/analytics/burndown/:sprintId
      * @param {Request} req - the request object, containing the id of the sprint in params.
      * @param {Response} res - the response object for the client.
-     * @returns {Object}
-     * - On success: A JSON object following the {@link BurndownDTO} structure containing the result of the get burndown analytics by sprint id operation. 
-     * - On failure: A JSON object with an error message and a HTTP status code indicating the failure.
+     * @returns {Promise<void>}
+     * - On success: response status 200, response data: {@link BurndownDTO}. 
+     * - On failure: response status code indicating the failure, response data: message describing the error.
      */
     private async getBurndownAnalyticsBySprintId(req: Request, res: Response): Promise<void> {
         const sprintId = parseInt(req.params.sprintId, 10);
@@ -56,9 +61,9 @@ export class GatewayAnalyticsController {
      * GET /api/v1/analytics/burnup/:sprintId
      * @param {Request} req - the request object, containing the id of the sprint in params.
      * @param {Response} res - the response object for the client.
-     * @returns {Object}
-     * - On success: A JSON object following the {@link BurnupDTO} structure containing the result of the get burnup analytics by sprint id operation. 
-     * - On failure: A JSON object with an error message and a HTTP status code indicating the failure.
+     * @returns {Promise<void>}
+     * - On success: response status 200, response data: {@link BurnupDTO}. 
+     * - On failure: response status code indicating the failure, response data: message describing the error.
      */
     private async getBurnupAnalyticsBySprintId(req: Request, res: Response): Promise<void> {
         const sprintId = parseInt(req.params.sprintId, 10);
@@ -71,9 +76,9 @@ export class GatewayAnalyticsController {
      * GET /api/v1/analytics/velocity/:projectId
      * @param {Request} req - the request object, containing the id of the project in params.
      * @param {Response} res - the response object for the client.
-     * @returns {Object}
-     * - On success: A JSON object containing the number that represents the result of the get velocity analytics by project id operation. 
-     * - On failure: A JSON object with an error message and a HTTP status code indicating the failure.
+     * @returns {Promise<void>}
+     * - On success: response status 200, response data: number representing the velocity. 
+     * - On failure: response status code indicating the failure, response data: message describing the error.
      */
     private async getVelocityAnalyticsByProjectId(req: Request, res: Response): Promise<void> {
         const projectId = parseInt(req.params.projectId, 10);
@@ -86,9 +91,9 @@ export class GatewayAnalyticsController {
      * GET /api/v1/analytics/budget/:projectId
      * @param {Request} req - the request object, containing the id of the project in params.
      * @param {Response} res - the response object for the client.
-     * @returns {Object}
-     * - On success: A JSON object following the {@link BudgetTrackingDTO} structure containing the result of the get budget tracking by project id operation. 
-     * - On failure: A JSON object with an error message and a HTTP status code indicating the failure.
+     * @returns {Promise<void>}
+     * - On success: response status 200, response data: {@link BudgetTrackingDTO}. 
+     * - On failure: response status code indicating the failure, response data: message describing the error.
      */
     private async getBudgetTrackingByProjectId(req: Request, res: Response): Promise<void> {
         const projectId = parseInt(req.params.projectId, 10);
@@ -101,9 +106,9 @@ export class GatewayAnalyticsController {
      * GET /api/v1/analytics/resource-cost/:projectId
      * @param {Request} req - the request object, containing the id of the project in params.
      * @param {Response} res - the response object for the client.
-     * @returns {Object}
-     * - On success: A JSON object following the {@link ResourceCostAllocationDTO} structure containing the result of the get resource cost by project id operation. 
-     * - On failure: A JSON object with an error message and a HTTP status code indicating the failure.
+     * @returns {Promise<void>}
+     * - On success: response status 200, response data: {@link ResourceCostAllocationDTO}. 
+     * - On failure: response status code indicating the failure, response data: message describing the error.
      */
     private async getResourceCostAllocationByProjectId(req: Request, res: Response): Promise<void> {
         const projectId = parseInt(req.params.projectId, 10);
@@ -116,9 +121,9 @@ export class GatewayAnalyticsController {
      * GET /api/v1/analytics/profit-margin/:projectId
      * @param {Request} req - the request object, containing the id of the project in params.
      * @param {Response} res - the response object for the client.
-     * @returns {Object}
-     * - On success: A JSON object following the {@link ProfitMarginDTO} structure containing the result of the get profit margin by project id operation. 
-     * - On failure: A JSON object with an error message and a HTTP status code indicating the failure.
+     * @returns {Promise<void>}
+     * - On success: response status 200, response data: {@link ProfitMarginDTO}. 
+     * - On failure: response status code indicating the failure, response data: message describing the error.
      */
     private async getProfitMarginByProjectId(req: Request, res: Response): Promise<void> {
         const projectId = parseInt(req.params.projectId, 10);

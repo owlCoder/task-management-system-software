@@ -11,6 +11,7 @@ import TaskPage from "./pages/TaskPage";
 import { FilePage } from "./pages/FilePage";
 import { OtpPage } from "./pages/OTPPage";
 import AnalyticsPage from "./pages/AnalyticsPage";
+import { Toaster } from 'react-hot-toast';
 
 const auth_api: IAuthAPI = new AuthAPI();
 
@@ -26,7 +27,7 @@ function App() {
         <Route path="/projects" element={<ProjectsPage />} />
         <Route path="/analytics" element={<AnalyticsPage />} />
         <Route path="/notifications" element={<NotificationPage />} />
-        <Route path="/tasks" element={<TaskPage projectId={""} token={""} />} />
+        <Route path="/tasks" element={<TaskPage projectId={""}  />} />
         <Route path="/auth" element={<AuthPage authAPI={auth_api} />} />
         <Route path="/files" element={<FilePage />} />
         <Route path="/mainwindow" element={<MainWindow />} />
@@ -41,6 +42,7 @@ function App() {
           }
         />
       </Routes>
+      <Toaster position="bottom-right" />
     </div>
   );
 }

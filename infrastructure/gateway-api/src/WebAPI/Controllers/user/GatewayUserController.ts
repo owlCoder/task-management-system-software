@@ -7,7 +7,7 @@ import { RegistrationUserDTO } from "../../../Domain/DTOs/user/RegistrationUserD
 import { UserDTO } from "../../../Domain/DTOs/user/UserDTO";
 import { UpdateUserDTO } from "../../../Domain/DTOs/user/UpdateUserDTO";
 import { UserRoleDTO } from "../../../Domain/DTOs/user/UserRoleDTO";
-import { UserRole } from "../../../Domain/enums/user/UserRole";
+import { UserPolicies } from "../../../Domain/access-policies/user/UserPolicies";
 
 // Middlewares
 import { authenticate } from "../../../Middlewares/authentication/AuthMiddleware";
@@ -27,22 +27,28 @@ export class GatewayUserController {
         this.initializeRoutes();
     }
 
+    /**
+     * Registering routes for User Microservice.
+     */
     private initializeRoutes() {
-        this.router.post("/users", authenticate, authorize(UserRole.ADMIN), this.createUser.bind(this));
-        this.router.get("/users/:id", authenticate, authorize(UserRole.ADMIN), this.getUserById.bind(this));
-        this.router.get("/users", authenticate, authorize(UserRole.ADMIN), this.getUsers.bind(this));
-        this.router.put("/users/:id", authenticate, authorize(UserRole.ADMIN), this.updateUserById.bind(this));
-        this.router.delete("/users/:id", authenticate, authorize(UserRole.ADMIN), this.logicallyDeleteUserById.bind(this));
-        this.router.get("/user-roles/userCreation", authenticate, authorize(UserRole.ADMIN), this.getCreationRoles.bind(this));
+        const userReadonlyAccess = [authenticate, authorize(...UserPolicies.READONLY)];
+        const userWriteAccess = [authenticate, authorize(...UserPolicies.WRITE)];
+
+        this.router.post("/users", ...userWriteAccess, this.createUser.bind(this));
+        this.router.get("/users/:userId", ...userReadonlyAccess, this.getUserById.bind(this));
+        this.router.get("/users", ...userReadonlyAccess, this.getUsers.bind(this));
+        this.router.put("/users/:userId", ...userWriteAccess, this.updateUserById.bind(this));
+        this.router.delete("/users/:userId", ...userWriteAccess, this.logicallyDeleteUserById.bind(this));
+        this.router.get("/user-roles/:impactLevel", ...userReadonlyAccess, this.getRolesByImpactLevel.bind(this));
     }
 
     /**
      * POST /api/v1/users
      * @param {Request} req - the request object, containing the registration data in the body as a {@link RegistrationUserDTO}.
      * @param {Response} res - the response object for the client.
-     * @returns {Object}
-     * - On success: A JSON object following the {@link UserDTO} structure containing the result of the registration attempt. 
-     * - On failure: A JSON object with an error message and a HTTP status code indicating the failure.
+     * @returns {Promise<void>}
+     * - On success: response status 201, response data: {@link UserDTO}. 
+     * - On failure: response status code indicating the failure, response data: message describing the error.
      */
     private async createUser(req: Request, res: Response): Promise<void> {
         const data = req.body as RegistrationUserDTO;
@@ -52,74 +58,76 @@ export class GatewayUserController {
     }
 
     /**
-     * GET /api/v1/users/:id
-     * @param {Request} req - the request object, containing the id in params.
+     * GET /api/v1/users/:userId
+     * @param {Request} req - the request object, containing the user id in params.
      * @param {Response} res - the response object for the client.
-     * @returns {Object}
-     * - On success: A JSON object following the {@link UserDTO} structure containing the result of the get user by id operation. 
-     * - On failure: A JSON object with an error message and a HTTP status code indicating the failure.
+     * @returns {Promise<void>}
+     * - On success: response status 200, response data: {@link UserDTO}.
+     * - On failure: response status code indicating the failure, response data: message describing the error.
      */
     private async getUserById(req: Request, res: Response): Promise<void> {
-        const id = parseInt(req.params.id, 10);
+        const userId = parseInt(req.params.userId, 10);
 
-        const result = await this.gatewayUserService.getUserById(id);
+        const result = await this.gatewayUserService.getUserById(userId);
         handleResponse(res, result);
     }
     
     /**
      * GET /api/v1/users
-     * @param {Request} req - the request object.
+     * @param {Request} _req - the request object.
      * @param {Response} res - the response object for the client.
-     * @returns {Object}
-     * - On success: A JSON object following the structure {@link UserDTO[]} containing the result of the get users operation. 
-     * - On failure: A JSON object with an error message and a HTTP status code indicating the failure.
+     * @returns {Promise<void>}
+     * - On success: response status 200, response data: {@link UserDTO[]}. 
+     * - On failure: response status code indicating the failure, response data: message describing the error.
      */
-    private async getUsers(req: Request, res: Response): Promise<void> {
+    private async getUsers(_req: Request, res: Response): Promise<void> {
         const result = await this.gatewayUserService.getUsers();
         handleResponse(res, result);
     }
 
     /**
-     * PUT /api/v1/users/:id
-     * @param {Request} req - the request object, containing the user data in the body as a {@link UpdateUserDTO} and id in params.
+     * PUT /api/v1/users/:userId
+     * @param {Request} req - the request object, containing the user data in the body as a {@link UpdateUserDTO} and user id in params.
      * @param {Response} res - the response object for the client.
-     * @returns {Object}
-     * - On success: A JSON object following the {@link UserDTO} structure containing the result of the update operation. 
-     * - On failure: A JSON object with an error message and a HTTP status code indicating the failure.
+     * @returns {Promise<void>}
+     * - On success: response status 200, response data: {@link UserDTO}.
+     * - On failure: response status code indicating the failure, response data: message describing the error.
      */
     private async updateUserById(req: Request, res: Response): Promise<void> {
-        const id = parseInt(req.params.id, 10);
+        const userId = parseInt(req.params.userId, 10);
         const data = req.body as UpdateUserDTO;
 
-        const result = await this.gatewayUserService.updateUserById(id, data);
+        const result = await this.gatewayUserService.updateUserById(userId, data);
         handleResponse(res, result);
     }
 
     /**
-     * DELETE /api/v1/users/:id
-     * @param {Request} req - the request object, containing the id in params.
+     * DELETE /api/v1/users/:userId
+     * @param {Request} req - the request object, containing the user id in params.
      * @param {Response} res - the response object for the client.
-     * @returns {Object}
-     * - On success: 204 No Content. 
-     * - On failure: A JSON object with an error message and a HTTP status code indicating the failure.
+     * @returns {Promise<void>}
+     * - On success: response status 204, no data.
+     * - On failure: response status code indicating the failure, response data: message describing the error.
      */
     private async logicallyDeleteUserById(req: Request, res: Response): Promise<void> {
-        const id = parseInt(req.params.id, 10);
+        const userId = parseInt(req.params.userId, 10);
 
-        const result = await this.gatewayUserService.logicallyDeleteUserById(id);
+        const result = await this.gatewayUserService.logicallyDeleteUserById(userId);
         handleEmptyResponse(res, result);
     }
 
     /**
-     * GET /api/v1/user-roles/userCreation
-     * @param {Request} _req - the request object, unused.
+     * GET /api/v1/user-roles/:impactLevel
+     * @param {Request} req - the request object.
      * @param {Response} res - the response object for the client.
-     * @returns {Object}
-     * - On success: A JSON object following the structure {@link UserRoleDTO[]} containing the result of the get creation roles operation. 
-     * - On failure: A JSON object with an error message and a HTTP status code indicating the failure.
+     * @returns {Promise<void>}
+     * - On success: response status 200, response data: {@link UserRoleDTO}. 
+     * - On failure: response status code indicating the failure, response data: message describing the error.
      */
-    private async getCreationRoles(_req: Request, res: Response): Promise<void> {
-        const result = await this.gatewayUserService.getCreationRoles();
+    private async getRolesByImpactLevel(req: Request, res: Response): Promise<void> {
+        const impactLevel = parseInt(req.params.impactLevel, 10);
+
+        const result = await this.gatewayUserService.getRolesByImpactLevel(impactLevel);
         handleResponse(res, result);
     }
 

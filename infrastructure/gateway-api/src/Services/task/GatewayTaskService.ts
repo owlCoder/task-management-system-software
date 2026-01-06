@@ -1,5 +1,5 @@
 // Libraries
-import axios, { AxiosInstance } from "axios";
+import { AxiosInstance } from "axios";
 
 // Domain
 import { IErrorHandlingService } from "../../Domain/services/common/IErrorHandlingService";
@@ -18,6 +18,7 @@ import { API_ENDPOINTS } from "../../Constants/services/APIEndpoints";
 
 // Infrastructure
 import { makeAPICall } from "../../Infrastructure/axios/APIHelpers";
+import { createAxiosClient } from "../../Infrastructure/axios/client/AxiosClientFactory";
 
 /**
  * Makes API requests to the Task Microservice.
@@ -26,10 +27,7 @@ export class GatewayTaskService implements IGatewayTaskService {
     private readonly taskClient: AxiosInstance;
     
     constructor(private readonly errorHandlingService: IErrorHandlingService){
-        this.taskClient = axios.create({
-            baseURL: API_ENDPOINTS.TASK,
-            timeout: 5000,
-        });
+        this.taskClient = createAxiosClient(API_ENDPOINTS.TASK);
     }
 
     /**
@@ -43,7 +41,7 @@ export class GatewayTaskService implements IGatewayTaskService {
         return await makeAPICall<TaskDTO>(this.taskClient, this.errorHandlingService, {
             serviceName: SERVICES.TASK,
             method: HTTP_METHODS.GET,
-            url: TASK_ROUTES.GET_BY_ID(taskId)
+            url: TASK_ROUTES.GET_TASK(taskId)
         });
     }
     
@@ -58,7 +56,7 @@ export class GatewayTaskService implements IGatewayTaskService {
         return await makeAPICall<TaskDTO[]>(this.taskClient, this.errorHandlingService, {
             serviceName: SERVICES.TASK,
             method: HTTP_METHODS.GET,
-            url: TASK_ROUTES.GET_BY_SPRINT_ID(sprintId)
+            url: TASK_ROUTES.GET_TASKS_FROM_SPRINT(sprintId)
         });
     }
     
@@ -74,7 +72,7 @@ export class GatewayTaskService implements IGatewayTaskService {
         return await makeAPICall<TaskDTO, CreateTaskDTO>(this.taskClient, this.errorHandlingService, {
             serviceName: SERVICES.TASK,
             method: HTTP_METHODS.POST,
-            url: TASK_ROUTES.ADD_TASK_BY_SPRINT_ID(sprintId),
+            url: TASK_ROUTES.ADD_TASK_TO_SPRINT(sprintId),
             data: data
         });
     }
@@ -91,7 +89,7 @@ export class GatewayTaskService implements IGatewayTaskService {
         return await makeAPICall<CommentDTO, CreateCommentDTO>(this.taskClient, this.errorHandlingService, {
             serviceName: SERVICES.TASK,
             method: HTTP_METHODS.POST,
-            url: TASK_ROUTES.ADD_COMMENT_BY_TASK_ID(taskId),
+            url: TASK_ROUTES.ADD_COMMENT_TO_TASK(taskId),
             data: data
         });
     }

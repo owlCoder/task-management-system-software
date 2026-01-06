@@ -3,4 +3,5 @@ export interface SprintUpdateDTO {
     sprint_description?: string;
     start_date?: Date;
     end_date?: Date;
+    story_points?: number;
 }

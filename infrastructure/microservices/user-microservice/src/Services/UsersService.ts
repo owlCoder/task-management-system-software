@@ -6,9 +6,9 @@ import { UserCreationDTO } from "../Domain/DTOs/UserCreationDTO";
 import bcrypt from "bcryptjs";
 import { UserRole } from "../Domain/models/UserRole";
 import { UserUpdateDTO } from "../Domain/DTOs/UserUpdateDTO";
-import { toDTO } from "../Helpers/toUserDto";
 import { Result } from "../Domain/types/Result";
 import { ErrorCode } from "../Domain/enums/ErrorCode";
+import { toUserDTO } from "../Helpers/Converter/toUserDTO";
 
 export class UsersService implements IUsersService {
   private readonly saltRounds: number = parseInt(
@@ -29,7 +29,7 @@ export class UsersService implements IUsersService {
       where: { is_deleted: false },
       relations: ["user_role"],
     });
-    return { success: true, data: users.map((u) => toDTO(u)) };
+    return { success: true, data: users.map((u) => toUserDTO(u)) };
   }
 
   /**
@@ -50,7 +50,23 @@ export class UsersService implements IUsersService {
         error: `User with ID ${user_id} not found`,
       };
     }
-    return { success: true, data: toDTO(user) };
+    return { success: true, data: toUserDTO(user) };
+  }
+
+  async getUserByUsername(username: string): Promise<Result<UserDTO>> {
+    const user = await this.userRepository.findOne({
+      where: { username, is_deleted: false },
+      relations: ["user_role"],
+    });
+
+    if (!user) {
+      return {
+        success: false,
+        code: ErrorCode.NOT_FOUND,
+        error: `User with USERNAME ${username} not found`,
+      };
+    }
+    return { success: true, data: toUserDTO(user) };
   }
 
   /**
@@ -63,7 +79,7 @@ export class UsersService implements IUsersService {
       relations: ["user_role"],
     });
 
-    return { success: true, data: users.map((u) => toDTO(u)) };
+    return { success: true, data: users.map((u) => toUserDTO(u)) };
   }
 
   /**
@@ -119,7 +135,7 @@ export class UsersService implements IUsersService {
       weekly_working_hour_sum: result.generatedMaps[0].weekly_working_hour_sum,
     };
 
-    return { success: true, data: toDTO(newUser) };
+    return { success: true, data: toUserDTO(newUser) };
   }
 
   /**
@@ -215,7 +231,7 @@ export class UsersService implements IUsersService {
 
     const updatedUser = await this.userRepository.save(existingUser);
 
-    return { success: true, data: toDTO(updatedUser) };
+    return { success: true, data: toUserDTO(updatedUser) };
   }
 
   /**
@@ -256,6 +272,6 @@ export class UsersService implements IUsersService {
 
     existingUser.weekly_working_hour_sum = weekly_working_hour_sum;
 
-    return { success: true, data: toDTO(existingUser) };
+    return { success: true, data: toUserDTO(existingUser) };
   }
 }

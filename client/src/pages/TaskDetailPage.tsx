@@ -9,60 +9,58 @@ import { TaskDescription } from "../components/task/TaskDescription";
 import { TaskTimeTracking } from "../components/task/TaskTimeTracking";
 import { TaskCostInfo } from "../components/task/TaskCostInfo";
 import { decodeJWT } from "../helpers/decode_jwt";
-import { TaskStatus } from "../enums/TaskStatus";
 import { TaskCommentList } from "../components/task/TaskCommentList";
 import { TaskDetailPageProps } from "../types/props";
+import { FileAPI } from "../api/file/FileAPI";
+import { TaskStatus } from "../enums/TaskStatus";
+import { CommentDTO } from "../models/task/CommentDTO";
+import { TaskCommentInput } from "../components/task/TaskCommentInput";
 
-const MOCK_TASK: TaskDTO = {
-  task_id: 1,
-  sprint_id: 1, // nije project_id nego sprint_id dto ti je bacao gresku
-  project_manager_id: 10,
-  worker_id: 5,
-  title: "Create character animation",
-  task_description:
-    "Design and animate the main character intro sequence. Use reference sketches and provide final render.",
-  task_status: TaskStatus.COMPLETED,
-  estimated_cost: 1200,
-  total_hours_spent: 18,
-  attachment_file_uuid: undefined,
-};
-
-export const TaskDetailPage: React.FC<TaskDetailPageProps> = ({
-  token,
-  taskId,
-  setClose,
-  onEdit,
-}) => {
+export const TaskDetailPage: React.FC<TaskDetailPageProps> = ({token,taskId,setClose,onEdit,
+  }) => {
   const [view, setView] = useState<"upload" | "preview">("upload");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [uploadedFileName, setUploadedFileName] = useState<string | null>(null);
   const [task, setTask] = useState<TaskDTO | null>(null);
   const [role, setRole] = useState<UserRole | null>(null);
   const [userId, setUserId] = useState<number>(0);
+  const [isTaskDone,setIsTaskDone] = useState(false);
+  const [comments, setComments] = useState<CommentDTO[]>([]);
 
   const apiTask = new TaskAPI(import.meta.env.VITE_GATEWAY_URL, token);
+  const fileApi = new FileAPI();
 
-  const handleUpload = async () => {
-    if (!selectedFile) return;
+const handleUpload = async () => {
+  if (!selectedFile) return;
 
-    try {
-      await apiTask.uploadFile(taskId, selectedFile);
-      setUploadedFileName(selectedFile.name);
-      setSelectedFile(null);
-      setView("upload");
-    } catch {
-      alert("Upload failed");
+  try {
+    await fileApi.uploadFile(token,selectedFile,userId);
+
+    setIsTaskDone(true);
+    setUploadedFileName(selectedFile.name);
+    setView("upload");
+  } catch (e) {
+    console.error(e);
+    alert("Upload failed");
+  }
+};
+
+  useEffect(() => {
+    if(!task) return;
+
+    if(isTaskDone && task.task_status !== TaskStatus.COMPLETED) {
+      setTask({...task,task_status : TaskStatus.COMPLETED});
     }
-  };
+    apiTask.updateTask(taskId, { status: TaskStatus.COMPLETED });
+    
+  },[task,isTaskDone])
+
 
   const handleAddComments = async (text: string) => {
     if (!text.trim()) return;
-
-    try {
-      await apiTask.uploadComment(taskId, userId, text);
-    } catch {
-      alert("Failed");
-    }
+    
+    const newComment = await apiTask.uploadComment(taskId, userId, text);
+    setComments((prev) => [...prev,newComment]);
   };
 
   useEffect(() => {
@@ -74,14 +72,15 @@ export const TaskDetailPage: React.FC<TaskDetailPageProps> = ({
   }, [token]);
 
   useEffect(() => {
-    apiTask
-      .getTask(taskId)
-      .then(setTask)
-      .catch(() => {
-        setTask(MOCK_TASK);
-        setRole(UserRole.PROJECT_MANAGER);
-      });
-  }, [taskId]);
+      apiTask.getTask(taskId)
+      .then((t) => {
+        setTask(t);
+        setComments(t.comments ?? []);
+    }).catch(() => {
+      setTask(null);
+    });
+}, [taskId]);
+
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md">
@@ -119,10 +118,10 @@ export const TaskDetailPage: React.FC<TaskDetailPageProps> = ({
                 role={role}
                 task={task}
               />
+              
+              <TaskCommentInput onSubmit={handleAddComments} />
 
-              <TaskCommentList onSubmit={handleAddComments} />
-
-              {view === "upload" && (
+              {task.task_status!== TaskStatus.COMPLETED &&  view === "upload" && (
                 <FileUpload
                   setFile={(file) => {
                     setSelectedFile(file);
@@ -132,10 +131,11 @@ export const TaskDetailPage: React.FC<TaskDetailPageProps> = ({
                 />
               )}
 
-              {view === "preview" && selectedFile && (
+              {view === "preview" && selectedFile &&  (
                 <FilePreview
                   file={selectedFile}
                   isUpload={handleUpload}
+                  role = {role}
                   setClose={() => {
                     setSelectedFile(null);
                     setView("upload");

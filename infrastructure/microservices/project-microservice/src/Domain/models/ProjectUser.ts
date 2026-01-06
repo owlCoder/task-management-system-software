@@ -14,11 +14,14 @@ export class ProjectUser {
 
   @ManyToOne(() => Project, (project) => project.project_id, {
     nullable: false,
+    onDelete: "CASCADE",
   })
   @JoinColumn({ name: "project_id" })
   project!: Project;
-  //kreira kolonu koja je fk za od tabele Project i njegovog project_id-a
 
   @Column({ unique: false })
   user_id!: number;
+
+  @Column({ type: "int", nullable: false })
+  weekly_hours!: number;
 }

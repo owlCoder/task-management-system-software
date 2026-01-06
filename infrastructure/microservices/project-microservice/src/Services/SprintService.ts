@@ -29,6 +29,7 @@ export class SprintService implements ISprintService {
             sprint_description: data.sprint_description,
             start_date: new Date(data.start_date),
             end_date: new Date(data.end_date),
+            story_points: data.story_points,
         });
 
         const saved = await this.sprintRepository.save(sprint);
@@ -59,6 +60,7 @@ export class SprintService implements ISprintService {
     async updateSprint(sprint_id: number, data: SprintUpdateDTO): Promise<SprintDTO> {
         const sprint = await this.sprintRepository.findOne({
             where: { sprint_id },
+            relations: ["project"], 
         });
         if(!sprint) {
             throw new Error(`Sprint with id ${sprint_id} not found`);
@@ -68,6 +70,7 @@ export class SprintService implements ISprintService {
         if (data.end_date) sprint.end_date = new Date(data.end_date);
         if (data.sprint_title !== undefined) sprint.sprint_title = data.sprint_title;
         if (data.sprint_description !== undefined) sprint.sprint_description = data.sprint_description;
+        if (data.story_points !== undefined) sprint.story_points = data.story_points;
 
         const saved = await this.sprintRepository.save(sprint);
         return SprintMapper.toDTO(saved);

@@ -1,10 +1,6 @@
-import { UserRole } from "../models/UserRole";
-
-export class UserUpdateDTO {
-  public constructor(
-    public username: string,
-    public email: string,
-    public role_name: string,
-    public password?: string
-  ) {}
+export interface UserUpdateDTO {
+  username: string;
+  email: string;
+  role_name: string;
+  password?: string;
 }

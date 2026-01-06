@@ -22,43 +22,46 @@ export class GatewayNotificationController {
         this.initializeRoutes();
     }
 
+    /**
+     * Registering routes for Notification Microservice.
+     */
     private initializeRoutes(){
-        this.router.get("/notifications/:id", authenticate, this.getNotificationById.bind(this));
+        this.router.get("/notifications/:notificationId", authenticate, this.getNotificationById.bind(this));
         this.router.get("/notifications/user/:userId", authenticate, this.getNotificationsByUserId.bind(this));
         this.router.get("/notifications/user/:userId/unread-count", authenticate, this.getUnreadNotificationCount.bind(this));
         this.router.patch("/notifications/bulk/unread", authenticate, this.markMultipleNotificationsAsUnread.bind(this));
         this.router.patch("/notifications/bulk/read", authenticate, this.markMultipleNotificationsAsRead.bind(this));
-        this.router.patch("/notifications/:id/read", authenticate, this.markNotificationAsRead.bind(this));
-        this.router.patch("/notifications/:id/unread", authenticate, this.markNotificationAsUnread.bind(this));
+        this.router.patch("/notifications/:notificationId/read", authenticate, this.markNotificationAsRead.bind(this));
+        this.router.patch("/notifications/:notificationId/unread", authenticate, this.markNotificationAsUnread.bind(this));
         this.router.delete("/notifications/bulk", authenticate, this.deleteMultipleNotifications.bind(this));
-        this.router.delete("/notifications/:id", authenticate, this.deleteNotification.bind(this));
+        this.router.delete("/notifications/:notificationId", authenticate, this.deleteNotification.bind(this));
     }
 
     /**
-     * GET /api/v1/notifications/:id
-     * @param {Request} req - the request object, containing the id in params.
+     * GET /api/v1/notifications/:notificationId
+     * @param {Request} req - the request object, containing the notification id in params.
      * @param {Response} res - the response object for the client.
-     * @returns {Object}
-     * - On success: A JSON object following the {@link NotificationDTO} structure containing the result of the get notification by id operation. 
-     * - On failure: A JSON object with an error message and a HTTP status code indicating the failure.
+     * @returns {Promise<void>}
+     * - On success: response status 200, response data: {@link NotificationDTO}. 
+     * - On failure: response status code indicating the failure, response data: message describing the error.
      */
     private async getNotificationById(req: Request, res: Response): Promise<void> {
-        const id = parseInt(req.params.id);
+        const notificationId = parseInt(req.params.notificationId, 10);
 
-        const result = await this.gatewayNotificationService.getNotificationById(id);
+        const result = await this.gatewayNotificationService.getNotificationById(notificationId);
         handleResponse(res, result);
     }
 
     /**
      * GET /api/v1/notifications/user/:userId
-     * @param {Request} req - the request object, containing the userId in params.
+     * @param {Request} req - the request object, containing the user id in params.
      * @param {Response} res - the response object for the client.
-     * @returns {Object}
-     * - On success: A JSON object following the {@link NotificationDTO[]} structure containing the result of the get notification by user id operation. 
-     * - On failure: A JSON object with an error message and a HTTP status code indicating the failure.
+     * @returns {Promise<void>}
+     * - On success: response status 200, response data: {@link NotificationDTO[]}. 
+     * - On failure: response status code indicating the failure, response data: message describing the error.
      */
     private async getNotificationsByUserId(req: Request, res: Response): Promise<void> {
-        const userId = parseInt(req.params.userId);
+        const userId = parseInt(req.params.userId, 10);
 
         const result = await this.gatewayNotificationService.getNotificationsByUserId(userId);
         handleResponse(res, result);
@@ -66,14 +69,14 @@ export class GatewayNotificationController {
 
     /**
      * GET /api/v1/notifications/user/:userId/unread-count
-     * @param {Request} req - the request object, containing the userId in params.
+     * @param {Request} req - the request object, containing the user id in params.
      * @param {Response} res - the response object for the client.
-     * @returns {Object}
-     * - On success: A JSON object containing the number of unread notifications for user with userId. 
-     * - On failure: A JSON object with an error message and a HTTP status code indicating the failure.
+     * @returns {Promise<void>}
+     * - On success: response status 200, response data: number of unread notifications. 
+     * - On failure: response status code indicating the failure, response data: message describing the error.
      */
     private async getUnreadNotificationCount(req: Request, res: Response): Promise<void> {
-        const userId = parseInt(req.params.userId);
+        const userId = parseInt(req.params.userId, 10);
 
         const result = await this.gatewayNotificationService.getUnreadNotificationCount(userId);
         handleResponse(res, result);
@@ -81,91 +84,91 @@ export class GatewayNotificationController {
 
     /**
      * PATCH /api/v1/notifications/bulk/read
-     * @param {Request} req - the request object, containing the ids in body.
+     * @param {Request} req - the request object, containing the notification ids in body.
      * @param {Response} res - the response object for the client.
-     * @returns {Object}
-     * - On success: 204 No Content.
-     * - On failure: A JSON object with an error message and a HTTP status code indicating the failure.
+     * @returns {Promise<void>}
+     * - On success: response status 204, no data. 
+     * - On failure: response status code indicating the failure, response data: message describing the error.
      */
     private async markMultipleNotificationsAsRead(req: Request, res: Response): Promise<void> {
-        const ids = req.body as number[];
+        const notificationIds = req.body as number[];
 
-        const result = await this.gatewayNotificationService.markMultipleNotificationsAsRead(ids);
+        const result = await this.gatewayNotificationService.markMultipleNotificationsAsRead(notificationIds);
         handleEmptyResponse(res, result);
     }
 
     /**
      * PATCH /api/v1/notifications/bulk/unread
-     * @param {Request} req - the request object, containing the ids in body.
+     * @param {Request} req - the request object, containing the notification ids in body.
      * @param {Response} res - the response object for the client.
-     * @returns {Object}
-     * - On success: 204 No Content. 
-     * - On failure: A JSON object with an error message and a HTTP status code indicating the failure.
+     * @returns {Promise<void>}
+     * - On success: response status 204, no data. 
+     * - On failure: response status code indicating the failure, response data: message describing the error.
      */
     private async markMultipleNotificationsAsUnread(req: Request, res: Response): Promise<void> {
-        const ids = req.body as number[];
+        const notificationIds = req.body as number[];
 
-        const result = await this.gatewayNotificationService.markMultipleNotificationsAsUnread(ids);
+        const result = await this.gatewayNotificationService.markMultipleNotificationsAsUnread(notificationIds);
         handleEmptyResponse(res, result);
     }
 
     /**
-     * PATCH /api/v1/notifications/:id/read
-     * @param {Request} req - the request object, containing the id in params.
+     * PATCH /api/v1/notifications/:notificationId/read
+     * @param {Request} req - the request object, containing the notification id in params.
      * @param {Response} res - the response object for the client.
-     * @returns {Object}
-     * - On success: 204 No Content.
-     * - On failure: A JSON object with an error message and a HTTP status code indicating the failure.
+     * @returns {Promise<void>}
+     * - On success: response status 204, no data. 
+     * - On failure: response status code indicating the failure, response data: message describing the error.
      */
     private async markNotificationAsRead(req: Request, res: Response): Promise<void> {
-        const id = parseInt(req.params.id);
+        const notificationId = parseInt(req.params.notificationId, 10);
         
-        const result = await this.gatewayNotificationService.markNotificationAsRead(id);
+        const result = await this.gatewayNotificationService.markNotificationAsRead(notificationId);
         handleEmptyResponse(res, result);
     }
 
     /**
-     * PATCH /api/v1/notifications/:id/unread
+     * PATCH /api/v1/notifications/:notificationId/unread
      * @param {Request} req - the request object, containing the id in params.
      * @param {Response} res - the response object for the client.
-     * @returns {Object}
-     * - On success: 204 No Content.
-     * - On failure: A JSON object with an error message and a HTTP status code indicating the failure.
+     * @returns {Promise<void>}
+     * - On success: response status 204, no data. 
+     * - On failure: response status code indicating the failure, response data: message describing the error.
      */
     private async markNotificationAsUnread(req: Request, res: Response): Promise<void> {
-        const id = parseInt(req.params.id);
+        const notificationId = parseInt(req.params.notificationId, 10);
 
-        const result = await this.gatewayNotificationService.markNotificationAsUnread(id);
+        const result = await this.gatewayNotificationService.markNotificationAsUnread(notificationId);
         handleEmptyResponse(res, result);
     }
 
     /**
      * DELETE /api/v1/notifications/bulk
-     * @param {Request} req - the request object, containing the ids in body.
+     * @param {Request} req - the request object, containing the notification ids in body.
      * @param {Response} res - the response object for the client.
-     * @returns {Object}
-     * - On success: 204 No Content. 
-     * - On failure: A JSON object with an error message and a HTTP status code indicating the failure.
+     * @returns {Promise<void>}
+     * - On success: response status 204, no data. 
+     * - On failure: response status code indicating the failure, response data: message describing the error.
      */
     private async deleteMultipleNotifications(req: Request, res: Response): Promise<void> {
-        const ids = req.body as number[];
+        const notificationIds = req.body as number[];
 
-        const result = await this.gatewayNotificationService.deleteMultipleNotifications(ids);
+        const result = await this.gatewayNotificationService.deleteMultipleNotifications(notificationIds);
         handleEmptyResponse(res, result);
     }
 
     /**
-     * DELETE /api/v1/notifications/:id
-     * @param {Request} req - the request object, containing the id in params.
+     * DELETE /api/v1/notifications/:notificationId
+     * @param {Request} req - the request object, containing the notification id in params.
      * @param {Response} res - the response object for the client.
-     * @returns {Object}
-     * - On success: 204 No Content. 
-     * - On failure: A JSON object with an error message and a HTTP status code indicating the failure.
+     * @returns {Promise<void>}
+     * - On success: response status 204, no data. 
+     * - On failure: response status code indicating the failure, response data: message describing the error.
      */
     private async deleteNotification(req: Request, res: Response): Promise<void> {
-        const id = parseInt(req.params.id);
+        const notificationId = parseInt(req.params.notificationId, 10);
 
-        const result = await this.gatewayNotificationService.deleteNotification(id);
+        const result = await this.gatewayNotificationService.deleteNotification(notificationId);
         handleEmptyResponse(res, result);
     }
 

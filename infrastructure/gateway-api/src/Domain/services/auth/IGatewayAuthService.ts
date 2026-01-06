@@ -6,6 +6,6 @@ import { Result } from "../../types/common/Result";
 
 export interface IGatewayAuthService {
     login(data: LoginUserDTO): Promise<Result<AuthResponseType>>;
-    verifyOtp(otpData: OTPVerificationDTO): Promise<Result<AuthResponseType>>;
-    resendOtp(browserData: BrowserDataDTO): Promise<Result<AuthResponseType>>;
+    verifyOtp(data: OTPVerificationDTO): Promise<Result<AuthResponseType>>;
+    resendOtp(data: BrowserDataDTO): Promise<Result<AuthResponseType>>;
 }
