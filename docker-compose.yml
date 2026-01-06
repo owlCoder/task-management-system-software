@@ -12,7 +12,7 @@ services:
       - "5001:5000"
     env_file:
       - ./infrastructure/microservices/auth-microservice/.env
-      - .env.docker
+      - ./docker-env-overrides/auth.env
     depends_on:
       mysql:
         condition: service_healthy
@@ -29,7 +29,7 @@ services:
       - "5002:5000"
     env_file:
       - ./infrastructure/microservices/analytics-microservice/.env
-      - .env.docker
+      - ./docker-env-overrides/analytics.env
     depends_on:
       mysql:
         condition: service_healthy
@@ -46,7 +46,7 @@ services:
       - "5004:3003"
     env_file:
       - ./infrastructure/microservices/file-microservice/.env
-      - .env.docker
+      - ./docker-env-overrides/file.env
     depends_on:
       mysql:
         condition: service_healthy
@@ -63,7 +63,7 @@ services:
       - "5005:5000"
     env_file:
       - ./infrastructure/microservices/mail-microservice/.env
-      - .env.docker
+      - ./docker-env-overrides/mail.env
     depends_on:
       mysql:
         condition: service_healthy
@@ -80,7 +80,7 @@ services:
       - "6432:6432"
     env_file:
       - ./infrastructure/microservices/notification-microservice/.env
-      - .env.docker
+      - ./docker-env-overrides/notification.env
     depends_on:
       mysql:
         condition: service_healthy
@@ -97,7 +97,7 @@ services:
       - "5006:5000"
     env_file:
       - ./infrastructure/microservices/project-microservice/.env
-      - .env.docker
+      - ./docker-env-overrides/project.env
     depends_on:
       mysql:
         condition: service_healthy
@@ -114,7 +114,7 @@ services:
       - "5007:5000"
     env_file:
       - ./infrastructure/microservices/task-microservice/.env
-      - .env.docker
+      - ./docker-env-overrides/task.env
     depends_on:
       mysql:
         condition: service_healthy
@@ -131,7 +131,7 @@ services:
       - "5008:5000"
     env_file:
       - ./infrastructure/microservices/user-microservice/.env
-      - .env.docker
+      - ./docker-env-overrides/user.env
     depends_on:
       mysql:
         condition: service_healthy
