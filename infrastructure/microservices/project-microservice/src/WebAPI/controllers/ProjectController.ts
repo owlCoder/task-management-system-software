@@ -96,62 +96,63 @@ export class ProjectController {
     }
 
     private async createProject(req: Request, res: Response): Promise<void> {
-        try {
-            const userId = req.body.user_id ? parseInt(req.body.user_id, 10) : undefined;
-            const totalWeeklyHours = parseInt(req.body.total_weekly_hours_required, 10);
+    try {
+        const userId = req.body.user_id ? parseInt(req.body.user_id, 10) : undefined;
+        const totalWeeklyHours = parseInt(req.body.total_weekly_hours_required, 10);
 
-            const data: ProjectCreateDTO = {
-                project_name: req.body.project_name,
-                project_description: req.body.project_description || "",
-                total_weekly_hours_required: totalWeeklyHours,
-                allowed_budget: parseFloat(req.body.allowed_budget),
-                user_id: userId,
-                start_date: req.body.start_date || null,
-                sprint_count: parseInt(req.body.sprint_count, 10),
-                sprint_duration: parseInt(req.body.sprint_duration, 10),
-                status: this.parseStatus(req.body.status),
-            };
+        const data: ProjectCreateDTO = {
+            project_name: req.body.project_name,
+            project_description: req.body.project_description || "",
+            total_weekly_hours_required: totalWeeklyHours,
+            allowed_budget: parseFloat(req.body.allowed_budget),
+            user_id: userId,
+            start_date: req.body.start_date || null,
+            sprint_count: parseInt(req.body.sprint_count, 10),
+            sprint_duration: parseInt(req.body.sprint_duration, 10),
+            status: this.parseStatus(req.body.status),
+        };
 
-            if (req.file) {
-                const uploadResult = await this.storageService.uploadImage(
-                    req.file.buffer,
-                    req.file.originalname,
-                    req.file.mimetype
-                );
-                data.image_key = uploadResult.key;
-                data.image_url = uploadResult.url;
-            }
-
-            const validation = validateCreateProject(data);
-            if (!validation.success) {
-                if (data.image_key) {
-                    await this.storageService.deleteImage(data.image_key);
-                }
-                res.status(400).json({ message: validation.message });
-                return;
-            }
-
-            const created = await this.projectService.CreateProject(data);
-
-            if (userId && created.project_id) {
-                try {
-                    await this.projectUserService.assignUserToProject({
-                        project_id: created.project_id,
-                        user_id: userId,
-                        weekly_hours: totalWeeklyHours,
-                    });
-                    console.log(`User ${userId} automatically assigned to project ${created.project_id} with ${totalWeeklyHours} weekly hours`);
-                } catch (assignError) {
-                    console.error("Failed to auto-assign user to project:", assignError);
-                }
-            }
-
-            res.status(201).json(created);
-        } catch (err) {
-            console.error("Create project error:", err);
-            res.status(500).json({ message: (err as Error).message });
+        if (req.file) {
+            const uploadResult = await this.storageService.uploadImage(
+                req.file.buffer,
+                req.file.originalname,
+                req.file.mimetype
+            );
+            data.image_key = uploadResult.key;
+            data.image_url = uploadResult.url;
         }
+
+        const validation = validateCreateProject(data);
+        if (!validation.success) {
+            if (data.image_key) {
+                await this.storageService.deleteImage(data.image_key);
+            }
+            res.status(400).json({ message: validation.message });
+            return;
+        }
+
+        const created = await this.projectService.CreateProject(data);
+
+        // IZMENJENO: Project Manager (kreator) dobija 0 sati
+        if (userId && created.project_id) {
+            try {
+                await this.projectUserService.assignUserToProject({
+                    project_id: created.project_id,
+                    user_id: userId,
+                    weekly_hours: 0, // Project Manager UVEK dobija 0 sati
+                });
+                console.log(`Project Manager ${userId} automatically assigned to project ${created.project_id} with 0 weekly hours`);
+            } catch (assignError) {
+                console.error("Failed to auto-assign Project Manager to project:", assignError);
+            }
+        }
+
+        res.status(201).json(created);
+    } catch (err) {
+        console.error("Create project error:", err);
+        res.status(500).json({ message: (err as Error).message });
     }
+}
 
     private async updateProject(req: Request, res: Response): Promise<void> {
         try {

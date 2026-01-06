@@ -68,10 +68,15 @@ export const EditProjectModal: React.FC<Props> = ({
         setUsersLoading(false);
     };
 
-    const handleAddUser = async (userId: number, weeklyHours: number): Promise<boolean> => {
-        if (!project) return false;
+    // IZMENJENO: handleAddUser koristi total_weekly_hours_required iz projekta
+    const handleAddUser = async (userId: number): Promise<boolean> => {
+        if (!project || !formData) return false;
         try {
-            const newUser = await projectAPI.assignUserToProject(project.project_id, userId, weeklyHours);
+            const newUser = await projectAPI.assignUserToProject(
+                project.project_id, 
+                userId, 
+                formData.total_weekly_hours_required // Koristi sate iz projekta
+            );
             setAssignedUsers(prev => [...prev, newUser]);
             return true;
         } catch (err) {
@@ -381,7 +386,7 @@ export const EditProjectModal: React.FC<Props> = ({
                     {/* Total Weekly Hours */}
                     <div>
                         <h3 className="text-xs uppercase tracking-wider text-white/60 mb-1">
-                            Total Weekly Hours Required *
+                            Weekly Hours Per Worker *
                         </h3>
                         <input
                             type="number"
@@ -401,6 +406,9 @@ export const EditProjectModal: React.FC<Props> = ({
                                 ${errors.total_weekly_hours_required ? "border-red-400" : "border-white/20"}
                             `}
                         />
+                        <p className="text-white/50 text-xs mt-1">
+                            New workers will receive this many hours. Project Manager has 0 hours.
+                        </p>
                         {errors.total_weekly_hours_required && (
                             <p className="text-red-400 text-sm mt-1">
                                 {errors.total_weekly_hours_required}
@@ -434,10 +442,11 @@ export const EditProjectModal: React.FC<Props> = ({
                         )}
                     </div>
 
-                    {/* User Assignment Section */}
+                    {/* User Assignment Section - IZMENJENO */}
                     <div className="pt-4 border-t border-white/10">
                         <UserAssignmentSection
                             assignedUsers={assignedUsers}
+                            weeklyHoursPerWorker={formData.total_weekly_hours_required}
                             onAddUser={handleAddUser}
                             onRemoveUser={handleRemoveUser}
                             isLoading={usersLoading}

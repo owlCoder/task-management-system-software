@@ -13,7 +13,6 @@ import { confirmToast } from '../components/toast/toastHelper';
 
 type PendingUser = {
     user_id: number;
-    weekly_hours: number;
 };
 
 const canManageProjects = (role?: string): boolean => {
@@ -103,6 +102,7 @@ export const ProjectsPage: React.FC = () => {
         setSelectedId(null);
     };
 
+    // IZMENJENO: handleCreateProject - Project Manager dobija 0 sati, ostali dobijaju total_weekly_hours_required
     const handleCreateProject = async (newProject: ProjectCreateDTO, usersToAssign: PendingUser[]) => {
         try {
             const projectData: ProjectCreateDTO = {
@@ -113,12 +113,13 @@ export const ProjectsPage: React.FC = () => {
             const created = await projectAPI.createProject(projectData);
             if (created) {
                 // Assign pending users to the created project
+                // Svaki worker dobija total_weekly_hours_required sati
                 for (const pendingUser of usersToAssign) {
                     try {
                         await projectAPI.assignUserToProject(
                             created.project_id,
                             pendingUser.user_id,
-                            pendingUser.weekly_hours
+                            newProject.total_weekly_hours_required // Svi radnici dobijaju iste sate
                         );
                     } catch (assignErr) {
                         console.error(`Failed to assign user ${pendingUser.user_id}:`, assignErr);

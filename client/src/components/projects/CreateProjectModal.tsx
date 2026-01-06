@@ -2,9 +2,9 @@ import React, { useState, useEffect } from "react";
 import type { ProjectCreateDTO } from "../../models/project/ProjectCreateDTO";
 import { ProjectStatus } from "../../enums/ProjectStatus";
 
+// IZMENJENO: PendingUser više nema weekly_hours
 type PendingUser = {
     user_id: number;
-    weekly_hours: number;
 };
 
 type Props = {
@@ -40,10 +40,9 @@ export const CreateProjectModal: React.FC<Props> = ({
         sprint_duration: "",
     });
 
-    // User assignment state
+    // User assignment state - IZMENJENO: uklonjen weeklyHours
     const [pendingUsers, setPendingUsers] = useState<PendingUser[]>([]);
     const [newUserId, setNewUserId] = useState("");
-    const [weeklyHours, setWeeklyHours] = useState("10");
     const [userError, setUserError] = useState("");
 
     const resetForm = () => {
@@ -68,7 +67,6 @@ export const CreateProjectModal: React.FC<Props> = ({
         });
         setPendingUsers([]);
         setNewUserId("");
-        setWeeklyHours("10");
         setUserError("");
     };
 
@@ -130,16 +128,12 @@ export const CreateProjectModal: React.FC<Props> = ({
         }
     };
 
+    // IZMENJENO: handleAddUser bez weekly_hours
     const handleAddUser = () => {
         const userId = parseInt(newUserId, 10);
-        const hours = parseInt(weeklyHours, 10);
 
         if (isNaN(userId) || userId <= 0) {
             setUserError("Please enter a valid user ID");
-            return;
-        }
-        if (isNaN(hours) || hours <= 0 || hours > 40) {
-            setUserError("Weekly hours must be between 1 and 40");
             return;
         }
         if (pendingUsers.some(u => u.user_id === userId)) {
@@ -147,9 +141,8 @@ export const CreateProjectModal: React.FC<Props> = ({
             return;
         }
 
-        setPendingUsers(prev => [...prev, { user_id: userId, weekly_hours: hours }]);
+        setPendingUsers(prev => [...prev, { user_id: userId }]);
         setNewUserId("");
-        setWeeklyHours("10");
         setUserError("");
     };
 
@@ -431,12 +424,13 @@ export const CreateProjectModal: React.FC<Props> = ({
                     {/* Total Weekly Hours */}
                     <div>
                         <h3 className="text-xs uppercase tracking-wider text-white/60 mb-1">
-                            Total Weekly Hours Required *
+                            Weekly Hours Per Worker *
                         </h3>
                         <input
                             type="number"
                             required
                             min="1"
+                            max="40"
                             value={formData.total_weekly_hours_required}
                             onChange={(e) =>
                                 setFormData({
@@ -459,6 +453,9 @@ export const CreateProjectModal: React.FC<Props> = ({
                             `}
                             placeholder="e.g., 40"
                         />
+                        <p className="text-white/50 text-xs mt-1">
+                            This will be assigned to each worker. Project Manager gets 0 hours.
+                        </p>
                         {errors.total_weekly_hours_required && (
                             <p className="text-red-400 text-sm mt-1">
                                 {errors.total_weekly_hours_required}
@@ -502,13 +499,13 @@ export const CreateProjectModal: React.FC<Props> = ({
                         )}
                     </div>
 
-                    {/* User Assignment Section */}
+                    {/* User Assignment Section - IZMENJENO */}
                     <div className="space-y-4 pt-4 border-t border-white/10">
                         <h3 className="text-xs uppercase tracking-wider text-white/60 mb-1">
-                            Assign Workers (will be assigned after project creation)
+                            Assign Workers (will receive {formData.total_weekly_hours_required || 0} hrs/week each)
                         </h3>
                         
-                        {/* Lista pending korisnika */}
+                        {/* Lista pending korisnika - IZMENJENO: bez prikaza sati */}
                         {pendingUsers.length > 0 && (
                             <div className="space-y-2 max-h-32 overflow-y-auto styled-scrollbar">
                                 {pendingUsers.map((user) => (
@@ -517,7 +514,7 @@ export const CreateProjectModal: React.FC<Props> = ({
                                         className="flex items-center justify-between bg-white/5 rounded-lg px-3 py-2"
                                     >
                                         <span className="text-sm text-white/80">
-                                            User ID: {user.user_id} ({user.weekly_hours} hrs/week)
+                                            User ID: {user.user_id}
                                         </span>
                                         <button
                                             type="button"
@@ -531,7 +528,7 @@ export const CreateProjectModal: React.FC<Props> = ({
                             </div>
                         )}
 
-                        {/* Form za dodavanje korisnika */}
+                        {/* Form za dodavanje korisnika - IZMENJENO: samo User ID */}
                         <div className="flex gap-2">
                             <input
                                 type="number"
@@ -540,15 +537,6 @@ export const CreateProjectModal: React.FC<Props> = ({
                                 onChange={(e) => setNewUserId(e.target.value)}
                                 className="flex-1 px-3 py-2 rounded-lg bg-white/10 border border-white/20 focus:outline-none text-sm [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                                 min="1"
-                            />
-                            <input
-                                type="number"
-                                placeholder="Hours/week"
-                                value={weeklyHours}
-                                onChange={(e) => setWeeklyHours(e.target.value)}
-                                className="w-28 px-3 py-2 rounded-lg bg-white/10 border border-white/20 focus:outline-none text-sm [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-                                min="1"
-                                max="40"
                             />
                             <button
                                 type="button"
