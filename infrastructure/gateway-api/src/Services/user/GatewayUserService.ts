@@ -124,16 +124,16 @@ export class GatewayUserService implements IGatewayUserService {
     }
 
     /**
-     * Fetches user roles available for creation of new user.
+     * Fetches user roles based on impact level.
      * @returns {Promise<Result<UserRoleDTO[]>>} - A promise that resolves to a Result object containing the data of the user roles.
      * - On success returns data as {@link UserRoleDTO[]}.
      * - On failure returns status code and error message.
      */
-    async getCreationRoles(): Promise<Result<UserRoleDTO[]>> {
+    async getRolesByImpactLevel(impactLevel: number): Promise<Result<UserRoleDTO[]>> {
         return await makeAPICall<UserRoleDTO[]>(this.userClient, this.errorHandlingService, {
             serviceName: SERVICES.USER,
             method: HTTP_METHODS.GET,
-            url: USER_ROUTES.GET_REGISTRATION_ROLES
+            url: USER_ROUTES.GET_ROLES_BY_IMPACT_LEVEL(impactLevel)
         });
     }
 

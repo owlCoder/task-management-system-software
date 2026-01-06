@@ -6,7 +6,7 @@ import { logger } from "../../Infrastructure/logging/Logger";
 
 /**
  * Middleware to log incoming and outgoing HTTP traffic.
- * Logs the details of each request and its corresponding response, including the method, URL, status code, and the client’s IP address. 
+ * Logs the details of each request and its corresponding response, including the method, URL, status code, and the client's IP address. 
  * The logs are categorized by the status code range into different log levels:
  * - `info` for successful requests (2xx and 3xx status codes).
  * - `warn` for client errors (4xx status codes).

@@ -77,7 +77,7 @@ export class GatewayFileService implements IGatewayFileService {
     }
 
     /**
-     * Uploads a file to file microservice.
+     * Passes through file data from the request.
      * @param {Request} req - The request object containing the file. 
      * @returns {Promise<Result<UploadedFileDTO>>} - A promise that resolves to a Result object containing the file metadata.
      * - On success returns data as {@link UploadedFileDTO}.

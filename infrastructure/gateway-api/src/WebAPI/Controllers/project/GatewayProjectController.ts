@@ -57,9 +57,9 @@ export class GatewayProjectController {
      * GET /api/v1/projects/:projectId
      * @param {Request} req - the request object, containing the id of the project in params.
      * @param {Response} res - the response object for the client.
-     * @returns {Object}
-     * - On success: A JSON object following the {@link ProjectDTO} structure containing the result of the get project by id operation. 
-     * - On failure: A JSON object with an error message and a HTTP status code indicating the failure.
+     * @returns {Promise<void>}
+     * - On success: response status 200, response data: {@link ProjectDTO}. 
+     * - On failure: response status code indicating the failure, response data: message describing the error.
      */
     private async getProjectById(req: Request, res: Response): Promise<void> {
         const projectId = parseInt(req.params.projectId, 10);
@@ -72,9 +72,9 @@ export class GatewayProjectController {
      * GET /api/v1/users/:userId/projects
      * @param {Request} req - the request object, containing the id of the user in params.
      * @param {Response} res - the response object for the client.
-     * @returns {Object}
-     * - On success: A JSON object following the {@link ProjectDTO[]} structure containing the result of the get projects from user operation. 
-     * - On failure: A JSON object with an error message and a HTTP status code indicating the failure.
+     * @returns {Promise<void>}
+     * - On success: response status 200, response data: {@link ProjectDTO[]}. 
+     * - On failure: response status code indicating the failure, response data: message describing the error.
      */
     private async getProjectsFromUser(req: Request, res: Response): Promise<void> {
         const userId = parseInt(req.params.userId, 10);
@@ -87,9 +87,9 @@ export class GatewayProjectController {
      * POST /api/v1/projects
      * @param {Request} req - the request object, containing the data of the project in body.
      * @param {Response} res - the response object for the client.
-     * @returns {Object}
-     * - On success: A JSON object following the {@link ProjectDTO} structure containing the result of the create project operation. 
-     * - On failure: A JSON object with an error message and a HTTP status code indicating the failure.
+     * @returns {Promise<void>}
+     * - On success: response status 201, response data: {@link ProjectDTO}. 
+     * - On failure: response status code indicating the failure, response data: message describing the error.
      */
     private async createProject(req: Request, res: Response): Promise<void> {
         if(!req.headers['content-type']?.includes('multipart/form-data')){
@@ -105,9 +105,9 @@ export class GatewayProjectController {
      * PUT /api/v1/projects/:projectId
      * @param {Request} req - the request object, containing the id in params and data of the project in body.
      * @param {Response} res - the response object for the client.
-     * @returns {Object}
-     * - On success: A JSON object following the {@link ProjectDTO} structure containing the result of the update project operation. 
-     * - On failure: A JSON object with an error message and a HTTP status code indicating the failure.
+     * @returns {Promise<void>}
+     * - On success: response status 200, response data: {@link ProjectDTO}. 
+     * - On failure: response status code indicating the failure, response data: message describing the error.
      */
     private async updateProject(req: Request, res: Response): Promise<void> {
         if(!req.headers['content-type']?.includes('multipart/form-data')){
@@ -124,9 +124,9 @@ export class GatewayProjectController {
      * DELETE /api/v1/projects/:projectId
      * @param {Request} req - the request object, containing the id of the project in params.
      * @param {Response} res - the response object for the client.
-     * @returns {Object}
-     * - On success: 204 No Content. 
-     * - On failure: A JSON object with an error message and a HTTP status code indicating the failure.
+     * @returns {Promise<void>}
+     * - On success: response status 204, no data. 
+     * - On failure: response status code indicating the failure, response data: message describing the error.
      */
     private async deleteProject(req: Request, res: Response): Promise<void> {
         const projectId = parseInt(req.params.projectId, 10);
@@ -139,9 +139,9 @@ export class GatewayProjectController {
      * GET /api/v1/projects/:projectId/sprints
      * @param {Request} req - the request object, containing the id of the project in params.
      * @param {Response} res - the response object for the client.
-     * @returns {Object}
-     * - On success: A JSON object following the {@link SprintDTO[]} structure containing the result of the get sprints by project operation. 
-     * - On failure: A JSON object with an error message and a HTTP status code indicating the failure.
+     * @returns {Promise<void>}
+     * - On success: response status 200, response data: {@link SprintDTO[]}. 
+     * - On failure: response status code indicating the failure, response data: message describing the error.
      */
     private async getSprintsByProject(req: Request, res: Response): Promise<void> {
         const projectId = parseInt(req.params.projectId, 10);
@@ -154,9 +154,9 @@ export class GatewayProjectController {
      * GET /api/v1/sprints/:sprintId
      * @param {Request} req - the request object, containing the id of the sprint in params.
      * @param {Response} res - the response object for the client.
-     * @returns {Object}
-     * - On success: A JSON object following the {@link SprintDTO} structure containing the result of the get sprint by id operation. 
-     * - On failure: A JSON object with an error message and a HTTP status code indicating the failure.
+     * @returns {Promise<void>}
+     * - On success: response status 200, response data: {@link SprintDTO}. 
+     * - On failure: response status code indicating the failure, response data: message describing the error.
      */
     private async getSprintById(req: Request, res: Response): Promise<void> {
         const sprintId = parseInt(req.params.sprintId, 10);
@@ -169,9 +169,9 @@ export class GatewayProjectController {
      * POST /api/v1/projects/:projectId/sprints
      * @param {Request} req - the request object, containing the id of the project in params and data of the sprint as {@link SprintCreateDTO} in body.
      * @param {Response} res - the response object for the client.
-     * @returns {Object}
-     * - On success: A JSON object following the {@link SprintDTO} structure containing the result of the create sprint operation. 
-     * - On failure: A JSON object with an error message and a HTTP status code indicating the failure.
+     * @returns {Promise<void>}
+     * - On success: response status 201, response data: {@link SprintDTO}. 
+     * - On failure: response status code indicating the failure, response data: message describing the error.
      */
     private async createSprint(req: Request, res: Response): Promise<void> {
         const projectId = parseInt(req.params.projectId, 10);
@@ -185,9 +185,9 @@ export class GatewayProjectController {
      * PUT /api/v1/sprints/:sprintId
      * @param {Request} req - the request object, containing the id of the sprint in params and data of the sprint as {@link SprintUpdateDTO} in body.
      * @param {Response} res - the response object for the client.
-     * @returns {Object}
-     * - On success: A JSON object following the {@link SprintDTO} structure containing the result of the update sprint operation. 
-     * - On failure: A JSON object with an error message and a HTTP status code indicating the failure.
+     * @returns {Promise<void>}
+     * - On success: response status 200, response data: {@link SprintDTO}. 
+     * - On failure: response status code indicating the failure, response data: message describing the error.
      */
     private async updateSprint(req: Request, res: Response): Promise<void> {
         const sprintId = parseInt(req.params.sprintId, 10);
@@ -201,9 +201,9 @@ export class GatewayProjectController {
      * DELETE /api/v1/sprints/:sprintId
      * @param {Request} req - the request object, containing the id of the sprint in params.
      * @param {Response} res - the response object for the client.
-     * @returns {Object}
-     * - On success: 204 No Content. 
-     * - On failure: A JSON object with an error message and a HTTP status code indicating the failure.
+     * @returns {Promise<void>}
+     * - On success: response status 204, no data. 
+     * - On failure: response status code indicating the failure, response data: message describing the error.
      */
     private async deleteSprint(req: Request, res: Response): Promise<void> {
         const sprintId = parseInt(req.params.sprintId, 10);
@@ -216,9 +216,9 @@ export class GatewayProjectController {
      * GET /api/v1/projects/:projectId/users
      * @param {Request} req - the request object, containing the id of the project in params.
      * @param {Response} res - the response object for the client.
-     * @returns {Object}
-     * - On success: A JSON object following the {@link ProjectUserDTO[]} structure containing the result of the get users from project operation. 
-     * - On failure: A JSON object with an error message and a HTTP status code indicating the failure.
+     * @returns {Promise<void>}
+     * - On success: response status 200, response data: {@link ProjectUserDTO[]}. 
+     * - On failure: response status code indicating the failure, response data: message describing the error.
      */
     private async getUsersFromProject(req: Request, res: Response): Promise<void> {
         const projectId = parseInt(req.params.projectId, 10);
@@ -231,9 +231,9 @@ export class GatewayProjectController {
      * POST /api/v1/projects/:projectId/users
      * @param {Request} req - the request object, containing the id of the project in params and the data of the user as {@link ProjectUserAssignDTO} in body.
      * @param {Response} res - the response object for the client.
-     * @returns {Object}
-     * - On success: A JSON object following the {@link ProjectUserDTO} structure containing the result of the assign user to project operation. 
-     * - On failure: A JSON object with an error message and a HTTP status code indicating the failure.
+     * @returns {Promise<void>}
+     * - On success: response status 201, response data: {@link ProjectUserDTO}. 
+     * - On failure: response status code indicating the failure, response data: message describing the error.
      */
     private async assignUser(req: Request, res: Response): Promise<void> {
         const projectId = parseInt(req.params.projectId, 10);
@@ -247,9 +247,9 @@ export class GatewayProjectController {
      * DELETE /api/v1/projects/:projectId/users/:userId
      * @param {Request} req - the request object, containing the id of the project and the id of the user in params.
      * @param {Response} res - the response object for the client.
-     * @returns {Object}
-     * - On success: 204 No Content. 
-     * - On failure: A JSON object with an error message and a HTTP status code indicating the failure.
+     * @returns {Promise<void>}
+     * - On success: response status 204, no data. 
+     * - On failure: response status code indicating the failure, response data: message describing the error.
      */
     private async removeUser(req: Request, res: Response): Promise<void> {
         const projectId = parseInt(req.params.projectId, 10);

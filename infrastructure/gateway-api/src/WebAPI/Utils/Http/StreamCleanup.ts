@@ -1,6 +1,11 @@
 import { Response } from "express";
 import { Readable } from "stream";
 
+/**
+ * Attaches cleanup and error-handling listeners to a stream and response.
+ * @param {Readable} stream - The readable stream being piped to the response.
+ * @param {Response} res - The response object.
+ */
 export function setupStreamCleanup(stream: Readable, res: Response): void {
     const cleanup = () => {
         if (!stream.destroyed) stream.destroy();

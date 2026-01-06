@@ -66,7 +66,7 @@ export class GatewayProjectService implements IGatewayProjectService {
     }
 
     /**
-     * Posts new project.
+     * Passes through the request for creating new project.
      * @param {Request} req - The request object containing the project data. 
      * @returns {Promise<Result<ProjectDTO>>} - A promise that resolves to a Result object containing the data of the project.
      * - On success returns data as {@link ProjectDTO}.
@@ -87,7 +87,7 @@ export class GatewayProjectService implements IGatewayProjectService {
     }
 
     /**
-     * Updates the existing project.
+     * Passes through the update project by id request.
      * @param {number} projectId - id of the project. 
      * @param {Request} req - the request object containing the update data for the project.
      * @returns {Promise<Result<ProjectDTO>>} - A promise that resolves to a Result object containing the data of the project.

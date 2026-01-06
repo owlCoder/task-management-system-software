@@ -46,9 +46,9 @@ export class GatewayAnalyticsController {
      * GET /api/v1/analytics/burndown/:sprintId
      * @param {Request} req - the request object, containing the id of the sprint in params.
      * @param {Response} res - the response object for the client.
-     * @returns {Object}
-     * - On success: A JSON object following the {@link BurndownDTO} structure containing the result of the get burndown analytics by sprint id operation. 
-     * - On failure: A JSON object with an error message and a HTTP status code indicating the failure.
+     * @returns {Promise<void>}
+     * - On success: response status 200, response data: {@link BurndownDTO}. 
+     * - On failure: response status code indicating the failure, response data: message describing the error.
      */
     private async getBurndownAnalyticsBySprintId(req: Request, res: Response): Promise<void> {
         const sprintId = parseInt(req.params.sprintId, 10);
@@ -61,9 +61,9 @@ export class GatewayAnalyticsController {
      * GET /api/v1/analytics/burnup/:sprintId
      * @param {Request} req - the request object, containing the id of the sprint in params.
      * @param {Response} res - the response object for the client.
-     * @returns {Object}
-     * - On success: A JSON object following the {@link BurnupDTO} structure containing the result of the get burnup analytics by sprint id operation. 
-     * - On failure: A JSON object with an error message and a HTTP status code indicating the failure.
+     * @returns {Promise<void>}
+     * - On success: response status 200, response data: {@link BurnupDTO}. 
+     * - On failure: response status code indicating the failure, response data: message describing the error.
      */
     private async getBurnupAnalyticsBySprintId(req: Request, res: Response): Promise<void> {
         const sprintId = parseInt(req.params.sprintId, 10);
@@ -76,9 +76,9 @@ export class GatewayAnalyticsController {
      * GET /api/v1/analytics/velocity/:projectId
      * @param {Request} req - the request object, containing the id of the project in params.
      * @param {Response} res - the response object for the client.
-     * @returns {Object}
-     * - On success: A JSON object containing the number that represents the result of the get velocity analytics by project id operation. 
-     * - On failure: A JSON object with an error message and a HTTP status code indicating the failure.
+     * @returns {Promise<void>}
+     * - On success: response status 200, response data: number representing the velocity. 
+     * - On failure: response status code indicating the failure, response data: message describing the error.
      */
     private async getVelocityAnalyticsByProjectId(req: Request, res: Response): Promise<void> {
         const projectId = parseInt(req.params.projectId, 10);
@@ -91,9 +91,9 @@ export class GatewayAnalyticsController {
      * GET /api/v1/analytics/budget/:projectId
      * @param {Request} req - the request object, containing the id of the project in params.
      * @param {Response} res - the response object for the client.
-     * @returns {Object}
-     * - On success: A JSON object following the {@link BudgetTrackingDTO} structure containing the result of the get budget tracking by project id operation. 
-     * - On failure: A JSON object with an error message and a HTTP status code indicating the failure.
+     * @returns {Promise<void>}
+     * - On success: response status 200, response data: {@link BudgetTrackingDTO}. 
+     * - On failure: response status code indicating the failure, response data: message describing the error.
      */
     private async getBudgetTrackingByProjectId(req: Request, res: Response): Promise<void> {
         const projectId = parseInt(req.params.projectId, 10);
@@ -106,9 +106,9 @@ export class GatewayAnalyticsController {
      * GET /api/v1/analytics/resource-cost/:projectId
      * @param {Request} req - the request object, containing the id of the project in params.
      * @param {Response} res - the response object for the client.
-     * @returns {Object}
-     * - On success: A JSON object following the {@link ResourceCostAllocationDTO} structure containing the result of the get resource cost by project id operation. 
-     * - On failure: A JSON object with an error message and a HTTP status code indicating the failure.
+     * @returns {Promise<void>}
+     * - On success: response status 200, response data: {@link ResourceCostAllocationDTO}. 
+     * - On failure: response status code indicating the failure, response data: message describing the error.
      */
     private async getResourceCostAllocationByProjectId(req: Request, res: Response): Promise<void> {
         const projectId = parseInt(req.params.projectId, 10);
@@ -121,9 +121,9 @@ export class GatewayAnalyticsController {
      * GET /api/v1/analytics/profit-margin/:projectId
      * @param {Request} req - the request object, containing the id of the project in params.
      * @param {Response} res - the response object for the client.
-     * @returns {Object}
-     * - On success: A JSON object following the {@link ProfitMarginDTO} structure containing the result of the get profit margin by project id operation. 
-     * - On failure: A JSON object with an error message and a HTTP status code indicating the failure.
+     * @returns {Promise<void>}
+     * - On success: response status 200, response data: {@link ProfitMarginDTO}. 
+     * - On failure: response status code indicating the failure, response data: message describing the error.
      */
     private async getProfitMarginByProjectId(req: Request, res: Response): Promise<void> {
         const projectId = parseInt(req.params.projectId, 10);

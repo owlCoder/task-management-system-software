@@ -11,5 +11,5 @@ export interface IGatewayUserService {
     getUsers(): Promise<Result<UserDTO[]>>;
     updateUserById(userId: number, data: UpdateUserDTO): Promise<Result<UserDTO>>;
     logicallyDeleteUserById(userId: number): Promise<Result<void>>;
-    getCreationRoles(): Promise<Result<UserRoleDTO[]>>;
+    getRolesByImpactLevel(impactLevel: number): Promise<Result<UserRoleDTO[]>>;
 }

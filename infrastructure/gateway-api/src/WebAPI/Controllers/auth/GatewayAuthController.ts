@@ -35,9 +35,9 @@ export class GatewayAuthController {
      * POST /api/v1/login
      * @param {Request} req - the request object, containing the login data in the body as a {@link LoginUserDTO}.
      * @param {Response} res - the response object for the client.
-     * @returns {Object}
-     * - On success: A JSON object following the {@link AuthResponseType} structure containing the result of the login attempt. 
-     * - On failure: A JSON object with an error message and a HTTP status code indicating the failure.
+     * @returns {Promise<void>}
+     * - On success: response status 200, response data: {@link AuthResponseType}. 
+     * - On failure: response status code indicating the failure, response data: message describing the error.
      */
     private async login(req: Request, res: Response): Promise<void> {
         const data = req.body as LoginUserDTO;
@@ -50,9 +50,9 @@ export class GatewayAuthController {
      * POST /api/v1/verify-otp
      * @param {Request} req - the request object, containing the session and otp data in the body as a {@link OTPVerificationDTO}.
      * @param {Response} res the response object for the client.
-     * @returns {Object}
-     * - On success: A JSON object following the {@link AuthResponseType} structure containing the result of the otp verification attempt.
-     * - On failure: A JSON object with an error message and a HTTP status code indicating the failure.
+     * @returns {Promise<void>}
+     * - On success: response status 200, response data: {@link AuthResponseType}. 
+     * - On failure: response status code indicating the failure, response data: message describing the error.
      */
     private async verifyOtp(req: Request, res: Response): Promise<void> {
         const data = req.body as OTPVerificationDTO;
@@ -65,9 +65,9 @@ export class GatewayAuthController {
      * POST /api/v1/resend-otp
      * @param {Request} req - the request object, containing the session data in the body as a {@link BrowserDataDTO}.
      * @param {Response} res - the response object for the client.
-     * @returns {Object}
-     * - On success: A JSON object following the {@link AuthResponseType} structure containing the result of the otp-resend attempt. 
-     * - On failure: A JSON object with an error message and a HTTP status code indicating the failure.
+     * @returns {Promise<void>}
+     * - On success: response status 200, response data: {@link AuthResponseType}. 
+     * - On failure: response status code indicating the failure, response data: message describing the error.
      */
     private async resendOtp(req: Request, res: Response): Promise<void> {
         const data = req.body as BrowserDataDTO

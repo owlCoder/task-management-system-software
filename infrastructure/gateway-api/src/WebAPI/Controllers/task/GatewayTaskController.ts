@@ -44,9 +44,9 @@ export class GatewayTaskController {
      * GET /api/v1/tasks/:taskId
      * @param {Request} req - the request object, containing the id of the task in params.
      * @param {Response} res - the response object for the client.
-     * @returns {Object}
-     * - On success: A JSON object following the {@link TaskDTO} structure containing the result of the get task by id operation. 
-     * - On failure: A JSON object with an error message and a HTTP status code indicating the failure.
+     * @returns {Promise<void>}
+     * - On success: response status 200, response data: {@link TaskDTO}. 
+     * - On failure: response status code indicating the failure, response data: message describing the error.
      */
     private async getTaskById(req: Request, res: Response): Promise<void> {
         const taskId = parseInt(req.params.taskId, 10);
@@ -59,9 +59,9 @@ export class GatewayTaskController {
      * GET /api/v1/tasks/sprints/:sprintId
      * @param {Request} req - the request object, containing the id of the sprint in params.
      * @param {Response} res - the response object for the client.
-     * @returns {Object}
-     * - On success: A JSON object following the {@link TaskDTO[]} structure containing the result of the get tasks by sprint id operation. 
-     * - On failure: A JSON object with an error message and a HTTP status code indicating the failure.
+     * @returns {Promise<void>}
+     * - On success: response status 200, response data: {@link TaskDTO[]}. 
+     * - On failure: response status code indicating the failure, response data: message describing the error.
      */
     private async getTasksBySprintId(req: Request, res: Response): Promise<void> {
         const sprintId = parseInt(req.params.sprintId, 10);
@@ -74,9 +74,9 @@ export class GatewayTaskController {
      * POST /api/v1/tasks/sprints/:sprintId
      * @param {Request} req - the request object, containing the id of the sprint in params and data as {@link CreateTaskDTO} in body.
      * @param {Response} res - the response object for the client.
-     * @returns {Object}
-     * - On success: A JSON object following the {@link TaskDTO} structure containing the result of the create task by sprint id operation. 
-     * - On failure: A JSON object with an error message and a HTTP status code indicating the failure.
+     * @returns {Promise<void>}
+     * - On success: response status 201, response data: {@link TaskDTO}. 
+     * - On failure: response status code indicating the failure, response data: message describing the error.
      */
     private async createTaskBySprintId(req: Request, res: Response): Promise<void> {
         const sprintId = parseInt(req.params.sprintId, 10);
@@ -90,9 +90,9 @@ export class GatewayTaskController {
      * POST /api/v1/tasks/:taskId/comments
      * @param {Request} req - the request object, containing the id of the task in params and data as {@link CreateCommentDTO} in body.
      * @param {Response} res - the response object for the client.
-     * @returns {Object}
-     * - On success: A JSON object following the {@link CommentDTO} structure containing the result of the create comment by task id operation. 
-     * - On failure: A JSON object with an error message and a HTTP status code indicating the failure.
+     * @returns {Promise<void>}
+     * - On success: response status 201, response data: {@link CommentDTO}. 
+     * - On failure: response status code indicating the failure, response data: message describing the error.
      */
     private async addCommentByTaskId(req: Request, res: Response): Promise<void> {
         const taskId = parseInt(req.params.taskId, 10);
