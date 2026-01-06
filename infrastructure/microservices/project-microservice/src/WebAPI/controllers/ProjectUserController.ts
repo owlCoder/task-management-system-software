@@ -16,7 +16,6 @@ export class ProjectUserController {
         this.router.post("/projects/:id/users", this.assignUser.bind(this));
         this.router.get("/projects/:id/users", this.getUsersForProject.bind(this));
         this.router.delete("/projects/:id/users/:userId", this.removeUser.bind(this));
-        this.router.get("/users/:userId/available-hours", this.getAvailableHours.bind(this));
     }
 
 
@@ -70,24 +69,6 @@ export class ProjectUserController {
                 return;
             }
             res.status(204).send();
-        } catch (err) {
-            res.status(500).json({ message: (err as Error).message });
-        }
-    }
-
-    private async getAvailableHours(req: Request, res: Response): Promise<void> {
-        try {
-            const userId = parseInt(req.params.userId, 10);
-            if (isNaN(userId) || userId <= 0) {
-                res.status(400).json({ message: "Invalid user ID" });
-                return;
-            }
-
-            const availableHours = await this.projectUserService.getUserAvailableHours(userId);
-            res.status(200).json({ 
-                user_id: userId, 
-                available_hours: availableHours 
-            });
         } catch (err) {
             res.status(500).json({ message: (err as Error).message });
         }

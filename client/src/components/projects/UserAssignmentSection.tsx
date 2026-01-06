@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { projectAPI } from "../../api/project/ProjectAPI";
 
 type AssignedUser = {
     user_id: number;
@@ -9,8 +8,8 @@ type AssignedUser = {
 
 type Props = {
     assignedUsers: AssignedUser[];
-    weeklyHoursPerWorker: number;
-    onAddUser: (userId: number) => Promise<boolean>;
+    weeklyHoursPerWorker: number; // NOVO: sati koji se dodeljuju radnicima
+    onAddUser: (userId: number) => Promise<boolean>; // IZMENJENO: bez weeklyHours parametra
     onRemoveUser: (userId: number) => Promise<boolean>;
     isLoading?: boolean;
 };
@@ -40,32 +39,13 @@ export const UserAssignmentSection: React.FC<Props> = ({
 
         setAdding(true);
         setError("");
-
-        try {
-            // Prvo proveri dostupne sate
-            const availability = await projectAPI.getUserAvailableHours(userId);
-            
-            if (availability.available_hours < weeklyHoursPerWorker) {
-                setError(
-                    `User ${userId} cannot be added. Available hours: ${availability.available_hours}h, ` +
-                    `required: ${weeklyHoursPerWorker}h. Adding this project would exceed the 40h weekly limit.`
-                );
-                setAdding(false);
-                return;
-            }
-
-            // Ako ima dovoljno sati, pokušaj da dodaš
-            const success = await onAddUser(userId);
-            if (success) {
-                setNewUserId("");
-            } else {
-                setError("Failed to add user. Please try again.");
-            }
-        } catch (err) {
-            console.error("Error adding user:", err);
-            setError("Failed to check user availability. Please verify the user ID exists.");
+        
+        const success = await onAddUser(userId);
+        if (success) {
+            setNewUserId("");
+        } else {
+            setError("Failed to add user. Check if user exists and has available hours.");
         }
-
         setAdding(false);
     };
 
@@ -103,7 +83,7 @@ export const UserAssignmentSection: React.FC<Props> = ({
                 </div>
             )}
 
-            {/* Form za dodavanje novog korisnika */}
+            {/* Form za dodavanje novog korisnika - IZMENJENO: samo User ID */}
             <div className="flex gap-2">
                 <input
                     type="number"
@@ -119,7 +99,7 @@ export const UserAssignmentSection: React.FC<Props> = ({
                     disabled={adding || isLoading}
                     className="px-4 py-2 rounded-lg bg-white/20 hover:bg-white/30 text-sm font-medium cursor-pointer disabled:opacity-50"
                 >
-                    {adding ? "Checking..." : "Add"}
+                    {adding ? "..." : "Add"}
                 </button>
             </div>
 
