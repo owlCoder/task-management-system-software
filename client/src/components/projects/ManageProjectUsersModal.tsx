@@ -1,0 +1,294 @@
+// src/components/projects/ManageProjectUsersModal.tsx
+
+import React, { useState, useEffect } from "react";
+import { projectAPI } from "../../api/project/ProjectAPI";
+import { ProjectUserDTO } from "../../models/project/ProjectUserDTO";
+
+type Props = {
+    projectId: number | null;
+    projectName: string;
+    weeklyHoursPerWorker: number;
+    isOpen: boolean;
+    onClose: () => void;
+    onUsersUpdated?: () => void;
+};
+
+export const ManageProjectUsersModal: React.FC<Props> = ({
+    projectId,
+    projectName,
+    weeklyHoursPerWorker,
+    isOpen,
+    onClose,
+    onUsersUpdated,
+}) => {
+    const [assignedUsers, setAssignedUsers] = useState<ProjectUserDTO[]>([]);
+    const [isLoading, setIsLoading] = useState(false);
+    const [newUserId, setNewUserId] = useState("");
+    const [error, setError] = useState("");
+    const [isAdding, setIsAdding] = useState(false);
+
+    // Load assigned users when modal opens
+    useEffect(() => {
+        if (isOpen && projectId) {
+            loadAssignedUsers();
+        }
+    }, [isOpen, projectId]);
+
+    // Reset state when modal closes
+    useEffect(() => {
+        if (!isOpen) {
+            setNewUserId("");
+            setError("");
+            setAssignedUsers([]);
+        }
+    }, [isOpen]);
+
+    const loadAssignedUsers = async () => {
+        if (!projectId) return;
+        setIsLoading(true);
+        setError("");
+        try {
+            const users = await projectAPI.getProjectUsers(projectId);
+            setAssignedUsers(users);
+        } catch (err) {
+            console.error("Failed to load assigned users:", err);
+            setError("Failed to load users. Please try again.");
+        }
+        setIsLoading(false);
+    };
+
+    const handleAddUser = async () => {
+        if (!projectId) return;
+        
+        const userId = parseInt(newUserId, 10);
+
+        if (isNaN(userId) || userId <= 0) {
+            setError("Please enter a valid user ID");
+            return;
+        }
+        if (assignedUsers.some(u => u.user_id === userId)) {
+            setError("User is already assigned to this project");
+            return;
+        }
+
+        setIsAdding(true);
+        setError("");
+
+        try {
+            const newUser = await projectAPI.assignUserToProject(
+                projectId,
+                userId,
+                weeklyHoursPerWorker
+            );
+            setAssignedUsers(prev => [...prev, newUser]);
+            setNewUserId("");
+            onUsersUpdated?.();
+        } catch (err: any) {
+            console.error("Failed to assign user:", err);
+            const errorMessage = err.response?.data?.message || "Failed to add user. Check if user exists and has available hours.";
+            setError(errorMessage);
+        }
+        setIsAdding(false);
+    };
+
+    const handleRemoveUser = async (userId: number) => {
+        if (!projectId) return;
+        
+        try {
+            const success = await projectAPI.removeUserFromProject(projectId, userId);
+            if (success) {
+                setAssignedUsers(prev => prev.filter(u => u.user_id !== userId));
+                onUsersUpdated?.();
+            }
+        } catch (err) {
+            console.error("Failed to remove user:", err);
+            setError("Failed to remove user. Please try again.");
+        }
+    };
+
+    if (!isOpen || !projectId) return null;
+
+    const handleBackdropClick = (e: React.MouseEvent) => {
+        if (e.target === e.currentTarget) onClose();
+    };
+
+    const handleKeyDown = (e: React.KeyboardEvent) => {
+        if (e.key === "Escape") onClose();
+    };
+
+    return (
+        <div
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-md bg-black/60"
+            onClick={handleBackdropClick}
+            onKeyDown={handleKeyDown}
+            role="dialog"
+            aria-modal="true"
+        >
+            <div
+                className="
+                    bg-white/10 border border-white/20 rounded-2xl shadow-2xl
+                    max-w-lg w-full max-h-[80vh] flex flex-col overflow-hidden text-white
+                "
+                onClick={(e) => e.stopPropagation()}
+            >
+                {/* Header */}
+                <div className="px-6 py-4 flex items-center justify-between border-b border-white/10">
+                    <div>
+                        <h2
+                            className="text-2xl font-semibold"
+                            style={{ fontFamily: "var(--font-secondary)" }}
+                        >
+                            Manage Users
+                        </h2>
+                        <p className="text-sm text-white/60 mt-1">
+                            {projectName}
+                        </p>
+                    </div>
+                    <button
+                        onClick={onClose}
+                        className="text-white/80 hover:text-white transition text-2xl w-8 h-8 flex items-center justify-center cursor-pointer"
+                    >
+                        ×
+                    </button>
+                </div>
+
+                {/* Body */}
+                <div className="p-6 overflow-y-auto flex-1 styled-scrollbar space-y-4">
+                    {/* Info banner */}
+                    <div className="bg-white/5 rounded-lg px-4 py-3 border border-white/10">
+                        <p className="text-sm text-white/80">
+                            Each worker will be assigned <span className="font-semibold text-white">{weeklyHoursPerWorker} hours/week</span>.
+                        </p>
+                        <p className="text-xs text-white/50 mt-1">
+                            Project Manager is automatically assigned with 0 hours.
+                        </p>
+                    </div>
+
+                    {/* Loading state */}
+                    {isLoading && (
+                        <div className="flex items-center justify-center py-8">
+                            <div className="text-white/60">Loading users...</div>
+                        </div>
+                    )}
+
+                    {/* Assigned Users List */}
+                    {!isLoading && (
+                        <div>
+                            <h3 className="text-xs uppercase tracking-wider text-white/60 mb-2">
+                                Assigned Users ({assignedUsers.length})
+                            </h3>
+                            
+                            {assignedUsers.length === 0 ? (
+                                <div className="bg-white/5 rounded-lg px-4 py-6 text-center">
+                                    <p className="text-white/50 text-sm">
+                                        No users assigned yet.
+                                    </p>
+                                </div>
+                            ) : (
+                                <div className="space-y-2 max-h-48 overflow-y-auto styled-scrollbar">
+                                    {assignedUsers.map((user) => (
+                                        <div
+                                            key={user.user_id}
+                                            className="flex items-center justify-between bg-white/5 rounded-lg px-4 py-3 border border-white/10"
+                                        >
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-sm font-medium">
+                                                    {user.user_id}
+                                                </div>
+                                                <div>
+                                                    <span className="text-sm text-white">
+                                                        User ID: {user.user_id}
+                                                    </span>
+                                                    <p className="text-xs text-white/50">
+                                                        {user.weekly_hours} hrs/week
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            <button
+                                                type="button"
+                                                onClick={() => handleRemoveUser(user.user_id)}
+                                                className="text-red-400 hover:text-red-300 text-sm font-medium cursor-pointer transition px-3 py-1 rounded hover:bg-red-500/10"
+                                            >
+                                                Remove
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                    {/* Add User Form */}
+                    <div className="pt-4 border-t border-white/10">
+                        <h3 className="text-xs uppercase tracking-wider text-white/60 mb-2">
+                            Add New User
+                        </h3>
+                        <div className="flex gap-2">
+                            <input
+                                type="number"
+                                placeholder="Enter User ID"
+                                value={newUserId}
+                                onChange={(e) => {
+                                    setNewUserId(e.target.value);
+                                    setError("");
+                                }}
+                                onKeyDown={(e) => {
+                                    if (e.key === "Enter") {
+                                        e.preventDefault();
+                                        handleAddUser();
+                                    }
+                                }}
+                                className="
+                                    flex-1 px-4 py-2 rounded-lg 
+                                    bg-white/10 border border-white/20 
+                                    focus:outline-none focus:border-white/40
+                                    text-white placeholder-white/40
+                                    [&::-webkit-inner-spin-button]:appearance-none 
+                                    [&::-webkit-outer-spin-button]:appearance-none
+                                "
+                                min="1"
+                                disabled={isAdding}
+                            />
+                            <button
+                                type="button"
+                                onClick={handleAddUser}
+                                disabled={isAdding || !newUserId}
+                                className={`
+                                    px-6 py-2 rounded-lg font-medium transition
+                                    ${isAdding || !newUserId
+                                        ? "bg-white/10 text-white/40 cursor-not-allowed"
+                                        : "bg-white/20 hover:bg-white/30 text-white cursor-pointer"
+                                    }
+                                `}
+                            >
+                                {isAdding ? "Adding..." : "Add"}
+                            </button>
+                        </div>
+                        
+                        {error && (
+                            <p className="text-red-400 text-sm mt-2">{error}</p>
+                        )}
+                    </div>
+                </div>
+
+                {/* Footer */}
+                <div className="px-6 py-4 border-t border-white/10 flex justify-center">
+                    <button
+                        onClick={onClose}
+                        className="
+                            px-8 py-2 rounded-lg font-semibold
+                            bg-gradient-to-t
+                            from-[var(--palette-medium-blue)]
+                            to-[var(--palette-deep-blue)]
+                            cursor-pointer transition hover:opacity-90
+                        "
+                    >
+                        Done
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+export default ManageProjectUsersModal;

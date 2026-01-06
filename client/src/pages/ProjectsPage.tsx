@@ -1,8 +1,11 @@
+// src/pages/ProjectsPage.tsx
+
 import React, { useState, useEffect, useCallback } from "react";
 import ProjectCard from "../components/projects/ProjectCard";
 import ProjectDetailsModal from "../components/projects/ProjectDetailsModal";
 import CreateProjectModal from "../components/projects/CreateProjectModal";
 import { EditProjectModal } from "../components/projects/EditProjectModal";
+import ManageProjectUsersModal from "../components/projects/ManageProjectUsersModal";
 import Sidebar from "../components/dashboard/sidebar/Sidebar";
 import { projectAPI } from "../api/project/ProjectAPI";
 import { useAuth } from "../hooks/useAuthHook";
@@ -10,10 +13,6 @@ import type { ProjectDTO } from "../models/project/ProjectDTO";
 import type { ProjectCreateDTO } from "../models/project/ProjectCreateDTO";
 import { toast } from 'react-hot-toast';
 import { confirmToast } from '../components/toast/toastHelper';
-
-type PendingUser = {
-    user_id: number;
-};
 
 const canManageProjects = (role?: string): boolean => {
     return role === "Project Manager";
@@ -28,9 +27,13 @@ export const ProjectsPage: React.FC = () => {
     const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [isManageUsersModalOpen, setIsManageUsersModalOpen] = useState(false);
     const [projectToEdit, setProjectToEdit] = useState<ProjectDTO | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+
+    // Get selected project for Manage Users modal
+    const selectedProject = projects.find((p) => p.project_id === selectedId) || null;
 
     const fetchProjects = useCallback(async () => {
         if (!user?.id) {
@@ -102,8 +105,17 @@ export const ProjectsPage: React.FC = () => {
         setSelectedId(null);
     };
 
-    // IZMENJENO: handleCreateProject - Project Manager dobija 0 sati, ostali dobijaju total_weekly_hours_required
-    const handleCreateProject = async (newProject: ProjectCreateDTO, usersToAssign: PendingUser[]) => {
+    // Manage Users Modal handlers
+    const handleOpenManageUsersModal = () => {
+        if (selectedId === null) return;
+        setIsManageUsersModalOpen(true);
+    };
+
+    const handleCloseManageUsersModal = () => {
+        setIsManageUsersModalOpen(false);
+    };
+
+    const handleCreateProject = async (newProject: ProjectCreateDTO) => {
         try {
             const projectData: ProjectCreateDTO = {
                 ...newProject,
@@ -112,21 +124,6 @@ export const ProjectsPage: React.FC = () => {
 
             const created = await projectAPI.createProject(projectData);
             if (created) {
-                // Assign pending users to the created project
-                // Svaki worker dobija total_weekly_hours_required sati
-                for (const pendingUser of usersToAssign) {
-                    try {
-                        await projectAPI.assignUserToProject(
-                            created.project_id,
-                            pendingUser.user_id,
-                            newProject.total_weekly_hours_required // Svi radnici dobijaju iste sate
-                        );
-                    } catch (assignErr) {
-                        console.error(`Failed to assign user ${pendingUser.user_id}:`, assignErr);
-                        toast.error(`Failed to assign user ${pendingUser.user_id}`);
-                    }
-                }
-
                 await fetchProjects();
                 setIsCreateModalOpen(false);
                 toast.success(`Project "${newProject.project_name}" created successfully!`);
@@ -227,6 +224,24 @@ export const ProjectsPage: React.FC = () => {
                     {/* Show management buttons only for Project Manager */}
                     {canManageProjects(user?.role) && (
                         <div className="flex gap-2 flex-wrap">
+                            {/* Manage Users Button */}
+                            <button
+                                type="button"
+                                className={`
+                                    w-[140px] h-[40px] rounded-[3em]
+                                    font-semibold transition-all duration-300
+                                    ${
+                                        selectedId !== null
+                                            ? "bg-white text-[var(--palette-deep-blue)] hover:-translate-y-1 shadow-lg cursor-pointer"
+                                            : "bg-white/10 text-white/40 cursor-not-allowed"
+                                    }
+                                `}
+                                disabled={selectedId === null}
+                                onClick={handleOpenManageUsersModal}
+                            >
+                                Manage Users
+                            </button>
+
                             <button
                                 type="button"
                                 className={`
@@ -336,6 +351,16 @@ export const ProjectsPage: React.FC = () => {
                     isOpen={isEditModalOpen}
                     onClose={handleCloseEditModal}
                     onSave={handleUpdateProject}
+                />
+
+                <ManageProjectUsersModal
+                    projectId={selectedProject?.project_id || null}
+                    projectName={selectedProject?.project_name || ""}
+                    weeklyHoursPerWorker={selectedProject?.total_weekly_hours_required || 0}
+                    isOpen={isManageUsersModalOpen}
+                    onClose={handleCloseManageUsersModal}
+                    onUsersUpdated={() => {
+                    }}
                 />
             </div>
         </div>

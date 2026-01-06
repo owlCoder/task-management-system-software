@@ -2,15 +2,10 @@ import React, { useState, useEffect } from "react";
 import type { ProjectCreateDTO } from "../../models/project/ProjectCreateDTO";
 import { ProjectStatus } from "../../enums/ProjectStatus";
 
-// IZMENJENO: PendingUser više nema weekly_hours
-type PendingUser = {
-    user_id: number;
-};
-
 type Props = {
     isOpen: boolean;
     onClose: () => void;
-    onSave: (project: ProjectCreateDTO, usersToAssign: PendingUser[]) => void;
+    onSave: (project: ProjectCreateDTO) => void;
 };
 
 export const CreateProjectModal: React.FC<Props> = ({
@@ -40,11 +35,6 @@ export const CreateProjectModal: React.FC<Props> = ({
         sprint_duration: "",
     });
 
-    // User assignment state - IZMENJENO: uklonjen weeklyHours
-    const [pendingUsers, setPendingUsers] = useState<PendingUser[]>([]);
-    const [newUserId, setNewUserId] = useState("");
-    const [userError, setUserError] = useState("");
-
     const resetForm = () => {
         setFormData({
             project_name: "",
@@ -65,9 +55,6 @@ export const CreateProjectModal: React.FC<Props> = ({
             sprint_count: "",
             sprint_duration: "",
         });
-        setPendingUsers([]);
-        setNewUserId("");
-        setUserError("");
     };
 
     useEffect(() => {
@@ -128,28 +115,6 @@ export const CreateProjectModal: React.FC<Props> = ({
         }
     };
 
-    // IZMENJENO: handleAddUser bez weekly_hours
-    const handleAddUser = () => {
-        const userId = parseInt(newUserId, 10);
-
-        if (isNaN(userId) || userId <= 0) {
-            setUserError("Please enter a valid user ID");
-            return;
-        }
-        if (pendingUsers.some(u => u.user_id === userId)) {
-            setUserError("User is already in the list");
-            return;
-        }
-
-        setPendingUsers(prev => [...prev, { user_id: userId }]);
-        setNewUserId("");
-        setUserError("");
-    };
-
-    const handleRemoveUser = (userId: number) => {
-        setPendingUsers(prev => prev.filter(u => u.user_id !== userId));
-    };
-
     const handleSubmit = () => {
         if (!validateForm()) return;
 
@@ -165,7 +130,7 @@ export const CreateProjectModal: React.FC<Props> = ({
             status: formData.status,
         };
 
-        onSave(projectData, pendingUsers);
+        onSave(projectData);
         handleClose();
     };
 
@@ -499,55 +464,11 @@ export const CreateProjectModal: React.FC<Props> = ({
                         )}
                     </div>
 
-                    {/* User Assignment Section - IZMENJENO */}
-                    <div className="space-y-4 pt-4 border-t border-white/10">
-                        <h3 className="text-xs uppercase tracking-wider text-white/60 mb-1">
-                            Assign Workers (will receive {formData.total_weekly_hours_required || 0} hrs/week each)
-                        </h3>
-                        
-                        {/* Lista pending korisnika - IZMENJENO: bez prikaza sati */}
-                        {pendingUsers.length > 0 && (
-                            <div className="space-y-2 max-h-32 overflow-y-auto styled-scrollbar">
-                                {pendingUsers.map((user) => (
-                                    <div
-                                        key={user.user_id}
-                                        className="flex items-center justify-between bg-white/5 rounded-lg px-3 py-2"
-                                    >
-                                        <span className="text-sm text-white/80">
-                                            User ID: {user.user_id}
-                                        </span>
-                                        <button
-                                            type="button"
-                                            onClick={() => handleRemoveUser(user.user_id)}
-                                            className="text-red-400 hover:text-red-300 text-sm cursor-pointer"
-                                        >
-                                            Remove
-                                        </button>
-                                    </div>
-                                ))}
-                            </div>
-                        )}
-
-                        {/* Form za dodavanje korisnika - IZMENJENO: samo User ID */}
-                        <div className="flex gap-2">
-                            <input
-                                type="number"
-                                placeholder="User ID"
-                                value={newUserId}
-                                onChange={(e) => setNewUserId(e.target.value)}
-                                className="flex-1 px-3 py-2 rounded-lg bg-white/10 border border-white/20 focus:outline-none text-sm [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-                                min="1"
-                            />
-                            <button
-                                type="button"
-                                onClick={handleAddUser}
-                                className="px-4 py-2 rounded-lg bg-white/20 hover:bg-white/30 text-sm font-medium cursor-pointer"
-                            >
-                                Add
-                            </button>
-                        </div>
-
-                        {userError && <p className="text-red-400 text-sm">{userError}</p>}
+                    {/* Info about managing users */}
+                    <div className="bg-white/5 rounded-lg px-4 py-3 border border-white/10">
+                        <p className="text-sm text-white/70">
+                            💡 After creating the project, use the <span className="font-semibold text-white">"Manage Users"</span> button to add team members.
+                        </p>
                     </div>
                 </div>
 

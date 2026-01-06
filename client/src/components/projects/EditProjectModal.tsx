@@ -2,9 +2,6 @@ import React, { useState, useEffect } from "react";
 import type { ProjectDTO } from "../../models/project/ProjectDTO";
 import { ProjectStatus } from "../../enums/ProjectStatus";
 import { hasProjectImage } from "../../helpers/image_url";
-import { projectAPI } from "../../api/project/ProjectAPI";
-import { ProjectUserDTO } from "../../models/project/ProjectUserDTO";
-import UserAssignmentSection from "./UserAssignmentSection";
 
 type Props = {
     project: ProjectDTO | null;
@@ -30,10 +27,6 @@ export const EditProjectModal: React.FC<Props> = ({
         sprint_duration: "",
     });
 
-    // User assignment state
-    const [assignedUsers, setAssignedUsers] = useState<ProjectUserDTO[]>([]);
-    const [usersLoading, setUsersLoading] = useState(false);
-
     useEffect(() => {
         if (project) {
             setFormData({ ...project });
@@ -48,56 +41,6 @@ export const EditProjectModal: React.FC<Props> = ({
             });
         }
     }, [project]);
-
-    // Load assigned users when modal opens
-    useEffect(() => {
-        if (project && isOpen) {
-            loadAssignedUsers();
-        }
-    }, [project, isOpen]);
-
-    const loadAssignedUsers = async () => {
-        if (!project) return;
-        setUsersLoading(true);
-        try {
-            const users = await projectAPI.getProjectUsers(project.project_id);
-            setAssignedUsers(users);
-        } catch (err) {
-            console.error("Failed to load assigned users:", err);
-        }
-        setUsersLoading(false);
-    };
-
-    // IZMENJENO: handleAddUser koristi total_weekly_hours_required iz projekta
-    const handleAddUser = async (userId: number): Promise<boolean> => {
-        if (!project || !formData) return false;
-        try {
-            const newUser = await projectAPI.assignUserToProject(
-                project.project_id, 
-                userId, 
-                formData.total_weekly_hours_required // Koristi sate iz projekta
-            );
-            setAssignedUsers(prev => [...prev, newUser]);
-            return true;
-        } catch (err) {
-            console.error("Failed to assign user:", err);
-            return false;
-        }
-    };
-
-    const handleRemoveUser = async (userId: number): Promise<boolean> => {
-        if (!project) return false;
-        try {
-            const success = await projectAPI.removeUserFromProject(project.project_id, userId);
-            if (success) {
-                setAssignedUsers(prev => prev.filter(u => u.user_id !== userId));
-            }
-            return success;
-        } catch (err) {
-            console.error("Failed to remove user:", err);
-            return false;
-        }
-    };
 
     if (!isOpen || !formData) return null;
 
@@ -442,15 +385,11 @@ export const EditProjectModal: React.FC<Props> = ({
                         )}
                     </div>
 
-                    {/* User Assignment Section - IZMENJENO */}
-                    <div className="pt-4 border-t border-white/10">
-                        <UserAssignmentSection
-                            assignedUsers={assignedUsers}
-                            weeklyHoursPerWorker={formData.total_weekly_hours_required}
-                            onAddUser={handleAddUser}
-                            onRemoveUser={handleRemoveUser}
-                            isLoading={usersLoading}
-                        />
+                    {/* Info about managing users */}
+                    <div className="bg-white/5 rounded-lg px-4 py-3 border border-white/10">
+                        <p className="text-sm text-white/70">
+                            💡 Use the <span className="font-semibold text-white">"Manage Users"</span> button to add or remove team members.
+                        </p>
                     </div>
                 </form>
 
