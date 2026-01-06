@@ -4,6 +4,7 @@ import { ProjectDTO } from "../../models/project/ProjectDTO";
 import { ProjectCreateDTO } from "../../models/project/ProjectCreateDTO";
 import { ProjectUpdateDTO } from "../../models/project/ProjectUpdateDTO";
 import { ProjectUserDTO } from "../../models/project/ProjectUserDTO";
+import { UserAvailableHoursDTO } from "../../models/project/UserAvailableHoursDTO";
 import { readValueByKey } from "../../helpers/local_storage";
 
 const GATEWAY_URL = import.meta.env.VITE_GATEWAY_URL;
@@ -173,6 +174,11 @@ class ProjectAPIImpl implements IProjectAPI {
             console.error("Error removing user from project:", error);
             return false;
         }
+    }
+
+    async getUserAvailableHours(userId: number): Promise<UserAvailableHoursDTO> {
+        const response = await this.client.get<UserAvailableHoursDTO>(`/users/${userId}/available-hours`);
+        return response.data;
     }
 }
 

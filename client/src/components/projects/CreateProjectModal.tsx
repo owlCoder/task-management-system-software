@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import type { ProjectCreateDTO } from "../../models/project/ProjectCreateDTO";
 import { ProjectStatus } from "../../enums/ProjectStatus";
+import { projectAPI } from "../../api/project/ProjectAPI";
 
-// IZMENJENO: PendingUser više nema weekly_hours
 type PendingUser = {
     user_id: number;
 };
@@ -40,10 +40,11 @@ export const CreateProjectModal: React.FC<Props> = ({
         sprint_duration: "",
     });
 
-    // User assignment state - IZMENJENO: uklonjen weeklyHours
+    // User assignment state
     const [pendingUsers, setPendingUsers] = useState<PendingUser[]>([]);
     const [newUserId, setNewUserId] = useState("");
     const [userError, setUserError] = useState("");
+    const [isCheckingUser, setIsCheckingUser] = useState(false);
 
     const resetForm = () => {
         setFormData({
@@ -128,9 +129,15 @@ export const CreateProjectModal: React.FC<Props> = ({
         }
     };
 
-    // IZMENJENO: handleAddUser bez weekly_hours
-    const handleAddUser = () => {
+    const handleAddUser = async () => {
         const userId = parseInt(newUserId, 10);
+        const weeklyHours = Number(formData.total_weekly_hours_required);
+
+        // Validacija: mora biti unet broj sati pre dodavanja korisnika
+        if (!formData.total_weekly_hours_required || weeklyHours <= 0) {
+            setUserError("Please enter Weekly Hours Per Worker first");
+            return;
+        }
 
         if (isNaN(userId) || userId <= 0) {
             setUserError("Please enter a valid user ID");
@@ -141,9 +148,32 @@ export const CreateProjectModal: React.FC<Props> = ({
             return;
         }
 
-        setPendingUsers(prev => [...prev, { user_id: userId }]);
-        setNewUserId("");
+        setIsCheckingUser(true);
         setUserError("");
+
+        try {
+            // Proveri dostupne sate za korisnika
+            const availability = await projectAPI.getUserAvailableHours(userId);
+            
+            if (availability.available_hours < weeklyHours) {
+                setUserError(
+                    `User ${userId} cannot be added. Available hours: ${availability.available_hours}h, ` +
+                    `required: ${weeklyHours}h. Adding this project would exceed the 40h weekly limit.`
+                );
+                setIsCheckingUser(false);
+                return;
+            }
+
+            // Ako ima dovoljno sati, dodaj na pending listu
+            setPendingUsers(prev => [...prev, { user_id: userId }]);
+            setNewUserId("");
+            setUserError("");
+        } catch (err) {
+            console.error("Error checking user availability:", err);
+            setUserError("Failed to check user availability. Please verify the user ID exists.");
+        }
+
+        setIsCheckingUser(false);
     };
 
     const handleRemoveUser = (userId: number) => {
@@ -188,6 +218,8 @@ export const CreateProjectModal: React.FC<Props> = ({
                 return "bg-gray-500";
         }
     };
+
+    const weeklyHoursValue = Number(formData.total_weekly_hours_required) || 0;
 
     return (
         <div
@@ -499,13 +531,13 @@ export const CreateProjectModal: React.FC<Props> = ({
                         )}
                     </div>
 
-                    {/* User Assignment Section - IZMENJENO */}
+                    {/* User Assignment Section */}
                     <div className="space-y-4 pt-4 border-t border-white/10">
                         <h3 className="text-xs uppercase tracking-wider text-white/60 mb-1">
-                            Assign Workers (will receive {formData.total_weekly_hours_required || 0} hrs/week each)
+                            Assign Workers (will receive {weeklyHoursValue} hrs/week each)
                         </h3>
                         
-                        {/* Lista pending korisnika - IZMENJENO: bez prikaza sati */}
+                        {/* Lista pending korisnika */}
                         {pendingUsers.length > 0 && (
                             <div className="space-y-2 max-h-32 overflow-y-auto styled-scrollbar">
                                 {pendingUsers.map((user) => (
@@ -514,7 +546,7 @@ export const CreateProjectModal: React.FC<Props> = ({
                                         className="flex items-center justify-between bg-white/5 rounded-lg px-3 py-2"
                                     >
                                         <span className="text-sm text-white/80">
-                                            User ID: {user.user_id}
+                                            User ID: {user.user_id} ({weeklyHoursValue} hrs/week)
                                         </span>
                                         <button
                                             type="button"
@@ -528,7 +560,7 @@ export const CreateProjectModal: React.FC<Props> = ({
                             </div>
                         )}
 
-                        {/* Form za dodavanje korisnika - IZMENJENO: samo User ID */}
+                        {/* Form za dodavanje korisnika */}
                         <div className="flex gap-2">
                             <input
                                 type="number"
@@ -541,9 +573,10 @@ export const CreateProjectModal: React.FC<Props> = ({
                             <button
                                 type="button"
                                 onClick={handleAddUser}
-                                className="px-4 py-2 rounded-lg bg-white/20 hover:bg-white/30 text-sm font-medium cursor-pointer"
+                                disabled={isCheckingUser}
+                                className="px-4 py-2 rounded-lg bg-white/20 hover:bg-white/30 text-sm font-medium cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                             >
-                                Add
+                                {isCheckingUser ? "Checking..." : "Add"}
                             </button>
                         </div>
 
