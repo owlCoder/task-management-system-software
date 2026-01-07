@@ -17,24 +17,24 @@ import { logger } from "../../Infrastructure/logging/Logger";
  * @returns A middleware function that checks if the user's role is authorized. If authorized, it calls next(). Otherwise, it responds with a 403 status and an error message.
  */
 export const authorize = (...permittedRoles: UserRole[]) => {
-  return (req: Request, res: Response, next: NextFunction): void => {
-    const user = req.user as AuthTokenClaimsType;
+  	return (req: Request, res: Response, next: NextFunction): void => {
+    	const user = req.user as AuthTokenClaimsType;
 
-    if (!user || !permittedRoles.includes(user.role)) {
-      const message = "Access denied";
+    	if (!user || !permittedRoles.includes(user.role)) {
+			const message = "Access denied";
 
-      logger.warn({
-          service: "Gateway",
-          code: "AUTHORIZATION_ERR",
-          method: req.method,
-          url: req.url,
-          ip: req.ip
-      }, message);
+			logger.warn({
+				service: "Gateway",
+				code: "AUTHORIZATION_ERR",
+				method: req.method,
+				url: req.url,
+				ip: req.ip
+			}, message);
 
-      res.status(403).json({ message: message });
-      return;
-    }
+			res.status(403).json({ message: message });
+			return;
+    	}
 
-    next();
-  };
+    	next();
+  	};
 };

@@ -11,11 +11,11 @@ import { AuthTokenClaimsType } from "../../Domain/types/auth/AuthTokenClaims";
 import { logger } from "../../Infrastructure/logging/Logger";
 
 declare global {
-  namespace Express {
-    interface Request {
-      user?: AuthTokenClaimsType;
-    }
-  }
+  	namespace Express {
+    	interface Request {
+      		user?: AuthTokenClaimsType;
+    	}
+  	}
 }
 
 /**
@@ -28,45 +28,45 @@ declare global {
  * @returns {void} - Authentication middleware either passes control to the next middleware (`next()`) if authentication is successful or sends a response with a 401 status if authentication fails.
  */
 export const authenticate = (req: Request, res: Response, next: NextFunction): void => {
-  const authHeader = req.headers.authorization;
+  	const authHeader = req.headers.authorization;
 
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    const message = "Token is missing";
+  	if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    	const message = "Token is missing";
 
-    logger.warn({
-        service: "Gateway",
-        code: "AUTHENTICATION_ERR",
-        method: req.method,
-        url: req.url,
-        ip: req.ip
-    }, message);
+    	logger.warn({
+			service: "Gateway",
+			code: "AUTHENTICATION_ERR",
+			method: req.method,
+			url: req.url,
+			ip: req.ip
+    	}, message);
 
-    res.status(401).json({ message: message });
-    return;
-  }
+    	res.status(401).json({ message: message });
+    	return;
+  	}
 
-  const token = authHeader.split(" ")[1];
+  	const token = authHeader.split(" ")[1];
 
-  try {
-    const decoded = jwt.verify(
-      token,
-      process.env.JWT_SECRET ?? ""
-    ) as AuthTokenClaimsType;
+  	try {
+    	const decoded = jwt.verify(
+      		token,
+      		process.env.JWT_SECRET ?? ""
+    	) as AuthTokenClaimsType;
 
-    req.user = decoded;
+    	req.user = decoded;
 
-    next();
-  } catch (err) {
-    const message = "Invalid token provided";
+    	next();
+  	} catch (err) {
+    	const message = "Invalid token provided";
 
-    logger.warn({
-        service: "Gateway",
-        code: "AUTHENTICATION_ERR",
-        method: req.method,
-        url: req.url,
-        ip: req.ip
-    }, message);
+    	logger.warn({
+			service: "Gateway",
+			code: "AUTHENTICATION_ERR",
+			method: req.method,
+			url: req.url,
+			ip: req.ip
+    	}, message);
 
-    res.status(401).json({ message: message });
-  }
+    	res.status(401).json({ message: message });
+  	}
 };
