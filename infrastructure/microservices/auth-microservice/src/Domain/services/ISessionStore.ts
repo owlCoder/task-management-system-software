@@ -5,5 +5,5 @@ export interface ISessionStore {
   setSession(sessionId: string, sessionData: LoginData): void;
   deleteSession(sessionId: string): void;
   clearExpiredSessions(expirationMs: number): void;
-  validateSession(sessionId: string, userId: number, expirationMs: number): LoginData | null;
+  validateSession(sessionId: string, userId: number): LoginData | null;
 }

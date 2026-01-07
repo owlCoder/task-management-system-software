@@ -31,7 +31,7 @@ export class OTPVerificationService implements IOTPVerificationService {
       relations: ["user_role"],
     });
     if (!user || user.is_deleted) return { authenticated: false };
-    const session = this.sessionService.validateSession(browserData.session_id, browserData.user_id, this.loginSessionExpirationMinutes * 60 * 1000);
+    const session = this.sessionService.validateSession(browserData.session_id, browserData.user_id);
     if (!session) return { authenticated: false };
     if (this.emailService.isAvailable) {
       const otpCode = this.otpGenerator.generateOTP();
@@ -76,11 +76,10 @@ export class OTPVerificationService implements IOTPVerificationService {
       relations: ["user_role"],
     });
     if (!user || user.is_deleted) return { authenticated: false };
-    this.logger.log(SeverityEnum.INFO, `Verifying OTP for user ${user.username} with UID ${user.user_id} and session ID: ${browserData.session_id} with OTP: ${otp}`);
-    const session = this.sessionService.validateSession(browserData.session_id, browserData.user_id, this.loginSessionExpirationMinutes * 60 * 1000);
-    console.log(session);
+    // this.logger.log(SeverityEnum.DEBUG, `Verifying OTP for user ${user.username} with UID ${user.user_id} and session ID: ${browserData.session_id} with OTP: ${otp}`);
+    const session = this.sessionService.validateSession(browserData.session_id, browserData.user_id);
     if (!session) return { authenticated: false };
-
+    // this.logger.log(SeverityEnum.DEBUG, `Retrieved session data: ${JSON.stringify(session)}`);
     if (session.otpCode !== otp) {
       return { authenticated: false };
     }

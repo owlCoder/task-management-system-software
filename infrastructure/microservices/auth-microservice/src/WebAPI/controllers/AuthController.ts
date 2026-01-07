@@ -126,7 +126,7 @@ export class AuthController {
     // Call the auth service to verify the OTP
     let result;
     try {
-      result = await this.otpVerificationService.verifyOTP({ user_id, session_id }, otp);
+      result = await this.otpVerificationService.verifyOTP(data, otp);
     } catch (error) {
       this.logerService.log(SeverityEnum.ERROR, error as string)
       res.status(500).json({ success: false, message: "Server error" });
