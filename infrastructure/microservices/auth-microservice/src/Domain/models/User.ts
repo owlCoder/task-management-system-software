@@ -7,6 +7,10 @@ import {
 } from "typeorm";
 import { UserRole } from "./UserRole";
 
+/** 
+  Acquired from user-microservice
+*/
+
 @Entity("users")
 export class User {
   @PrimaryGeneratedColumn()
@@ -21,7 +25,8 @@ export class User {
   @ManyToOne(() => UserRole, (user_role) => user_role.users, {
     nullable: false,
   })
-  @JoinColumn({ name: "user_role_id" })
+  @JoinColumn({ name: "user_role_id" }) //ovo poravlja naziv kolone umesto da bude user_role_user_role_id, imacemo samo user_role_id. Prvi naziv bi bio takav jer TypeORM po defaultu generise strani kljuc po formuli:
+  // <ime_polja_u_entitetu>_<primarni_kljuc_ref_tabele>
   user_role!: UserRole;
 
   @Column({ type: "varchar", length: 100, unique: true })

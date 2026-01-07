@@ -12,11 +12,11 @@ import pretty from "pino-pretty";
  * - `Serializers`: Default serializers are used for serializing error, request, and response objects into structured log entries.
  */
 const stream = pretty({
-  colorize: true,
-  translateTime: 'dd-mm-yyyy HH:MM:ss.l',
-  ignore: 'pid,hostname',
-  messageFormat: '{service} | {msg} | {code}: {method} {url} {ip}',
-  hideObject: true
+  	colorize: true,
+  	translateTime: 'dd-mm-yyyy HH:MM:ss.l',
+  	ignore: 'pid,hostname',
+  	messageFormat: '{service} | {msg} | {code}: {method} {url} {ip}',
+  	hideObject: true
 });
 
 export const logger = pino({

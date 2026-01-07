@@ -83,10 +83,11 @@ export class AuthService implements IAuthService {
     }
 
     this.logger.log(SeverityEnum.INFO, `Login successful for user ${data.username} with UID ${user.user_id}`);
-    if (this.emailService.isAvailable) {
-      return await this.performOtpLogin(user);
-    } else {
+    // ALWAYS use password login for now, so we do not use Mailing service more than necessary, only for development convenience
+    // if (this.emailService.isAvailable) {
+      // return await this.performOtpLogin(user);
+    // } else {
       return await this.performPasswordLogin(user);
-    }
+    // }
   }
 }

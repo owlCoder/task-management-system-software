@@ -16,20 +16,18 @@ export class SessionService implements ISessionStore {
 
   getSession(sessionId: string): LoginData | undefined {
     // return this.sessionStore.get(sessionId);
-    this.logger.log(SeverityEnum.INFO, `Retrieving session with ID: ${sessionId}`);
     const session = this.sessionStore.get(sessionId);
-    this.logger.log(SeverityEnum.DEBUG, `Session Data: ${JSON.stringify(session)}`);
+    // this.logger.log(SeverityEnum.DEBUG, `Session Data for session ${sessionId}: ${JSON.stringify(session)}`);
     return session;
   }
 
   setSession(sessionId: string, sessionData: LoginData): void {
-    this.logger.log(SeverityEnum.INFO, `Setting session for user ${sessionData.userId} with session ID: ${sessionId}`);
-    this.logger.log(SeverityEnum.DEBUG, `Session Data: ${JSON.stringify(sessionData)}`);
+    // this.logger.log(SeverityEnum.DEBUG, `Setting session for userId ${sessionData.userId} with session ID: ${sessionId} with data: ${JSON.stringify(sessionData)}`);
     this.sessionStore.set(sessionId, sessionData);
   }
 
   deleteSession(sessionId: string): void {
-    this.logger.log(SeverityEnum.INFO, `Deleting session with ID: ${sessionId}`);
+    // this.logger.log(SeverityEnum.DEBUG, `Deleting session with ID: ${sessionId}`);
     this.sessionStore.delete(sessionId);
   }
 
@@ -45,18 +43,18 @@ export class SessionService implements ISessionStore {
   }
 
   validateSession(sessionId: string, userId: number): LoginData | null {
-    this.logger.log(SeverityEnum.INFO, `Validating session ID: ${sessionId} for user ID: ${userId}`);
+    // this.logger.log(SeverityEnum.DEBUG, `Validating session ID: ${sessionId} for user ID: ${userId}`);
     if (!sessionId) return null;
     const session = this.sessionStore.get(sessionId);
-    this.logger.log(SeverityEnum.DEBUG, `Session Data: ${JSON.stringify(session)}`);
+    // this.logger.log(SeverityEnum.DEBUG, `Session Data: ${JSON.stringify(session)}`);
     if (!session) return null;
 
     const nowMs = Date.now();
     const expired = (nowMs - session.dateCreated.getTime()) > this.loginSessionExpirationMinutes * 60 * 1000;
-    this.logger.log(SeverityEnum.DEBUG, `Session expired: ${expired}`);
-    this.logger.log(SeverityEnum.DEBUG, `${nowMs} - ${session.dateCreated.getTime()} (${nowMs - session.dateCreated.getTime()}) > ${this.loginSessionExpirationMinutes * 60 * 1000}`);
+    // this.logger.log(SeverityEnum.DEBUG, `Session expired: ${expired}`);
+    // this.logger.log(SeverityEnum.DEBUG, `${nowMs} - ${session.dateCreated.getTime()} (${nowMs - session.dateCreated.getTime()}) > ${this.loginSessionExpirationMinutes * 60 * 1000}`);
 
-    if (expired || session.userId !== userId) {
+    if (expired || Number(session.userId) !== Number(userId)) {
       this.logger.log(SeverityEnum.WARN, `Session ID: ${sessionId} is invalid or expired for user ID: ${userId} ${session.userId}`);
       this.sessionStore.delete(sessionId);
       return null;

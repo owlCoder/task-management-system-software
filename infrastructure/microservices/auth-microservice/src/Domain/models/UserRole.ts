@@ -1,6 +1,10 @@
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { User } from "./User";
 
+/** 
+  Acquired from user-microservice
+*/
+
 @Entity("user_roles")
 export class UserRole {
   @PrimaryGeneratedColumn()
@@ -9,6 +13,9 @@ export class UserRole {
   @Column({ type: "varchar", unique: true, nullable: false, length: 100 })
   role_name!: string;
 
+  @Column({ unique: false, nullable: false })
+  impact_level!: number;
+
   @OneToMany(() => User, (user) => user.user_role)
-  users!: User[]; 
+  users!: User[];
 }

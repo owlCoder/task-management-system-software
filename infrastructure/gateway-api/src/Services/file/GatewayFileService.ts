@@ -91,6 +91,7 @@ export class GatewayFileService implements IGatewayFileService {
             data: req,
             headers: {
                 'Content-Type': req.headers["content-type"]!,
+                ...(req.user?.role && { 'x-user-role': req.user.role }),
                 ...(req.headers["content-length"] && { 'Content-Length': req.headers["content-length"] })
             },
             timeout: 20000
