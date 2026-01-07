@@ -5,13 +5,15 @@ import { UploadedFileDTO } from '../Domain/DTOs/UploadedFileDTO';
 import { FileResponseDTO } from '../Domain/DTOs/FileResponseDTO';
 import { Result } from '../Domain/types/Result';
 import { UploadedFile } from '../Domain/models/UploadedFile';
+import { IFileMapper } from '../Utils/converters/IFileMapper';
 import { v4 as uuidv4 } from 'uuid';
 import { Repository } from 'typeorm';
 
 export class FileService implements IFileService {
   constructor(
     private fileRepository: Repository<UploadedFile>,
-    private fileStorageService: IFileStorageService
+    private fileStorageService: IFileStorageService,
+    private fileMapper: IFileMapper
   ) {}
 
   async createFile(fileData: CreateFileDTO): Promise<Result<UploadedFileDTO>> {
@@ -42,15 +44,8 @@ export class FileService implements IFileService {
       });
 
       const savedFile = await this.fileRepository.save(fileModel);
-
-      const uploadedFileDTO: UploadedFileDTO = {
-        fileId: savedFile.file_id!,
-        originalFileName: savedFile.original_file_name,
-        fileType: savedFile.file_type,
-        fileExtension: savedFile.file_extension,
-        authorId: savedFile.author_id,
-        pathToFile: savedFile.path_to_file
-      };
+      
+      const uploadedFileDTO = this.fileMapper.toUploadedFileDTO(savedFile);
 
       return { success: true, data: uploadedFileDTO };
     } catch (error) {
@@ -77,14 +72,7 @@ export class FileService implements IFileService {
         return { success: false, error: storageResult.error };
       }
 
-      const fileResponseDTO: FileResponseDTO = {
-        fileId: file.file_id!,
-        originalFileName: file.original_file_name,
-        fileType: file.file_type,
-        fileExtension: file.file_extension,
-        authorId: file.author_id,
-        fileBuffer: storageResult.data!
-      };
+      const fileResponseDTO = this.fileMapper.toFileResponseDTO(file, storageResult.data!);
 
       return { success: true, data: fileResponseDTO };
     } catch (error) {
@@ -128,14 +116,7 @@ export class FileService implements IFileService {
         where: { author_id: authorId }
       });
 
-      const uploadedFileDTOs: UploadedFileDTO[] = files.map(file => ({
-        fileId: file.file_id!,
-        originalFileName: file.original_file_name,
-        fileType: file.file_type,
-        fileExtension: file.file_extension,
-        authorId: file.author_id,
-        pathToFile: file.path_to_file
-      }));
+      const uploadedFileDTOs = this.fileMapper.toUploadedFileDTOArray(files);
 
       return { success: true, data: uploadedFileDTOs };
     } catch (error) {

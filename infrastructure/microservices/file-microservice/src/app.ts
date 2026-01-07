@@ -4,6 +4,7 @@ import 'reflect-metadata';
 import { FileController } from './WebAPI/FileController';
 import { FileService } from './Services/FileService';
 import { FileStorageService } from './Services/FileStorageService';
+import { FileMapper } from './Utils/converters/FileMapper';
 import { initializeDatabase } from './Database/InitializeConnection';
 import { Db } from './Database/DbConnectionPool';
 import { UploadedFile } from './Domain/models/UploadedFile';
@@ -34,7 +35,8 @@ app.use(express.urlencoded({ extended: true }));
 
   // Services
   const fileStorageService = new FileStorageService();
-  const fileService = new FileService(fileRepository, fileStorageService);
+  const fileMapper = new FileMapper();
+  const fileService = new FileService(fileRepository, fileStorageService, fileMapper);
 
   // WebAPI routes
   const fileController = new FileController(fileService);
