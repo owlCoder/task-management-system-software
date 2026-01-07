@@ -5,6 +5,7 @@ import axios, { AxiosError } from "axios";
 import { ILoggerService } from "../../Domain/services/common/ILoggerService";
 import { IErrorHandlingService } from "../../Domain/services/common/IErrorHandlingService";
 import { Result } from "../../Domain/types/common/Result";
+import { UpstreamedErrorDetails } from "../../Domain/types/common/UpstreamedErrorDetails";
 
 /**
  * Centralized error handler for client requests.
@@ -86,7 +87,7 @@ export class ErrorHandlingService implements IErrorHandlingService {
      */
     private handleHttpError(error: AxiosError, serviceName: string, method: string, url: string): Result<never> {
         const status = error.response!.status;
-        const responseMessage = (error.response!.data as any)?.message ||  error.response!.statusText || 'Request failed';
+        const responseMessage = (error.response!.data as UpstreamedErrorDetails)?.message ||  error.response!.statusText || 'Request failed';
         const message = `${serviceName} request failed: ${responseMessage}`;
 
         if(status >= 500){

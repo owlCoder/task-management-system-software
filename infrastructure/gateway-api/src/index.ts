@@ -11,7 +11,7 @@ const server = app.listen(port, () => {
 /**
  * Gracefully shuts down the Gateway-API server.
  * Stops accepting new connections, closes idle ones, allows in-flight requests to finish, and forces exit on timeout.
- * @param signal - OS signal that triggered the shutdown (e.g. SIGINT, SIGTERM)
+ * @param {string} signal - OS signal that triggered the shutdown (e.g. SIGINT, SIGTERM)
  */
 const shutdown = (signal: string) => {
     if(isShuttingDown) return;

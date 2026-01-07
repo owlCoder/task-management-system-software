@@ -7,6 +7,7 @@ import { AxiosInstance } from "axios";
 import { IErrorHandlingService } from "../../Domain/services/common/IErrorHandlingService";
 import { IGatewayFileService } from "../../Domain/services/file/IGatewayFileService";
 import { UploadedFileDTO } from "../../Domain/DTOs/file/UploadedFileDTO";
+import { FileQueryParams } from "../../Domain/types/file/FileQueryParams";
 import { Result } from "../../Domain/types/common/Result";
 import { StreamResponse } from "../../Domain/types/common/StreamResponse";
 
@@ -49,32 +50,17 @@ export class GatewayFileService implements IGatewayFileService {
     /**
      * Fetches the metadata of all files created by certain author.
      * @param {number} authorId - id of the author. 
-     * @param {number} offset - optional offset for pagination.
-     * @param {number} limit - optional limit for pagination.
+     * @param {FileQueryParams} params - optional query parameters for files.
      * @returns {Promise<Result<UploadedFileDTO[]>>} - A promise that resolves to a Result object containing the list of file metadata.
      * - On success returns data as {@link UploadedFileDTO[]}.
      * - On failure returns status code and error message.
      */
-    async getFilesByAuthorId(authorId: number, offset?: number, limit?: number): Promise<Result<UploadedFileDTO[]>> {
-        let url = FILE_ROUTES.GET_FILES_FROM_AUTHOR(authorId);
-        
-        // Build query string for pagination parameters
-        const queryParams = new URLSearchParams();
-        if (offset !== undefined) {
-            queryParams.append('offset', offset.toString());
-        }
-        if (limit !== undefined) {
-            queryParams.append('limit', limit.toString());
-        }
-        
-        if (queryParams.toString()) {
-            url += `?${queryParams.toString()}`;
-        }
-        
-        return await makeAPICall<UploadedFileDTO[]>(this.fileClient, this.errorHandlingService, {
+    async getFilesByAuthorId(authorId: number, params: FileQueryParams): Promise<Result<UploadedFileDTO[]>> {
+        return await makeAPICall<UploadedFileDTO[], undefined, FileQueryParams>(this.fileClient, this.errorHandlingService, {
             serviceName: SERVICES.FILE,
             method: HTTP_METHODS.GET,
-            url: url
+            url: FILE_ROUTES.GET_FILES_FROM_AUTHOR(authorId),
+            params: params
         });
     }
 

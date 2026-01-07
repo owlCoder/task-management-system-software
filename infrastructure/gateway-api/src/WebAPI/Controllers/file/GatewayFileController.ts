@@ -10,6 +10,7 @@ import { authenticate } from "../../../Middlewares/authentication/AuthMiddleware
 
 // Utils
 import { handleDownloadResponse, handleEmptyResponse, handleResponse } from "../../Utils/Http/ResponseHandler";
+import { parseOptionalInt } from "../../Utils/Query/QueryUtils";
 
 /**
  * Routes client requests towards the File Microservice.
@@ -58,26 +59,10 @@ export class GatewayFileController {
      */
     private async getFilesByAuthorId(req: Request, res: Response): Promise<void> {
         const authorId = parseInt(req.params.authorId, 10);
-        
-        // Parse pagination parameters from query string
-        let offset: number | undefined = undefined;
-        let limit: number | undefined = undefined;
+        const offset = parseOptionalInt(req.query.offset);
+        const limit = parseOptionalInt(req.query.limit);
 
-        if (req.query.offset !== undefined) {
-            const parsedOffset = parseInt(req.query.offset as string);
-            if (!isNaN(parsedOffset) && parsedOffset >= 0) {
-                offset = parsedOffset;
-            }
-        }
-
-        if (req.query.limit !== undefined) {
-            const parsedLimit = parseInt(req.query.limit as string);
-            if (!isNaN(parsedLimit) && parsedLimit > 0) {
-                limit = parsedLimit;
-            }
-        }
-
-        const result = await this.gatewayFileService.getFilesByAuthorId(authorId, offset, limit);
+        const result = await this.gatewayFileService.getFilesByAuthorId(authorId, { offset, limit });
         handleResponse(res, result);
     }
 
