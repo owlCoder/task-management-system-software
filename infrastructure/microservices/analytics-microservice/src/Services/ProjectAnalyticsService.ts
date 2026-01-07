@@ -1,8 +1,8 @@
 import { LessThan, Repository } from "typeorm";
 import { IProjectAnalyticsService } from "../Domain/services/IProjectAnalyticsService";
-import { Task } from "../../../task-microservice/src/Domain/models/Task";
-import { Sprint } from "../../../project-microservice/src/Domain/models/Sprint";
-import { Project } from "../../../project-microservice/src/Domain/models/Project";
+import { Task } from "../Domain/models/Task";
+import { Sprint } from "../Domain/models/Sprint";
+import { Project } from "../Domain/models/Project";
 import { BurndownDto } from "../Domain/DTOs/BurndownDto";
 import { BurndownTaskDTO } from "../Domain/DTOs/BurndownTaskDto";
 import { BurnupDto } from "../Domain/DTOs/BurnupDto";

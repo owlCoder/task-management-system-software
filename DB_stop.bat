@@ -1,2 +1,3 @@
-cd database
-docker compose stop
+docker compose stop mysql
+echo MySQL container stopped.
+pause

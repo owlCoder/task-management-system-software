@@ -1,0 +1,153 @@
+name: OIB_TMSS_BACKEND
+
+include:
+  - path: ./database/docker-compose.yml
+
+services:
+  auth-microservice:
+    container_name: auth-microservice
+    build:
+      context: ./infrastructure/microservices/auth-microservice
+    ports:
+      - "5001:5000"
+    env_file:
+      - ./infrastructure/microservices/auth-microservice/.env
+      - ./docker-env-overrides/auth.env
+    depends_on:
+      mysql:
+        condition: service_healthy
+      gateway-api:
+        condition: service_started
+    networks:
+      - mysql_network
+
+  analytics-microservice:
+    container_name: analytics-microservice
+    build:
+      context: ./infrastructure/microservices/analytics-microservice
+    ports:
+      - "5002:5000"
+    env_file:
+      - ./infrastructure/microservices/analytics-microservice/.env
+      - ./docker-env-overrides/analytics.env
+    depends_on:
+      mysql:
+        condition: service_healthy
+      gateway-api:
+        condition: service_started
+    networks:
+      - mysql_network
+
+  file-microservice:
+    container_name: file-microservice
+    build:
+      context: ./infrastructure/microservices/file-microservice
+    ports:
+      - "5004:3003"
+    env_file:
+      - ./infrastructure/microservices/file-microservice/.env
+      - ./docker-env-overrides/file.env
+    depends_on:
+      mysql:
+        condition: service_healthy
+      gateway-api:
+        condition: service_started
+    networks:
+      - mysql_network
+
+  mail-microservice:
+    container_name: mail-microservice
+    build:
+      context: ./infrastructure/microservices/mail-microservice
+    ports:
+      - "5005:5000"
+    env_file:
+      - ./infrastructure/microservices/mail-microservice/.env
+      - ./docker-env-overrides/mail.env
+    depends_on:
+      mysql:
+        condition: service_healthy
+      gateway-api:
+        condition: service_started
+    networks:
+      - mysql_network
+
+  notification-microservice:
+    container_name: notification-microservice
+    build:
+      context: ./infrastructure/microservices/notification-microservice
+    ports:
+      - "6432:6432"
+    env_file:
+      - ./infrastructure/microservices/notification-microservice/.env
+      - ./docker-env-overrides/notification.env
+    depends_on:
+      mysql:
+        condition: service_healthy
+      gateway-api:
+        condition: service_started
+    networks:
+      - mysql_network
+
+  project-microservice:
+    container_name: project-microservice
+    build:
+      context: ./infrastructure/microservices/project-microservice
+    ports:
+      - "5006:5000"
+    env_file:
+      - ./infrastructure/microservices/project-microservice/.env
+      - ./docker-env-overrides/project.env
+    depends_on:
+      mysql:
+        condition: service_healthy
+      gateway-api:
+        condition: service_started
+    networks:
+      - mysql_network
+
+  task-microservice:
+    container_name: task-microservice
+    build:
+      context: ./infrastructure/microservices/task-microservice
+    ports:
+      - "5007:5000"
+    env_file:
+      - ./infrastructure/microservices/task-microservice/.env
+      - ./docker-env-overrides/task.env
+    depends_on:
+      mysql:
+        condition: service_healthy
+      gateway-api:
+        condition: service_started
+    networks:
+      - mysql_network
+
+  user-microservice:
+    container_name: user-microservice
+    build:
+      context: ./infrastructure/microservices/user-microservice
+    ports:
+      - "5008:5000"
+    env_file:
+      - ./infrastructure/microservices/user-microservice/.env
+      - ./docker-env-overrides/user.env
+    depends_on:
+      mysql:
+        condition: service_healthy
+      gateway-api:
+        condition: service_started
+    networks:
+      - mysql_network
+
+  gateway-api:
+    container_name: gateway-api
+    build:
+      context: ./infrastructure/gateway-api
+    ports:
+      - "4000:4000"
+    env_file:
+      - ./infrastructure/gateway-api/.env
+      - .env.docker
+    networks:
+      - mysql_network

@@ -1,3 +1,4 @@
+name: OIB_TMSS_BACKEND_DB
 services:
   mysql:
     image: mysql
@@ -10,6 +11,12 @@ services:
       - mysql_data:/var/lib/mysql
       - ./docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
     restart: unless-stopped
+    command: --socket=/tmp/mysql.sock
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "--socket=/tmp/mysql.sock", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}"]
+      start_period: 15s
+      timeout: 5s
+      retries: 100
     networks:
       - mysql_network
 

@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { NotificationController } from './controllers/NotificationController';
-import { INotificationService } from '../Domain/services/INotificationService';
+import { INotificationService } from '../Domain/Services/INotificationService';
 
 /**
  * Kreira Express Router sa svim notification rutama
