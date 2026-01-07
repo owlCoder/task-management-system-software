@@ -68,17 +68,4 @@ export class ProjectUserService implements IProjectUserService{
         });
         return list.map(pu => ProjectUserMapper.toDTO(pu));
     }
-
-    async getUserAvailableHours(user_id: number): Promise<number> {
-        const assignments = await this.projectUserRepository.find({
-            where: { user_id: user_id },
-        });
-
-        const currentTotal = assignments.reduce(
-            (sum, a) => sum + a.weekly_hours,
-            0
-        );
-
-        return Math.max(0, 40 - currentTotal);
-    }
 }
