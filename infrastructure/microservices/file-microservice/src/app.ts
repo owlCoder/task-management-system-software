@@ -4,6 +4,8 @@ import 'reflect-metadata';
 import { FileController } from './WebAPI/FileController';
 import { FileService } from './Services/FileService';
 import { FileStorageService } from './Services/FileStorageService';
+import { RoleValidationService } from './Services/RoleValidationService';
+import { FileTypeValidationService } from './Services/FileTypeValidationService';
 import { FileMapper } from './Utils/converters/FileMapper';
 import { initializeDatabase } from './Database/InitializeConnection';
 import { Db } from './Database/DbConnectionPool';
@@ -35,11 +37,13 @@ app.use(express.urlencoded({ extended: true }));
 
   // Services
   const fileStorageService = new FileStorageService();
+  const roleValidationService = new RoleValidationService();
+  const fileTypeValidationService = new FileTypeValidationService();
   const fileMapper = new FileMapper();
   const fileService = new FileService(fileRepository, fileStorageService, fileMapper);
 
   // WebAPI routes
-  const fileController = new FileController(fileService);
+  const fileController = new FileController(fileService, roleValidationService, fileTypeValidationService);
 
   // Registering routes
   app.use('/api/v1', fileController.getRouter());

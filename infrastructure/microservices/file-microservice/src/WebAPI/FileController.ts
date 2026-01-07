@@ -2,13 +2,20 @@ import { Request, Response, Router } from 'express';
 import multer from 'multer';
 import { IFileService } from '../Domain/services/IFileService';
 import { CreateFileDTO } from '../Domain/DTOs/CreateFileDTO';
+import { IRoleValidationService } from '../Domain/services/IRoleValidationService';
+import { IFileTypeValidationService } from '../Domain/services/IFileTypeValidationService';
+import { UserRole } from '../Domain/enums/UserRole';
 import * as path from 'path';
 
 export class FileController {
   private router: Router;
   private upload: multer.Multer;
 
-  constructor(private fileService: IFileService) {
+  constructor(
+    private fileService: IFileService,
+    private roleValidationService: IRoleValidationService,
+    private fileTypeValidationService: IFileTypeValidationService
+  ) {
     this.router = Router();
     this.upload = multer({ 
       storage: multer.memoryStorage(),
@@ -57,13 +64,42 @@ export class FileController {
       }
 
       const { authorId } = req.body;
+      const userRole = req.headers['x-user-role'] as string;
 
       if (!authorId) {
         res.status(400).json({ success: false, error: 'Author ID is required' });
         return;
       }
 
-      const fileExtension = path.extname(req.file.originalname);
+      if (!userRole) {
+        res.status(400).json({ success: false, error: 'User role is required' });
+        return;
+      }
+
+      if (!this.roleValidationService.isValidRole(userRole)) {
+        res.status(400).json({ success: false, error: 'Invalid user role' });
+        return;
+      }
+
+      const role = userRole as UserRole;
+      const allowedExtensions = this.roleValidationService.getAllowedExtensions(role);
+      const allowedExtensionsStrings = allowedExtensions.map(ext => ext.toString());
+
+      const isValidFileType = await this.fileTypeValidationService.validateFileType(
+        req.file.buffer, 
+        allowedExtensionsStrings
+      );
+
+      if (!isValidFileType) {
+        res.status(400).json({ 
+          success: false, 
+          error: `File type not allowed for ${role}. Allowed extensions: ${allowedExtensionsStrings.join(', ')}` 
+        });
+        return;
+      }
+
+      const detectedExtension = await this.fileTypeValidationService.getFileExtension(req.file.buffer);
+      const fileExtension = detectedExtension || path.extname(req.file.originalname);
       const fileType = req.file.mimetype;
 
       const createFileDTO: CreateFileDTO = {
