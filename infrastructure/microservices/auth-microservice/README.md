@@ -3,12 +3,12 @@
 
 **Important Note:** Email and OTP delivery are now fully implemented. If the email service is offline, user authentication will bypass OTP and issue JWT tokens directly. OTP codes are sent via email when the service is online; otherwise, login proceeds without OTP for seamless fallback.
 
-A lightweight authentication microservice built with Node.js, TypeScript, and Express, following SOLID principles for maintainability. It handles user authentication, OTP-based login flows (with email delivery), and registration, with robust fallback mechanisms for external service dependencies.
+A lightweight authentication microservice built with Node.js, TypeScript, and Express, following SOLID principles for maintainability. It handles user authentication and OTP-based login flows (with email delivery), with robust fallback mechanisms for external service dependencies.
 
 ## Features
-- **User Registration**: Creates new users with role validation and password hashing.
 - **Login with OTP**: Verifies credentials, generates OTP codes, and manages sessions. OTP codes are sent via email. If the email service is unavailable, login falls back to direct JWT issuance (no OTP required).
 - **OTP Verification**: Validates OTP codes received via email against stored sessions and issues JWT tokens.
+- **OTP Resend**: Allows resending OTP codes during the login session.
 - **Health Monitoring**: Periodically checks the email service status and logs connectivity. Login flow adapts automatically based on email service availability.
 - **Security**: Uses bcrypt for password hashing, JWT for tokens, and in-memory session management with expiration.
 
@@ -16,7 +16,7 @@ A lightweight authentication microservice built with Node.js, TypeScript, and Ex
 The microservice is structured into layers for separation of concerns:
 - **Domain Layer**: Contains models, DTOs, types, and interfaces (e.g., `User`, `LoginUserDTO`, `IAuthService`).
 - **Services Layer**: Core business logic, separated into dedicated classes:
-  - `AuthService`: Handles authentication logic (login, register, verify OTP).
+  - `AuthService`: Handles authentication logic (login and OTP verification).
   - `EmailService`: Manages OTP generation, email sending, and health checks.
   - `SessionService`: Stores and manages login sessions with automatic expiration.
   - `RoleService`: Caches and refreshes user roles from the database.
@@ -26,15 +26,15 @@ The microservice is structured into layers for separation of concerns:
 ## Core HTTP Endpoints
 (Locally mounted under `/api/v1`; public endpoints may differ based on gateway configuration.)
 - `POST /auth/login` — Authenticates user credentials, checks email service health, and returns session info (OTP required if email service is online) or JWT token (direct login if email service is offline). Payload: [`LoginUserDTO`](src/Domain/DTOs/LoginUserDTO.ts).
-- `POST /auth/register` — Registers a new user and returns a JWT token. Payload: [`RegistrationUserDTO`](src/Domain/DTOs/RegistrationUserDTO.ts).
-- `POST /auth/verify-otp` — Verifies OTP code (sent via email) and issues a JWT token. Payload: [`BrowserData`](src/Domain/models/BrowserData.ts).
+- `POST /auth/verify-OTP` — Verifies OTP code (sent via email) and issues a JWT token. Payload: [`BrowserData`](src/Domain/models/BrowserData.ts).
+- `POST /auth/resend-OTP` — Resends OTP code for the current login session. Payload: [`BrowserData`](src/Domain/models/BrowserData.ts).
 
 ## Tokens and Types
-- **JWT Tokens**: Issued on successful registration, direct login (when email is down), or OTP verification. Contains claims defined in [`AuthTokenClaims`](src/Domain/types/AuthTokenClaims.ts).
+- **JWT Tokens**: Issued on successful direct login (when email is down) or OTP verification. Contains claims defined in [`AuthTokenClaims`](src/Domain/types/AuthTokenClaims.ts).
 - **Login Session Tokens**: For OTP flows, a `session_id` is returned for client-side OTP submission.
 - **Response Types**:
   - Login: [`LoginResponse`](src/Domain/types/LoginResponse.ts) (varies based on OTP requirement).
-  - Registration/OTP Verification: [`AuthResponse`](src/Domain/types/AuthResponse.ts).
+  - OTP Verification: [`AuthResponse`](src/Domain/types/AuthResponse.ts).
 
 ## Development Notes
 - **OTP Delivery**: OTP codes are now sent via email using the mailing microservice. If the email service is offline, login does not require OTP and issues JWT tokens directly.
@@ -45,7 +45,7 @@ The microservice is structured into layers for separation of concerns:
 
 ## Setup and Running
 1. Install dependencies: `npm install`.
-2. Set environment variables in `.env` (see .env Configuration section below).
+2. Copy `.env.example` to `.env` and set environment variables (see .env Configuration section below).
 3. Run database migrations if needed (via TypeORM).
 4. Start the service: `npm start` (or `npm run dev` for development).
 5. Access endpoints via your API gateway or directly at `http://localhost:<port>/api/v1/auth/*`.
@@ -67,6 +67,7 @@ Configure the following in your `.env` file. Defaults are provided where applica
 ### Mail Service Configuration
 - `MAIL_SERVICE_HOST`: Host for the mailing microservice.
 - `MAIL_SERVICE_PORT`: Port for the mailing microservice.
+- `MAIL_SERVICE_PATH`: Path for the mailing microservice API (default: /api/v1/MailService).
 
 ### JWT Configuration
 - `JWT_SECRET`: Secret key for JWT signing (required; keep secure and rotate regularly).
