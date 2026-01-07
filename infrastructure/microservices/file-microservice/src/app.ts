@@ -43,7 +43,7 @@ app.use(express.urlencoded({ extended: true }));
   const fileService = new FileService(fileRepository, fileStorageService, fileMapper);
 
   // WebAPI routes
-  const fileController = new FileController(fileService, roleValidationService, fileTypeValidationService);
+  const fileController = new FileController(fileService, roleValidationService, fileTypeValidationService, fileMapper);
 
   // Registering routes
   app.use('/api/v1', fileController.getRouter());

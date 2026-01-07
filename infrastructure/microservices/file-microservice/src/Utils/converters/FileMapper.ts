@@ -33,4 +33,26 @@ export class FileMapper implements IFileMapper {
   toUploadedFileDTOArray(entities: UploadedFile[]): UploadedFileDTO[] {
     return entities.map(entity => this.toUploadedFileDTO(entity));
   }
+
+  // Creates metadata object from FileResponseDTO (excludes file buffer)
+  toMetadata(fileData: FileResponseDTO): Omit<FileResponseDTO, 'fileBuffer'> {
+    return {
+      fileId: fileData.fileId,
+      originalFileName: fileData.originalFileName,
+      fileType: fileData.fileType,
+      fileExtension: fileData.fileExtension,
+      authorId: fileData.authorId
+    };
+  }
+
+  // Creates CreateFileDTO from upload request data
+  toCreateFileDTO(originalName: string, fileType: string, fileExtension: string, authorId: number, fileBuffer: Buffer): CreateFileDTO {
+    return {
+      originalFileName: originalName,
+      fileType: fileType,
+      fileExtension: fileExtension,
+      authorId: authorId,
+      fileBuffer: fileBuffer
+    };
+  }
 }

@@ -5,6 +5,7 @@ import { CreateFileDTO } from '../Domain/DTOs/CreateFileDTO';
 import { IRoleValidationService } from '../Domain/services/IRoleValidationService';
 import { IFileTypeValidationService } from '../Domain/services/IFileTypeValidationService';
 import { UserRole } from '../Domain/enums/UserRole';
+import { IFileMapper } from '../Utils/converters/IFileMapper';
 import * as path from 'path';
 
 export class FileController {
@@ -14,7 +15,8 @@ export class FileController {
   constructor(
     private fileService: IFileService,
     private roleValidationService: IRoleValidationService,
-    private fileTypeValidationService: IFileTypeValidationService
+    private fileTypeValidationService: IFileTypeValidationService,
+    private fileMapper: IFileMapper
   ) {
     this.router = Router();
     this.upload = multer({ 
@@ -102,13 +104,13 @@ export class FileController {
       const fileExtension = detectedExtension || path.extname(req.file.originalname);
       const fileType = req.file.mimetype;
 
-      const createFileDTO: CreateFileDTO = {
-        originalFileName: req.file.originalname,
-        fileType: fileType,
-        fileExtension: fileExtension,
-        authorId: parseInt(authorId),
-        fileBuffer: req.file.buffer
-      };
+      const createFileDTO = this.fileMapper.toCreateFileDTO(
+        req.file.originalname,
+        fileType,
+        fileExtension,
+        parseInt(authorId),
+        req.file.buffer
+      );
 
       const result = await this.fileService.createFile(createFileDTO);
 
@@ -238,13 +240,7 @@ export class FileController {
       const result = await this.fileService.retrieveFile(fileId);
 
       if (result.success && result.data) {
-        const metadata = {
-          fileId: result.data.fileId,
-          originalFileName: result.data.originalFileName,
-          fileType: result.data.fileType,
-          fileExtension: result.data.fileExtension,
-          authorId: result.data.authorId
-        };
+        const metadata = this.fileMapper.toMetadata(result.data);
         res.status(200).json({ success: true, data: metadata });
       } else {
         res.status(404).json({ success: false, error: result.error || 'File not found' });
