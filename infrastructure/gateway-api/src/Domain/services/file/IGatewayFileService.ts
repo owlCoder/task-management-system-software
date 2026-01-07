@@ -7,7 +7,7 @@ import { StreamResponse } from "../../types/common/StreamResponse";
 
 export interface IGatewayFileService {
     downloadFile(fileId: number): Promise<Result<StreamResponse>>;
-    getFilesByAuthorId(authorId: number): Promise<Result<UploadedFileDTO[]>>;
+    getFilesByAuthorId(authorId: number, offset?: number, limit?: number): Promise<Result<UploadedFileDTO[]>>;
     getFileMetadata(fileId: number): Promise<Result<UploadedFileDTO>>;
     uploadFile(req: Request): Promise<Result<UploadedFileDTO>>;
     deleteFile(fileId: number): Promise<Result<void>>;

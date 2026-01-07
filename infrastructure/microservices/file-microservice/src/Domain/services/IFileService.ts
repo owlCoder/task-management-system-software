@@ -7,5 +7,5 @@ export interface IFileService {
   createFile(fileData: CreateFileDTO): Promise<Result<UploadedFileDTO>>;
   retrieveFile(fileId: number): Promise<Result<FileResponseDTO>>;
   deleteFile(fileId: number): Promise<Result<boolean>>;
-  getFilesByAuthor(authorId: number): Promise<Result<UploadedFileDTO[]>>;
+  getFilesByAuthor(authorId: number, offset?: number, limit?: number): Promise<Result<UploadedFileDTO[]>>;
 }

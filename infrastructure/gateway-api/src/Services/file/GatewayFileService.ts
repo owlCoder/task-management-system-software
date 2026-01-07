@@ -49,15 +49,32 @@ export class GatewayFileService implements IGatewayFileService {
     /**
      * Fetches the metadata of all files created by certain author.
      * @param {number} authorId - id of the author. 
+     * @param {number} offset - optional offset for pagination.
+     * @param {number} limit - optional limit for pagination.
      * @returns {Promise<Result<UploadedFileDTO[]>>} - A promise that resolves to a Result object containing the list of file metadata.
      * - On success returns data as {@link UploadedFileDTO[]}.
      * - On failure returns status code and error message.
      */
-    async getFilesByAuthorId(authorId: number): Promise<Result<UploadedFileDTO[]>> {
+    async getFilesByAuthorId(authorId: number, offset?: number, limit?: number): Promise<Result<UploadedFileDTO[]>> {
+        let url = FILE_ROUTES.GET_FILES_FROM_AUTHOR(authorId);
+        
+        // Build query string for pagination parameters
+        const queryParams = new URLSearchParams();
+        if (offset !== undefined) {
+            queryParams.append('offset', offset.toString());
+        }
+        if (limit !== undefined) {
+            queryParams.append('limit', limit.toString());
+        }
+        
+        if (queryParams.toString()) {
+            url += `?${queryParams.toString()}`;
+        }
+        
         return await makeAPICall<UploadedFileDTO[]>(this.fileClient, this.errorHandlingService, {
             serviceName: SERVICES.FILE,
             method: HTTP_METHODS.GET,
-            url: FILE_ROUTES.GET_FILES_FROM_AUTHOR(authorId)
+            url: url
         });
     }
 

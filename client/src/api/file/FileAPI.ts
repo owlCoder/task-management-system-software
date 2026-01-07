@@ -17,9 +17,24 @@ export class FileAPI  implements IFileAPI{
         });
     }
 
-    async getFileList(token: string , authorId : number): Promise<FileDTO[]> {
+    async getFileList(token: string , authorId : number, offset?: number, limit?: number): Promise<FileDTO[]> {
+        let url = `/files/author/${authorId}`;
+        
+        // Build query string for pagination parameters
+        const queryParams = new URLSearchParams();
+        if (offset !== undefined) {
+            queryParams.append('offset', offset.toString());
+        }
+        if (limit !== undefined) {
+            queryParams.append('limit', limit.toString());
+        }
+        
+        if (queryParams.toString()) {
+            url += `?${queryParams.toString()}`;
+        }
+        
         const response = await this.axiosInstance.get(
-            `/files/author/${authorId}`,
+            url,
             {
                 headers: { Authorization: `Bearer ${token}` },
             });

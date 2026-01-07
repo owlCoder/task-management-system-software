@@ -110,11 +110,22 @@ export class FileService implements IFileService {
     }
   }
 
-  async getFilesByAuthor(authorId: number): Promise<Result<UploadedFileDTO[]>> {
+  async getFilesByAuthor(authorId: number, offset?: number, limit?: number): Promise<Result<UploadedFileDTO[]>> {
     try {
-      const files = await this.fileRepository.find({
-        where: { author_id: authorId }
-      });
+      const queryOptions: any = {
+        where: { author_id: authorId },
+        order: { file_id: 'DESC' } 
+      };
+
+      if (offset !== undefined && offset >= 0) {
+        queryOptions.skip = offset;
+      }
+      
+      if (limit !== undefined && limit > 0) {
+        queryOptions.take = limit;
+      }
+
+      const files = await this.fileRepository.find(queryOptions);
 
       const uploadedFileDTOs = this.fileMapper.toUploadedFileDTOArray(files);
 

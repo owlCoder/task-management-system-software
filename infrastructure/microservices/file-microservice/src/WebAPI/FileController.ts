@@ -8,6 +8,9 @@ import { UserRole } from "../Domain/enums/UserRole";
 import { IFileMapper } from "../Utils/converters/IFileMapper";
 import * as path from "path";
 
+const FILE_SIZE_LIMIT_MB = parseInt(process.env.FILE_SIZE_LIMIT_MB || "10");
+const FILE_SIZE_LIMIT = FILE_SIZE_LIMIT_MB * 1024 * 1024; // Convert MB to bytes
+
 export class FileController {
     private router: Router;
     private upload: multer.Multer;
@@ -22,7 +25,7 @@ export class FileController {
         this.upload = multer({
             storage: multer.memoryStorage(),
             limits: {
-                fileSize: 10 * 1024 * 1024,
+                fileSize: FILE_SIZE_LIMIT,
             },
         });
         this.initializeRoutes();
@@ -213,8 +216,10 @@ export class FileController {
 
     /**
      * GET /api/v1/files/author/:authorId
-     * Get all files uploaded by a specific author
+     * Get all files uploaded by a specific author with optional pagination
      * @param {number} req.params.authorId - ID of the author whose files to retrieve
+     * @param {number} req.query.offset - Optional offset for pagination (default: 0)
+     * @param {number} req.query.limit - Optional limit for pagination (default: no limit)
      * @returns {UploadedFileDTO[]} JSON response with success status and array of file metadata
      * @see {@link UploadedFileDTO} for response structure
      */
@@ -227,7 +232,29 @@ export class FileController {
                 return;
             }
 
-            const result = await this.fileService.getFilesByAuthor(authorId);
+            // Parse pagination parameters from query string
+            let offset: number | undefined = undefined;
+            let limit: number | undefined = undefined;
+
+            if (req.query.offset !== undefined) {
+                const parsedOffset = parseInt(req.query.offset as string);
+                if (isNaN(parsedOffset) || parsedOffset < 0) {
+                    res.status(400).json({ message: "Invalid offset parameter. Must be a non-negative integer." });
+                    return;
+                }
+                offset = parsedOffset;
+            }
+
+            if (req.query.limit !== undefined) {
+                const parsedLimit = parseInt(req.query.limit as string);
+                if (isNaN(parsedLimit) || parsedLimit <= 0) {
+                    res.status(400).json({ message: "Invalid limit parameter. Must be a positive integer." });
+                    return;
+                }
+                limit = parsedLimit;
+            }
+
+            const result = await this.fileService.getFilesByAuthor(authorId, offset, limit);
 
             if (result.success) {
                 res.status(200).json({ data: result.data });

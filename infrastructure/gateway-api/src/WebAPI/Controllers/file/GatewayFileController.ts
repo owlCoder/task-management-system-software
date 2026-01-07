@@ -50,7 +50,7 @@ export class GatewayFileController {
 
     /**
      * GET /api/v1/files/author/:authorId
-     * @param {Request} req - the request object, containing the id of the author in params.
+     * @param {Request} req - the request object, containing the id of the author in params and optional offset/limit in query.
      * @param {Response} res - the response object for the client.
      * @returns {Promise<void>}
      * - On success: response status 200, response data: {@link UploadedFileDTO[]}. 
@@ -58,8 +58,26 @@ export class GatewayFileController {
      */
     private async getFilesByAuthorId(req: Request, res: Response): Promise<void> {
         const authorId = parseInt(req.params.authorId, 10);
+        
+        // Parse pagination parameters from query string
+        let offset: number | undefined = undefined;
+        let limit: number | undefined = undefined;
 
-        const result = await this.gatewayFileService.getFilesByAuthorId(authorId);
+        if (req.query.offset !== undefined) {
+            const parsedOffset = parseInt(req.query.offset as string);
+            if (!isNaN(parsedOffset) && parsedOffset >= 0) {
+                offset = parsedOffset;
+            }
+        }
+
+        if (req.query.limit !== undefined) {
+            const parsedLimit = parseInt(req.query.limit as string);
+            if (!isNaN(parsedLimit) && parsedLimit > 0) {
+                limit = parsedLimit;
+            }
+        }
+
+        const result = await this.gatewayFileService.getFilesByAuthorId(authorId, offset, limit);
         handleResponse(res, result);
     }
 
