@@ -1,9 +1,11 @@
 import { Repository } from "typeorm";
 import { ITaskService } from "../Domain/services/ITaskService";
-import { Task } from "../Domain/models/Task";  
+import { Task } from "../Domain/models/Task";
 import { TaskStatus } from "../Domain/enums/TaskStatus";
 import { Result } from "../Domain/types/Result";
 import { ErrorCode } from "../Domain/enums/ErrorCode";
+import { CreateTaskDTO } from "../Domain/DTOs/CreateTaskDTO";
+import { UpdateTaskDTO } from "../Domain/DTOs/UpdateTaskDTO";
 export class TaskService implements ITaskService {
 
     constructor(
@@ -82,34 +84,34 @@ export class TaskService implements ITaskService {
     }
     
     
-    async addTaskForSprint(sprint_id: number, worker_id: number, project_manager_id : number, title: string, task_description: string, estimated_cost: number): Promise<Result<Task>> {
+    async addTaskForSprint(sprint_id: number, createTaskDTO: CreateTaskDTO): Promise<Result<Task>> {
         //Estimated cost mozda da se izracuna popust (cena sata radnika) * (broj sati ocekivanih za zadatak)
             //TODO: Proveriti da li projekat postoji
             //TODO: Proveriti da li worker postoji i da li je dodeljen na dati projekat
-        if (!title || title.trim().length === 0) {
-            throw new Error("Title is required");
+        if (!createTaskDTO.title || createTaskDTO.title.trim().length === 0) {
+            return { success: false, errorCode: ErrorCode.INVALID_INPUT, message: "Title is required" };
         }
-        if (!task_description || task_description.trim().length === 0) {
-            throw new Error("Task description is required");
+        if (!createTaskDTO.task_description || createTaskDTO.task_description.trim().length === 0) {
+            return { success: false, errorCode: ErrorCode.INVALID_INPUT, message: "Task description is required" };
         }
         //Treba videti sa ostalima kako ovo da se izracuna,da li moj servis ili da to dodje kao parametar
-        if (estimated_cost < 0) {
-            throw new Error("Estimated cost cannot be negative");
+        if ((createTaskDTO.estimated_cost ?? 0) < 0) {
+            return { success: false, errorCode: ErrorCode.INVALID_INPUT, message: "Estimated cost cannot be negative" };
         }
 
         const newTask = this.taskRepository.create({
             sprint_id,
-            worker_id,
-            project_manager_id,
-            title,
-            task_description,
-            estimated_cost,
+            worker_id: createTaskDTO.worker_id,
+            title: createTaskDTO.title,
+            task_description: createTaskDTO.task_description,
+            estimated_cost: createTaskDTO.estimated_cost,
             task_status: TaskStatus.CREATED,
-            total_hours_spent: 0
+            total_hours_spent: 0,
+            project_manager_id: createTaskDTO.project_manager_id
         });
 
         const savedTask = await this.taskRepository.save(newTask);
-        return {success: true,data: savedTask};
+        return { success: true, data: savedTask };
     }
     async getAllDummyTasksForSprint() : Promise<Result<Task[]>>{
         //Vracamo dummy podatke ako nema zadataka u bazi dok smo u developmentu
@@ -134,6 +136,68 @@ export class TaskService implements ITaskService {
         }
     }
     
+    async updateTask(task_id: number, updateTaskDTO: UpdateTaskDTO): Promise<Result<Task>> {
+        try {
+            const task = await this.taskRepository.findOne({
+                where: { task_id },
+                relations: ["comments"]
+            });
+
+            if (!task) {
+                return { success: false, errorCode: ErrorCode.TASK_NOT_FOUND, message: "Task not found" };
+            }
+
+            if (updateTaskDTO.title !== undefined && updateTaskDTO.title.trim().length > 0) {
+                task.title = updateTaskDTO.title;
+            }
+
+            if (updateTaskDTO.description !== undefined && updateTaskDTO.description.trim().length > 0) {
+                task.task_description = updateTaskDTO.description;
+            }
+
+            if (updateTaskDTO.estimatedCost !== undefined && updateTaskDTO.estimatedCost >= 0) {
+                task.estimated_cost = updateTaskDTO.estimatedCost;
+            }
+
+            if (updateTaskDTO.status !== undefined) {
+                const validStatus = Object.values(TaskStatus).includes(updateTaskDTO.status);
+                if (!validStatus) {
+                    return { success: false, errorCode: ErrorCode.INVALID_INPUT, message: "Invalid task status" };
+                }
+                task.task_status = updateTaskDTO.status;
+            }
+
+            if (updateTaskDTO.assignedTo !== undefined && updateTaskDTO.assignedTo > 0) {
+                task.worker_id = updateTaskDTO.assignedTo;
+            }
+
+            const updatedTask = await this.taskRepository.save(task);
+            return { success: true, data: updatedTask };
+
+        } catch (error) {
+            console.log(error);
+            return { success: false, errorCode: ErrorCode.INTERNAL_ERROR, message: "Failed to update task" };
+        }
+    }
+
+    async deleteTask(task_id: number): Promise<Result<boolean>> {
+        try {
+            const task = await this.taskRepository.findOne({
+                where: { task_id }
+            });
+
+            if (!task) {
+                return { success: false, errorCode: ErrorCode.TASK_NOT_FOUND, message: "Task not found" };
+            }
+
+            await this.taskRepository.remove(task);
+            return { success: true, data: true };
+
+        } catch (error) {
+            console.log(error);
+            return { success: false, errorCode: ErrorCode.INTERNAL_ERROR, message: "Failed to delete task" };
+        }
+    }
 
     //#endregion
 }

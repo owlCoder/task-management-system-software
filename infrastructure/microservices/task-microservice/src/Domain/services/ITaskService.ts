@@ -1,5 +1,7 @@
 import { Task } from "../models/Task";
 import { Result } from "../types/Result";
+import { CreateTaskDTO } from "../DTOs/CreateTaskDTO";
+import { UpdateTaskDTO } from "../DTOs/UpdateTaskDTO";
 
 export interface ITaskService {
     getTaskById(task_id: number): Promise<Result<Task>>;
@@ -7,11 +9,8 @@ export interface ITaskService {
     getAllDummyTasksForSprint() : Promise<Result<Task[]>>;
     addTaskForSprint(
         sprint_id: number,
-        worker_id: number,
-        project_manager_id : number, 
-        title: string, 
-        task_description: string, 
-        estimated_cost: number
+        createTaskDTO: CreateTaskDTO
     ): Promise<Result<Task>>;
-
+    updateTask(task_id: number, updateTaskDTO: UpdateTaskDTO): Promise<Result<Task>>;
+    deleteTask(task_id: number): Promise<Result<boolean>>;
 }

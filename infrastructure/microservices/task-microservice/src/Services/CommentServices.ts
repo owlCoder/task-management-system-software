@@ -1,17 +1,18 @@
 import { Repository } from "typeorm";
 import { ICommentService } from "../Domain/services/ICommentService";
-import { Task } from "../Domain/models/Task";   
+import { Task } from "../Domain/models/Task";
 import { TaskStatus } from "../Domain/enums/TaskStatus";
 import { Comment } from "../Domain/models/Comment";
 import { Result } from "../Domain/types/Result";
 import { ErrorCode } from "../Domain/enums/ErrorCode";
+import { CreateCommentDTO } from "../Domain/DTOs/CreateCommentDTO";
    export class CommentService implements ICommentService {
    
        constructor(
            private readonly taskRepository: Repository<Task>,
            private readonly commentRepository: Repository<Comment>
        ) {} 
-    async addComment(task_id: number, user_id: number, commentText: string): Promise<Result<Comment>> {
+    async addComment(task_id: number, createCommentDTO: CreateCommentDTO): Promise<Result<Comment>> {
         try {
             const task = await this.taskRepository.findOne({ where: { task_id } });
             if (!task) {
@@ -23,8 +24,8 @@ import { ErrorCode } from "../Domain/enums/ErrorCode";
             }
 
             const comment : Comment = this.commentRepository.create({
-                user_id : user_id,
-                comment: commentText,
+                user_id : createCommentDTO.user_id,
+                comment: createCommentDTO.comment,
                 task: task
             });
 

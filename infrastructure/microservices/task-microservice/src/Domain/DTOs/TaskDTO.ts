@@ -1,7 +1,7 @@
-import { TaskStatus } from "../../../Domain/enums/TaskStatus";
-import { CommentResponseDTO } from "./CommentResponseDTO";
+import { TaskStatus } from "../enums/TaskStatus";
+import { CommentDTO } from "./CommentDTO";
 
-export interface TaskResponseDTO {
+export interface TaskDTO {
     task_id: number;
     sprint_id: number;
     worker_id: number;
@@ -9,8 +9,7 @@ export interface TaskResponseDTO {
     title: string;
     task_description: string;
     task_status: TaskStatus;
-    attachment_file_uuid?: number;
     estimated_cost?: number;
     total_hours_spent?: number;
-    comments?: CommentResponseDTO[];    
+    comments?: CommentDTO[];    
 }

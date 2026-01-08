@@ -1,13 +1,15 @@
     import { Router,Request,Response } from "express";
     import { ITaskService } from "../../Domain/services/ITaskService";
     import { ICommentService } from "../../Domain/services/ICommentService";
-    import { CreateTaskDTO } from "../DTOs/Request/CreateTaskDTO";
-    import { TaskResponseDTO } from "../DTOs/Response/TaskResponseDTO";
-    import { ApiResponse } from "../types/ApiResponse";
-    import { commentToResponseDTO, mapErrorToStatus, mapTaskToTaskResponseDTO } from "../../Utils/Converters/Mappers";
-    import { CommentResponseDTO } from "../DTOs/Response/CommentResponseDTO";
-    import { Console } from "console";
-import { CreateCommentDTO } from "../DTOs/Request/CreateCommentDTO";
+    import { CreateTaskDTO } from "../../Domain/DTOs/CreateTaskDTO";
+    import { UpdateTaskDTO } from "../../Domain/DTOs/UpdateTaskDTO";
+    import { TaskDTO } from "../../Domain/DTOs/TaskDTO";
+    import { CreateCommentDTO } from "../../Domain/DTOs/CreateCommentDTO";
+    import { taskToTaskDTO } from "../../Utils/Converters/TaskConverter";
+    import { commentToCommentDTO } from "../../Utils/Converters/CommentConverter";
+    import { errorCodeToHttpStatus } from "../../Utils/Converters/ErrorCodeConverter";
+    import { UpdateTaskValidator } from "../validators/UpdateTaskValidator";
+    import { DeleteTaskValidator } from "../validators/DeleteTaskValidator";
 
     export class TaskController {
     private readonly router: Router;
@@ -29,6 +31,8 @@ import { CreateCommentDTO } from "../DTOs/Request/CreateCommentDTO";
         // TASKS
         this.router.get('/tasks/:taskId', this.getTaskById.bind(this));
         this.router.post('/tasks/sprints/:sprintId', this.addTaskForSprint.bind(this));
+        this.router.put('/tasks/:taskId', this.updateTask.bind(this));
+        this.router.delete('/tasks/:taskId', this.deleteTask.bind(this));
 
         // GET ALL TASKS FOR PROJECT
         this.router.get('/tasks/sprints/:sprintId', this.getAllTasksForSprint.bind(this));
@@ -44,7 +48,6 @@ import { CreateCommentDTO } from "../DTOs/Request/CreateCommentDTO";
     async addTaskForSprint(req: Request, res: Response): Promise<void> {
         try {
             const sprint_id = Number(req.params.sprintId);
-            console.log(sprint_id);
             if (isNaN(sprint_id)) {
                 res.status(400).json({ message: "Invalid sprint ID" });
                 return;
@@ -52,42 +55,16 @@ import { CreateCommentDTO } from "../DTOs/Request/CreateCommentDTO";
 
             const createTask: CreateTaskDTO = req.body;
 
-            const {
-                worker_id,
-                project_manager_id,
-                title,
-                task_description,
-                estimated_cost
-            } = createTask;
-
-            const result = await this.taskService.addTaskForSprint(
-                sprint_id,
-                worker_id,
-                project_manager_id,
-                title,
-                task_description,
-                estimated_cost
-            );
-
-            let response: ApiResponse<TaskResponseDTO>;
+            const result = await this.taskService.addTaskForSprint(sprint_id, createTask);
 
             if (result.success) {
-                response = {
-                    success: true,
-                    data: mapTaskToTaskResponseDTO(result.data),
-                    statusCode: 200
-                };
+                res.status(200).json(taskToTaskDTO(result.data));
             } else {
-                response = {
-                    success: false,
-                    statusCode: mapErrorToStatus(result.errorCode),
-                    message: result.message
-                };
+                res.status(errorCodeToHttpStatus(result.errorCode)).json({ message: result.message });
             }
 
-            res.status(response.statusCode).json(response);
-
         } catch (error) {
+            console.log(error);
             res.status(500).json({ message: "Internal server error" });
         }
     }
@@ -102,23 +79,12 @@ import { CreateCommentDTO } from "../DTOs/Request/CreateCommentDTO";
             }
 
             const result = await this.taskService.getTaskById(taskId);
-            let response: ApiResponse<TaskResponseDTO>;
 
             if (result.success) {
-                response = {
-                    success: true,
-                    data: mapTaskToTaskResponseDTO(result.data),
-                    statusCode: 200
-                };
+                res.status(200).json(taskToTaskDTO(result.data));
             } else {
-                response = {
-                    success: false,
-                    statusCode: mapErrorToStatus(result.errorCode),
-                    message: result.errorCode.toString()
-                };
+                res.status(errorCodeToHttpStatus(result.errorCode)).json({ message: result.message });
             }
-
-            res.status(response.statusCode).json(response);
 
         } catch (error) {
             res.status(500).json({ message: "Internal server error" });
@@ -135,23 +101,11 @@ import { CreateCommentDTO } from "../DTOs/Request/CreateCommentDTO";
 
             const result = await this.taskService.getAllTasksForSprint(sprint_id);
 
-            let response: ApiResponse<TaskResponseDTO[]>;
-
             if (result.success) {
-                response = {
-                    success: true,
-                    data: result.data.map(mapTaskToTaskResponseDTO),
-                    statusCode: 200
-                };
+                res.status(200).json(result.data.map(taskToTaskDTO));
             } else {
-                response = {
-                    success: false,
-                    statusCode: mapErrorToStatus(result.errorCode),
-                    message: result.message
-                };
+                res.status(errorCodeToHttpStatus(result.errorCode)).json({ message: result.message });
             }
-
-            res.status(response.statusCode).json(response);
 
         } catch (error) {
             res.status(500).json({ message: "Internal server error" });
@@ -168,30 +122,13 @@ import { CreateCommentDTO } from "../DTOs/Request/CreateCommentDTO";
 
             const createComment: CreateCommentDTO = req.body;
 
-            const {
-                user_id,
-                comment
-            } = createComment;
-
-            const result = await this.commentService.addComment(taskId, user_id, comment);
-
-            let response: ApiResponse<CommentResponseDTO>; 
+            const result = await this.commentService.addComment(taskId, createComment);
 
             if (result.success) {
-                response = {
-                    success: true,
-                    data: commentToResponseDTO(result.data), 
-                    statusCode: 200
-                };
+                res.status(200).json(commentToCommentDTO(result.data, taskId));
             } else {
-                response = {
-                    success: false,
-                    statusCode: mapErrorToStatus(result.errorCode),
-                    message: result.message
-                };
+                res.status(errorCodeToHttpStatus(result.errorCode)).json({ message: result.message });
             }
-
-            res.status(response.statusCode).json(response);
 
         } catch (error) {
             res.status(500).json({ message: "Internal server error" });
@@ -202,25 +139,68 @@ import { CreateCommentDTO } from "../DTOs/Request/CreateCommentDTO";
         try {
             const result = await this.taskService.getAllDummyTasksForSprint();
 
-            let response: ApiResponse<TaskResponseDTO[]>;
-
             if (result.success) {
-                response = {
-                    success: true,
-                    data: result.data.map(mapTaskToTaskResponseDTO),
-                    statusCode: 200
-                };
+                res.status(200).json(result.data.map(taskToTaskDTO));
             } else {
-                response = {
-                    success: false,
-                    statusCode: mapErrorToStatus(result.errorCode),
-                    message: result.message
-                };
+                res.status(errorCodeToHttpStatus(result.errorCode)).json({ message: result.message });
             }
 
-            res.status(response.statusCode).json(response);
+        } catch (error) {
+            res.status(500).json({ message: "Internal server error" });
+        }
+    }
+
+    async updateTask(req: Request, res: Response): Promise<void> {
+        try {
+            const taskId = parseInt(req.params.taskId, 10);
+            const taskIdValidation = DeleteTaskValidator.validateTaskId(taskId);
+            if (!taskIdValidation.isValid) {
+                res.status(400).json({ message: taskIdValidation.message });
+                return;
+            }
+
+            const updateTaskDTO: UpdateTaskDTO = req.body;
+
+            const dtoValidation = UpdateTaskValidator.validateUpdateTaskDTO(updateTaskDTO);
+            if (!dtoValidation.isValid) {
+                res.status(400).json({ message: dtoValidation.message });
+                return;
+            }
+
+            const result = await this.taskService.updateTask(taskId, updateTaskDTO);
+
+            if (result.success) {
+                res.status(200).json(taskToTaskDTO(result.data));
+            } else {
+                res.status(errorCodeToHttpStatus(result.errorCode)).json({ message: result.message });
+            }
 
         } catch (error) {
+            console.log(error);
+            res.status(500).json({ message: "Internal server error" });
+        }
+    }
+    
+
+    async deleteTask(req: Request, res: Response): Promise<void> {
+        try {
+            const taskId = parseInt(req.params.taskId, 10);
+            const taskIdValidation = DeleteTaskValidator.validateTaskId(taskId);
+            if (!taskIdValidation.isValid) {
+                res.status(400).json({ message: taskIdValidation.message });
+                return;
+            }
+
+            const result = await this.taskService.deleteTask(taskId);
+
+            if (result.success) {
+                res.status(204).json();
+            } else {
+                res.status(errorCodeToHttpStatus(result.errorCode)).json({ message: result.message });
+            }
+
+        } catch (error) {
+            console.log(error);
             res.status(500).json({ message: "Internal server error" });
         }
     }
