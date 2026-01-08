@@ -7,7 +7,7 @@ export interface ProjectCreateDTO {
     image_url?: string;
     total_weekly_hours_required: number;
     allowed_budget: number;
-    user_id?: number;
+    creator_username?: string;
     start_date?: string | null;
     sprint_count: number;
     sprint_duration: number;

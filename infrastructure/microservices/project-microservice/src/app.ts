@@ -50,7 +50,6 @@ app.use(express.json());
     const projectUserRepository: Repository<ProjectUser> = Db.getRepository(ProjectUser);
     const sprintRepository: Repository<Sprint> = Db.getRepository(Sprint);
 
-    // Services
     const projectService: IProjectService = new ProjectService(projectRepository, storageService);
     const projectUserService: IProjectUserService = new ProjectUserService(
         projectUserRepository,

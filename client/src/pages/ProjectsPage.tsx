@@ -1,5 +1,3 @@
-// src/pages/ProjectsPage.tsx
-
 import React, { useState, useEffect, useCallback } from "react";
 import ProjectCard from "../components/projects/ProjectCard";
 import ProjectDetailsModal from "../components/projects/ProjectDetailsModal";
@@ -32,7 +30,6 @@ export const ProjectsPage: React.FC = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    // Get selected project for Manage Users modal
     const selectedProject = projects.find((p) => p.project_id === selectedId) || null;
 
     const fetchProjects = useCallback(async () => {
@@ -105,7 +102,6 @@ export const ProjectsPage: React.FC = () => {
         setSelectedId(null);
     };
 
-    // Manage Users Modal handlers
     const handleOpenManageUsersModal = () => {
         if (selectedId === null) return;
         setIsManageUsersModalOpen(true);
@@ -119,7 +115,7 @@ export const ProjectsPage: React.FC = () => {
         try {
             const projectData: ProjectCreateDTO = {
                 ...newProject,
-                user_id: user?.id,
+                creator_username: user?.username,
             };
 
             const created = await projectAPI.createProject(projectData);
@@ -221,10 +217,8 @@ export const ProjectsPage: React.FC = () => {
                 <header className="flex items-center justify-between gap-5 mb-6 flex-wrap flex-shrink-0">
                     <h1 className="text-3xl md:text-4xl font-bold text-white">Projects</h1>
 
-                    {/* Show management buttons only for Project Manager */}
                     {canManageProjects(user?.role) && (
                         <div className="flex gap-2 flex-wrap">
-                            {/* Manage Users Button */}
                             <button
                                 type="button"
                                 className={`
@@ -359,8 +353,7 @@ export const ProjectsPage: React.FC = () => {
                     weeklyHoursPerWorker={selectedProject?.total_weekly_hours_required || 0}
                     isOpen={isManageUsersModalOpen}
                     onClose={handleCloseManageUsersModal}
-                    onUsersUpdated={() => {
-                    }}
+                    onUsersUpdated={() => {}}
                 />
             </div>
         </div>

@@ -1,5 +1,3 @@
-// src/components/projects/ManageProjectUsersModal.tsx
-
 import React, { useState, useEffect } from "react";
 import { projectAPI } from "../../api/project/ProjectAPI";
 import { ProjectUserDTO } from "../../models/project/ProjectUserDTO";
@@ -23,21 +21,19 @@ export const ManageProjectUsersModal: React.FC<Props> = ({
 }) => {
     const [assignedUsers, setAssignedUsers] = useState<ProjectUserDTO[]>([]);
     const [isLoading, setIsLoading] = useState(false);
-    const [newUserId, setNewUserId] = useState("");
+    const [newUsername, setNewUsername] = useState("");
     const [error, setError] = useState("");
     const [isAdding, setIsAdding] = useState(false);
 
-    // Load assigned users when modal opens
     useEffect(() => {
         if (isOpen && projectId) {
             loadAssignedUsers();
         }
     }, [isOpen, projectId]);
 
-    // Reset state when modal closes
     useEffect(() => {
         if (!isOpen) {
-            setNewUserId("");
+            setNewUsername("");
             setError("");
             setAssignedUsers([]);
         }
@@ -60,14 +56,15 @@ export const ManageProjectUsersModal: React.FC<Props> = ({
     const handleAddUser = async () => {
         if (!projectId) return;
         
-        const userId = parseInt(newUserId, 10);
+        const username = newUsername.trim();
 
-        if (isNaN(userId) || userId <= 0) {
-            setError("Please enter a valid user ID");
+        if (!username) {
+            setError("Please enter a username");
             return;
         }
-        if (assignedUsers.some(u => u.user_id === userId)) {
-            setError("User is already assigned to this project");
+
+        if (username.length < 3) {
+            setError("Username must be at least 3 characters");
             return;
         }
 
@@ -77,11 +74,11 @@ export const ManageProjectUsersModal: React.FC<Props> = ({
         try {
             const newUser = await projectAPI.assignUserToProject(
                 projectId,
-                userId,
+                username,  // Sada šaljemo username
                 weeklyHoursPerWorker
             );
             setAssignedUsers(prev => [...prev, newUser]);
-            setNewUserId("");
+            setNewUsername("");
             onUsersUpdated?.();
         } catch (err: any) {
             console.error("Failed to assign user:", err);
@@ -225,11 +222,11 @@ export const ManageProjectUsersModal: React.FC<Props> = ({
                         </h3>
                         <div className="flex gap-2">
                             <input
-                                type="number"
-                                placeholder="Enter User ID"
-                                value={newUserId}
+                                type="text"
+                                placeholder="Enter Username"
+                                value={newUsername}
                                 onChange={(e) => {
-                                    setNewUserId(e.target.value);
+                                    setNewUsername(e.target.value);
                                     setError("");
                                 }}
                                 onKeyDown={(e) => {
@@ -243,19 +240,16 @@ export const ManageProjectUsersModal: React.FC<Props> = ({
                                     bg-white/10 border border-white/20 
                                     focus:outline-none focus:border-white/40
                                     text-white placeholder-white/40
-                                    [&::-webkit-inner-spin-button]:appearance-none 
-                                    [&::-webkit-outer-spin-button]:appearance-none
                                 "
-                                min="1"
                                 disabled={isAdding}
                             />
                             <button
                                 type="button"
                                 onClick={handleAddUser}
-                                disabled={isAdding || !newUserId}
+                                disabled={isAdding || !newUsername.trim()}
                                 className={`
                                     px-6 py-2 rounded-lg font-medium transition
-                                    ${isAdding || !newUserId
+                                    ${isAdding || !newUsername.trim()
                                         ? "bg-white/10 text-white/40 cursor-not-allowed"
                                         : "bg-white/20 hover:bg-white/30 text-white cursor-pointer"
                                     }
@@ -268,6 +262,10 @@ export const ManageProjectUsersModal: React.FC<Props> = ({
                         {error && (
                             <p className="text-red-400 text-sm mt-2">{error}</p>
                         )}
+                        
+                        <p className="text-white/40 text-xs mt-2">
+                            Enter the exact username of the user you want to add.
+                        </p>
                     </div>
                 </div>
 

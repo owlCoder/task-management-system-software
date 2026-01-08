@@ -79,8 +79,8 @@ class ProjectAPIImpl implements IProjectAPI {
                 formData.append("start_date", data.start_date);
             }
 
-            if (data.user_id) {
-                formData.append("user_id", data.user_id.toString());
+            if (data.creator_username) {
+                formData.append("creator_username", data.creator_username);
             }
 
             if (data.image_file) {
@@ -144,7 +144,7 @@ class ProjectAPIImpl implements IProjectAPI {
             return false;
         }
     }
-    
+
     // project_users
 
     async getProjectUsers(projectId: number): Promise<ProjectUserDTO[]> {
@@ -157,9 +157,9 @@ class ProjectAPIImpl implements IProjectAPI {
         }
     }
 
-    async assignUserToProject(projectId: number, userId: number, weeklyHours: number): Promise<ProjectUserDTO> {
+    async assignUserToProject(projectId: number, username: string, weeklyHours: number): Promise<ProjectUserDTO> {
         const response = await this.client.post<ProjectUserDTO>(`/projects/${projectId}/users`, {
-            user_id: userId,
+            username: username,
             weekly_hours: weeklyHours
         });
         return response.data;

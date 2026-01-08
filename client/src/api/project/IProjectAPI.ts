@@ -11,6 +11,6 @@ export interface IProjectAPI {
     deleteProject(projectId: number): Promise<boolean>;
     
     getProjectUsers(projectId: number): Promise<ProjectUserDTO[]>;
-    assignUserToProject(projectId: number, userId: number, weeklyHours: number): Promise<ProjectUserDTO>;
+    assignUserToProject(projectId: number, username: string, weeklyHours: number): Promise<ProjectUserDTO>;
     removeUserFromProject(projectId: number, userId: number): Promise<boolean>;
 }

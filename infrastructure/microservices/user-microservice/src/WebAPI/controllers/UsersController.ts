@@ -22,11 +22,8 @@ export class UsersController {
   private initializeRoutes(): void {
     this.router.get("/users", this.getAllUsers.bind(this));
     this.router.get("/users/ids", this.getUsersByIds.bind(this));
+    this.router.get("/users/by-username/:username", this.getUserByUsername.bind(this));
     this.router.get("/users/:id", this.getUserById.bind(this));
-    this.router.get(
-      "/users/by-username/:username",
-      this.getUserByUsername.bind(this)
-    );
     this.router.post("/users", this.createUser.bind(this));
     this.router.delete("/users/:id", this.logicalyDeleteUser.bind(this));
     this.router.put("/users/:id", this.updateUser.bind(this));

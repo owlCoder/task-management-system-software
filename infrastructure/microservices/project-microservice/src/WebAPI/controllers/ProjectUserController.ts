@@ -3,7 +3,6 @@ import { IProjectUserService } from "../../Domain/services/IProjectUserService";
 import { ProjectUserAssignDTO } from "../../Domain/DTOs/ProjectUserAssignDTO";
 import { validateAssignUser } from "../validators/ProjectUserValidator";
 
-
 export class ProjectUserController {
     private readonly router: Router;
 
@@ -18,32 +17,48 @@ export class ProjectUserController {
         this.router.delete("/projects/:id/users/:userId", this.removeUser.bind(this));
     }
 
-
     private async assignUser(req: Request, res: Response): Promise<void> {
         try {
             const project_id = parseInt(req.params.id, 10);
-            const user_id = parseInt(req.body.user_id, 10);
+            const username = req.body.username?.trim();
             const weekly_hours = parseInt(req.body.weekly_hours, 10);
 
-            const dto: ProjectUserAssignDTO = { project_id, user_id, weekly_hours };
+            if (isNaN(project_id)) {
+                res.status(400).json({ message: "Invalid project ID" });
+                return;
+            }
+
+            const dto: ProjectUserAssignDTO = { project_id, username, weekly_hours };
 
             const validation = validateAssignUser(dto);
             if (!validation.success) {
-            res.status(400).json({ message: validation.message });
-            return;
+                res.status(400).json({ message: validation.message });
+                return;
             }
 
             const result = await this.projectUserService.assignUserToProject(dto);
             res.status(201).json(result);
         } catch (err) {
-            res.status(500).json({ message: (err as Error).message });
+            const errorMessage = (err as Error).message;
+            
+            if (errorMessage.includes("not found")) {
+                res.status(404).json({ message: errorMessage });
+                return;
+            }
+            
+            if (errorMessage.includes("already assigned") || errorMessage.includes("exceed")) {
+                res.status(409).json({ message: errorMessage });
+                return;
+            }
+            
+            res.status(500).json({ message: errorMessage });
         }
     }
 
     private async getUsersForProject(req: Request, res: Response): Promise<void> {
         try {
             const project_id = parseInt(req.params.id, 10);
-            if(isNaN(project_id)){
+            if (isNaN(project_id)) {
                 res.status(400).json({ message: "Invalid project ID" });
                 return;
             }
@@ -59,12 +74,13 @@ export class ProjectUserController {
             const project_id = parseInt(req.params.id, 10);
             const user_id = parseInt(req.params.userId, 10);
             
-            if(isNaN(project_id) || isNaN(user_id)){
+            if (isNaN(project_id) || isNaN(user_id)) {
                 res.status(400).json({ message: "Invalid project ID or user ID" });
                 return;
             }
+            
             const ok = await this.projectUserService.removeUserFromProject(project_id, user_id);
-            if(!ok){
+            if (!ok) {
                 res.status(404).json({ message: "Assignment not found" });
                 return;
             }
