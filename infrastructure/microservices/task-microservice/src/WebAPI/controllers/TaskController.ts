@@ -10,6 +10,7 @@
     import { errorCodeToHttpStatus } from "../../Utils/Converters/ErrorCodeConverter";
     import { UpdateTaskValidator } from "../validators/UpdateTaskValidator";
     import { DeleteTaskValidator } from "../validators/DeleteTaskValidator";
+import { DeleteCommentValidator } from "../validators/DeleteCommentValidator";
 
     export class TaskController {
     private readonly router: Router;
@@ -39,6 +40,7 @@
 
         // COMMENTS
         this.router.post('/tasks/:taskId/comments', this.addCommentToTask.bind(this));
+        this.router.delete('/comments/:commentId', this.deleteComment.bind(this));
 
         // DEV / DUMMY
         this.router.get('/dev/dummy-tasks', this.getAllDummyTasksForProject.bind(this));
@@ -192,6 +194,29 @@
             }
 
             const result = await this.taskService.deleteTask(taskId);
+
+            if (result.success) {
+                res.status(204).json();
+            } else {
+                res.status(errorCodeToHttpStatus(result.errorCode)).json({ message: result.message });
+            }
+
+        } catch (error) {
+            console.log(error);
+            res.status(500).json({ message: "Internal server error" });
+        }
+    }
+
+    async deleteComment(req: Request, res: Response): Promise<void> {
+        try {
+            const commentId = parseInt(req.params.commentId, 10);
+            const commentIdValidation = DeleteCommentValidator.validateCommentId(commentId);
+            if (!commentIdValidation.isValid) {
+                res.status(400).json({ message: commentIdValidation.message });
+                return;
+            }
+
+            const result = await this.commentService.deleteComment(commentId);
 
             if (result.success) {
                 res.status(204).json();

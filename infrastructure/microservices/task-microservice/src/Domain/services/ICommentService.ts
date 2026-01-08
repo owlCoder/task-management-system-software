@@ -4,4 +4,5 @@ import { CreateCommentDTO } from "../DTOs/CreateCommentDTO";
 
 export interface ICommentService{
     addComment(task_id: number, createCommentDTO: CreateCommentDTO): Promise<Result<Comment>>;
+    deleteComment(comment_id: number): Promise<Result<boolean>>;
 }

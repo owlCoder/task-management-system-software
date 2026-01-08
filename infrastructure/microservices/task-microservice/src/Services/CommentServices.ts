@@ -36,4 +36,23 @@ import { CreateCommentDTO } from "../Domain/DTOs/CreateCommentDTO";
             return { success: false, errorCode:ErrorCode.INTERNAL_ERROR, message: "Internal server error" };
         }
     }
+
+    async deleteComment(comment_id: number): Promise<Result<boolean>> {
+        try {
+            const comment = await this.commentRepository.findOne({
+                where: { comment_id }
+            });
+
+            if (!comment) {
+                return { success: false, errorCode: ErrorCode.INVALID_INPUT, message: "Comment not found" };
+            }
+
+            await this.commentRepository.remove(comment);
+            return { success: true, data: true };
+
+        } catch (error) {
+            console.log(error);
+            return { success: false, errorCode: ErrorCode.INTERNAL_ERROR, message: "Failed to delete comment" };
+        }
+    }
 }
