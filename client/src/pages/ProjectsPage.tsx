@@ -191,7 +191,6 @@ export const ProjectsPage: React.FC = () => {
             </div>
         );
     }
-
     if (error) {
         return (
             <div className="flex h-screen bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-[#0f172a] via-[#020617] to-black">
@@ -208,7 +207,6 @@ export const ProjectsPage: React.FC = () => {
             </div>
         );
     }
-
     return (
         <div className="flex h-screen bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-[#0f172a] via-[#020617] to-black overflow-hidden">
             <Sidebar />
@@ -221,75 +219,144 @@ export const ProjectsPage: React.FC = () => {
                         <div className="flex gap-2 flex-wrap">
                             <button
                                 type="button"
-                                className={`
-                                    w-[140px] h-[40px] rounded-[3em]
-                                    font-semibold transition-all duration-300
-                                    ${
-                                        selectedId !== null
-                                            ? "bg-white text-[var(--palette-deep-blue)] hover:-translate-y-1 shadow-lg cursor-pointer"
-                                            : "bg-white/10 text-white/40 cursor-not-allowed"
-                                    }
-                                `}
-                                disabled={selectedId === null}
                                 onClick={handleOpenManageUsersModal}
-                            >
+                                disabled={selectedId === null}
+                                className={`group  w-[140px] h-[40px] rounded-[3em] flex items-center justify-center gap-[8px]
+                                    font-semibold transition-all duration-500
+                                    ${ selectedId !== null
+                                        ? `
+                                        bg-white/10 backdrop-blur-xl
+                                        border border-white/15
+                                        text-white/60
+                                        hover:bg-gradient-to-t
+                                        hover:from-[var(--palette-medium-blue)]
+                                        hover:to-[var(--palette-deep-blue)]
+                                        hover:text-white
+                                        hover:-translate-y-1
+                                        shadow-lg
+                                        cursor-pointer
+                                        `
+                                        : `
+                                        bg-white/5
+                                        border border-white/10
+                                        text-white/30
+                                        cursor-not-allowed
+                                        `
+                                    }
+                                `}
+                                >
+                            <span className="transition-colors duration-300">
                                 Manage Users
+                            </span>
                             </button>
 
                             <button
-                                type="button"
-                                className={`
-                                    w-[140px] h-[40px] rounded-[3em]
-                                    font-semibold transition-all duration-300
-                                    ${
-                                        selectedId !== null
-                                            ? "bg-white text-[var(--palette-deep-blue)] hover:-translate-y-1 shadow-lg cursor-pointer"
-                                            : "bg-white/10 text-white/40 cursor-not-allowed"
-                                    }
-                                `}
-                                disabled={selectedId === null}
-                                onClick={handleOpenEditModalClick}
+                            type="button"
+                            onClick={handleOpenEditModalClick}
+                            disabled={selectedId === null}
+                            className={`group w-[140px] h-[40px] rounded-[3em] flex items-center justify-center gap-[8px]
+                                font-semibold transition-all duration-500
+                                ${ selectedId !== null
+                                    ? `
+                                    bg-white/10 backdrop-blur-xl
+                                    border border-white/15
+                                    text-white/60
+                                    hover:bg-gradient-to-t
+                                    hover:from-[var(--palette-medium-blue)]
+                                    hover:to-[var(--palette-deep-blue)]
+                                    hover:text-white
+                                    hover:-translate-y-1
+                                    shadow-lg
+                                    cursor-pointer
+                                    `
+                                    : `
+                                    bg-white/5
+                                    border border-white/10
+                                    text-white/30
+                                    cursor-not-allowed
+                                    `
+                                }
+                            `}
                             >
+                            <svg
+                                className={`w-4 h-4 transition-all duration-300
+                                ${ selectedId !== null
+                                    ? "text-white/60 group-hover:text-white group-hover:scale-110"
+                                    : "text-white/30"
+                                }
+                                `}
+                                viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
+                                strokeLinecap="round" strokeLinejoin="round"
+                            >
+                                <path d="M12 20h9" />
+                                <path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4Z" />
+                            </svg>
+                            <span className="transition-colors duration-300">
                                 Edit Project
+                            </span>
                             </button>
 
                             <button
                                 type="button"
-                                className={`
-                                    w-[140px] h-[40px] rounded-[3em]
-                                    font-semibold transition-all duration-300
-                                    ${
-                                        selectedId !== null
-                                            ? "bg-white text-red-600 hover:-translate-y-1 shadow-lg cursor-pointer"
-                                            : "bg-white/10 text-white/40 cursor-not-allowed"
+                                onClick={handleDelete}
+                                disabled={selectedId === null}
+                                className={`group w-[140px] h-[40px] rounded-[3em] flex items-center justify-center gap-[8px]
+                                    font-semibold transition-all duration-500
+                                    ${ selectedId !== null
+                                        ? `
+                                        bg-white/10 backdrop-blur-xl
+                                        border border-white/15
+                                        text-white
+                                        hover:bg-gradient-to-t
+                                        hover:from-red-500 hover:to-red-700
+                                        hover:text-white
+                                        hover:-translate-y-1
+                                        shadow-lg
+                                        cursor-pointer
+                                        `
+                                        : `
+                                        bg-white/5
+                                        border border-white/10
+                                        text-white/30
+                                        cursor-not-allowed
+                                        `
                                     }
                                 `}
-                                disabled={selectedId === null}
-                                onClick={handleDelete}
-                            >
-                                Delete Project
+                                >
+                                <span className="transition-colors duration-300">
+                                    Delete Project
+                                </span>
                             </button>
 
                             <button
                                 type="button"
                                 onClick={handleOpenCreateModal}
-                                className="
-                                    w-[160px] h-[40px] rounded-[3em]
-                                    font-semibold
-                                    bg-white
-                                    text-[var(--palette-deep-blue)]
+                                className="group w-[160px] h-[40px] rounded-[3em] flex items-center justify-center gap-[10px]
+                                    bg-white/10 backdrop-blur-xl border border-white/15 text-white font-semibold
+                                    transition-all duration-500
                                     hover:bg-gradient-to-t
                                     hover:from-[var(--palette-medium-blue)]
                                     hover:to-[var(--palette-deep-blue)]
-                                    hover:text-white
-                                    transition-all duration-300
                                     hover:-translate-y-1
                                     shadow-lg
                                     cursor-pointer
                                 "
-                            >
-                                Create Project
-                            </button>
+                                >
+                                <svg
+                                    className="w-4 h-4 text-white group-hover:text-white transition-all duration-300 group-hover:scale-110"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="2"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                >
+                                    <path d="M12 5v14M5 12h14" />
+                                </svg>
+                                <span className="group-hover:text-white transition-colors duration-300">
+                                    Create Project
+                                </span>
+                                </button>
                         </div>
                     )}
                 </header>
