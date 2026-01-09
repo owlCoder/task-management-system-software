@@ -159,9 +159,6 @@ export const ManageProjectUsersModal: React.FC<Props> = ({
                         <p className="text-sm text-white/80">
                             Each worker will be assigned <span className="font-semibold text-white">{weeklyHoursPerWorker} hours/week</span>.
                         </p>
-                        <p className="text-xs text-white/50 mt-1">
-                            Project Manager is automatically assigned with 0 hours.
-                        </p>
                     </div>
 
                     {/* Loading state */}
@@ -192,25 +189,27 @@ export const ManageProjectUsersModal: React.FC<Props> = ({
                                             className="flex items-center justify-between bg-white/5 rounded-lg px-4 py-3 border border-white/10"
                                         >
                                             <div className="flex items-center gap-3">
-                                                <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-sm font-medium">
-                                                    {user.user_id}
+                                                <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-sm font-medium uppercase">
+                                                    {user.username?. charAt(0) || "U"}
                                                 </div>
                                                 <div>
-                                                    <span className="text-sm text-white">
-                                                        User ID: {user.user_id}
+                                                    <span className="text-sm text-white font-medium">
+                                                        {user.username || `User ${user.user_id}`}
                                                     </span>
                                                     <p className="text-xs text-white/50">
-                                                        {user.weekly_hours} hrs/week
+                                                        {user. role_name || "Unknown"}
                                                     </p>
                                                 </div>
                                             </div>
-                                            <button
-                                                type="button"
-                                                onClick={() => handleRemoveUser(user.user_id)}
-                                                className="text-red-400 hover:text-red-300 text-sm font-medium cursor-pointer transition px-3 py-1 rounded hover:bg-red-500/10"
-                                            >
-                                                Remove
-                                            </button>
+                                            {user.role_name !== "Project Manager" && (
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleRemoveUser(user.user_id)}
+                                                    className="text-red-400 hover:text-red-300 text-sm font-medium cursor-pointer transition px-3 py-1 rounded hover:bg-red-500/10"
+                                                >
+                                                    Remove
+                                                </button>
+                                            )}
                                         </div>
                                     ))}
                                 </div>

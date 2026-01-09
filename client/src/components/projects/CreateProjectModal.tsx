@@ -418,9 +418,6 @@ export const CreateProjectModal: React.FC<Props> = ({
                             `}
                             placeholder="e.g., 40"
                         />
-                        <p className="text-white/50 text-xs mt-1">
-                            This will be assigned to each worker. Project Manager gets 0 hours.
-                        </p>
                         {errors.total_weekly_hours_required && (
                             <p className="text-red-400 text-sm mt-1">
                                 {errors.total_weekly_hours_required}

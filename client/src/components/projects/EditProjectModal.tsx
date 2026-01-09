@@ -349,9 +349,6 @@ export const EditProjectModal: React.FC<Props> = ({
                                 ${errors.total_weekly_hours_required ? "border-red-400" : "border-white/20"}
                             `}
                         />
-                        <p className="text-white/50 text-xs mt-1">
-                            New workers will receive this many hours. Project Manager has 0 hours.
-                        </p>
                         {errors.total_weekly_hours_required && (
                             <p className="text-red-400 text-sm mt-1">
                                 {errors.total_weekly_hours_required}

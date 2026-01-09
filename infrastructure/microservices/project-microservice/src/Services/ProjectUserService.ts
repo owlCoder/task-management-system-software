@@ -39,6 +39,16 @@ export class ProjectUserService implements IProjectUserService {
         }
     }
 
+    private async getUserById(userId: number): Promise<UserDTO | null> {
+        try {
+            const response = await this.userClient.get<UserDTO>(`/users/${userId}`);
+            return response.data;
+        } catch (error: any) {
+            console.error(`Error fetching user by ID ${userId}:`, error.message);
+            return null;
+        }
+    }
+
     async assignUserToProject(data: ProjectUserAssignDTO): Promise<ProjectUserDTO> {
         const user = await this.getUserByUsername(data.username);
         
@@ -47,10 +57,10 @@ export class ProjectUserService implements IProjectUserService {
         }
 
         if (RESTRICTED_ROLES.includes(user.role_name)) {
-        throw new Error(
-            `Users with role "${user.role_name}" cannot be assigned to projects.`
-        );
-    }
+            throw new Error(
+                `Users with role "${user.role_name}" cannot be assigned to projects.`
+            );
+        }
 
         const userId = user.user_id;
 
@@ -63,7 +73,7 @@ export class ProjectUserService implements IProjectUserService {
         }
 
         const existing = await this.projectUserRepository.findOne({
-            where: { project: { project_id: data.project_id }, user_id: userId },
+            where: { project: { project_id: data. project_id }, user_id:  userId },
             relations: ["project"],
         });
         
@@ -71,11 +81,11 @@ export class ProjectUserService implements IProjectUserService {
             throw new Error(`User "${data.username}" is already assigned to this project`);
         }
 
-        const assignments = await this.projectUserRepository.find({
+        const assignments = await this.projectUserRepository. find({
             where: { user_id: userId },
         });
 
-        const currentTotal = assignments.reduce(
+        const currentTotal = assignments. reduce(
             (sum, a) => sum + a.weekly_hours,
             0
         );
@@ -96,10 +106,15 @@ export class ProjectUserService implements IProjectUserService {
         });
 
         const saved = await this.projectUserRepository.save(pu);
-        return ProjectUserMapper.toDTO(saved);
+        const dto = ProjectUserMapper.toDTO(saved);
+        
+        dto. username = user.username;
+        dto.role_name = user. role_name;
+        
+        return dto;
     }
 
-    async removeUserFromProject(project_id: number, user_id: number): Promise<boolean> {
+    async removeUserFromProject(project_id: number, user_id:  number): Promise<boolean> {
         const result = await this.projectUserRepository.delete({
             user_id,
             project: { project_id },
@@ -109,10 +124,28 @@ export class ProjectUserService implements IProjectUserService {
 
     async getUsersForProject(project_id: number): Promise<ProjectUserDTO[]> {
         const list = await this.projectUserRepository.find({
-            where: { project: { project_id } },
+            where: { project:  { project_id } },
             relations: ["project"],
         });
-        return list.map(pu => ProjectUserMapper.toDTO(pu));
+        
+        const dtos = await Promise.all(
+            list.map(async (pu) => {
+                const dto = ProjectUserMapper.toDTO(pu);
+                
+                const user = await this.getUserById(pu.user_id);
+                if (user) {
+                    dto.username = user.username;
+                    dto.role_name = user.role_name;
+                } else {
+                    dto.username = `User ${pu.user_id}`;
+                    dto.role_name = "Unknown";
+                }
+                
+                return dto;
+            })
+        );
+        
+        return dtos;
     }
 
     async updateWeeklyHoursForAllUsers(project_id: number, oldHours: number, newHours: number): Promise<void> {
