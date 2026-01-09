@@ -34,30 +34,38 @@ export class GatewayTaskService implements IGatewayTaskService {
     /**
      * Fetches the specific task.
      * @param {number} taskId - id of the task. 
+     * @param {number} senderId - id of the user who sent request.
      * @returns {Promise<Result<TaskDTO>>} - A promise that resolves to a Result object containing the data of the task.
      * - On success returns data as {@link TaskDTO}.
      * - On failure returns status code and error message.
      */
-    async getTaskById(taskId: number): Promise<Result<TaskDTO>> {
+    async getTaskById(taskId: number, senderId: number): Promise<Result<TaskDTO>> {
         return await makeAPICall<TaskDTO>(this.taskClient, this.errorHandlingService, {
             serviceName: SERVICES.TASK,
             method: HTTP_METHODS.GET,
-            url: TASK_ROUTES.GET_TASK(taskId)
+            url: TASK_ROUTES.GET_TASK(taskId),
+            headers: {
+                'x-user-id': senderId.toString()
+            }
         });
     }
     
     /**
      * Fetches tasks of the specific sprint.
      * @param {number} sprintId - id of the sprint. 
+     * @param {number} senderId - id of the user who sent request.
      * @returns {Promise<Result<TaskDTO[]>>} - A promise that resolves to a Result object containing the data of the tasks.
      * - On success returns data as {@link TaskDTO[]}.
      * - On failure returns status code and error message.
      */
-    async getTasksBySprintId(sprintId: number): Promise<Result<TaskDTO[]>> {
+    async getTasksBySprintId(sprintId: number, senderId: number): Promise<Result<TaskDTO[]>> {
         return await makeAPICall<TaskDTO[]>(this.taskClient, this.errorHandlingService, {
             serviceName: SERVICES.TASK,
             method: HTTP_METHODS.GET,
-            url: TASK_ROUTES.GET_TASKS_FROM_SPRINT(sprintId)
+            url: TASK_ROUTES.GET_TASKS_FROM_SPRINT(sprintId),
+            headers: {
+                'x-user-id': senderId.toString()
+            }
         });
     }
     
@@ -65,15 +73,19 @@ export class GatewayTaskService implements IGatewayTaskService {
      * Creates new task in a sprint.
      * @param {number} sprintId - id of the sprint.
      * @param {CreateTaskDTO} data - task data. 
+     * @param {number} senderId - id of the user who sent request.
      * @returns {Promise<Result<TaskDTO>>} - A promise that resolves to a Result object containing the data of the task.
      * - On success returns data as {@link TaskDTO}.
      * - On failure returns status code and error message.
      */
-    async addTaskBySprintId(sprintId: number, data: CreateTaskDTO): Promise<Result<TaskDTO>> {
+    async addTaskBySprintId(sprintId: number, data: CreateTaskDTO, senderId: number): Promise<Result<TaskDTO>> {
         return await makeAPICall<TaskDTO, CreateTaskDTO>(this.taskClient, this.errorHandlingService, {
             serviceName: SERVICES.TASK,
             method: HTTP_METHODS.POST,
             url: TASK_ROUTES.ADD_TASK_TO_SPRINT(sprintId),
+            headers: {
+                'x-user-id': senderId.toString()
+            },
             data: data
         });
     }
@@ -82,15 +94,19 @@ export class GatewayTaskService implements IGatewayTaskService {
      * Updates an existing task.
      * @param {number} taskId - id of the task.
      * @param {CreateTaskDTO} data - updated task data. 
+     * @param {number} senderId - id of the user who sent request.
      * @returns {Promise<Result<TaskDTO>>} - A promise that resolves to a Result object containing the data of the task.
      * - On success returns data as {@link TaskDTO}.
      * - On failure returns status code and error message.
      */
-    async updateTaskById(taskId: number, data: UpdateTaskDTO): Promise<Result<TaskDTO>> {
+    async updateTaskById(taskId: number, data: UpdateTaskDTO, senderId: number): Promise<Result<TaskDTO>> {
         return await makeAPICall<TaskDTO, UpdateTaskDTO>(this.taskClient, this.errorHandlingService, {
             serviceName: SERVICES.TASK,
             method: HTTP_METHODS.PUT,
             url: TASK_ROUTES.UPDATE_TASK(taskId),
+            headers: {
+                'x-user-id': senderId.toString()
+            },
             data: data
         });
     }
@@ -98,15 +114,19 @@ export class GatewayTaskService implements IGatewayTaskService {
     /**
      * Requests a deletion of a specific task.
      * @param {number} taskId - id of the task. 
+     * @param {number} senderId - id of the user who sent request.
      * @returns {Promise<Result<void>>} - A promise that resolves to a Result object.
      * - On success returns void.
      * - On failure returns status code and error message.
      */
-    async deleteTaskById(taskId: number): Promise<Result<void>> {
+    async deleteTaskById(taskId: number, senderId: number): Promise<Result<void>> {
         return await makeAPICall<void>(this.taskClient, this.errorHandlingService, {
             serviceName: SERVICES.TASK,
             method: HTTP_METHODS.DELETE,
-            url: TASK_ROUTES.DELETE_TASK(taskId)
+            url: TASK_ROUTES.DELETE_TASK(taskId),
+            headers: {
+                'x-user-id': senderId.toString()
+            }
         });
     }
 
@@ -114,15 +134,19 @@ export class GatewayTaskService implements IGatewayTaskService {
      * Adds a comment to a specific task.
      * @param {number} taskId - id of the task. 
      * @param {CreateCommentDTO} data - comment data.
+     * @param {number} senderId - id of the user who sent request.
      * @returns {Promise<Result<TaskDTO>>} - A promise that resolves to a Result object containing the data of the comment.
      * - On success returns data as {@link CommentDTO}.
      * - On failure returns status code and error message.
      */
-    async addCommentByTaskId(taskId: number, data: CreateCommentDTO): Promise<Result<CommentDTO>> {
+    async addCommentByTaskId(taskId: number, data: CreateCommentDTO, senderId: number): Promise<Result<CommentDTO>> {
         return await makeAPICall<CommentDTO, CreateCommentDTO>(this.taskClient, this.errorHandlingService, {
             serviceName: SERVICES.TASK,
             method: HTTP_METHODS.POST,
             url: TASK_ROUTES.ADD_COMMENT_TO_TASK(taskId),
+            headers: {
+                'x-user-id': senderId.toString()
+            },
             data: data
         });
     }
@@ -130,15 +154,19 @@ export class GatewayTaskService implements IGatewayTaskService {
     /**
      * Requests a deletion of a specific comment.
      * @param {number} commentId - id of the comment. 
+     * @param {number} senderId - id of the user who sent request.
      * @returns {Promise<Result<void>>} - A promise that resolves to a Result object.
      * - On success returns void.
      * - On failure returns status code and error message.
      */
-    async deleteCommentById(commentId: number): Promise<Result<void>> {
+    async deleteCommentById(commentId: number, senderId: number): Promise<Result<void>> {
         return await makeAPICall<void>(this.taskClient, this.errorHandlingService, {
             serviceName: SERVICES.TASK,
             method: HTTP_METHODS.DELETE,
-            url: TASK_ROUTES.DELETE_COMMENT(commentId)
+            url: TASK_ROUTES.DELETE_COMMENT(commentId),
+            headers: {
+                'x-user-id': senderId.toString()
+            }
         });
     }
 

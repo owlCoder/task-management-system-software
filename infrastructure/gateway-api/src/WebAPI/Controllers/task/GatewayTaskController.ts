@@ -54,8 +54,9 @@ export class GatewayTaskController {
      */
     private async getTaskById(req: Request, res: Response): Promise<void> {
         const taskId = parseInt(req.params.taskId, 10);
+        const senderId = req.user!.id;
 
-        const result = await this.gatewayTaskService.getTaskById(taskId);
+        const result = await this.gatewayTaskService.getTaskById(taskId, senderId);
         handleResponse(res, result);
     }
 
@@ -69,8 +70,9 @@ export class GatewayTaskController {
      */
     private async getTasksBySprintId(req: Request, res: Response): Promise<void> {
         const sprintId = parseInt(req.params.sprintId, 10);
+        const senderId = req.user!.id;
 
-        const result = await this.gatewayTaskService.getTasksBySprintId(sprintId);
+        const result = await this.gatewayTaskService.getTasksBySprintId(sprintId, senderId);
         handleResponse(res, result);
     }
 
@@ -85,8 +87,9 @@ export class GatewayTaskController {
     private async createTaskBySprintId(req: Request, res: Response): Promise<void> {
         const sprintId = parseInt(req.params.sprintId, 10);
         const data = req.body as CreateTaskDTO;
+        const senderId = req.user!.id;
 
-        const result = await this.gatewayTaskService.addTaskBySprintId(sprintId, data);
+        const result = await this.gatewayTaskService.addTaskBySprintId(sprintId, data, senderId);
         handleResponse(res, result, 201);
     }
 
@@ -101,8 +104,9 @@ export class GatewayTaskController {
     private async updateTaskById(req: Request, res: Response): Promise<void> {
         const taskId = parseInt(req.params.taskId, 10);
         const data = req.body as UpdateTaskDTO;
+        const senderId = req.user!.id;
 
-        const result = await this.gatewayTaskService.updateTaskById(taskId, data);
+        const result = await this.gatewayTaskService.updateTaskById(taskId, data, senderId);
         handleResponse(res, result);
     }
 
@@ -116,8 +120,9 @@ export class GatewayTaskController {
      */
     private async deleteTaskById(req: Request, res: Response): Promise<void> {
         const taskId = parseInt(req.params.taskId, 10);
+        const senderId = req.user!.id;
 
-        const result = await this.gatewayTaskService.deleteTaskById(taskId);
+        const result = await this.gatewayTaskService.deleteTaskById(taskId, senderId);
         handleEmptyResponse(res, result);
     }
 
@@ -132,8 +137,9 @@ export class GatewayTaskController {
     private async addCommentByTaskId(req: Request, res: Response): Promise<void> {
         const taskId = parseInt(req.params.taskId, 10);
         const data = req.body as CreateCommentDTO;
+        const senderId = req.user!.id;
 
-        const result = await this.gatewayTaskService.addCommentByTaskId(taskId, data);
+        const result = await this.gatewayTaskService.addCommentByTaskId(taskId, data, senderId);
         handleResponse(res, result, 201);
     }
 
@@ -147,8 +153,9 @@ export class GatewayTaskController {
      */
     private async deleteCommentById(req: Request, res: Response): Promise<void> {
         const commentId = parseInt(req.params.commentId, 10);
+        const senderId = req.user!.id;
 
-        const result = await this.gatewayTaskService.deleteCommentById(commentId);
+        const result = await this.gatewayTaskService.deleteCommentById(commentId, senderId);
         handleEmptyResponse(res, result);
     }
 
