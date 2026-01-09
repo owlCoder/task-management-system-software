@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { projectAPI } from "../../api/project/ProjectAPI";
 import { ProjectUserDTO } from "../../models/project/ProjectUserDTO";
+import { toast } from 'react-hot-toast';
 
 type Props = {
     projectId: number | null;
@@ -80,6 +81,7 @@ export const ManageProjectUsersModal: React.FC<Props> = ({
             setAssignedUsers(prev => [...prev, newUser]);
             setNewUsername("");
             onUsersUpdated?.();
+            toast.success("User added to project successfully!");
         } catch (err: any) {
             console.error("Failed to assign user:", err);
             const errorMessage = err.response?.data?.message || "Failed to add user. Check if user exists and has available hours.";
@@ -96,6 +98,7 @@ export const ManageProjectUsersModal: React.FC<Props> = ({
             if (success) {
                 setAssignedUsers(prev => prev.filter(u => u.user_id !== userId));
                 onUsersUpdated?.();
+                toast.success("User removed from project successfully!");
             }
         } catch (err) {
             console.error("Failed to remove user:", err);

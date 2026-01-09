@@ -3,6 +3,7 @@ import { IUserAPI } from "../../api/users/IUserAPI";
 import { UserDTO } from "../../models/users/UserDTO";
 import { UserCreationDTO } from "../../models/users/UserCreationDTO";
 import { UserRoleDTO } from "../../models/users/UserRoleDTO";
+import toast from "react-hot-toast";
 
 const inputClasses = "w-full px-4 py-3 rounded-xl text-white bg-black/20 backdrop-blur-md border border-white/10 placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:bg-black/30 transition-all shadow-inner";
 
@@ -57,11 +58,12 @@ export const AddUserForm: React.FC<AddUserFormProps> = ({
 
     try {
       const created = await userAPI.createUser(token, formData);
+      toast.success("User created successfully!");
       onUserAdded(created);
       onClose();
     } catch (err) {
       console.error("Failed to add user:", err);
-      alert("Error adding user. Check if username/email already exists.");
+      toast.error("Error adding user. Check if username/email already exists.");
     }
   };
 

@@ -32,6 +32,7 @@ export interface TaskBoardListPreviewProps {
 
 // TaskListPreview Props
 export interface TaskListPreviewProps {
+  tasks: TaskDTO[];
   onSelect: (taskId: number) => void;
 }
 
