@@ -4,6 +4,7 @@ import { CreateTaskDTO } from "../../models/task/CreateTaskDTO";
 import { TaskAPI } from "../../api/task/TaskAPI";
 import { UserAPI } from "../../api/users/UserAPI";
 import { UserDTO } from "../../models/users/UserDTO";
+import toast from "react-hot-toast";
 
 const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
   open,
@@ -38,7 +39,10 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
   if (!open) return null;
 
   const handleSubmit = async () => {
-    if (!title.trim()) return;
+    if (!title.trim()){
+      toast.error("Please enter a task title!");
+      return;
+    }
 
     const payload: CreateTaskDTO = {
       title,
@@ -51,9 +55,11 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
     try {
       setLoading(true);
       await api.createTask(payload);
+      toast.success("Task created successfully!");
       onClose();
     } catch (err) {
       console.error("Failed to create task:", err);
+      toast.error("Failed to create task!");
     } finally {
       setLoading(false);
     }

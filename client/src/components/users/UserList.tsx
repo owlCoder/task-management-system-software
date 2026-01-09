@@ -6,6 +6,8 @@ import { AddUserForm } from "./AddUserForm";
 import { EditUserForm } from "./EditUserForm";
 import { UserDetail } from "./UserDetail";
 import { UserRole } from "../../enums/UserRole";
+import { confirmToast } from "../toast/toastHelper";
+import toast from "react-hot-toast";
 
 type UserListProps = {
   userAPI: IUserAPI;
@@ -41,20 +43,34 @@ export const UserList: React.FC<UserListProps> = ({ userAPI }) => {
 
   const handleDelete = async (id: number) => {
     if (!token) return;
-    if (authUser?.id === id) return;
-    try {
-      await userAPI.logicalyDeleteUserById(token, id);
-      const updatedUsers = users.filter((u) => u.user_id !== id);
-      setUsers(updatedUsers);
-      
-      if (selectedRole === "All") {
-        setFilteredUsers(updatedUsers);
-      } else {
-        setFilteredUsers(updatedUsers.filter((u) => u.role_name === selectedRole));
-      }
-    } catch (err) {
-      console.error("Failed to delete user:", err);
+    if (authUser?.id === id) {
+      toast.error("You cannot delete your own account!");
+      return;
     }
+
+    const confirmed = await confirmToast("Are you sure you want to delete this user?");
+
+    if(confirmed) {
+      try {
+            await userAPI.logicalyDeleteUserById(token, id);
+            const updatedUsers = users.filter((u) => u.user_id !== id);
+            setUsers(updatedUsers);
+            
+            if (selectedRole === "All") {
+              setFilteredUsers(updatedUsers);
+            } else {
+              setFilteredUsers(updatedUsers.filter((u) => u.role_name === selectedRole));
+            }
+
+            toast.success("User deleted successfully!");
+          } catch (err) {
+            console.error("Failed to delete user:", err);
+            toast.error("Delete failed!");
+          }
+    } else {
+      console.log("Deletion cancelled");
+    }
+    
   };
 
   const handleRoleFilter = (role: string) => {
