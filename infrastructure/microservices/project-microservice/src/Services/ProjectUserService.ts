@@ -8,8 +8,10 @@ import { ProjectUser } from "../Domain/models/ProjectUser";
 import { ProjectUserMapper } from "../Utils/Mappers/ProjectUserMapper";
 import { UserDTO } from "../Domain/DTOs/UserDTO";
 
+const RESTRICTED_ROLES = ["SysAdmin", "Admin", "Analytics & Development Manager"];
 export class ProjectUserService implements IProjectUserService {
     private readonly userClient: AxiosInstance;
+    
 
     constructor(
         private readonly projectUserRepository: Repository<ProjectUser>,
@@ -43,6 +45,12 @@ export class ProjectUserService implements IProjectUserService {
         if (!user) {
             throw new Error(`User with username "${data.username}" not found`);
         }
+
+        if (RESTRICTED_ROLES.includes(user.role_name)) {
+        throw new Error(
+            `Users with role "${user.role_name}" cannot be assigned to projects.`
+        );
+    }
 
         const userId = user.user_id;
 
