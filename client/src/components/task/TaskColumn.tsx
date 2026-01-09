@@ -29,7 +29,7 @@ const TaskColumn: React.FC<TaskColumnProps> = ({
     <div
       onDragOver={handleDragOver}
       onDrop={handleDrop}
-      className="flex flex-col w-[320px] min-w-[320px] bg-black/20 backdrop-blur-md rounded-2xl border border-white/10 h-full max-h-full overflow-hidden shadow-2xl"
+      className="flex flex-col w-[310px] min-w-[310px] bg-black/20 backdrop-blur-md rounded-2xl border border-white/10 h-full max-h-full overflow-hidden shadow-2xl"
     >
       <div className="p-4 border-b border-white/5 bg-white/5 flex justify-between items-center">
         <div className="flex items-center gap-2">
