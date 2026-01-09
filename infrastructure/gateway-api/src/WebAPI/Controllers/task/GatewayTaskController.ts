@@ -6,6 +6,7 @@ import { IGatewayTaskService } from "../../../Domain/services/task/IGatewayTaskS
 import { CreateTaskDTO } from "../../../Domain/DTOs/task/CreateTaskDTO";
 import { CreateCommentDTO } from "../../../Domain/DTOs/task/CreateCommentDTO";
 import { TaskDTO } from "../../../Domain/DTOs/task/TaskDTO";
+import { UpdateTaskDTO } from "../../../Domain/DTOs/task/UpdateTaskDTO";
 import { CommentDTO } from "../../../Domain/DTOs/task/CommentDTO";
 import { TaskPolicies } from "../../../Domain/access-policies/task/TaskPolicies";
 
@@ -14,7 +15,7 @@ import { authenticate } from "../../../Middlewares/authentication/AuthMiddleware
 import { authorize } from "../../../Middlewares/authorization/AuthorizeMiddleware";
 
 // Utils
-import { handleResponse } from "../../Utils/Http/ResponseHandler";
+import { handleEmptyResponse, handleResponse } from "../../Utils/Http/ResponseHandler";
 
 /**
  * Routes client requests towards the Task Microservice.
@@ -37,7 +38,10 @@ export class GatewayTaskController {
         this.router.get('/tasks/:taskId', ...taskReadonlyAccess, this.getTaskById.bind(this));
         this.router.get('/tasks/sprints/:sprintId', ...taskReadonlyAccess, this.getTasksBySprintId.bind(this));
         this.router.post('/tasks/sprints/:sprintId', ...taskWriteAccess, this.createTaskBySprintId.bind(this));
+        this.router.put('/tasks/:taskId', ...taskWriteAccess, this.updateTaskById.bind(this));
+        this.router.delete('/tasks/:taskId', ...taskWriteAccess, this.deleteTaskById.bind(this));
         this.router.post('/tasks/:taskId/comments', ...taskWriteAccess, this.addCommentByTaskId.bind(this));
+        this.router.delete('/comments/:commentId', ...taskWriteAccess, this.deleteCommentById.bind(this));
     }
 
     /**
@@ -87,6 +91,37 @@ export class GatewayTaskController {
     }
 
     /**
+     * PUT /api/v1/tasks/:taskId
+     * @param {Request} req - the request object, containing the id of the task in params and data of the task as {@link UpdateTaskDTO} in body.
+     * @param {Response} res - the response object for the client.
+     * @returns {Promise<void>}
+     * - On success: response status 200, response data: {@link TaskDTO}. 
+     * - On failure: response status code indicating the failure, response data: message describing the error.
+     */
+    private async updateTaskById(req: Request, res: Response): Promise<void> {
+        const taskId = parseInt(req.params.taskId, 10);
+        const data = req.body as UpdateTaskDTO;
+
+        const result = await this.gatewayTaskService.updateTaskById(taskId, data);
+        handleResponse(res, result);
+    }
+
+    /**
+     * DELETE /api/v1/tasks/:taskId
+     * @param {Request} req - the request object, containing the id of the task in params.
+     * @param {Response} res - the response object for the client.
+     * @returns {Promise<void>}
+     * - On success: response status 204, no data. 
+     * - On failure: response status code indicating the failure, response data: message describing the error.
+     */
+    private async deleteTaskById(req: Request, res: Response): Promise<void> {
+        const taskId = parseInt(req.params.taskId, 10);
+
+        const result = await this.gatewayTaskService.deleteTaskById(taskId);
+        handleEmptyResponse(res, result);
+    }
+
+    /**
      * POST /api/v1/tasks/:taskId/comments
      * @param {Request} req - the request object, containing the id of the task in params and data as {@link CreateCommentDTO} in body.
      * @param {Response} res - the response object for the client.
@@ -100,6 +135,21 @@ export class GatewayTaskController {
 
         const result = await this.gatewayTaskService.addCommentByTaskId(taskId, data);
         handleResponse(res, result, 201);
+    }
+
+    /**
+     * DELETE /api/v1/comments/:commentId
+     * @param {Request} req - the request object, containing the id of the comment in params.
+     * @param {Response} res - the response object for the client.
+     * @returns {Promise<void>}
+     * - On success: response status 204, no data. 
+     * - On failure: response status code indicating the failure, response data: message describing the error.
+     */
+    private async deleteCommentById(req: Request, res: Response): Promise<void> {
+        const commentId = parseInt(req.params.commentId, 10);
+
+        const result = await this.gatewayTaskService.deleteCommentById(commentId);
+        handleEmptyResponse(res, result);
     }
 
     public getRouter(): Router {

@@ -1,4 +1,4 @@
 export interface ProjectUserAssignDTO {
-    user_id: number;
+    username: string;
     weekly_hours: number;
 }

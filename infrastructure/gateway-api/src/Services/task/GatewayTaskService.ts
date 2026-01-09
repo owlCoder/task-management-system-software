@@ -8,6 +8,7 @@ import { CommentDTO } from "../../Domain/DTOs/task/CommentDTO";
 import { CreateCommentDTO } from "../../Domain/DTOs/task/CreateCommentDTO";
 import { CreateTaskDTO } from "../../Domain/DTOs/task/CreateTaskDTO";
 import { TaskDTO } from "../../Domain/DTOs/task/TaskDTO";
+import { UpdateTaskDTO } from "../../Domain/DTOs/task/UpdateTaskDTO";
 import { Result } from "../../Domain/types/common/Result";
 
 // Constants
@@ -78,6 +79,38 @@ export class GatewayTaskService implements IGatewayTaskService {
     }
     
     /**
+     * Updates an existing task.
+     * @param {number} taskId - id of the task.
+     * @param {CreateTaskDTO} data - updated task data. 
+     * @returns {Promise<Result<TaskDTO>>} - A promise that resolves to a Result object containing the data of the task.
+     * - On success returns data as {@link TaskDTO}.
+     * - On failure returns status code and error message.
+     */
+    async updateTaskById(taskId: number, data: UpdateTaskDTO): Promise<Result<TaskDTO>> {
+        return await makeAPICall<TaskDTO, UpdateTaskDTO>(this.taskClient, this.errorHandlingService, {
+            serviceName: SERVICES.TASK,
+            method: HTTP_METHODS.PUT,
+            url: TASK_ROUTES.UPDATE_TASK(taskId),
+            data: data
+        });
+    }
+
+    /**
+     * Requests a deletion of a specific task.
+     * @param {number} taskId - id of the task. 
+     * @returns {Promise<Result<void>>} - A promise that resolves to a Result object.
+     * - On success returns void.
+     * - On failure returns status code and error message.
+     */
+    async deleteTaskById(taskId: number): Promise<Result<void>> {
+        return await makeAPICall<void>(this.taskClient, this.errorHandlingService, {
+            serviceName: SERVICES.TASK,
+            method: HTTP_METHODS.DELETE,
+            url: TASK_ROUTES.DELETE_TASK(taskId)
+        });
+    }
+
+    /**
      * Adds a comment to a specific task.
      * @param {number} taskId - id of the task. 
      * @param {CreateCommentDTO} data - comment data.
@@ -91,6 +124,21 @@ export class GatewayTaskService implements IGatewayTaskService {
             method: HTTP_METHODS.POST,
             url: TASK_ROUTES.ADD_COMMENT_TO_TASK(taskId),
             data: data
+        });
+    }
+
+    /**
+     * Requests a deletion of a specific comment.
+     * @param {number} commentId - id of the comment. 
+     * @returns {Promise<Result<void>>} - A promise that resolves to a Result object.
+     * - On success returns void.
+     * - On failure returns status code and error message.
+     */
+    async deleteCommentById(commentId: number): Promise<Result<void>> {
+        return await makeAPICall<void>(this.taskClient, this.errorHandlingService, {
+            serviceName: SERVICES.TASK,
+            method: HTTP_METHODS.DELETE,
+            url: TASK_ROUTES.DELETE_COMMENT(commentId)
         });
     }
 

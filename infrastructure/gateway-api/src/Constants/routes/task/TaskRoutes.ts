@@ -2,5 +2,8 @@ export const TASK_ROUTES = Object.freeze({
     GET_TASK: (taskId: number) => `/tasks/${taskId}`,
     GET_TASKS_FROM_SPRINT: (sprintId: number) => `/tasks/sprints/${sprintId}`,
     ADD_TASK_TO_SPRINT: (sprintId: number) => `/tasks/sprints/${sprintId}`,
-    ADD_COMMENT_TO_TASK: (taskId: number) => `/tasks/${taskId}/comments`
+    UPDATE_TASK: (taskId: number) => `/tasks/${taskId}`,
+    DELETE_TASK: (taskId: number) => `/tasks/${taskId}`,
+    ADD_COMMENT_TO_TASK: (taskId: number) => `/tasks/${taskId}/comments`,
+    DELETE_COMMENT: (commentId: number) => `/comments/${commentId}`
 } as const);
