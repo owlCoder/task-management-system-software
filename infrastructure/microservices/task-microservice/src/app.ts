@@ -12,6 +12,10 @@ import { TaskService } from './Services/TaskService';
 import { TaskController } from './WebAPI/controllers/TaskController';
 import { ICommentService } from './Domain/services/ICommentService';
 import { CommentService } from './Services/CommentServices';
+import { IProjectServiceClient } from './Domain/services/external-services/IProjectServiceClient';
+import { ProjectServiceClient } from './Services/external-services/ProjectServiceClient';
+import { IUserServiceClient } from './Domain/services/external-services/IUserServiceClient';
+import { UserServiceClient } from './Services/external-services/UserServiceClient';
 
 
 dotenv.config({ quiet: true });
@@ -38,7 +42,9 @@ app.use(express.json());
   const commentRepository: Repository<Comment> = Db.getRepository(Comment);
 
   // Services
-  const taskService : ITaskService = new TaskService(taskRepository);
+  const projectServiceClient : IProjectServiceClient = new ProjectServiceClient();
+  const userServiceClient: IUserServiceClient = new UserServiceClient();
+  const taskService : ITaskService = new TaskService(taskRepository,projectServiceClient,userServiceClient);
   const commentService : ICommentService = new CommentService(taskRepository,commentRepository);
 
   // WebAPI routes

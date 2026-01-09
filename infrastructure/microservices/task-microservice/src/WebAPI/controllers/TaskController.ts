@@ -54,10 +54,21 @@ import { DeleteCommentValidator } from "../validators/DeleteCommentValidator";
                 res.status(400).json({ message: "Invalid sprint ID" });
                 return;
             }
+            const userIdHeader = req.headers['x-user-id'];
 
+            if (typeof userIdHeader !== 'string') {
+                res.status(400).json({ message: "Missing or invalid x-user-id header" });
+                return;
+            }
+
+            const user_id = parseInt(userIdHeader, 10);
+            if (isNaN(user_id)) {
+                res.status(400).json({ message: "Invalid user id" });
+                return;
+            }
             const createTask: CreateTaskDTO = req.body;
 
-            const result = await this.taskService.addTaskForSprint(sprint_id, createTask);
+            const result = await this.taskService.addTaskForSprint(sprint_id, createTask,user_id);
 
             if (result.success) {
                 res.status(200).json(taskToTaskDTO(result.data));
@@ -79,8 +90,19 @@ import { DeleteCommentValidator } from "../validators/DeleteCommentValidator";
                 res.status(400).json({ message: "Invalid task ID" });
                 return;
             }
+            const userIdHeader = req.headers['x-user-id'];
 
-            const result = await this.taskService.getTaskById(taskId);
+            if (typeof userIdHeader !== 'string') {
+                res.status(400).json({ message: "Missing or invalid x-user-id header" });
+                return;
+            }
+
+            const user_id = parseInt(userIdHeader, 10);
+            if (isNaN(user_id)) {
+                res.status(400).json({ message: "Invalid user id" });
+                return;
+            }
+            const result = await this.taskService.getTaskById(taskId,user_id);
 
             if (result.success) {
                 res.status(200).json(taskToTaskDTO(result.data));
@@ -100,8 +122,19 @@ import { DeleteCommentValidator } from "../validators/DeleteCommentValidator";
                 res.status(400).json({ message: "Invalid sprint ID" });
                 return;
             }
+            const userIdHeader = req.headers['x-user-id'];
 
-            const result = await this.taskService.getAllTasksForSprint(sprint_id);
+            if (typeof userIdHeader !== 'string') {
+                res.status(400).json({ message: "Missing or invalid x-user-id header" });
+                return;
+            }
+
+            const user_id = parseInt(userIdHeader, 10);
+            if (isNaN(user_id)) {
+                res.status(400).json({ message: "Invalid user id" });
+                return;
+            }
+            const result = await this.taskService.getAllTasksForSprint(sprint_id,user_id);
 
             if (result.success) {
                 res.status(200).json(result.data.map(taskToTaskDTO));
@@ -121,10 +154,21 @@ import { DeleteCommentValidator } from "../validators/DeleteCommentValidator";
                 res.status(400).json({ message: "Invalid task ID" });
                 return;
             }
+            const userIdHeader = req.headers['x-user-id'];
 
+            if (typeof userIdHeader !== 'string') {
+                res.status(400).json({ message: "Missing or invalid x-user-id header" });
+                return;
+            }
+
+            const user_id = parseInt(userIdHeader, 10);
+            if (isNaN(user_id)) {
+                res.status(400).json({ message: "Invalid user id" });
+                return;
+            }
             const createComment: CreateCommentDTO = req.body;
 
-            const result = await this.commentService.addComment(taskId, createComment);
+            const result = await this.commentService.addComment(taskId, createComment,user_id);
 
             if (result.success) {
                 res.status(200).json(commentToCommentDTO(result.data, taskId));
@@ -160,7 +204,18 @@ import { DeleteCommentValidator } from "../validators/DeleteCommentValidator";
                 res.status(400).json({ message: taskIdValidation.message });
                 return;
             }
+            const userIdHeader = req.headers['x-user-id'];
 
+            if (typeof userIdHeader !== 'string') {
+                res.status(400).json({ message: "Missing or invalid x-user-id header" });
+                return;
+            }
+
+            const user_id = parseInt(userIdHeader, 10);
+            if (isNaN(user_id)) {
+                res.status(400).json({ message: "Invalid user id" });
+                return;
+            }
             const updateTaskDTO: UpdateTaskDTO = req.body;
 
             const dtoValidation = UpdateTaskValidator.validateUpdateTaskDTO(updateTaskDTO);
@@ -169,7 +224,7 @@ import { DeleteCommentValidator } from "../validators/DeleteCommentValidator";
                 return;
             }
 
-            const result = await this.taskService.updateTask(taskId, updateTaskDTO);
+            const result = await this.taskService.updateTask(taskId, updateTaskDTO,user_id);
 
             if (result.success) {
                 res.status(200).json(taskToTaskDTO(result.data));
@@ -192,8 +247,19 @@ import { DeleteCommentValidator } from "../validators/DeleteCommentValidator";
                 res.status(400).json({ message: taskIdValidation.message });
                 return;
             }
+            const userIdHeader = req.headers['x-user-id'];
 
-            const result = await this.taskService.deleteTask(taskId);
+            if (typeof userIdHeader !== 'string') {
+                res.status(400).json({ message: "Missing or invalid x-user-id header" });
+                return;
+            }
+
+            const user_id = parseInt(userIdHeader, 10);
+            if (isNaN(user_id)) {
+                res.status(400).json({ message: "Invalid user id" });
+                return;
+            }
+            const result = await this.taskService.deleteTask(taskId,user_id);
 
             if (result.success) {
                 res.status(204).json();
@@ -215,8 +281,19 @@ import { DeleteCommentValidator } from "../validators/DeleteCommentValidator";
                 res.status(400).json({ message: commentIdValidation.message });
                 return;
             }
+            const userIdHeader = req.headers['x-user-id'];
 
-            const result = await this.commentService.deleteComment(commentId);
+            if (typeof userIdHeader !== 'string') {
+                res.status(400).json({ message: "Missing or invalid x-user-id header" });
+                return;
+            }
+
+            const user_id = parseInt(userIdHeader, 10);
+            if (isNaN(user_id)) {
+                res.status(400).json({ message: "Invalid user id" });
+                return;
+            }
+            const result = await this.commentService.deleteComment(commentId,user_id);
 
             if (result.success) {
                 res.status(204).json();
