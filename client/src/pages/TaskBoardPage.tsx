@@ -5,7 +5,6 @@ import { TaskDTO } from "../models/task/TaskDTO";
 import { TaskAPI } from "../api/task/TaskAPI";
 import CreateTaskModal from "../components/task/CreateTaskModal";
 import EditTaskModal from "../components/task/EditTaskModal";
-import { mockTasks } from "../mocks/TaskMock";
 import TaskBoardListPreview from "../components/task/TaskBoardListPreview";
 // import { TaskDetailPage } from "./TaskDetailPage";
 // import EditTaskModal from "../components/task/EditTaskModal";
@@ -14,12 +13,13 @@ import { TaskStatus } from "../enums/TaskStatus";
 import { TaskBoardPageProps } from "../types/props";
 
 const TaskBoardPage: React.FC<TaskBoardPageProps> = ({ projectId, token }) => {
-  const [tasks, setTasks] = useState<TaskDTO[]>(mockTasks);
+  const [tasks, setTasks] = useState<TaskDTO[]>([]);
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
   const [selectedtaskId, setSelectedTaskId] = useState<number | null>(null);
   const [editOpen, setEditOpen] = useState(false);
   const api = new TaskAPI(import.meta.env.VITE_GATEWAY_URL, token);
+  const selectedTask = tasks.find((t) => t.task_id === selectedtaskId);
 
   const handleStatusChange = async (taskId: number, newStatus: TaskStatus) => {
     const taskToUpdate = tasks.find((t) => t.task_id === taskId);
@@ -162,24 +162,14 @@ const TaskBoardPage: React.FC<TaskBoardPageProps> = ({ projectId, token }) => {
                 token={token}
               />
 
-              <EditTaskModal
-                open={editOpen}
-                onClose={() => setEditOpen(false)}
-                task={(() => {
-                  if (selectedtaskId !== null) {
-                    const real = tasks.find(
-                      (t) => t.task_id === selectedtaskId
-                    );
-                    if (real) return real;
-                    const mock = mockTasks.find(
-                      (t) => t.task_id === selectedtaskId
-                    );
-                    if (mock) return mock;
-                  }
-                  return tasks[0] ?? mockTasks[0];
-                })()}
-                token={token}
-              />
+              {editOpen && selectedTask && (
+                <EditTaskModal
+                  open={editOpen}
+                  onClose={() => setEditOpen(false)}
+                  task={selectedTask}
+                  token={token}
+                />
+              )}
             </div>
           </header>
 

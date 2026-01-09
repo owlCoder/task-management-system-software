@@ -6,6 +6,7 @@ import { UserAPI } from "../../api/users/UserAPI";
 import { UserDTO } from "../../models/users/UserDTO";
 import { TaskStatus } from "../../enums/TaskStatus";
 import StatusDropdown from "./StatusDropdown";
+import toast from "react-hot-toast";
 
 const EditTaskModal: React.FC<EditTaskModalProps> = ({
   open,
@@ -64,9 +65,11 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({
     try {
       setLoading(true);
       await api.updateTask(task.task_id, payload);
+      toast.success("Task updated successfully!");
       onClose();
     } catch (err) {
       console.error("Failed to update task:", err);
+      toast.error("Update failed!");
     } finally {
       setLoading(false);
     }

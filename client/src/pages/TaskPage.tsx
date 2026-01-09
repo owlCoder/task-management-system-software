@@ -8,7 +8,6 @@ import { TaskAPI } from "../api/task/TaskAPI";
 import { UserAPI } from "../api/users/UserAPI";
 import CreateTaskModal from "../components/task/CreateTaskModal";
 import EditTaskModal from "../components/task/EditTaskModal";
-import { mockTasks } from "../mocks/TaskMock";
 import TaskSearchBar from "../components/task/TaskSearchBar";
 import TaskStatusFilter from "../components/task/TaskStatusFilter";
 import TaskSortSelect from "../components/task/TaskSortSelect";
@@ -36,6 +35,7 @@ const TaskPage: React.FC<TaskListPageProps> = ({ projectId }) => {
   const [showBoard, setShowBoard] = useState(false);
   const api = new TaskAPI(import.meta.env.VITE_GATEWAY_URL, token);
   const userAPI = new UserAPI();
+  const selectedTask = tasks.find((t) => t.task_id === selectedtaskId);
 
   const handleStatusChange = async (taskId: number, newStatus: TaskStatus) => {
     const taskToUpdate = tasks.find((t) => t.task_id === taskId);
@@ -135,7 +135,7 @@ const TaskPage: React.FC<TaskListPageProps> = ({ projectId }) => {
           }
         }}
       >
-        <div className="w-full max-w-4xl mx-auto flex flex-col h-full">
+        <div className={`w-full ${showBoard ? 'max-w-none' : 'max-w-4xl'} mx-auto flex flex-col h-full transition-all duration-300`}>
           <header className="flex flex-col gap-4 mb-6 flex-shrink-0">
             <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-white">
               Tasks
@@ -236,7 +236,7 @@ const TaskPage: React.FC<TaskListPageProps> = ({ projectId }) => {
                 {filteredAndSortedTasks.length === 0 &&
                 search.trim() === "" &&
                 !statusFilter ? (
-                  <TaskListPreview onSelect={setSelectedTaskId} />
+                  <TaskListPreview tasks={filteredAndSortedTasks}  onSelect={setSelectedTaskId} />
                 ) : filteredAndSortedTasks.length === 0 ? (
                   <div className="flex flex-col items-center justify-center h-full text-white/40">
                     <svg
@@ -286,20 +286,14 @@ const TaskPage: React.FC<TaskListPageProps> = ({ projectId }) => {
         token={token}
       />
 
-      <EditTaskModal
-        open={editOpen}
-        onClose={() => setEditOpen(false)}
-        task={(() => {
-          if (selectedtaskId !== null) {
-            const real = tasks.find((t) => t.task_id === selectedtaskId);
-            if (real) return real;
-            const mock = mockTasks.find((t) => t.task_id === selectedtaskId);
-            if (mock) return mock;
-          }
-          return tasks[0] ?? mockTasks[0];
-        })()}
-        token={token}
-      />
+      {editOpen && selectedTask && (
+        <EditTaskModal
+          open={editOpen}
+          onClose={() => setEditOpen(false)}
+          task={selectedTask}
+          token={token}
+        />
+      )}
     </div>
   );
 };

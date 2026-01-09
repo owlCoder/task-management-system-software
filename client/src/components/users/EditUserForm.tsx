@@ -3,7 +3,7 @@ import { IUserAPI } from "../../api/users/IUserAPI";
 import { UserDTO } from "../../models/users/UserDTO";
 import { UserUpdateDTO } from "../../models/users/UserUpdateDTO";
 import { UserRole } from "../../enums/UserRole";
-
+import toast from "react-hot-toast";
 
 type EditUserFormProps = {
   userAPI: IUserAPI;
@@ -49,7 +49,7 @@ export const EditUserForm: React.FC<EditUserFormProps> = ({
       );
 
     const updated = await userAPI.updateUser(token, existingUser.user_id, updateData);
-
+    toast.success("User updated successfully!");
     if(weeklyHours > 0) {
       await userAPI.setWeeklyHours(token, existingUser.user_id, weeklyHours);
     }
@@ -57,6 +57,7 @@ export const EditUserForm: React.FC<EditUserFormProps> = ({
       onClose();
     } catch (err) {
       console.error("Failed to update user:", err);
+      toast.error("Update failed!");
     }
   };
 
