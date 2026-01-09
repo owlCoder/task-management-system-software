@@ -114,4 +114,17 @@ export class ProjectUserService implements IProjectUserService {
         });
         return list.map(pu => ProjectUserMapper.toDTO(pu));
     }
+
+    async updateWeeklyHoursForAllUsers(project_id: number, oldHours: number, newHours: number): Promise<void> {
+        const projectUsers = await this.projectUserRepository.find({
+            where: { project: { project_id } }
+        });
+        
+        for (const pu of projectUsers) {
+            if (pu.weekly_hours === oldHours && oldHours > 0) {
+                pu.weekly_hours = newHours;
+                await this.projectUserRepository.save(pu);
+            }
+        }
+    }
 }

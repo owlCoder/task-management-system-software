@@ -68,8 +68,8 @@ export const EditProjectModal: React.FC<Props> = ({
         if (!formData.project_name.trim()) {
             newErrors.project_name = "Project name is required";
         }
-        if (!formData.total_weekly_hours_required || formData.total_weekly_hours_required <= 0) {
-            newErrors.total_weekly_hours_required = "Hours must be a positive number";
+        if (!formData.total_weekly_hours_required || Number(formData.total_weekly_hours_required) <= 0 || Number(formData.total_weekly_hours_required) >= 41) {
+            newErrors.total_weekly_hours_required = "Hours must be a positive number and lower than 41";
         }
         if (!formData.allowed_budget || formData.allowed_budget <= 0) {
             newErrors.allowed_budget = "Budget must be a positive number";

@@ -7,11 +7,13 @@ import { Project } from "../Domain/models/Project";
 import { ProjectMapper } from "../Utils/Mappers/ProjectMapper";
 import { IR2StorageService } from "../Storage/R2StorageService";
 import { ProjectStatus } from "../Domain/enums/ProjectStatus";
+import { IProjectUserService } from "../Domain/services/IProjectUserService";
 
 export class ProjectService implements IProjectService {
     constructor(
         private readonly projectRepository: Repository<Project>,
-        private readonly storageService: IR2StorageService
+        private readonly storageService: IR2StorageService,
+        private readonly projectUserService: IProjectUserService
     ) {}
 
     async CreateProject(data: ProjectCreateDTO): Promise<ProjectDTO> {
@@ -64,6 +66,8 @@ export class ProjectService implements IProjectService {
             await this.storageService.deleteImage(project.image_key);
         }
 
+        const oldWeeklyHours = project.total_weekly_hours_required;
+
         if (data.project_name !== undefined) project.project_name = data.project_name;
         if (data.project_description !== undefined) project.project_description = data.project_description;
         if (data.image_key !== undefined) project.image_key = data.image_key;
@@ -80,6 +84,14 @@ export class ProjectService implements IProjectService {
         if (data.status !== undefined) project.status = data.status;
 
         const saved = await this.projectRepository.save(project);
+        if (data.total_weekly_hours_required !== undefined && 
+            oldWeeklyHours !== data. total_weekly_hours_required) {
+            await this.projectUserService.updateWeeklyHoursForAllUsers(
+                project_id,
+                oldWeeklyHours,
+                data.total_weekly_hours_required
+            );
+        }
         return ProjectMapper.toDTO(saved);
     }
 
