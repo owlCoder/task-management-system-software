@@ -4,13 +4,14 @@ import { CreateTaskDTO } from "../DTOs/CreateTaskDTO";
 import { UpdateTaskDTO } from "../DTOs/UpdateTaskDTO";
 
 export interface ITaskService {
-    getTaskById(task_id: number): Promise<Result<Task>>;
-    getAllTasksForSprint(sprint_id: number) : Promise<Result<Task[]>>;
+    getTaskById(task_id: number,user_id: number): Promise<Result<Task>>;
+    getAllTasksForSprint(sprint_id: number,user_id: number) : Promise<Result<Task[]>>;
     getAllDummyTasksForSprint() : Promise<Result<Task[]>>;
     addTaskForSprint(
         sprint_id: number,
-        createTaskDTO: CreateTaskDTO
+        createTaskDTO: CreateTaskDTO,
+        user_id: number
     ): Promise<Result<Task>>;
-    updateTask(task_id: number, updateTaskDTO: UpdateTaskDTO): Promise<Result<Task>>;
-    deleteTask(task_id: number): Promise<Result<boolean>>;
+    updateTask(task_id: number, updateTaskDTO: UpdateTaskDTO,user_id: number): Promise<Result<Task>>;
+    deleteTask(task_id: number,user_id: number): Promise<Result<boolean>>;
 }

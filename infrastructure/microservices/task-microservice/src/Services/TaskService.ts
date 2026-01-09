@@ -6,11 +6,18 @@ import { Result } from "../Domain/types/Result";
 import { ErrorCode } from "../Domain/enums/ErrorCode";
 import { CreateTaskDTO } from "../Domain/DTOs/CreateTaskDTO";
 import { UpdateTaskDTO } from "../Domain/DTOs/UpdateTaskDTO";
+import { IProjectServiceClient } from "../Domain/services/external-services/IProjectServiceClient";
+import { IUserServiceClient } from "../Domain/services/external-services/IUserServiceClient";
+import { UserRole } from "../Domain/enums/UserRole";
 export class TaskService implements ITaskService {
 
     constructor(
         private readonly taskRepository: Repository<Task>,
-    ) {}
+        private readonly projectService: IProjectServiceClient,
+        private readonly userService: IUserServiceClient
+    ) {
+       
+    }
 //#region Dummy data for development
 
    private readonly dummyTasks: Task[] = [
@@ -66,13 +73,32 @@ export class TaskService implements ITaskService {
     }
 ];
 
-
+    async getAllDummyTasksForSprint() : Promise<Result<Task[]>>{
+        //Vracamo dummy podatke ako nema zadataka u bazi dok smo u developmentu
+            return {success:true,data:this.dummyTasks};
+    }
 //#endregion
     //#region  TASK METHODS
-    async getAllTasksForSprint(sprint_id: number) : Promise<Result<Task[]>>{
+    async getAllTasksForSprint(sprint_id: number,user_id: number) : Promise<Result<Task[]>>{
         try {
-            //TODO: Proveriti da li korisnik ima pravo da vidi taskove za dati projekat
-            //TODO: proveriti da li projekat postoji
+            // Proveri da li sprint postoji
+            const sprintResult = await this.projectService.getSprintById(sprint_id);
+            if (!sprintResult.success) {
+                return { success: false, errorCode: ErrorCode.SPRINT_NOT_FOUND, message: "Sprint not found" };
+            }
+
+            const project_id = sprintResult.data.project_id;
+
+            const usersResult = await this.projectService.getUsersForProject(project_id);
+            if (!usersResult.success) {
+                return { success: false, errorCode: ErrorCode.INVALID_INPUT, message: "Failed to get project users" };
+            }
+            
+            const userExists = usersResult.data.some((user: any) => user.user_id === user_id);
+            if (!userExists) {
+                return { success: false, errorCode: ErrorCode.INVALID_INPUT, message: "User is not assigned to this project" };
+            }
+
             const tasks = await this.taskRepository.find({
                 where: { sprint_id },
                 relations: ["comments"]
@@ -84,10 +110,38 @@ export class TaskService implements ITaskService {
     }
     
     
-    async addTaskForSprint(sprint_id: number, createTaskDTO: CreateTaskDTO): Promise<Result<Task>> {
-        //Estimated cost mozda da se izracuna popust (cena sata radnika) * (broj sati ocekivanih za zadatak)
-            //TODO: Proveriti da li projekat postoji
-            //TODO: Proveriti da li worker postoji i da li je dodeljen na dati projekat
+    async addTaskForSprint(sprint_id: number, createTaskDTO: CreateTaskDTO,user_id: number): Promise<Result<Task>> {
+        
+        //provera da li je user-id projectManager
+        const managerResult = await this.userService.getUserById(user_id);
+        if (!managerResult.success) {
+            return { success: false, errorCode: ErrorCode.INVALID_INPUT, message: "User not found" };
+        }
+
+        
+        const role_name = managerResult.data.role_name;
+
+        if (role_name !== UserRole.PROJECT_MANAGER) {
+            return { success: false, errorCode: ErrorCode.INVALID_INPUT, message: "Only project managers can add tasks" };
+        }
+
+        //TODO: Proveriti da li sprint postoji
+        const sprintResult = await this.projectService.getSprintById(sprint_id);
+        if (!sprintResult.success) {
+            return { success: false, errorCode: ErrorCode.SPRINT_NOT_FOUND, message: "Sprint not found" };
+            }
+
+        const project_id = sprintResult.data.project_id;
+
+        const usersResult = await this.projectService.getUsersForProject(project_id);
+        if (!usersResult.success) {
+            return { success: false, errorCode: ErrorCode.INVALID_INPUT, message: "Failed to get project users" };
+        }
+        //provera da li se workerid nalazi u projects-user tabeli
+        const userExists = usersResult.data.some((user: any) => user.user_id === createTaskDTO.worker_id);
+        if (!userExists) {
+            return { success: false, errorCode: ErrorCode.INVALID_INPUT, message: "User is not assigned to this project" };
+        }
         if (!createTaskDTO.title || createTaskDTO.title.trim().length === 0) {
             return { success: false, errorCode: ErrorCode.INVALID_INPUT, message: "Title is required" };
         }
@@ -113,30 +167,28 @@ export class TaskService implements ITaskService {
         const savedTask = await this.taskRepository.save(newTask);
         return { success: true, data: savedTask };
     }
-    async getAllDummyTasksForSprint() : Promise<Result<Task[]>>{
-        //Vracamo dummy podatke ako nema zadataka u bazi dok smo u developmentu
-            return {success:true,data:this.dummyTasks};
-    }
 
-    async getTaskById(task_id: number): Promise<Result<Task>> {
+
+    async getTaskById(task_id: number,user_id: number): Promise<Result<Task>> {
         try {
             const task = await this.taskRepository.findOne({
                 where: { task_id },
                 relations: ["comments"]
             });
-            console.log(task);
             if (!task) {
                 return {success:false,errorCode: ErrorCode.TASK_NOT_FOUND};
             }
-            return {success: true,data: task}
+            if(user_id == task.worker_id || user_id == task.project_manager_id)
+                return {success: true,data: task}
+            else
+                return { success:false,errorCode: ErrorCode.FORBIDDEN};
         } catch (error) {
-            console.log(error);
             return {success:false,errorCode: ErrorCode.INTERNAL_ERROR};
-
         }
     }
     
-    async updateTask(task_id: number, updateTaskDTO: UpdateTaskDTO): Promise<Result<Task>> {
+    async updateTask(task_id: number, updateTaskDTO: UpdateTaskDTO,user_id: number
+    ): Promise<Result<Task>> {
         try {
             const task = await this.taskRepository.findOne({
                 where: { task_id },
@@ -146,41 +198,50 @@ export class TaskService implements ITaskService {
             if (!task) {
                 return { success: false, errorCode: ErrorCode.TASK_NOT_FOUND, message: "Task not found" };
             }
-
-            if (updateTaskDTO.title !== undefined && updateTaskDTO.title.trim().length > 0) {
-                task.title = updateTaskDTO.title;
-            }
-
-            if (updateTaskDTO.description !== undefined && updateTaskDTO.description.trim().length > 0) {
-                task.task_description = updateTaskDTO.description;
-            }
-
-            if (updateTaskDTO.estimatedCost !== undefined && updateTaskDTO.estimatedCost >= 0) {
-                task.estimated_cost = updateTaskDTO.estimatedCost;
-            }
-
-            if (updateTaskDTO.status !== undefined) {
-                const validStatus = Object.values(TaskStatus).includes(updateTaskDTO.status);
-                if (!validStatus) {
-                    return { success: false, errorCode: ErrorCode.INVALID_INPUT, message: "Invalid task status" };
+            console.log(task);
+            if(user_id == task.project_manager_id)
+            {
+                if (updateTaskDTO.title !== undefined && updateTaskDTO.title.trim().length > 0) {
+                    task.title = updateTaskDTO.title;
                 }
-                task.task_status = updateTaskDTO.status;
-            }
 
-            if (updateTaskDTO.assignedTo !== undefined && updateTaskDTO.assignedTo > 0) {
+                if (updateTaskDTO.description !== undefined && updateTaskDTO.description.trim().length > 0) {
+                    task.task_description = updateTaskDTO.description;
+                }
+
+                if (updateTaskDTO.estimatedCost !== undefined && updateTaskDTO.estimatedCost >= 0) {
+                    task.estimated_cost = updateTaskDTO.estimatedCost;
+                }
+                if (updateTaskDTO.assignedTo !== undefined && updateTaskDTO.assignedTo > 0) {
                 task.worker_id = updateTaskDTO.assignedTo;
+                }
+            }
+            else if(user_id == task.worker_id)
+            {
+                //treba implementirati logiku za upload fajla
+                //verovatno druga metoda
+                if (updateTaskDTO.status !== undefined) {
+                    const validStatus = Object.values(TaskStatus).includes(updateTaskDTO.status);
+                    if (!validStatus) {
+                        return { success: false, errorCode: ErrorCode.INVALID_INPUT, message: "Invalid task status" };
+                    }
+                    task.task_status = updateTaskDTO.status;
+                }
+            }
+            else
+            {
+                return { success: false, errorCode: ErrorCode.FORBIDDEN, message: "Failed to update task" };
             }
 
             const updatedTask = await this.taskRepository.save(task);
             return { success: true, data: updatedTask };
 
         } catch (error) {
-            console.log(error);
             return { success: false, errorCode: ErrorCode.INTERNAL_ERROR, message: "Failed to update task" };
         }
     }
 
-    async deleteTask(task_id: number): Promise<Result<boolean>> {
+    async deleteTask(task_id: number,user_id: number): Promise<Result<boolean>> {
         try {
             const task = await this.taskRepository.findOne({
                 where: { task_id }
@@ -189,12 +250,26 @@ export class TaskService implements ITaskService {
             if (!task) {
                 return { success: false, errorCode: ErrorCode.TASK_NOT_FOUND, message: "Task not found" };
             }
+       
+        const managerResult = await this.userService.getUserById(user_id);
+        if (!managerResult.success) {
+            return { success: false, errorCode: ErrorCode.INVALID_INPUT, message: "User not found" };
+        }
 
-            await this.taskRepository.remove(task);
-            return { success: true, data: true };
+        
+        const role_name = managerResult.data.role_name;
+
+        if (role_name !== UserRole.PROJECT_MANAGER) {
+            return { success: false, errorCode: ErrorCode.INVALID_INPUT, message: "Only project managers can add tasks" };
+        }
+         //samo projekt manager koji je kreirao task moze da ga obrise
+        if(task.project_manager_id != user_id)
+            return { success: false, errorCode: ErrorCode.INTERNAL_ERROR, message: "Only project manager that created a task can delete it" };
+        await this.taskRepository.remove(task);
+        
+        return { success: true, data: true };
 
         } catch (error) {
-            console.log(error);
             return { success: false, errorCode: ErrorCode.INTERNAL_ERROR, message: "Failed to delete task" };
         }
     }
