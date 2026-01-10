@@ -80,6 +80,7 @@ export interface TaskCommentInputProps {
 // TaskCommentList Props
 export interface TaskCommentListProps {
   comments : CommentDTO[];
+  onDelete: (id : number) => Promise<void>;
 }
 
 // TaskSearchBar Props

@@ -93,4 +93,18 @@ async uploadComment(taskId: number,userId: number,text: string): Promise<Comment
   return json; 
 }
 
+async deleteComment(commentId:number,userId:number) : Promise<void>{
+   const res = await fetch(`${this.baseUrl}/comments/${commentId}`, {
+    method: "DELETE",
+    headers: {
+      ...this.headers,
+      "x-user-id": userId.toString(),
+    },
+   });
+
+   if(!res.ok){
+    throw new Error("Failed to delete comment");
+   }
+}
+
 }

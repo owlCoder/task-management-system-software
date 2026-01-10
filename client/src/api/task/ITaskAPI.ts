@@ -10,4 +10,5 @@ export interface ITaskAPI {
   updateTask(taskId: number, payload: UpdateTaskDTO): Promise<TaskDTO>;
   deleteTask(taskId: string): Promise<void>;
   uploadComment(taskId:number,userId:number,comment:string) : Promise<CommentDTO>;
+  deleteComment(commentId:number,userId:number) : Promise<void>;
 }

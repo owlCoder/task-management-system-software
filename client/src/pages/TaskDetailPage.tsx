@@ -63,6 +63,23 @@ const handleUpload = async () => {
     setComments((prev) => [...prev,newComment]);
   };
 
+ 
+ const handleDeleteComments = async (commentId: number) => {
+  await apiTask.deleteComment(commentId, userId);
+
+  setTask(prev => {
+    if (!prev) return prev;
+
+    return {
+      ...prev,
+      comments: prev.comments.filter(
+        c => c.comment_id !== commentId
+      ),
+    };
+  });
+};
+
+
   useEffect(() => {
     const decoded = decodeJWT(token);
     if (decoded) {
@@ -119,7 +136,8 @@ const handleUpload = async () => {
                 task={task}
               />
               
-              <TaskCommentInput onSubmit={handleAddComments} />
+              <TaskCommentList comments={task.comments} onDelete={handleDeleteComments}/>
+              {task.task_status!== TaskStatus.COMPLETED &&  <TaskCommentInput onSubmit={handleAddComments} />}
 
               {task.task_status!== TaskStatus.COMPLETED &&  view === "upload" && (
                 <FileUpload
