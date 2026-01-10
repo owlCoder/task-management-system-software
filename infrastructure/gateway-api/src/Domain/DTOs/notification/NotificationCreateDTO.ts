@@ -1,11 +1,8 @@
 import { NotificationType } from "../../enums/notification/NotificationType";
 
-export interface NotificationDTO {
-    id: number;
+export interface NotificationCreateDTO {
     title: string;
     content: string;
     type: NotificationType;
-    isRead: boolean;
-    userId: number;
-    createdAt: Date;
+    userIds: number[];
 }
