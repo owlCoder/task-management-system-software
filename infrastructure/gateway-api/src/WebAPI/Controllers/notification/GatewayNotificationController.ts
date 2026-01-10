@@ -4,6 +4,7 @@ import { Router, Request, Response } from "express";
 // Domain
 import { IGatewayNotificationService } from "../../../Domain/services/notification/IGatewayNotificationService";
 import { NotificationDTO } from "../../../Domain/DTOs/notification/NotificationDTO";
+import { NotificationCreateDTO } from "../../../Domain/DTOs/notification/NotificationCreateDTO";
 
 // Middlewares
 import { authenticate } from "../../../Middlewares/authentication/AuthMiddleware";
@@ -29,6 +30,7 @@ export class GatewayNotificationController {
         this.router.get("/notifications/:notificationId", authenticate, this.getNotificationById.bind(this));
         this.router.get("/notifications/user/:userId", authenticate, this.getNotificationsByUserId.bind(this));
         this.router.get("/notifications/user/:userId/unread-count", authenticate, this.getUnreadNotificationCount.bind(this));
+        this.router.post("/notifications", authenticate, this.createNotification.bind(this));
         this.router.patch("/notifications/bulk/unread", authenticate, this.markMultipleNotificationsAsUnread.bind(this));
         this.router.patch("/notifications/bulk/read", authenticate, this.markMultipleNotificationsAsRead.bind(this));
         this.router.patch("/notifications/:notificationId/read", authenticate, this.markNotificationAsRead.bind(this));
@@ -80,6 +82,21 @@ export class GatewayNotificationController {
 
         const result = await this.gatewayNotificationService.getUnreadNotificationCount(userId);
         handleResponse(res, result);
+    }
+
+    /**
+     * POST /api/v1/notifications
+     * @param {Request} req - the request object, containing the notification data as {@link NotificationCreateDTO} in body.
+     * @param {Response} res - the response object for the client.
+     * @returns {Promise<void>}
+     * - On success: response status 204, no data. 
+     * - On failure: response status code indicating the failure, response data: message describing the error.
+     */
+    private async createNotification(req: Request, res: Response): Promise<void> {
+        const data = req.body as NotificationCreateDTO;
+
+        const result = await this.gatewayNotificationService.createNotification(data);
+        handleEmptyResponse(res, result);
     }
 
     /**

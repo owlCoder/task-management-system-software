@@ -5,6 +5,7 @@ import { AxiosInstance } from "axios";
 import { IErrorHandlingService } from "../../Domain/services/common/IErrorHandlingService";
 import { IGatewayNotificationService } from "../../Domain/services/notification/IGatewayNotificationService";
 import { NotificationDTO } from "../../Domain/DTOs/notification/NotificationDTO";
+import { NotificationCreateDTO } from "../../Domain/DTOs/notification/NotificationCreateDTO";
 import { Result } from "../../Domain/types/common/Result";
 
 // Constants
@@ -69,6 +70,22 @@ export class GatewayNotificationService implements IGatewayNotificationService {
             serviceName: SERVICES.NOTIFICATION,
             method: HTTP_METHODS.GET,
             url: NOTIFICATION_ROUTES.GET_UNREAD_NOTIFICATIONS_COUNT(userId) 
+        });
+    }
+
+    /**
+     * Creates a new notification.
+     * @param {NotificationCreateDTO} data - notification data containing notification details and recipient ids.
+     * @returns {Promise<Result<void>>} - A promise that resolves to a Result object.
+     * - On success returns void.
+     * - On failure returns status code and error message.
+     */
+    async createNotification(data: NotificationCreateDTO): Promise<Result<void>> {
+        return await makeAPICall<void, NotificationCreateDTO>(this.notificationClient, this.errorHandlingService, {
+            serviceName: SERVICES.NOTIFICATION,
+            method: HTTP_METHODS.POST,
+            url: NOTIFICATION_ROUTES.CREATE_NOTIFICATION,
+            data: data
         });
     }
 
