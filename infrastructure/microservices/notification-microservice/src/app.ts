@@ -1,7 +1,7 @@
 import express, { Application, Request, Response } from "express";
 import "reflect-metadata";
 import { createNotificationRoutes } from "./WebAPI/routes";
-import { INotificationService } from "./Domain/services/INotificationService";
+import { INotificationService } from "./Domain/Services/INotificationService";
 import { corsMiddleware } from "./Middleware/CorsMiddleware";
 import { loggerMiddleware } from "./Middleware/LoggerMiddleware";
 import { notFoundHandler, errorHandler } from "./Middleware/ErrorMiddleware";

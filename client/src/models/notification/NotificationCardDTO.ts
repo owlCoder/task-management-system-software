@@ -7,8 +7,7 @@ export interface Notification {
   type: NotificationType;
   isRead: boolean;
   userId: number;
-  createdAt: string;  
-  updatedAt: string;  
+  createdAt: string;
 }
 
 export interface NotificationCardProps {

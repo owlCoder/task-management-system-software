@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Route, Routes } from "react-router-dom";
 import { AuthPage } from "./pages/AuthPage";
 import { IAuthAPI } from "./api/auth/IAuthAPI";
@@ -12,12 +13,27 @@ import { FilePage } from "./pages/FilePage";
 import { OtpPage } from "./pages/OTPPage";
 import AnalyticsPage from "./pages/AnalyticsPage";
 import { Toaster } from 'react-hot-toast';
+import { socketManager } from "./api/notification/socketInstance";
+import { useAuth } from "./hooks/useAuthHook";
 
 const auth_api: IAuthAPI = new AuthAPI();
 
 const backgroundImageUrl = new URL("../public/bg2.png", import.meta.url).href;
 
 function App() {
+  const { user } = useAuth();
+  const currentUserId = user?.id || 1;
+
+  useEffect(() => {
+    socketManager.connect();
+    socketManager.joinUserRoom(currentUserId);
+
+    return () => {
+      socketManager.leaveUserRoom(currentUserId);
+      socketManager.disconnect();
+    };
+  }, [currentUserId]);
+
   return (
     <div
       className="h-full min-h-screen bg-cover bg-center"

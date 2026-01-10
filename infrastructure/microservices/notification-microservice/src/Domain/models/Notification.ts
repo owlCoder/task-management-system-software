@@ -1,16 +1,15 @@
 import { NotificationType } from '../enums/NotificationType';
 
-import { 
-  Entity, 
-  PrimaryGeneratedColumn, 
-  Column, 
-  CreateDateColumn, 
-  UpdateDateColumn 
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn
 } from 'typeorm';
 
 @Entity('notifications')
 export class Notification {
-  
+
   @PrimaryGeneratedColumn()
   id!: number;
 
@@ -20,8 +19,8 @@ export class Notification {
   @Column({ type: 'text' })
   content!: string;
 
-  @Column({ 
-    type: 'enum', 
+  @Column({
+    type: 'enum',
     enum: NotificationType,
     default: NotificationType.INFO
   })
@@ -35,7 +34,4 @@ export class Notification {
 
   @CreateDateColumn()
   createdAt!: Date;
-
-  @UpdateDateColumn()
-  updatedAt!: Date;
 }

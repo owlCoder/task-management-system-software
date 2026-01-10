@@ -25,8 +25,7 @@ export class NotificationMapper implements INotificationMapper {
       type: entity.type,
       isRead: entity.isRead,
       userId: entity.userId,
-      createdAt: entity.createdAt,
-      updatedAt: entity.updatedAt
+      createdAt: entity.createdAt
     };
   }
 

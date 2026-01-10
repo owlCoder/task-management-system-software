@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { INotificationService } from '../../Domain/services/INotificationService';
+import { INotificationService } from '../../Domain/Services/INotificationService';
 import { NotificationCreateDTO } from '../../Domain/DTOs/NotificationCreateDTO';
 import { NotificationValidation } from '../validators/NotificationValidation';
 import { mapErrorCodeToHttpStatus } from '../../Utils/converters/errorCodeMapper';
@@ -122,7 +122,7 @@ export class NotificationController {
         return;
       }
 
-      res.status(201).json(result.data);
+      res.status(204).send();
     } catch (error) {
       res.status(500).json({
         message: 'Error creating notification',

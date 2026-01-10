@@ -7,10 +7,14 @@ import NotificationSendPopUp from "../components/notification/NotificationSendPo
 import type { Notification } from "../models/notification/NotificationCardDTO";
 import { NotificationType } from "../enums/NotificationType";
 import { notificationAPI } from "../api/notification/NotificationAPI";
-import { socketManager, socketEventService } from "../api/notification/socketInstance";
+import { socketEventService } from "../api/notification/socketInstance";
 import toast from "react-hot-toast";
+import { useAuth } from "../hooks/useAuthHook";
 
 const NotificationPage: React.FC = () => {
+  const { user } = useAuth();
+  const currentUserId = user?.id || 1;
+
   const [activeFilter, setActiveFilter] = useState<"all" | "unread">("all");
   const [sortBy, setSortBy] = useState<"newest" | "oldest" | "unread" | "read">(
     "newest"
@@ -26,18 +30,15 @@ const NotificationPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // TODO: Zamijeniti sa pravim userId-em iz auth contexta
-  const currentUserId = 1;
-
-  // UCITAJ NOTIFIKACIJE SA BACKEND-A I KONEKTUJ WEBSOCKET
+  // UCITAJ NOTIFIKACIJE SA BACKEND-A I PODESI WEBSOCKET EVENT LISTENERS
   useEffect(() => {
     loadNotifications();
     setupWebSocket();
 
-    // Cleanup na unmount
+    // Cleanup - socket ostaje konektovan, samo cleanup event listenere
     return () => {
-      socketManager.leaveUserRoom(currentUserId);
-      socketManager.disconnect();
+      // Ne disconnect-uj socket, on treba da ostane aktivan!
+      // socketEventService ima cleanup metodu za event listenere
     };
   }, []);
 
@@ -59,11 +60,7 @@ const NotificationPage: React.FC = () => {
   };
 
   const setupWebSocket = () => {
-    // Konektuj WebSocket
-    socketManager.connect();
-
-    // Pridruži se user room-u
-    socketManager.joinUserRoom(currentUserId);
+    // Socket je već konektovan u App.tsx, samo dodaj event listenere
 
     // NOTIFICATION CREATED - Nova notifikacija
     socketEventService.onNotificationCreated((notification: Notification) => {
@@ -304,15 +301,15 @@ const NotificationPage: React.FC = () => {
     try {
       console.log("Sending notification:", { title, content, type });
 
-      const newNotifications = await notificationAPI.createNotification({
+      await notificationAPI.createNotification({
         title,
         content,
         type,
         userIds: [currentUserId],
       });
 
-      // Odmah dodaj nove notifikacije u listu (optimistic update)
-      setAllNotifications([...newNotifications, ...allNotifications]);
+      // Ne dodajemo ovde - notifikacija ce stici preko Socket.IO!
+      // Socket listener (setupWebSocket) ce automatski dodati u listu
 
       setIsPopUpOpen(false);
 

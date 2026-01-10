@@ -8,5 +8,4 @@ export interface NotificationResponseDTO {
   isRead: boolean;
   userId?: number;
   createdAt: Date;
-  updatedAt: Date;
 }

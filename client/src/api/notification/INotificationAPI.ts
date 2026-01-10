@@ -13,7 +13,7 @@ export interface INotificationAPI {
     content: string;
     type: NotificationType;
     userIds: number[];
-  }): Promise<Notification[]>;
+  }): Promise<void>;
   
   // PATCH operacije (mark as read/unread)
   markAsRead(id: number): Promise<void>;
