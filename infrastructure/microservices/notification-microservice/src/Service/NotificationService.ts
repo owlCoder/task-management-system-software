@@ -1,7 +1,7 @@
 import { Repository, In } from 'typeorm';
 import { Notification } from '../Domain/models/Notification';
 import { INotificationMapper } from '../Utils/converters/INotificationMapper';
-import { INotificationService} from '../Domain/Services/INotificationService';
+import { INotificationService} from '../Domain/services/INotificationService';
 import { Result } from '../Domain/types/common/Result';
 import { ErrorCode } from '../Domain/types/common/ErrorCode';
 import { NotificationCreateDTO } from '../Domain/DTOs/NotificationCreateDTO';
@@ -23,24 +23,38 @@ export class NotificationService implements INotificationService {
     this.socketService = socketService;
   }
 
-  async createNotification(data: NotificationCreateDTO): Promise<Result<NotificationResponseDTO>> {
+  async createNotification(data: NotificationCreateDTO): Promise<Result<NotificationResponseDTO[]>> {
     try {
-      const notificationEntity = this.mapper.toEntity(data);
-      const notification = this.repository.create(notificationEntity);
-      const savedNotification = await this.repository.save(notification);
+      const createdNotifications: NotificationResponseDTO[] = [];
 
-      if (!savedNotification) {
-        console.error(' Service.createNotification: Failed to save notification');
-        return { success: false, errorCode: ErrorCode.INTERNAL_ERROR, message: 'Failed to save notification' };
+      // Kreiraj notifikaciju za svaki userId u listi
+      for (const userId of data.userIds) {
+        const notificationEntity = this.mapper.toEntity({
+          ...data,
+          userId
+        });
+        const notification = this.repository.create(notificationEntity);
+        const savedNotification = await this.repository.save(notification);
+
+        if (!savedNotification) {
+          console.error(` Service.createNotification: Failed to save notification for user ${userId}`);
+          continue; // Nastavi sa sledecim korisnikom
+        }
+
+        const responseDTO = this.mapper.toResponseDTO(savedNotification);
+        createdNotifications.push(responseDTO);
+
+        // Emituj WebSocket event za svakog korisnika
+        if (this.socketService) {
+          this.socketService.emitNotificationCreated(responseDTO);
+        }
       }
 
-      const responseDTO = this.mapper.toResponseDTO(savedNotification);
-
-      if (this.socketService) {
-        this.socketService.emitNotificationCreated(responseDTO);
+      if (createdNotifications.length === 0) {
+        return { success: false, errorCode: ErrorCode.INTERNAL_ERROR, message: 'Failed to create any notifications' };
       }
 
-      return { success: true, data: responseDTO };
+      return { success: true, data: createdNotifications };
     } catch (error) {
       console.error(' Service.createNotification error:', error);
       return { success: false, errorCode: ErrorCode.INTERNAL_ERROR, message: (error as Error).message };

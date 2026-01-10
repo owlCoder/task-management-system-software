@@ -4,9 +4,9 @@ import { NotificationResponseDTO } from '../../Domain/DTOs/NotificationDTO';
 import { INotificationMapper } from './INotificationMapper';
 
 export class NotificationMapper implements INotificationMapper {
-  
+
   // mapira CreateDTO u Entity (za kreiranje)
-  toEntity(dto: NotificationCreateDTO): Partial<Notification> {
+  toEntity(dto: NotificationCreateDTO & { userId?: number }): Partial<Notification> {
     return {
       title: dto.title,
       content: dto.content,

@@ -24,8 +24,8 @@ export class NotificationAPI implements INotificationAPI {
     title: string;
     content: string;
     type: NotificationType;
-    userId: number;
-  }): Promise<Notification> {
+    userIds: number[];
+  }): Promise<Notification[]> {
     const response = await axios.post(`${this.baseURL}/notifications`, data);
     return response.data;
   }

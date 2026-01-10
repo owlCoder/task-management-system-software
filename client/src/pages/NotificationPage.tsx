@@ -8,6 +8,7 @@ import type { Notification } from "../models/notification/NotificationCardDTO";
 import { NotificationType } from "../enums/NotificationType";
 import { notificationAPI } from "../api/notification/NotificationAPI";
 import { socketManager, socketEventService } from "../api/notification/socketInstance";
+import toast from "react-hot-toast";
 
 const NotificationPage: React.FC = () => {
   const [activeFilter, setActiveFilter] = useState<"all" | "unread">("all");
@@ -199,11 +200,14 @@ const NotificationPage: React.FC = () => {
         )
       );
 
+      const count = selectedNotifications.length;
       setSelectedNotifications([]);
       setIsAllSelected(false);
+
+      toast.success(`${count} notification${count === 1 ? '' : 's'} marked as read`);
     } catch (err: any) {
       console.error(" Frontend handleMarkAsRead error:", err);
-      alert(
+      toast.error(
         `Failed to mark notifications as read: ${
           err.response?.data?.message || err.message
         }`
@@ -223,11 +227,14 @@ const NotificationPage: React.FC = () => {
         )
       );
 
+      const count = selectedNotifications.length;
       setSelectedNotifications([]);
       setIsAllSelected(false);
+
+      toast.success(`${count} notification${count === 1 ? '' : 's'} marked as unread`);
     } catch (err: any) {
       console.error(" Frontend handleMarkAsUnread error:", err);
-      alert(
+      toast.error(
         `Failed to mark notifications as unread: ${
           err.response?.data?.message || err.message
         }`
@@ -245,11 +252,14 @@ const NotificationPage: React.FC = () => {
         allNotifications.filter((n) => !selectedNotifications.includes(n.id))
       );
 
+      const deletedCount = selectedNotifications.length;
       setSelectedNotifications([]);
       setIsAllSelected(false);
+
+      toast.success(`${deletedCount} notification${deletedCount === 1 ? '' : 's'} deleted successfully`);
     } catch (err: any) {
       console.error(" Frontend handleDeleteSelected error:", err);
-      alert(
+      toast.error(
         `Failed to delete notifications: ${
           err.response?.data?.message || err.message
         }`
@@ -294,20 +304,23 @@ const NotificationPage: React.FC = () => {
     try {
       console.log("Sending notification:", { title, content, type });
 
-      const newNotification = await notificationAPI.createNotification({
+      const newNotifications = await notificationAPI.createNotification({
         title,
         content,
         type,
-        userId: currentUserId,
+        userIds: [currentUserId],
       });
 
-      // Odmah dodaj novu notifikaciju u listu (optimistic update)
-      setAllNotifications([newNotification, ...allNotifications]);
+      // Odmah dodaj nove notifikacije u listu (optimistic update)
+      setAllNotifications([...newNotifications, ...allNotifications]);
 
       setIsPopUpOpen(false);
+
+      // Toast success poruka
+      toast.success("Notification created successfully!");
     } catch (err) {
       console.error("Error sending notification:", err);
-      alert("Failed to send notification");
+      toast.error("Failed to create notification");
     }
   };
 

@@ -42,7 +42,7 @@ function App() {
           }
         />
       </Routes>
-      <Toaster position="bottom-right" />
+      <Toaster position="top-center" />
     </div>
   );
 }

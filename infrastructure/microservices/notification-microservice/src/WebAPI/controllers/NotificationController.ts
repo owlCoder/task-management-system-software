@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { INotificationService } from '../../Domain/Services/INotificationService';
+import { INotificationService } from '../../Domain/services/INotificationService';
 import { NotificationCreateDTO } from '../../Domain/DTOs/NotificationCreateDTO';
 import { NotificationValidation } from '../validators/NotificationValidation';
 import { mapErrorCodeToHttpStatus } from '../../Utils/converters/errorCodeMapper';

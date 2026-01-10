@@ -24,8 +24,18 @@ export class NotificationValidation {
       return `Type must be one of: ${VALID_NOTIFICATION_TYPES.join(', ')}`;
     }
 
-    if (data.userId !== undefined && (typeof data.userId !== 'number' || data.userId <= 0)) {
-      return 'UserId must be a positive number';
+    if (!data.userIds || !Array.isArray(data.userIds)) {
+      return 'UserIds must be an array';
+    }
+
+    if (data.userIds.length === 0) {
+      return 'UserIds array cannot be empty';
+    }
+
+    for (const userId of data.userIds) {
+      if (typeof userId !== 'number' || userId <= 0) {
+        return 'All userIds must be positive numbers';
+      }
     }
 
     return null; 

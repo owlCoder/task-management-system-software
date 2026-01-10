@@ -11,9 +11,9 @@ export interface INotificationAPI {
   createNotification(data: {
     title: string;
     content: string;
-    type: NotificationType; 
-    userId: number;
-  }): Promise<Notification>;
+    type: NotificationType;
+    userIds: number[];
+  }): Promise<Notification[]>;
   
   // PATCH operacije (mark as read/unread)
   markAsRead(id: number): Promise<void>;

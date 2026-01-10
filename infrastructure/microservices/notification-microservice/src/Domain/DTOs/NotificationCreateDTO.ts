@@ -4,5 +4,5 @@ export interface NotificationCreateDTO {
   title: string;
   content: string;
   type: NotificationType;
-  userId?: number;
+  userIds: number[];
 }
