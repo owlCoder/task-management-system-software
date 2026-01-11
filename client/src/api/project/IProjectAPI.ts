@@ -4,6 +4,7 @@ import { ProjectUpdateDTO } from "../../models/project/ProjectUpdateDTO";
 import { ProjectUserDTO } from "../../models/project/ProjectUserDTO";
 
 export interface IProjectAPI {
+    getAllProjects(): Promise<ProjectDTO[]>;
     getProjectsByUserId(userId: number): Promise<ProjectDTO[]>;
     getProjectById(projectId: number): Promise<ProjectDTO | null>;
     createProject(data: ProjectCreateDTO): Promise<ProjectDTO | null>;
