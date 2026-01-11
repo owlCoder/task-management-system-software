@@ -5,6 +5,7 @@ import { ITaskAPI } from "./ITaskAPI";
 import { CommentDTO } from "../../models/task/CommentDTO";
 
 
+
 export class TaskAPI implements ITaskAPI {
   private baseUrl: string;
   private token: string;
@@ -65,6 +66,18 @@ export class TaskAPI implements ITaskAPI {
       body: JSON.stringify(payload),
     });
     return res.json();
+  }
+
+  async updateTaskStatus(taskId: number, status: string): Promise<void> {
+    const res = await fetch(`${this.baseUrl}/tasks/${taskId}/status`, {
+      method: "PATCH",
+      headers: this.headers,
+      body: JSON.stringify({status}),
+    });
+
+    if(!res.ok) {
+      throw new Error("Failed to update task status");
+    }
   }
 
   async deleteTask(taskId: string): Promise<void> {
