@@ -1,6 +1,6 @@
 import { TaskDTO } from "../../models/task/TaskDTO";
 import { TaskStatus } from "../../enums/TaskStatus";
-import { UserDTO } from "../../models/users/UserDTO";
+import { ProjectUserDTO } from "../../models/project/ProjectUserDTO";
 import { UserRole } from "../../enums/UserRole";
 import { CommentDTO } from "../../models/task/CommentDTO";
 
@@ -9,7 +9,7 @@ export interface TaskListItemProps {
   task: TaskDTO;
   onSelect?: (taskId: number) => void;
   onStatusChange?: (taskId: number, newStatus: TaskStatus) => void;
-  users?: UserDTO[];
+  users?: ProjectUserDTO[];
 }
 
 // TaskColumn Props
@@ -41,7 +41,7 @@ export interface TaskListItemProps {
   task: TaskDTO;
   onSelect?: (taskId: number) => void;
   onStatusChange?: (taskId: number, newStatus: TaskStatus) => void;
-  users?: UserDTO[];
+  users?: ProjectUserDTO[];
 }
 
 // TaskHeader Props

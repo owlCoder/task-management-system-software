@@ -3,9 +3,9 @@ import Sidebar from "../components/dashboard/sidebar/Sidebar";
 import TaskListItem from "../components/task/TaskListItem";
 import TaskListPreview from "../components/task/TaskListPreview";
 import { TaskDTO } from "../models/task/TaskDTO";
-import { UserDTO } from "../models/users/UserDTO";
+import { ProjectUserDTO } from "../models/project/ProjectUserDTO";
 import { TaskAPI } from "../api/task/TaskAPI";
-import { UserAPI } from "../api/users/UserAPI";
+import { projectAPI } from "../api/project/ProjectAPI";
 import CreateTaskModal from "../components/task/CreateTaskModal";
 import EditTaskModal from "../components/task/EditTaskModal";
 import TaskSearchBar from "../components/task/TaskSearchBar";
@@ -24,7 +24,7 @@ const TaskPage: React.FC<TaskListPageProps> = ({ projectId }) => {
   if (!token) return null;
 
   const [tasks, setTasks] = useState<TaskDTO[]>([]);
-  const [users, setUsers] = useState<UserDTO[]>([]);
+  const [users, setUsers] = useState<ProjectUserDTO[]>([]);
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
   const [selectedtaskId, setSelectedTaskId] = useState<number | null>(null);
@@ -34,7 +34,6 @@ const TaskPage: React.FC<TaskListPageProps> = ({ projectId }) => {
   const [sortBy, setSortBy] = useState<SortOption>("NEWEST");
   const [showBoard, setShowBoard] = useState(false);
   const api = new TaskAPI(import.meta.env.VITE_GATEWAY_URL, token);
-  const userAPI = new UserAPI();
   const selectedTask = tasks.find((t) => t.task_id === selectedtaskId);
 
   const handleStatusChange = async (taskId: number, newStatus: TaskStatus) => {
@@ -102,7 +101,7 @@ const TaskPage: React.FC<TaskListPageProps> = ({ projectId }) => {
       try {
         const [tasksData, usersData] = await Promise.all([
           api.getTasksByProject(projectId),
-          userAPI.getAllUsers(token),
+          projectAPI.getProjectUsers(Number(projectId))
         ]);
         setTasks(tasksData);
         setUsers(usersData);

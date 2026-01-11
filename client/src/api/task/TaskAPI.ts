@@ -3,14 +3,24 @@ import { TaskDTO } from "../../models/task/TaskDTO";
 import { UpdateTaskDTO } from "../../models/task/UpdateTaskDTO";
 import { ITaskAPI } from "./ITaskAPI";
 import { CommentDTO } from "../../models/task/CommentDTO";
+import { jwtDecode } from "jwt-decode";
 
 export class TaskAPI implements ITaskAPI {
   private baseUrl: string;
   private token: string;
+  private userId: string;
 
   constructor(baseUrl: string, token: string) {
     this.baseUrl = baseUrl;
     this.token = token;
+
+    try {
+      const decoded: any = jwtDecode(token);
+      this.userId = (decoded.userId || decoded.id || "0").toString();
+    } catch (error) {
+      console.error(error);
+      this.userId = "0";
+    }
   }
   
 
@@ -18,13 +28,15 @@ export class TaskAPI implements ITaskAPI {
     return {
       "Content-Type": "application/json",
       Authorization: `Bearer ${this.token}`,
+      "x-user-id": this.userId,
     };
   }
 
   async getTasksByProject(sprintId: string): Promise<TaskDTO[]> {
-    const res = await fetch(`${this.baseUrl}/tasks/sprints/${sprintId}`, {
-      headers: this.headers,
-    });
+    const testSprintId = "1"; 
+    const res = await fetch(`${this.baseUrl}/tasks/sprints/${testSprintId}`, {
+    headers: this.headers,
+  });
    if (!res.ok) {
     throw new Error("Failed to fetch task");
   }
@@ -47,7 +59,8 @@ export class TaskAPI implements ITaskAPI {
 }
 
   async createTask(payload: CreateTaskDTO): Promise<TaskDTO> {
-    const res = await fetch(`${this.baseUrl}/task`, {
+    const testSprint = "1";
+    const res = await fetch(`${this.baseUrl}/tasks/sprints/${testSprint}`, {
       method: "POST",
       headers: this.headers,
       body: JSON.stringify(payload),
@@ -56,7 +69,7 @@ export class TaskAPI implements ITaskAPI {
   }
 
   async updateTask(taskId: number, payload: UpdateTaskDTO): Promise<TaskDTO> {
-    const res = await fetch(`${this.baseUrl}/task/${taskId}`, {
+    const res = await fetch(`${this.baseUrl}/tasks/${taskId}`, {
       method: "PUT",
       headers: this.headers,
       body: JSON.stringify(payload),
@@ -65,7 +78,7 @@ export class TaskAPI implements ITaskAPI {
   }
 
   async deleteTask(taskId: string): Promise<void> {
-    await fetch(`${this.baseUrl}/task/${taskId}`, {
+    await fetch(`${this.baseUrl}/tasks/${taskId}`, {
       method: "DELETE",
       headers: this.headers,
     });
