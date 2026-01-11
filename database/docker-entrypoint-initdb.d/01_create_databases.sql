@@ -3,3 +3,4 @@ CREATE DATABASE IF NOT EXISTS uploaded_files_db;
 CREATE DATABASE IF NOT EXISTS generated_reports_db;
 CREATE DATABASE IF NOT EXISTS projects_db;
 CREATE DATABASE IF NOT EXISTS notification_db;
+CREATE DATABASE IF NOT EXISTS service_status_db;

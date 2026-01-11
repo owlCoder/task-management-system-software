@@ -61,9 +61,9 @@ export class UserAPI implements IUserAPI {
     })).data;
   }
 
-  async getUserRolesForCreation(token: string): Promise<UserRoleDTO[]> {
+  async getUserRolesForCreation(token: string, impact_level:number): Promise<UserRoleDTO[]> {
     return (
-      await this.axiosInstance.get<UserRoleDTO[]>("/user-roles/userCreation", {
+      await this.axiosInstance.get<UserRoleDTO[]>(`/user-roles/${impact_level}`, {
         headers: { Authorization: `Bearer ${token}`},
       })).data;
   }

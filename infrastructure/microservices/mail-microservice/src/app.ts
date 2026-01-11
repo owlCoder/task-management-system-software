@@ -2,23 +2,20 @@ import express from 'express';
 import { MailsController } from "./WebAPI/controllers/MailsController";
 import { SendService } from "./Services/SendService";
 import { AliveService } from "./Services/AliveService";
-import cors from "cors";
+import { corsPolicy } from './Middlewares/cors/corsPolicy';
+import { LoggerService } from './Services/LoggerService';
+import { logger } from './infrastructure/Logger';
 
 const app = express();
 
-const corsOrigin = process.env.CORS_ORIGIN ?? "*";
-const corsMethods = process.env.CORS_METHODS?.split(",").map(m => m.trim()) ?? ["POST"];
-
-app.use(cors({
-  origin: corsOrigin,
-  methods: corsMethods,
-}));
+app.use(corsPolicy);
 
 app.use(express.json());
 
 const aliveService = new AliveService();
 const sendService = new SendService();
-const mailsController = new MailsController(sendService,aliveService);
+const loggerService = new LoggerService(logger);
+const mailsController = new MailsController(sendService,aliveService,loggerService);
 
 app.use("/api/v1/MailService", mailsController.getRouter());
 

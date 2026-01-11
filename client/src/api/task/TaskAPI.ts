@@ -4,6 +4,8 @@ import { UpdateTaskDTO } from "../../models/task/UpdateTaskDTO";
 import { ITaskAPI } from "./ITaskAPI";
 import { CommentDTO } from "../../models/task/CommentDTO";
 
+
+
 export class TaskAPI implements ITaskAPI {
   private baseUrl: string;
   private token: string;
@@ -22,9 +24,10 @@ export class TaskAPI implements ITaskAPI {
   }
 
   async getTasksByProject(sprintId: string): Promise<TaskDTO[]> {
-    const res = await fetch(`${this.baseUrl}/tasks/sprints/${sprintId}`, {
-      headers: this.headers,
-    });
+    const testSprintId = "1"; 
+    const res = await fetch(`${this.baseUrl}/tasks/sprints/${testSprintId}`, {
+    headers: this.headers,
+  });
    if (!res.ok) {
     throw new Error("Failed to fetch task");
   }
@@ -47,7 +50,8 @@ export class TaskAPI implements ITaskAPI {
 }
 
   async createTask(payload: CreateTaskDTO): Promise<TaskDTO> {
-    const res = await fetch(`${this.baseUrl}/task`, {
+    const testSprint = "1";
+    const res = await fetch(`${this.baseUrl}/tasks/sprints/${testSprint}`, {
       method: "POST",
       headers: this.headers,
       body: JSON.stringify(payload),
@@ -56,7 +60,7 @@ export class TaskAPI implements ITaskAPI {
   }
 
   async updateTask(taskId: number, payload: UpdateTaskDTO): Promise<TaskDTO> {
-    const res = await fetch(`${this.baseUrl}/task/${taskId}`, {
+    const res = await fetch(`${this.baseUrl}/tasks/${taskId}`, {
       method: "PUT",
       headers: this.headers,
       body: JSON.stringify(payload),
@@ -64,8 +68,20 @@ export class TaskAPI implements ITaskAPI {
     return res.json();
   }
 
+  async updateTaskStatus(taskId: number, status: string): Promise<void> {
+    const res = await fetch(`${this.baseUrl}/tasks/${taskId}/status`, {
+      method: "PATCH",
+      headers: this.headers,
+      body: JSON.stringify({status}),
+    });
+
+    if(!res.ok) {
+      throw new Error("Failed to update task status");
+    }
+  }
+
   async deleteTask(taskId: string): Promise<void> {
-    await fetch(`${this.baseUrl}/task/${taskId}`, {
+    await fetch(`${this.baseUrl}/tasks/${taskId}`, {
       method: "DELETE",
       headers: this.headers,
     });

@@ -145,6 +145,7 @@ export class UsersService implements IUsersService {
   async logicalyDeleteUserById(user_id: number): Promise<Result<void>> {
     const existingUser = await this.userRepository.findOne({
       where: { user_id },
+      relations: ["user_role"],
     });
 
     if (!existingUser) {
@@ -152,6 +153,15 @@ export class UsersService implements IUsersService {
         success: false,
         code: ErrorCode.NOT_FOUND,
         error: `User with ID ${user_id} not found`,
+      };
+    }
+
+    const role = existingUser.user_role.role_name.toUpperCase();
+    if(role === "ADMIN" || role === "SYSADMIN"){
+      return {
+        success: false,
+        code: ErrorCode.FORBIDDEN,
+        error: `Cannot delete user with role ${role}`,
       };
     }
 
@@ -191,6 +201,21 @@ export class UsersService implements IUsersService {
         code: ErrorCode.NOT_FOUND,
         error: `User with ID ${user_id} not found`,
       };
+    }
+
+    const currentRole = existingUser.user_role.role_name.toUpperCase();
+
+    if(currentRole === "ADMIN" || currentRole === "SYSADMIN") {
+
+      updateUserData.role_name = existingUser.user_role.role_name; 
+      
+      if (updateUserData.role_name !== existingUser.user_role.role_name) {
+          return {
+              success: false,
+              code: ErrorCode.FORBIDDEN,
+              error: `Chaning role is forbidden for users with role ${currentRole}`,
+          };
+      }
     }
 
     const alreadyExist = await this.userRepository.count({

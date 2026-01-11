@@ -2,9 +2,9 @@ import React, { useState, useEffect } from "react";
 import { CreateTaskModalProps } from "../../types/props";
 import { CreateTaskDTO } from "../../models/task/CreateTaskDTO";
 import { TaskAPI } from "../../api/task/TaskAPI";
-import { UserAPI } from "../../api/users/UserAPI";
-import { UserDTO } from "../../models/users/UserDTO";
 import toast from "react-hot-toast";
+import { projectAPI } from "../../api/project/ProjectAPI";
+import { ProjectUserDTO } from "../../models/project/ProjectUserDTO";
 
 const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
   open,
@@ -16,17 +16,17 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
   const [description, setDescription] = useState("");
   const [estimatedCost, setEstimatedCost] = useState(0);
   const [assignedTo, setAssignedTo] = useState<number | undefined>(undefined);
-  const [users, setUsers] = useState<UserDTO[]>([]);
+  const [users, setUsers] = useState<ProjectUserDTO[]>([]);
   const [loading, setLoading] = useState(false);
 
   const api = new TaskAPI(import.meta.env.VITE_GATEWAY_URL, token);
-  const userAPI = new UserAPI();
+
 
   useEffect(() => {
     if (open) {
       const fetchUsers = async () => {
         try {
-          const fetchedUsers = await userAPI.getAllUsers(token);
+          const fetchedUsers = await projectAPI.getProjectUsers(Number(projectId));
           setUsers(fetchedUsers);
         } catch (err) {
           console.error("Failed to fetch users:", err);
@@ -104,19 +104,17 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
         </div>
 
         {/* Assigned To */}
-        <div className="mb-4">
-          <label className="block text-sm mb-1">Assign To</label>
+       <div className="mb-4">
+          <label className="block text-sm mb-1">Assign To Worker</label>
           <select
-            className="w-full p-2 bg-white/10 border border-white/20 rounded-lg text-white outline-none"
+            className="w-full p-2 bg-slate-900/50 border border-white/20 rounded-lg text-white outline-none"
             value={assignedTo ?? ""}
-            onChange={(e) =>
-              setAssignedTo(e.target.value ? Number(e.target.value) : undefined)
-            }
+            onChange={(e) => setAssignedTo(e.target.value ? Number(e.target.value) : undefined)}
           >
-            <option value="">Unassigned</option>
+            <option value="" className="bg-slate-900">Unassigned</option>
             {users.map((user) => (
-              <option key={user.user_id} value={user.user_id}>
-                {user.username} ({user.email})
+              <option key={user.user_id} value={user.user_id} className="bg-slate-900">
+                {user.username} ({user.role_name})
               </option>
             ))}
           </select>

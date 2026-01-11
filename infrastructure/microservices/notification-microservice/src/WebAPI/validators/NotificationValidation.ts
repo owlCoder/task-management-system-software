@@ -1,4 +1,4 @@
-import { NotificationType, VALID_NOTIFICATION_TYPES, isValidNotificationType } from '../../Domain/enums/NotificationType';
+import {  VALID_NOTIFICATION_TYPES, isValidNotificationType } from '../../Utils/ValidNotificationHelpers/ValidNotificationType';
 
 export class NotificationValidation {
 

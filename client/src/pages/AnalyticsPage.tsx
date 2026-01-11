@@ -27,14 +27,22 @@ export const AnalyticsPage: React.FC = () => {
     useEffect(() => {
         const loadProjects = async () => {
             try {
-                const data = await projectAPI.getAllProjects();
-                setProjects(data);
-                if (data.length > 0) {
-                    setSelectedProjectId(data[0].id); // default prvi projekat
-                    setSelectedProject(data[0]);
+                const ids = [1, 2, 3]; // MORAŠ ih imati odnekle
+                const loadedProjects: ProjectDTO[] = [];
+
+                for (const id of ids) {
+                    const project = await projectAPI.getProjectById(id);
+                    if (project) loadedProjects.push(project);
                 }
-            } catch (err) {
-                console.error("Failed to load projects", err);
+
+                setProjects(loadedProjects);
+
+                if (loadedProjects.length > 0) {
+                    setSelectedProjectId(String(loadedProjects[0].project_id));
+                    setSelectedProject(loadedProjects[0]);
+                }
+            } catch (e) {
+                console.error("Failed to load projects", e);
             } finally {
                 setLoadingProjects(false);
             }
@@ -42,8 +50,6 @@ export const AnalyticsPage: React.FC = () => {
 
         loadProjects();
     }, []);
-
-
 
     return (
         <div className="flex min-h-screen bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-[#0f172a] via-[#020617] to-black">
@@ -68,18 +74,22 @@ export const AnalyticsPage: React.FC = () => {
                         ) : (
                             <select
                                 value={selectedProjectId ?? ""}
-                                onChange={(e) => {
-                                    setSelectedProjectId(e.target.value)
-                                    setSelectedProject(projects.find(p => p.id === selectedProjectId)!)
+                                onChange={async (e: React.ChangeEvent<HTMLSelectElement>) => {
+                                    const id = e.target.value;
+                                    setSelectedProjectId(id);
+
+                                    const project = await projectAPI.getProjectById(Number(id));
+                                    setSelectedProject(project);
                                 }}
-                                className="w-full sm:w-[320px] bg-white/10 backdrop-blur-xl border border-white/15 rounded-xl px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-[var(--palette-medium-blue)] transition-all">
+                                className="w-full sm:w-[320px] bg-white/10 backdrop-blur-xl border border-white/15 rounded-xl px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-[var(--palette-medium-blue)] transition-all"
+                            >
                                 {projects.map((project) => (
                                     <option
-                                        key={project.id}
-                                        value={project.id}
+                                        key={project.project_id}
+                                        value={project.project_id}
                                         className="bg-[#020617] text-white"
                                     >
-                                        {project.name}
+                                        {project.project_name}
                                     </option>
                                 ))}
                             </select>

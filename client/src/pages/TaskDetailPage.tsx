@@ -51,7 +51,7 @@ const handleUpload = async () => {
     if(isTaskDone && task.task_status !== TaskStatus.COMPLETED) {
       setTask({...task,task_status : TaskStatus.COMPLETED});
     }
-    apiTask.updateTask(taskId, { status: TaskStatus.COMPLETED });
+    apiTask.updateTaskStatus(taskId,TaskStatus.COMPLETED);
     
   },[task,isTaskDone])
 
