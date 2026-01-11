@@ -3,24 +3,16 @@ import { TaskDTO } from "../../models/task/TaskDTO";
 import { UpdateTaskDTO } from "../../models/task/UpdateTaskDTO";
 import { ITaskAPI } from "./ITaskAPI";
 import { CommentDTO } from "../../models/task/CommentDTO";
-import { jwtDecode } from "jwt-decode";
+
+
 
 export class TaskAPI implements ITaskAPI {
   private baseUrl: string;
   private token: string;
-  private userId: string;
 
   constructor(baseUrl: string, token: string) {
     this.baseUrl = baseUrl;
     this.token = token;
-
-    try {
-      const decoded: any = jwtDecode(token);
-      this.userId = (decoded.userId || decoded.id || "0").toString();
-    } catch (error) {
-      console.error(error);
-      this.userId = "0";
-    }
   }
   
 
@@ -28,7 +20,6 @@ export class TaskAPI implements ITaskAPI {
     return {
       "Content-Type": "application/json",
       Authorization: `Bearer ${this.token}`,
-      "x-user-id": this.userId,
     };
   }
 
@@ -75,6 +66,18 @@ export class TaskAPI implements ITaskAPI {
       body: JSON.stringify(payload),
     });
     return res.json();
+  }
+
+  async updateTaskStatus(taskId: number, status: string): Promise<void> {
+    const res = await fetch(`${this.baseUrl}/tasks/${taskId}/status`, {
+      method: "PATCH",
+      headers: this.headers,
+      body: JSON.stringify({status}),
+    });
+
+    if(!res.ok) {
+      throw new Error("Failed to update task status");
+    }
   }
 
   async deleteTask(taskId: string): Promise<void> {

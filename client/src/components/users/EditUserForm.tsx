@@ -22,6 +22,8 @@ export const EditUserForm: React.FC<EditUserFormProps> = ({
   onUserUpdated,
   onClose,
 }) => {
+  const isRestricted = existingUser.role_name === UserRole.ADMIN || existingUser.role_name === UserRole.SYS_ADMIN;
+
   const [formData, setFormData] = useState({
     username: existingUser.username,
     email: existingUser.email,
@@ -29,7 +31,7 @@ export const EditUserForm: React.FC<EditUserFormProps> = ({
     role_name: existingUser.role_name,
   });
 
-  const [weeklyHours, setWeeklyHours] = useState(0);
+ // const [weeklyHours, setWeeklyHours] = useState(0);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -50,15 +52,15 @@ export const EditUserForm: React.FC<EditUserFormProps> = ({
 
     const updated = await userAPI.updateUser(token, existingUser.user_id, updateData);
     toast.success("User updated successfully!");
-    if(weeklyHours > 0) {
-      await userAPI.setWeeklyHours(token, existingUser.user_id, weeklyHours);
-    }
-      onUserUpdated(updated);
-      onClose();
+
+    onUserUpdated(updated);
+    onClose();
+  
     } catch (err) {
       console.error("Failed to update user:", err);
       toast.error("Update failed!");
     }
+    
   };
 
   return (
@@ -70,16 +72,27 @@ export const EditUserForm: React.FC<EditUserFormProps> = ({
         <input type="email" name="email" value={formData.email} onChange={handleChange} placeholder="Email" className={inputClasses} required />
         <input type="password" name="password" value={formData.password} onChange={handleChange} placeholder="New Password (optional)" className={inputClasses} />
         
-        <select name="role_name" value={formData.role_name} onChange={handleChange} className={inputClasses}>
-          {Object.values(UserRole).map(role => (
-            <option key={role} value={role} className="bg-slate-900">{role}</option>
-          ))}
-        </select>
+        <div className="flex flex-col gap-1">
+          {isRestricted && <label className="text-[10px] text-blue-400 ml-2 uppercase tracking-wider">Role changes disabled for Admin</label>}
+          <select 
+            name="role_name" 
+            value={formData.role_name} 
+            onChange={handleChange} 
+            disabled={isRestricted}
+            className={`${inputClasses} ${isRestricted ? "opacity-50 cursor-not-allowed border-blue-500/30" : ""}`}
+          >
+            {Object.values(UserRole).map(role => (
+              <option key={role} value={role} className="bg-slate-900">{role}</option>
+            ))}
+          </select>
+        </div>
 
+        {/*
         <div className="flex flex-col gap-1">
           <label className="text-xs text-white/40 ml-2">Weekly Working Hours</label>
           <input type="number" name="workinghours" value={weeklyHours} onChange={(e) => setWeeklyHours(Number(e.target.value))} className={inputClasses} />
-        </div>
+        </div>  */}
+         
 
         <div className="flex gap-3 mt-6">
           <button 

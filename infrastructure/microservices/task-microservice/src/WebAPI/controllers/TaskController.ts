@@ -34,6 +34,7 @@ import { DeleteCommentValidator } from "../validators/DeleteCommentValidator";
         this.router.post('/tasks/sprints/:sprintId', this.addTaskForSprint.bind(this));
         this.router.put('/tasks/:taskId', this.updateTask.bind(this));
         this.router.delete('/tasks/:taskId', this.deleteTask.bind(this));
+        this.router.patch('/tasks/:taskId/status', this.updateTaskStatus.bind(this));
 
         // GET ALL TASKS FOR PROJECT
         this.router.get('/tasks/sprints/:sprintId', this.getAllTasksForSprint.bind(this));
@@ -234,6 +235,46 @@ import { DeleteCommentValidator } from "../validators/DeleteCommentValidator";
 
         } catch (error) {
             console.log(error);
+            res.status(500).json({ message: "Internal server error" });
+        }
+    }
+
+    async updateTaskStatus(req: Request, res: Response): Promise<void> {
+        try {
+            const taskId = parseInt(req.params.taskId, 10);
+            if (isNaN(taskId)) {
+                res.status(400).json({ message: "Invalid task ID" });
+                return;
+            }
+
+            const userIdHeader = req.headers['x-user-id'];
+            if (typeof userIdHeader !== 'string') {
+                res.status(400).json({ message: "Missing or invalid x-user-id header" });
+                return;
+            }
+
+            const user_id = parseInt(userIdHeader, 10);
+            if (isNaN(user_id)) {
+                res.status(400).json({ message: "Invalid user id" });
+                return;
+            }
+
+            const { status } = req.body;
+            if (status === undefined) {
+                res.status(400).json({ message: "Status is required" });
+                return;
+            }
+
+            const result = await this.taskService.updateTaskStatus(taskId, status, user_id);
+
+            if (result.success) {
+                res.status(200).json(taskToTaskDTO(result.data));
+            } else {
+                res.status(errorCodeToHttpStatus(result.errorCode)).json({ message: result.message });
+            }
+
+        } catch (error) {
+            console.error(error);
             res.status(500).json({ message: "Internal server error" });
         }
     }
