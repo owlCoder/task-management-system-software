@@ -1,4 +1,3 @@
-import { Console } from "console";
 import { Db } from "./DbConnectionPool";
 
 let initialization_attempts = 0;
