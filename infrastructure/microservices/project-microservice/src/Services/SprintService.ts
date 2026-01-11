@@ -6,6 +6,8 @@ import { Project } from "../Domain/models/Project";
 import { Sprint } from "../Domain/models/Sprint";
 import { ISprintService } from "../Domain/services/ISprintService";
 import { SprintMapper } from "../Utils/Mappers/SprintMapper";
+import { Result } from "../Domain/types/Result";
+import { ErrorCode } from "../Domain/enums/ErrorCode";
 
 
 export class SprintService implements ISprintService {
@@ -15,12 +17,16 @@ export class SprintService implements ISprintService {
     private readonly projectRepository: Repository<Project>
   ) {}
   
-    async createSprint(data: SprintCreateDTO): Promise<SprintDTO> {
+    async createSprint(data: SprintCreateDTO): Promise<Result<SprintDTO>> {
         const project = await this.projectRepository.findOne({
             where: { project_id: data.project_id },
         });
         if(!project) {
-            throw new Error(`Project with id ${data.project_id} not found`);
+            return {
+                success: false,
+                code: ErrorCode.NOT_FOUND,
+                error: `Project with id ${data.project_id} not found`,
+            };
         }
 
         const sprint = this.sprintRepository.create({
@@ -33,37 +39,45 @@ export class SprintService implements ISprintService {
         });
 
         const saved = await this.sprintRepository.save(sprint);
-        return SprintMapper.toDTO(saved);
+        return { success: true, data: SprintMapper.toDTO(saved) };
     }
 
-    async getSprintsByProject(project_id: number): Promise<SprintDTO[]> {
+    async getSprintsByProject(project_id: number): Promise<Result<SprintDTO[]>> {
         const sprints = await this.sprintRepository.find({
             where: { project: { project_id } },
             relations: ["project"],
         });
-        return sprints.map((s) => SprintMapper.toDTO(s));
+        return { success: true, data: sprints.map((s) => SprintMapper.toDTO(s)) };
     }
 
-    async getSprintById(sprint_id: number): Promise<SprintDTO> {
+    async getSprintById(sprint_id: number): Promise<Result<SprintDTO>> {
         const sprint = await this.sprintRepository.findOne({
             where: { sprint_id },
             relations: ["project"],
         });
 
         if(!sprint) {
-            throw new Error(`Sprint with id ${sprint_id} not found`);
+            return {
+                success: false,
+                code: ErrorCode.NOT_FOUND,
+                error: `Sprint with id ${sprint_id} not found`,
+            };
         }
 
-        return SprintMapper.toDTO(sprint);
+        return { success: true, data: SprintMapper.toDTO(sprint) };
     }
 
-    async updateSprint(sprint_id: number, data: SprintUpdateDTO): Promise<SprintDTO> {
+    async updateSprint(sprint_id: number, data: SprintUpdateDTO): Promise<Result<SprintDTO>> {
         const sprint = await this.sprintRepository.findOne({
             where: { sprint_id },
             relations: ["project"], 
         });
         if(!sprint) {
-            throw new Error(`Sprint with id ${sprint_id} not found`);
+            return {
+                success: false,
+                code: ErrorCode.NOT_FOUND,
+                error: `Sprint with id ${sprint_id} not found`,
+            };
         }
 
         if (data.start_date) sprint.start_date = new Date(data.start_date);
@@ -73,11 +87,18 @@ export class SprintService implements ISprintService {
         if (data.story_points !== undefined) sprint.story_points = data.story_points;
 
         const saved = await this.sprintRepository.save(sprint);
-        return SprintMapper.toDTO(saved);
+        return { success: true, data: SprintMapper.toDTO(saved) };
     }
 
-    async deleteSprint(sprint_id: number): Promise<boolean> {
+    async deleteSprint(sprint_id: number): Promise<Result<boolean>> {
         const result = await this.sprintRepository.delete(sprint_id);
-        return !!result.affected && result.affected > 0;
+        if (!result.affected || result.affected === 0) {
+            return {
+                success: false,
+                code: ErrorCode.NOT_FOUND,
+                error: `Sprint with id ${sprint_id} not found`,
+            };
+        }
+        return { success: true, data: true };
     }
 }

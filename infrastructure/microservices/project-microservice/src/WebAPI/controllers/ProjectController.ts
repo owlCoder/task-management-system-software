@@ -37,7 +37,7 @@ export class ProjectController {
 
     private initializeRoutes(): void {
         this.router.get("/projects", this.getProjects.bind(this));
-        this.router.get("/users/:userId/projects", (req, res, next) => {console.log('123'); next() }, this.getProjectsByUserId.bind(this));
+        this.router.get("/users/:userId/projects", this.getProjectsByUserId.bind(this));
         this.router.get("/projects/:id", this.getProjectById.bind(this));
         this.router.post("/projects", upload.single("image_file"), this.createProject.bind(this));
         this.router.put("/projects/:id", upload.single("image_file"), this.updateProject.bind(this));
@@ -132,18 +132,33 @@ export class ProjectController {
                 return;
             }
 
-            const created = await this.projectService.CreateProject(data);
+            const createdResult = await this.projectService.CreateProject(data);
 
-            if (creatorUsername && created.project_id) {
-                try {
+            if(!createdResult.success){
+                if(data.image_key){
+                    await this.storageService.deleteImage(data.image_key);
+                }
+                res.status(createdResult.code).json({ message: createdResult.error });
+                return;
+            }
+
+            const created = createdResult.data;
+
+            if(creatorUsername && created.project_id){
+                try{
                     await this.projectUserService.assignUserToProject({
                         project_id: created.project_id,
                         username: creatorUsername,
                         weekly_hours: 0,
                     });
-                    console.log(`Project Manager "${creatorUsername}" automatically assigned to project ${created.project_id} with 0 weekly hours`);
-                } catch (assignError) {
-                    console.error("Failed to auto-assign Project Manager to project:", assignError);
+                    console.log( 
+                        `Project Manager "${creatorUsername}" automatically assigned to project ${created.project_id} with 0 weekly hours`
+                    );
+                } catch(assignError){
+                    console.error(
+                    "Failed to auto-assign Project Manager to project:",
+                    assignError
+                );
                 }
             }
 

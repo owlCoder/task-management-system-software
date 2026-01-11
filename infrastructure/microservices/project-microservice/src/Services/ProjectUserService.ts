@@ -7,6 +7,8 @@ import { Project } from "../Domain/models/Project";
 import { ProjectUser } from "../Domain/models/ProjectUser";
 import { ProjectUserMapper } from "../Utils/Mappers/ProjectUserMapper";
 import { UserDTO } from "../Domain/DTOs/UserDTO";
+import { Result } from "../Domain/types/Result";
+import { ErrorCode } from "../Domain/enums/ErrorCode";
 
 const RESTRICTED_ROLES = ["SysAdmin", "Admin", "Analytics & Development Manager"];
 export class ProjectUserService implements IProjectUserService {
@@ -49,17 +51,23 @@ export class ProjectUserService implements IProjectUserService {
         }
     }
 
-    async assignUserToProject(data: ProjectUserAssignDTO): Promise<ProjectUserDTO> {
+    async assignUserToProject(data: ProjectUserAssignDTO): Promise<Result<ProjectUserDTO>> {
         const user = await this.getUserByUsername(data.username);
         //exception delete
         if (!user) {
-            throw new Error(`User with username "${data.username}" not found`);
+            return {
+                success: false,
+                code: ErrorCode.NOT_FOUND,
+                error: `User with username "${data.username}" not found`,
+            };
         }
 
         if (RESTRICTED_ROLES.includes(user.role_name)) {
-            throw new Error(
-                `Users with role "${user.role_name}" cannot be assigned to projects.`
-            );
+            return {
+                success: false,
+                code: ErrorCode.FORBIDDEN,
+                error: `Users with role "${user.role_name}" cannot be assigned to projects.`,
+            };
         }
 
         const userId = user.user_id;
@@ -69,7 +77,11 @@ export class ProjectUserService implements IProjectUserService {
         });
         //exception delete
         if (!project) {
-            throw new Error(`Project with id ${data.project_id} not found`);
+            return {
+                success: false,
+                code: ErrorCode.NOT_FOUND,
+                error: `Project with id ${data.project_id} not found`,
+            };
         }
 
         const existing = await this.projectUserRepository.findOne({
@@ -78,7 +90,11 @@ export class ProjectUserService implements IProjectUserService {
         });
         
         if (existing) {
-            throw new Error(`User "${data.username}" is already assigned to this project`);
+            return {
+                success: false,
+                code: ErrorCode.CONFLICT,
+                error: `User "${data.username}" is already assigned to this project`,
+            };
         }
 
         const assignments = await this.projectUserRepository. find({
@@ -93,10 +109,13 @@ export class ProjectUserService implements IProjectUserService {
         const newTotal = currentTotal + data.weekly_hours;
 
         if (newTotal > 40) {
-            throw new Error(
-                `User "${data.username}" total weekly hours (${newTotal}) would exceed allowed 40 hours. ` +
-                `Current hours: ${currentTotal}, trying to add: ${data.weekly_hours}`
-            );
+            return {
+                success: false,
+                code: ErrorCode.CONFLICT,
+                error:
+                    `User "${data.username}" total weekly hours (${newTotal}) would exceed allowed 40 hours. ` +
+                    `Current hours: ${currentTotal}, trying to add: ${data.weekly_hours}`,
+            };
         }
 
         const pu = this.projectUserRepository.create({
@@ -109,20 +128,20 @@ export class ProjectUserService implements IProjectUserService {
         const dto = ProjectUserMapper.toDTO(saved);
         
         dto. username = user.username;
-        dto.role_name = user. role_name;
+        dto.role_name = user.role_name;
         
-        return dto;
+        return { success: true, data: dto };
     }
 
-    async removeUserFromProject(project_id: number, user_id:  number): Promise<boolean> {
+    async removeUserFromProject(project_id: number, user_id:  number): Promise<Result<boolean>> {
         const result = await this.projectUserRepository.delete({
             user_id,
             project: { project_id },
         } as any);
-        return !!result.affected && result.affected > 0;
+        return { success: true, data: !!result.affected && result.affected > 0 };
     }
 
-    async getUsersForProject(project_id: number): Promise<ProjectUserDTO[]> {
+    async getUsersForProject(project_id: number): Promise<Result<ProjectUserDTO[]>> {
         const list = await this.projectUserRepository.find({
             where: { project:  { project_id } },
             relations: ["project"],
@@ -145,10 +164,10 @@ export class ProjectUserService implements IProjectUserService {
             })
         );
         
-        return dtos;
+        return { success: true, data: dtos };
     }
 
-    async updateWeeklyHoursForAllUsers(project_id: number, oldHours: number, newHours: number): Promise<void> {
+    async updateWeeklyHoursForAllUsers(project_id: number, oldHours: number, newHours: number): Promise<Result<void>> {
         const projectUsers = await this.projectUserRepository.find({
             where: { project: { project_id } }
         });
@@ -159,5 +178,7 @@ export class ProjectUserService implements IProjectUserService {
                 await this.projectUserRepository.save(pu);
             }
         }
+
+        return { success: true, data: undefined };
     }
 }

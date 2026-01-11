@@ -8,6 +8,8 @@ import { ProjectMapper } from "../Utils/Mappers/ProjectMapper";
 import { IR2StorageService } from "../Storage/R2StorageService";
 import { ProjectStatus } from "../Domain/enums/ProjectStatus";
 import { IProjectUserService } from "../Domain/services/IProjectUserService";
+import { Result } from "../Domain/types/Result";
+import { ErrorCode } from "../Domain/enums/ErrorCode";
 
 export class ProjectService implements IProjectService {
     constructor(
@@ -16,7 +18,7 @@ export class ProjectService implements IProjectService {
         private readonly projectUserService: IProjectUserService
     ) {}
 
-    async CreateProject(data: ProjectCreateDTO): Promise<ProjectDTO> {
+    async CreateProject(data: ProjectCreateDTO): Promise<Result<ProjectDTO>> {
         const project = this.projectRepository.create({
             project_name: data.project_name,
             project_description: data.project_description,
@@ -31,37 +33,45 @@ export class ProjectService implements IProjectService {
         });
 
         const saved = await this.projectRepository.save(project);
-        return ProjectMapper.toDTO(saved);
+        return { success: true, data: ProjectMapper.toDTO(saved) };
     }
 
-    async getProjects(): Promise<ProjectDTO[]> {
+    async getProjects(): Promise<Result<ProjectDTO[]>> {
         const projects = await this.projectRepository.find();
-        return projects.map((p) => ProjectMapper.toDTO(p));
+        return { success: true, data: projects.map((p) => ProjectMapper.toDTO(p)) };
     }
 
-    async getProjectsByUserId(user_id: number): Promise<ProjectDTO[]> {
+    async getProjectsByUserId(user_id: number): Promise<Result<ProjectDTO[]>> {
         const projects = await this.projectRepository
             .createQueryBuilder("project")
             .innerJoin("project.project_users", "pu")
             .where("pu.user_id = :user_id", { user_id })
             .getMany();
-        return projects.map((p) => ProjectMapper.toDTO(p));
+        return { success: true, data: projects.map((p) => ProjectMapper.toDTO(p)) };
     }
 
-    async getProjectById(project_id: number): Promise<ProjectDTO> {
+    async getProjectById(project_id: number): Promise<Result<ProjectDTO>> {
         const project = await this.projectRepository.findOne({ where: { project_id } });
         //exception delete
         if (!project) {
-            throw new Error(`Project with id ${project_id} not found`);
+            return {
+                success: false,
+                code: ErrorCode.NOT_FOUND,
+                error: `Project with id ${project_id} not found`,
+            };
         }
-        return ProjectMapper.toDTO(project);
+        return { success: true, data: ProjectMapper.toDTO(project) };
     }
 
-    async updateProject(project_id: number, data: ProjectUpdateDTO): Promise<ProjectDTO> {
+    async updateProject(project_id: number, data: ProjectUpdateDTO): Promise<Result<ProjectDTO>> {
         const project = await this.projectRepository.findOne({ where: { project_id } });
         //exception delete
         if (!project) {
-            throw new Error(`Project with id ${project_id} not found`);
+            return {
+                success: false,
+                code: ErrorCode.NOT_FOUND,
+                error: `Project with id ${project_id} not found`,
+            };
         }
 
         if (data.image_key !== undefined && project.image_key) {
@@ -87,17 +97,17 @@ export class ProjectService implements IProjectService {
 
         const saved = await this.projectRepository.save(project);
         if (data.total_weekly_hours_required !== undefined && 
-            oldWeeklyHours !== data. total_weekly_hours_required) {
+            oldWeeklyHours !== data.total_weekly_hours_required) {
             await this.projectUserService.updateWeeklyHoursForAllUsers(
                 project_id,
                 oldWeeklyHours,
                 data.total_weekly_hours_required
             );
         }
-        return ProjectMapper.toDTO(saved);
+        return { success: true, data: ProjectMapper.toDTO(saved) };
     }
 
-    async deleteProject(project_id: number): Promise<boolean> {
+    async deleteProject(project_id: number): Promise<Result<boolean>> {
         const project = await this.projectRepository.findOne({ where: { project_id } });
         
         if (project && project.image_key) {
@@ -105,11 +115,18 @@ export class ProjectService implements IProjectService {
         }
 
         const result = await this.projectRepository.delete(project_id);
-        return !!result.affected && result.affected > 0;
+        if (!result.affected || result.affected === 0) {
+            return {
+                success: false,
+                code: ErrorCode.NOT_FOUND,
+                error: `Project with id ${project_id} not found`,
+            };
+        }
+        return { success: true, data: true };
     }
 
-    async projectExists(project_id: number): Promise<boolean> {
+    async projectExists(project_id: number): Promise<Result<boolean>> {
         const count = await this.projectRepository.count({ where: { project_id } });
-        return count > 0;
+        return { success: true, data: count > 0 };
     }
 }
