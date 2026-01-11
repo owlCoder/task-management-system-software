@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { projectAPI } from "../../api/project/ProjectAPI";
 import { ProjectUserDTO } from "../../models/project/ProjectUserDTO";
 import { toast } from 'react-hot-toast';
 import type { Props } from "../../types/props/ManageProjectUserModalProps";
@@ -11,6 +10,7 @@ export const ManageProjectUsersModal: React.FC<Props> = ({
     isOpen,
     onClose,
     onUsersUpdated,
+    projectAPI,
 }) => {
     const [assignedUsers, setAssignedUsers] = useState<ProjectUserDTO[]>([]);
     const [isLoading, setIsLoading] = useState(false);
