@@ -291,6 +291,7 @@ const TaskPage: React.FC<TaskListPageProps> = ({ projectId }) => {
           onClose={() => setEditOpen(false)}
           task={selectedTask}
           token={token}
+          projectId={Number(projectId)}
         />
       )}
     </div>

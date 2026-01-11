@@ -50,6 +50,7 @@ export class ProjectService implements IProjectService {
 
     async getProjectById(project_id: number): Promise<ProjectDTO> {
         const project = await this.projectRepository.findOne({ where: { project_id } });
+        //exception delete
         if (!project) {
             throw new Error(`Project with id ${project_id} not found`);
         }
@@ -58,6 +59,7 @@ export class ProjectService implements IProjectService {
 
     async updateProject(project_id: number, data: ProjectUpdateDTO): Promise<ProjectDTO> {
         const project = await this.projectRepository.findOne({ where: { project_id } });
+        //exception delete
         if (!project) {
             throw new Error(`Project with id ${project_id} not found`);
         }

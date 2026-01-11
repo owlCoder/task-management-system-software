@@ -51,7 +51,7 @@ export class ProjectUserService implements IProjectUserService {
 
     async assignUserToProject(data: ProjectUserAssignDTO): Promise<ProjectUserDTO> {
         const user = await this.getUserByUsername(data.username);
-        
+        //exception delete
         if (!user) {
             throw new Error(`User with username "${data.username}" not found`);
         }
@@ -67,7 +67,7 @@ export class ProjectUserService implements IProjectUserService {
         const project = await this.projectRepository.findOne({
             where: { project_id: data.project_id }
         });
-        
+        //exception delete
         if (!project) {
             throw new Error(`Project with id ${data.project_id} not found`);
         }

@@ -7,6 +7,7 @@ import { ProjectUpdateDTO } from "../../Domain/DTOs/ProjectUpdateDTO";
 import { ProjectStatus } from "../../Domain/enums/ProjectStatus";
 import { validateCreateProject, validateUpdateProject } from "../validators/ProjectValidator";
 import { IR2StorageService } from "../../Storage/R2StorageService";
+import { ReqParams } from "../../Domain/types/ReqParams";
 
 const upload = multer({
     storage: multer.memoryStorage(),
@@ -36,7 +37,7 @@ export class ProjectController {
 
     private initializeRoutes(): void {
         this.router.get("/projects", this.getProjects.bind(this));
-        this.router.get("/users/:userId/projects", this.getProjectsByUserId.bind(this));
+        this.router.get("/users/:userId/projects", (req, res, next) => {console.log('123'); next() }, this.getProjectsByUserId.bind(this));
         this.router.get("/projects/:id", this.getProjectById.bind(this));
         this.router.post("/projects", upload.single("image_file"), this.createProject.bind(this));
         this.router.put("/projects/:id", upload.single("image_file"), this.updateProject.bind(this));
@@ -53,7 +54,7 @@ export class ProjectController {
         }
     }
 
-    private async getProjectsByUserId(req: Request, res: Response): Promise<void> {
+    private async getProjectsByUserId(req: Request<ReqParams<'userId'>>, res: Response): Promise<void> {
         try {
             const userId = parseInt(req.params.userId, 10);
             if (isNaN(userId)) {
@@ -68,7 +69,7 @@ export class ProjectController {
         }
     }
 
-    private async getProjectById(req: Request, res: Response): Promise<void> {
+    private async getProjectById(req: Request<ReqParams<'id'>>, res: Response): Promise<void> {
         try {
             const id = parseInt(req.params.id, 10);
             if (isNaN(id)) {
@@ -153,7 +154,7 @@ export class ProjectController {
         }
     }
 
-    private async updateProject(req: Request, res: Response): Promise<void> {
+    private async updateProject(req: Request<ReqParams<'id'>>, res: Response): Promise<void> {
         try {
             const id = parseInt(req.params.id, 10);
             if (isNaN(id)) {
@@ -215,7 +216,7 @@ export class ProjectController {
         }
     }
 
-    private async deleteProject(req: Request, res: Response): Promise<void> {
+    private async deleteProject(req: Request<ReqParams<'id'>>, res: Response): Promise<void> {
         try {
             const id = parseInt(req.params.id, 10);
             if (isNaN(id)) {
@@ -234,7 +235,7 @@ export class ProjectController {
         }
     }
 
-    private async projectExists(req: Request, res: Response): Promise<void> {
+    private async projectExists(req: Request<ReqParams<'id'>>, res: Response): Promise<void> {
         try {
             const id = parseInt(req.params.id, 10);
             if (isNaN(id)) {

@@ -2,6 +2,7 @@ import { Router, Request, Response } from "express";
 import { IProjectUserService } from "../../Domain/services/IProjectUserService";
 import { ProjectUserAssignDTO } from "../../Domain/DTOs/ProjectUserAssignDTO";
 import { validateAssignUser } from "../validators/ProjectUserValidator";
+import { ReqParams } from "../../Domain/types/ReqParams";
 
 export class ProjectUserController {
     private readonly router: Router;
@@ -17,7 +18,7 @@ export class ProjectUserController {
         this.router.delete("/projects/:id/users/:userId", this.removeUser.bind(this));
     }
 
-    private async assignUser(req: Request, res: Response): Promise<void> {
+    private async assignUser(req: Request<ReqParams<'id'>>, res: Response): Promise<void> {
         try {
             const project_id = parseInt(req.params.id, 10);
             const username = req.body.username?.trim();
@@ -55,7 +56,7 @@ export class ProjectUserController {
         }
     }
 
-    private async getUsersForProject(req: Request, res: Response): Promise<void> {
+    private async getUsersForProject(req: Request<ReqParams<'id'>>, res: Response): Promise<void> {
         try {
             const project_id = parseInt(req.params.id, 10);
             if (isNaN(project_id)) {
@@ -69,7 +70,7 @@ export class ProjectUserController {
         }
     }
 
-    private async removeUser(req: Request, res: Response): Promise<void> {
+    private async removeUser(req: Request<ReqParams<'id' | 'userId'>>, res: Response): Promise<void> {
         try {
             const project_id = parseInt(req.params.id, 10);
             const user_id = parseInt(req.params.userId, 10);
