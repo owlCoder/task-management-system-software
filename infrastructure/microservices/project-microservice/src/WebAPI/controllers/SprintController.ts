@@ -2,6 +2,7 @@ import { Router, Request, Response } from "express";
 import { ISprintService } from "../../Domain/services/ISprintService";
 import { SprintCreateDTO } from "../../Domain/DTOs/SprintCreateDTO";
 import { SprintUpdateDTO } from "../../Domain/DTOs/SprintUpdateDTO";
+import { ReqParams } from "../../Domain/types/ReqParams";
 
 
 export class SprintController {
@@ -20,7 +21,7 @@ export class SprintController {
         this.router.delete("/sprints/:id", this.deleteSprint.bind(this));
     }
 
-    private async createSprint(req: Request, res: Response): Promise<void> {
+    private async createSprint(req: Request<ReqParams<'projectId'>>, res: Response): Promise<void> {
         try{
             const projectId = parseInt(req.params.projectId, 10);
             if(isNaN(projectId)){
@@ -40,7 +41,7 @@ export class SprintController {
         }
     }
 
-    private async getSprintsByProject(req: Request, res: Response): Promise<void> {
+    private async getSprintsByProject(req: Request<ReqParams<'projectId'>>, res: Response): Promise<void> {
         try {
             const projectId = parseInt(req.params.projectId, 10);
             if(isNaN(projectId)){
@@ -54,7 +55,7 @@ export class SprintController {
         }
     }
 
-    private async getSprintById(req: Request, res: Response): Promise<void> {
+    private async getSprintById(req: Request<ReqParams<'id'>>, res: Response): Promise<void> {
         try {
             const sprintId = parseInt(req.params.id, 10);
             if(isNaN(sprintId)){
@@ -68,7 +69,7 @@ export class SprintController {
         }
     }
 
-    private async updateSprint(req: Request, res: Response): Promise<void> {
+    private async updateSprint(req: Request<ReqParams<'id'>>, res: Response): Promise<void> {
         try {
             const sprintId = parseInt(req.params.id, 10);
             if(isNaN(sprintId)){
@@ -83,7 +84,7 @@ export class SprintController {
         }
     }
 
-    private async deleteSprint(req: Request, res: Response): Promise<void> {
+    private async deleteSprint(req: Request<ReqParams<'id'>>, res: Response): Promise<void> {
         try {
             const sprintId = parseInt(req.params.id, 10);
             if(isNaN(sprintId)){
