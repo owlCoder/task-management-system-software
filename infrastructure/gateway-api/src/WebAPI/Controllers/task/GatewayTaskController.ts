@@ -17,6 +17,9 @@ import { authorize } from "../../../Middlewares/authorization/AuthorizeMiddlewar
 // Utils
 import { handleEmptyResponse, handleResponse } from "../../Utils/Http/ResponseHandler";
 
+// Infrastructure
+import { ReqParams } from "../../../Infrastructure/express/types/ReqParams";
+
 /**
  * Routes client requests towards the Task Microservice.
  */
@@ -52,8 +55,8 @@ export class GatewayTaskController {
      * - On success: response status 200, response data: {@link TaskDTO}. 
      * - On failure: response status code indicating the failure, response data: message describing the error.
      */
-    private async getTaskById(req: Request, res: Response): Promise<void> {
-        const taskId = parseInt(req.params.taskId as string, 10);
+    private async getTaskById(req: Request<ReqParams<'taskId'>>, res: Response): Promise<void> {
+        const taskId = parseInt(req.params.taskId, 10);
         const senderId = req.user!.id;
 
         const result = await this.gatewayTaskService.getTaskById(taskId, senderId);
@@ -68,8 +71,8 @@ export class GatewayTaskController {
      * - On success: response status 200, response data: {@link TaskDTO[]}. 
      * - On failure: response status code indicating the failure, response data: message describing the error.
      */
-    private async getTasksBySprintId(req: Request, res: Response): Promise<void> {
-        const sprintId = parseInt(req.params.sprintId as string, 10);
+    private async getTasksBySprintId(req: Request<ReqParams<'sprintId'>>, res: Response): Promise<void> {
+        const sprintId = parseInt(req.params.sprintId, 10);
         const senderId = req.user!.id;
 
         const result = await this.gatewayTaskService.getTasksBySprintId(sprintId, senderId);
@@ -84,8 +87,8 @@ export class GatewayTaskController {
      * - On success: response status 201, response data: {@link TaskDTO}. 
      * - On failure: response status code indicating the failure, response data: message describing the error.
      */
-    private async createTaskBySprintId(req: Request, res: Response): Promise<void> {
-        const sprintId = parseInt(req.params.sprintId as string, 10);
+    private async createTaskBySprintId(req: Request<ReqParams<'sprintId'>>, res: Response): Promise<void> {
+        const sprintId = parseInt(req.params.sprintId, 10);
         const data = req.body as CreateTaskDTO;
         const senderId = req.user!.id;
 
@@ -101,8 +104,8 @@ export class GatewayTaskController {
      * - On success: response status 200, response data: {@link TaskDTO}. 
      * - On failure: response status code indicating the failure, response data: message describing the error.
      */
-    private async updateTaskById(req: Request, res: Response): Promise<void> {
-        const taskId = parseInt(req.params.taskId as string, 10);
+    private async updateTaskById(req: Request<ReqParams<'taskId'>>, res: Response): Promise<void> {
+        const taskId = parseInt(req.params.taskId, 10);
         const data = req.body as UpdateTaskDTO;
         const senderId = req.user!.id;
 
@@ -118,8 +121,8 @@ export class GatewayTaskController {
      * - On success: response status 204, no data. 
      * - On failure: response status code indicating the failure, response data: message describing the error.
      */
-    private async deleteTaskById(req: Request, res: Response): Promise<void> {
-        const taskId = parseInt(req.params.taskId as string, 10);
+    private async deleteTaskById(req: Request<ReqParams<'taskId'>>, res: Response): Promise<void> {
+        const taskId = parseInt(req.params.taskId, 10);
         const senderId = req.user!.id;
 
         const result = await this.gatewayTaskService.deleteTaskById(taskId, senderId);
@@ -134,8 +137,8 @@ export class GatewayTaskController {
      * - On success: response status 201, response data: {@link CommentDTO}. 
      * - On failure: response status code indicating the failure, response data: message describing the error.
      */
-    private async addCommentByTaskId(req: Request, res: Response): Promise<void> {
-        const taskId = parseInt(req.params.taskId as string, 10);
+    private async addCommentByTaskId(req: Request<ReqParams<'taskId'>>, res: Response): Promise<void> {
+        const taskId = parseInt(req.params.taskId, 10);
         const data = req.body as CreateCommentDTO;
         const senderId = req.user!.id;
 
@@ -151,8 +154,8 @@ export class GatewayTaskController {
      * - On success: response status 204, no data. 
      * - On failure: response status code indicating the failure, response data: message describing the error.
      */
-    private async deleteCommentById(req: Request, res: Response): Promise<void> {
-        const commentId = parseInt(req.params.commentId as string, 10);
+    private async deleteCommentById(req: Request<ReqParams<'commentId'>>, res: Response): Promise<void> {
+        const commentId = parseInt(req.params.commentId, 10);
         const senderId = req.user!.id;
 
         const result = await this.gatewayTaskService.deleteCommentById(commentId, senderId);

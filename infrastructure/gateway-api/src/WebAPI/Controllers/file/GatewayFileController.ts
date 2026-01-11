@@ -12,6 +12,9 @@ import { authenticate } from "../../../Middlewares/authentication/AuthMiddleware
 import { handleDownloadResponse, handleEmptyResponse, handleResponse } from "../../Utils/Http/ResponseHandler";
 import { parseOptionalInt } from "../../Utils/Query/QueryUtils";
 
+// Infrastructure
+import { ReqParams } from "../../../Infrastructure/express/types/ReqParams";
+
 /**
  * Routes client requests towards the File Microservice.
  */
@@ -42,8 +45,8 @@ export class GatewayFileController {
      * - On success: response status 200, response data: file data stream.
      * - On failure: response status code indicating the failure, response data: message describing the error.
      */
-    private async downloadFile(req: Request, res: Response): Promise<void> {
-        const fileId = parseInt(req.params.fileId as string, 10);
+    private async downloadFile(req: Request<ReqParams<'fileId'>>, res: Response): Promise<void> {
+        const fileId = parseInt(req.params.fileId, 10);
 
         const result = await this.gatewayFileService.downloadFile(fileId);
         handleDownloadResponse(res, result);
@@ -57,8 +60,8 @@ export class GatewayFileController {
      * - On success: response status 200, response data: {@link UploadedFileDTO[]}. 
      * - On failure: response status code indicating the failure, response data: message describing the error.
      */
-    private async getFilesByAuthorId(req: Request, res: Response): Promise<void> {
-        const authorId = parseInt(req.params.authorId as string, 10);
+    private async getFilesByAuthorId(req: Request<ReqParams<'authorId'>>, res: Response): Promise<void> {
+        const authorId = parseInt(req.params.authorId, 10);
         const offset = parseOptionalInt(req.query.offset);
         const limit = parseOptionalInt(req.query.limit);
 
@@ -74,8 +77,8 @@ export class GatewayFileController {
      * - On success: response status 200, response data: {@link UploadedFileDTO}. 
      * - On failure: response status code indicating the failure, response data: message describing the error.
      */
-    private async getFileMetadata(req: Request, res: Response): Promise<void> {
-        const fileId = parseInt(req.params.fileId as string, 10);
+    private async getFileMetadata(req: Request<ReqParams<'fileId'>>, res: Response): Promise<void> {
+        const fileId = parseInt(req.params.fileId, 10);
 
         const result = await this.gatewayFileService.getFileMetadata(fileId);
         handleResponse(res, result);
@@ -107,8 +110,8 @@ export class GatewayFileController {
      * - On success: response status 204, no data. 
      * - On failure: response status code indicating the failure, response data: message describing the error.
      */
-    private async deleteFile(req: Request, res: Response): Promise<void> {
-        const fileId = parseInt(req.params.fileId as string, 10);
+    private async deleteFile(req: Request<ReqParams<'fileId'>>, res: Response): Promise<void> {
+        const fileId = parseInt(req.params.fileId, 10);
 
         const result = await this.gatewayFileService.deleteFile(fileId);
         handleEmptyResponse(res, result);

@@ -16,6 +16,9 @@ import { authorize } from "../../../Middlewares/authorization/AuthorizeMiddlewar
 // Utils
 import { handleEmptyResponse, handleResponse } from "../../Utils/Http/ResponseHandler";
 
+// Infrastructure
+import { ReqParams } from "../../../Infrastructure/express/types/ReqParams";
+
 /**
  * Routes client requests towards the User Microservice.
  */
@@ -65,8 +68,8 @@ export class GatewayUserController {
      * - On success: response status 200, response data: {@link UserDTO}.
      * - On failure: response status code indicating the failure, response data: message describing the error.
      */
-    private async getUserById(req: Request, res: Response): Promise<void> {
-        const userId = parseInt(req.params.userId as string, 10);
+    private async getUserById(req: Request<ReqParams<'userId'>>, res: Response): Promise<void> {
+        const userId = parseInt(req.params.userId, 10);
 
         const result = await this.gatewayUserService.getUserById(userId);
         handleResponse(res, result);
@@ -93,8 +96,8 @@ export class GatewayUserController {
      * - On success: response status 200, response data: {@link UserDTO}.
      * - On failure: response status code indicating the failure, response data: message describing the error.
      */
-    private async updateUserById(req: Request, res: Response): Promise<void> {
-        const userId = parseInt(req.params.userId as string, 10);
+    private async updateUserById(req: Request<ReqParams<'userId'>>, res: Response): Promise<void> {
+        const userId = parseInt(req.params.userId, 10);
         const data = req.body as UpdateUserDTO;
 
         const result = await this.gatewayUserService.updateUserById(userId, data);
@@ -109,8 +112,8 @@ export class GatewayUserController {
      * - On success: response status 204, no data.
      * - On failure: response status code indicating the failure, response data: message describing the error.
      */
-    private async logicallyDeleteUserById(req: Request, res: Response): Promise<void> {
-        const userId = parseInt(req.params.userId as string, 10);
+    private async logicallyDeleteUserById(req: Request<ReqParams<'userId'>>, res: Response): Promise<void> {
+        const userId = parseInt(req.params.userId, 10);
 
         const result = await this.gatewayUserService.logicallyDeleteUserById(userId);
         handleEmptyResponse(res, result);
@@ -124,8 +127,8 @@ export class GatewayUserController {
      * - On success: response status 200, response data: {@link UserRoleDTO}. 
      * - On failure: response status code indicating the failure, response data: message describing the error.
      */
-    private async getRolesByImpactLevel(req: Request, res: Response): Promise<void> {
-        const impactLevel = parseInt(req.params.impactLevel as string, 10);
+    private async getRolesByImpactLevel(req: Request<ReqParams<'impactLevel'>>, res: Response): Promise<void> {
+        const impactLevel = parseInt(req.params.impactLevel, 10);
 
         const result = await this.gatewayUserService.getRolesByImpactLevel(impactLevel);
         handleResponse(res, result);

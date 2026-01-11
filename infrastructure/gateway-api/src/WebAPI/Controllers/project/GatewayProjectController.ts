@@ -18,6 +18,9 @@ import { authorize } from "../../../Middlewares/authorization/AuthorizeMiddlewar
 // Utils
 import { handleEmptyResponse, handleResponse } from "../../Utils/Http/ResponseHandler";
 
+// Infrastructure
+import { ReqParams } from "../../../Infrastructure/express/types/ReqParams";
+
 /**
  * Routes client requests towards the Project Microservice.
  */
@@ -61,8 +64,8 @@ export class GatewayProjectController {
      * - On success: response status 200, response data: {@link ProjectDTO}. 
      * - On failure: response status code indicating the failure, response data: message describing the error.
      */
-    private async getProjectById(req: Request, res: Response): Promise<void> {
-        const projectId = parseInt(req.params.projectId as string, 10);
+    private async getProjectById(req: Request<ReqParams<'projectId'>>, res: Response): Promise<void> {
+        const projectId = parseInt(req.params.projectId, 10);
 
         const result = await this.gatewayProjectService.getProjectById(projectId);
         handleResponse(res, result);
@@ -76,8 +79,8 @@ export class GatewayProjectController {
      * - On success: response status 200, response data: {@link ProjectDTO[]}. 
      * - On failure: response status code indicating the failure, response data: message describing the error.
      */
-    private async getProjectsFromUser(req: Request, res: Response): Promise<void> {
-        const userId = parseInt(req.params.userId as string, 10);
+    private async getProjectsFromUser(req: Request<ReqParams<'userId'>>, res: Response): Promise<void> {
+        const userId = parseInt(req.params.userId, 10);
 
         const result = await this.gatewayProjectService.getProjectsFromUser(userId);
         handleResponse(res, result);
@@ -109,12 +112,12 @@ export class GatewayProjectController {
      * - On success: response status 200, response data: {@link ProjectDTO}. 
      * - On failure: response status code indicating the failure, response data: message describing the error.
      */
-    private async updateProject(req: Request, res: Response): Promise<void> {
+    private async updateProject(req: Request<ReqParams<'projectId'>>, res: Response): Promise<void> {
         if(!req.headers['content-type']?.includes('multipart/form-data')){
             res.status(400).json({ message: "Bad request" });
             return;
         }
-        const projectId = parseInt(req.params.projectId as string, 10);
+        const projectId = parseInt(req.params.projectId, 10);
 
         const result = await this.gatewayProjectService.updateProject(projectId, req);
         handleResponse(res, result);
@@ -128,8 +131,8 @@ export class GatewayProjectController {
      * - On success: response status 204, no data. 
      * - On failure: response status code indicating the failure, response data: message describing the error.
      */
-    private async deleteProject(req: Request, res: Response): Promise<void> {
-        const projectId = parseInt(req.params.projectId as string, 10);
+    private async deleteProject(req: Request<ReqParams<'projectId'>>, res: Response): Promise<void> {
+        const projectId = parseInt(req.params.projectId, 10);
 
         const result = await this.gatewayProjectService.deleteProject(projectId);
         handleEmptyResponse(res, result);
@@ -143,8 +146,8 @@ export class GatewayProjectController {
      * - On success: response status 200, response data: {@link SprintDTO[]}. 
      * - On failure: response status code indicating the failure, response data: message describing the error.
      */
-    private async getSprintsByProject(req: Request, res: Response): Promise<void> {
-        const projectId = parseInt(req.params.projectId as string, 10);
+    private async getSprintsByProject(req: Request<ReqParams<'projectId'>>, res: Response): Promise<void> {
+        const projectId = parseInt(req.params.projectId, 10);
 
         const result = await this.gatewayProjectService.getSprintsByProject(projectId);
         handleResponse(res, result);
@@ -158,8 +161,8 @@ export class GatewayProjectController {
      * - On success: response status 200, response data: {@link SprintDTO}. 
      * - On failure: response status code indicating the failure, response data: message describing the error.
      */
-    private async getSprintById(req: Request, res: Response): Promise<void> {
-        const sprintId = parseInt(req.params.sprintId as string, 10);
+    private async getSprintById(req: Request<ReqParams<'sprintId'>>, res: Response): Promise<void> {
+        const sprintId = parseInt(req.params.sprintId, 10);
         
         const result = await this.gatewayProjectService.getSprintById(sprintId);
         handleResponse(res, result);
@@ -173,8 +176,8 @@ export class GatewayProjectController {
      * - On success: response status 201, response data: {@link SprintDTO}. 
      * - On failure: response status code indicating the failure, response data: message describing the error.
      */
-    private async createSprint(req: Request, res: Response): Promise<void> {
-        const projectId = parseInt(req.params.projectId as string, 10);
+    private async createSprint(req: Request<ReqParams<'projectId'>>, res: Response): Promise<void> {
+        const projectId = parseInt(req.params.projectId, 10);
         const data = req.body as SprintCreateDTO;
 
         const result = await this.gatewayProjectService.createSprint(projectId, data);
@@ -189,8 +192,8 @@ export class GatewayProjectController {
      * - On success: response status 200, response data: {@link SprintDTO}. 
      * - On failure: response status code indicating the failure, response data: message describing the error.
      */
-    private async updateSprint(req: Request, res: Response): Promise<void> {
-        const sprintId = parseInt(req.params.sprintId as string, 10);
+    private async updateSprint(req: Request<ReqParams<'sprintId'>>, res: Response): Promise<void> {
+        const sprintId = parseInt(req.params.sprintId, 10);
         const data = req.body as SprintUpdateDTO;
 
         const result = await this.gatewayProjectService.updateSprint(sprintId, data);
@@ -205,8 +208,8 @@ export class GatewayProjectController {
      * - On success: response status 204, no data. 
      * - On failure: response status code indicating the failure, response data: message describing the error.
      */
-    private async deleteSprint(req: Request, res: Response): Promise<void> {
-        const sprintId = parseInt(req.params.sprintId as string, 10);
+    private async deleteSprint(req: Request<ReqParams<'sprintId'>>, res: Response): Promise<void> {
+        const sprintId = parseInt(req.params.sprintId, 10);
 
         const result = await this.gatewayProjectService.deleteSprint(sprintId);
         handleEmptyResponse(res, result);
@@ -220,8 +223,8 @@ export class GatewayProjectController {
      * - On success: response status 200, response data: {@link ProjectUserDTO[]}. 
      * - On failure: response status code indicating the failure, response data: message describing the error.
      */
-    private async getUsersFromProject(req: Request, res: Response): Promise<void> {
-        const projectId = parseInt(req.params.projectId as string, 10);
+    private async getUsersFromProject(req: Request<ReqParams<'projectId'>>, res: Response): Promise<void> {
+        const projectId = parseInt(req.params.projectId, 10);
 
         const result = await this.gatewayProjectService.getUsersFromProject(projectId);
         handleResponse(res, result);
@@ -235,8 +238,8 @@ export class GatewayProjectController {
      * - On success: response status 201, response data: {@link ProjectUserDTO}. 
      * - On failure: response status code indicating the failure, response data: message describing the error.
      */
-    private async assignUser(req: Request, res: Response): Promise<void> {
-        const projectId = parseInt(req.params.projectId as string, 10);
+    private async assignUser(req: Request<ReqParams<'projectId'>>, res: Response): Promise<void> {
+        const projectId = parseInt(req.params.projectId, 10);
         const data = req.body as ProjectUserAssignDTO;
 
         const result = await this.gatewayProjectService.assignUserToProject(projectId, data);
@@ -251,9 +254,9 @@ export class GatewayProjectController {
      * - On success: response status 204, no data. 
      * - On failure: response status code indicating the failure, response data: message describing the error.
      */
-    private async removeUser(req: Request, res: Response): Promise<void> {
-        const projectId = parseInt(req.params.projectId as string, 10);
-        const userId = parseInt(req.params.userId as string, 10);
+    private async removeUser(req: Request<ReqParams<'projectId' | 'userId'>>, res: Response): Promise<void> {
+        const projectId = parseInt(req.params.projectId, 10);
+        const userId = parseInt(req.params.userId, 10);
 
         const result = await this.gatewayProjectService.removeUserFromProject(projectId, userId);
         handleEmptyResponse(res, result);
