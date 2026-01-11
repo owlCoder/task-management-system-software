@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from "react"; // Dodali smo useEffect
+import React, { useState, useEffect } from "react";
 import { IUserAPI } from "../../api/users/IUserAPI";
 import { UserDTO } from "../../models/users/UserDTO";
 import { UserCreationDTO } from "../../models/users/UserCreationDTO";
 import { UserRoleDTO } from "../../models/users/UserRoleDTO";
 import toast from "react-hot-toast";
+import { jwtDecode } from "jwt-decode"; // Uvoz biblioteke
 
 const inputClasses = "w-full px-4 py-3 rounded-xl text-white bg-black/20 backdrop-blur-md border border-white/10 placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:bg-black/30 transition-all shadow-inner";
 
@@ -14,13 +15,18 @@ type AddUserFormProps = {
   onClose: () => void;
 };
 
+// Interfejs za tvoj token (prilagodi polja ako se zovu drugačije)
+interface MyTokenPayload {
+  impact_level?: number;
+  role?: string;
+}
+
 export const AddUserForm: React.FC<AddUserFormProps> = ({
   userAPI,
   token,
   onUserAdded,
   onClose,
 }) => {
-
   const [availableRoles, setAvailableRoles] = useState<UserRoleDTO[]>([]);
   const [loadingRoles, setLoadingRoles] = useState(true);
 
@@ -34,17 +40,32 @@ export const AddUserForm: React.FC<AddUserFormProps> = ({
   useEffect(() => {
     const fetchRoles = async () => {
       try {
-        const roles = await userAPI.getUserRolesForCreation(token);
+        setLoadingRoles(true);
+        
+        // 1. Dekodiramo token da uzmemo impact_level
+        let impactLevel = 1; // Default ako nešto pođe po zlu
+        if (token) {
+          const decoded = jwtDecode<MyTokenPayload>(token);
+          // Ako tvoj backend šalje impact_level u tokenu, uzimamo ga
+          impactLevel = decoded.impact_level || 1;
+          console.log("Dohvatam uloge za impact level:", impactLevel);
+        }
+
+        // 2. Pozivamo API sa dinamičkim impactLevel-om
+        const roles = await userAPI.getUserRolesForCreation(token, impactLevel);
+        
         setAvailableRoles(roles);
         if (roles.length > 0) {
           setFormData(prev => ({ ...prev, role_name: roles[0].role_name }));
         }
       } catch (err) {
         console.error("Failed to load roles:", err);
+        toast.error("Error loading available roles.");
       } finally {
         setLoadingRoles(false);
       }
     };
+    
     fetchRoles();
   }, [token, userAPI]);
 
