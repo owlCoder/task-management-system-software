@@ -16,7 +16,7 @@ export const VelocityAnalytics: React.FC<VelocityAnalyticsProps> = ({ project })
         // simulacija API call sa delay-om
         setVelocity(null); // reset pre učitavanja
         const timeout = setTimeout(() => {
-            const vel = getMockVelocityForProject(Number(project.id));
+            const vel = getMockVelocityForProject(Number(project.project_id));
             setVelocity(vel);
         }, 500);
 

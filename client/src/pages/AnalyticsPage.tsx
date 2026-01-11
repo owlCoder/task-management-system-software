@@ -6,6 +6,7 @@ import { projectAPI } from "../api/project/ProjectAPI";
 import { BurndownAnalytics } from "../components/analytics/Burndown";
 import { VelocityAnalytics } from "../components/analytics/Velocity";
 import { BurnupAnalytics } from "../components/analytics/Burnup";
+import { BudgetAnalytics } from "../components/analytics/BudgetTracking";
 
 
 const TABS: { id: AnalyticsTab; label: string }[] = [
@@ -23,6 +24,7 @@ export const AnalyticsPage: React.FC = () => {
     const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
     const [selectedProject, setSelectedProject] = useState<ProjectDTO | null>(null);
     const [loadingProjects, setLoadingProjects] = useState(true);
+    const [selectedSprint, setSelectedSprint] = useState<number | null>(null);
 
     useEffect(() => {
         const loadProjects = async () => {
@@ -130,7 +132,10 @@ export const AnalyticsPage: React.FC = () => {
                         {selectedProjectId ?
                             <VelocityAnalytics project={selectedProject!} /> : "Select project..."}
                     </div>}
-                    {activeTab === "BUDGET" && <div>TODO: Budget analytics</div>}
+                    {activeTab === "BUDGET" && <div>
+                        {selectedProjectId ?
+                            <BudgetAnalytics project={selectedProject!} token={""}/> : "Select project..."}
+                    </div>}
                     {activeTab === "PROFIT" && <div>TODO: Profit margin analytics</div>}
                     {activeTab === "RESOURCES" && <div>TODO: Resource cost analytics</div>}
                 </section>
