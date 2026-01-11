@@ -28,7 +28,7 @@ export const BurndownAnalytics: React.FC<BurndownAnalyticsProps> = ({
 
     /* 1️⃣ Kada se promeni projekat → reset + default sprint */
     useEffect(() => {
-        if (project.numberOfSprints! > 0) {
+        if (project.sprint_count! > 0) {
             setSelectedSprintId(null); // default: Sprint 1
             setData(null);
         }
@@ -89,7 +89,7 @@ export const BurndownAnalytics: React.FC<BurndownAnalyticsProps> = ({
                     </option>
 
                     {/* Sprint options */}
-                    {Array.from({ length: project.numberOfSprints! }, (_, i) => {
+                    {Array.from({ length: project.sprint_count! }, (_, i) => {
                         const sprintNumber = i + 1;
                         return (
                             <option key={sprintNumber} value={sprintNumber} className="bg-[#020617]">
