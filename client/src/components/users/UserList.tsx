@@ -165,7 +165,7 @@ export const UserList: React.FC<UserListProps> = ({ userAPI }) => {
                         Edit
                       </button>
 
-                      {authUser?.id !== u.user_id && (
+                      {authUser?.id !== u.user_id && u.role_name !== UserRole.ADMIN && u.role_name !== UserRole.SYS_ADMIN && (
                         <button
                           className="px-4 py-1.5 bg-red-500/20 hover:bg-red-600 text-red-200 hover:text-white text-xs font-bold rounded-full border border-red-500/20 transition-all"
                           onClick={(e) => {

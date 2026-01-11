@@ -2,15 +2,7 @@ import React, { useState, useEffect } from "react";
 import { projectAPI } from "../../api/project/ProjectAPI";
 import { ProjectUserDTO } from "../../models/project/ProjectUserDTO";
 import { toast } from 'react-hot-toast';
-
-type Props = {
-    projectId: number | null;
-    projectName: string;
-    weeklyHoursPerWorker: number;
-    isOpen: boolean;
-    onClose: () => void;
-    onUsersUpdated?: () => void;
-};
+import type { Props } from "../../types/props/ManageProjectUserModalProps";
 
 export const ManageProjectUsersModal: React.FC<Props> = ({
     projectId,
