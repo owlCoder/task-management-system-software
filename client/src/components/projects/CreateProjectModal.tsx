@@ -1,12 +1,8 @@
 import React, { useState, useEffect } from "react";
 import type { ProjectCreateDTO } from "../../models/project/ProjectCreateDTO";
 import { ProjectStatus } from "../../enums/ProjectStatus";
+import type  { Props } from "../../types/props/CreateProjectModalProps";
 
-type Props = {
-    isOpen: boolean;
-    onClose: () => void;
-    onSave: (project: ProjectCreateDTO) => void;
-};
 
 export const CreateProjectModal: React.FC<Props> = ({
     isOpen,
