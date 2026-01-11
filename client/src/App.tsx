@@ -15,8 +15,11 @@ import AnalyticsPage from "./pages/AnalyticsPage";
 import { Toaster } from 'react-hot-toast';
 import { socketManager } from "./api/notification/socketInstance";
 import { useAuth } from "./hooks/useAuthHook";
+import { INotificationAPI } from "./api/notification/INotificationAPI";
+import { NotificationAPI } from "./api/notification/NotificationAPI";
 
 const auth_api: IAuthAPI = new AuthAPI();
+const notification_API: INotificationAPI = new NotificationAPI(import.meta.env.VITE_GATEWAY_URL);
 
 const backgroundImageUrl = new URL("../public/bg2.png", import.meta.url).href;
 
@@ -42,7 +45,7 @@ function App() {
       <Routes>
         <Route path="/projects" element={<ProjectsPage />} />
         <Route path="/analytics" element={<AnalyticsPage />} />
-        <Route path="/notifications" element={<NotificationPage />} />
+        <Route path="/notifications" element={<NotificationPage notificationAPI={notification_API} />} />
         <Route path="/tasks" element={<TaskPage projectId={""}  />} />
         <Route path="/auth" element={<AuthPage authAPI={auth_api} />} />
         <Route path="/files" element={<FilePage />} />

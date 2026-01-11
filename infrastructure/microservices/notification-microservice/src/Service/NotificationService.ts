@@ -3,7 +3,7 @@ import { Notification } from '../Domain/models/Notification';
 import { INotificationMapper } from '../Utils/converters/INotificationMapper';
 import { INotificationService} from '../Domain/Services/INotificationService';
 import { Result } from '../Domain/types/common/Result';
-import { ErrorCode } from '../Domain/types/common/ErrorCode';
+import { ErrorCode } from '../Domain/enums/ErrorCode';
 import { NotificationCreateDTO } from '../Domain/DTOs/NotificationCreateDTO';
 import { NotificationResponseDTO } from '../Domain/DTOs/NotificationDTO';
 import { SocketService } from '../WebSocket/SocketService';

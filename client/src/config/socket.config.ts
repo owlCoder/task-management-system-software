@@ -10,7 +10,7 @@ export interface SocketConfig {
 
 // Defaultna socket konfiguracija
 export const defaultSocketConfig: SocketConfig = {
-  baseURL: import.meta.env.VITE_NOTIFICATION_SERVICE_URL || "http://localhost:6432",
+  baseURL: import.meta.env.VITE_NOTIFICATION_SERVICE_URL,
   transports: ["websocket", "polling"],
   reconnection: true,
   reconnectionAttempts: 5,

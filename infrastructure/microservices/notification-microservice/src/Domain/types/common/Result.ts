@@ -1,4 +1,4 @@
-import { ErrorCode } from './ErrorCode';
+import { ErrorCode } from '../../enums/ErrorCode';
 
 export type Result<T> =
   | { success: true; data: T }
