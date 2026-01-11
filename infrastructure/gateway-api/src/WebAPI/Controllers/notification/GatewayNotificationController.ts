@@ -48,7 +48,7 @@ export class GatewayNotificationController {
      * - On failure: response status code indicating the failure, response data: message describing the error.
      */
     private async getNotificationById(req: Request, res: Response): Promise<void> {
-        const notificationId = parseInt(req.params.notificationId, 10);
+        const notificationId = parseInt(req.params.notificationId as string, 10);
 
         const result = await this.gatewayNotificationService.getNotificationById(notificationId);
         handleResponse(res, result);
@@ -63,7 +63,7 @@ export class GatewayNotificationController {
      * - On failure: response status code indicating the failure, response data: message describing the error.
      */
     private async getNotificationsByUserId(req: Request, res: Response): Promise<void> {
-        const userId = parseInt(req.params.userId, 10);
+        const userId = parseInt(req.params.userId as string, 10);
 
         const result = await this.gatewayNotificationService.getNotificationsByUserId(userId);
         handleResponse(res, result);
@@ -78,7 +78,7 @@ export class GatewayNotificationController {
      * - On failure: response status code indicating the failure, response data: message describing the error.
      */
     private async getUnreadNotificationCount(req: Request, res: Response): Promise<void> {
-        const userId = parseInt(req.params.userId, 10);
+        const userId = parseInt(req.params.userId as string, 10);
 
         const result = await this.gatewayNotificationService.getUnreadNotificationCount(userId);
         handleResponse(res, result);
@@ -138,7 +138,7 @@ export class GatewayNotificationController {
      * - On failure: response status code indicating the failure, response data: message describing the error.
      */
     private async markNotificationAsRead(req: Request, res: Response): Promise<void> {
-        const notificationId = parseInt(req.params.notificationId, 10);
+        const notificationId = parseInt(req.params.notificationId as string, 10);
         
         const result = await this.gatewayNotificationService.markNotificationAsRead(notificationId);
         handleEmptyResponse(res, result);
@@ -153,7 +153,7 @@ export class GatewayNotificationController {
      * - On failure: response status code indicating the failure, response data: message describing the error.
      */
     private async markNotificationAsUnread(req: Request, res: Response): Promise<void> {
-        const notificationId = parseInt(req.params.notificationId, 10);
+        const notificationId = parseInt(req.params.notificationId as string, 10);
 
         const result = await this.gatewayNotificationService.markNotificationAsUnread(notificationId);
         handleEmptyResponse(res, result);
@@ -183,7 +183,7 @@ export class GatewayNotificationController {
      * - On failure: response status code indicating the failure, response data: message describing the error.
      */
     private async deleteNotification(req: Request, res: Response): Promise<void> {
-        const notificationId = parseInt(req.params.notificationId, 10);
+        const notificationId = parseInt(req.params.notificationId as string, 10);
 
         const result = await this.gatewayNotificationService.deleteNotification(notificationId);
         handleEmptyResponse(res, result);

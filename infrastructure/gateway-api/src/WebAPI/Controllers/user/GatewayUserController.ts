@@ -66,7 +66,7 @@ export class GatewayUserController {
      * - On failure: response status code indicating the failure, response data: message describing the error.
      */
     private async getUserById(req: Request, res: Response): Promise<void> {
-        const userId = parseInt(req.params.userId, 10);
+        const userId = parseInt(req.params.userId as string, 10);
 
         const result = await this.gatewayUserService.getUserById(userId);
         handleResponse(res, result);
@@ -94,7 +94,7 @@ export class GatewayUserController {
      * - On failure: response status code indicating the failure, response data: message describing the error.
      */
     private async updateUserById(req: Request, res: Response): Promise<void> {
-        const userId = parseInt(req.params.userId, 10);
+        const userId = parseInt(req.params.userId as string, 10);
         const data = req.body as UpdateUserDTO;
 
         const result = await this.gatewayUserService.updateUserById(userId, data);
@@ -110,7 +110,7 @@ export class GatewayUserController {
      * - On failure: response status code indicating the failure, response data: message describing the error.
      */
     private async logicallyDeleteUserById(req: Request, res: Response): Promise<void> {
-        const userId = parseInt(req.params.userId, 10);
+        const userId = parseInt(req.params.userId as string, 10);
 
         const result = await this.gatewayUserService.logicallyDeleteUserById(userId);
         handleEmptyResponse(res, result);
@@ -125,7 +125,7 @@ export class GatewayUserController {
      * - On failure: response status code indicating the failure, response data: message describing the error.
      */
     private async getRolesByImpactLevel(req: Request, res: Response): Promise<void> {
-        const impactLevel = parseInt(req.params.impactLevel, 10);
+        const impactLevel = parseInt(req.params.impactLevel as string, 10);
 
         const result = await this.gatewayUserService.getRolesByImpactLevel(impactLevel);
         handleResponse(res, result);

@@ -43,7 +43,7 @@ export class GatewayFileController {
      * - On failure: response status code indicating the failure, response data: message describing the error.
      */
     private async downloadFile(req: Request, res: Response): Promise<void> {
-        const fileId = parseInt(req.params.fileId, 10);
+        const fileId = parseInt(req.params.fileId as string, 10);
 
         const result = await this.gatewayFileService.downloadFile(fileId);
         handleDownloadResponse(res, result);
@@ -58,7 +58,7 @@ export class GatewayFileController {
      * - On failure: response status code indicating the failure, response data: message describing the error.
      */
     private async getFilesByAuthorId(req: Request, res: Response): Promise<void> {
-        const authorId = parseInt(req.params.authorId, 10);
+        const authorId = parseInt(req.params.authorId as string, 10);
         const offset = parseOptionalInt(req.query.offset);
         const limit = parseOptionalInt(req.query.limit);
 
@@ -75,7 +75,7 @@ export class GatewayFileController {
      * - On failure: response status code indicating the failure, response data: message describing the error.
      */
     private async getFileMetadata(req: Request, res: Response): Promise<void> {
-        const fileId = parseInt(req.params.fileId, 10);
+        const fileId = parseInt(req.params.fileId as string, 10);
 
         const result = await this.gatewayFileService.getFileMetadata(fileId);
         handleResponse(res, result);
@@ -108,7 +108,7 @@ export class GatewayFileController {
      * - On failure: response status code indicating the failure, response data: message describing the error.
      */
     private async deleteFile(req: Request, res: Response): Promise<void> {
-        const fileId = parseInt(req.params.fileId, 10);
+        const fileId = parseInt(req.params.fileId as string, 10);
 
         const result = await this.gatewayFileService.deleteFile(fileId);
         handleEmptyResponse(res, result);

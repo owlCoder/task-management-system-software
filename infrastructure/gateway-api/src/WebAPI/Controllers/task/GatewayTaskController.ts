@@ -53,7 +53,7 @@ export class GatewayTaskController {
      * - On failure: response status code indicating the failure, response data: message describing the error.
      */
     private async getTaskById(req: Request, res: Response): Promise<void> {
-        const taskId = parseInt(req.params.taskId, 10);
+        const taskId = parseInt(req.params.taskId as string, 10);
         const senderId = req.user!.id;
 
         const result = await this.gatewayTaskService.getTaskById(taskId, senderId);
@@ -69,7 +69,7 @@ export class GatewayTaskController {
      * - On failure: response status code indicating the failure, response data: message describing the error.
      */
     private async getTasksBySprintId(req: Request, res: Response): Promise<void> {
-        const sprintId = parseInt(req.params.sprintId, 10);
+        const sprintId = parseInt(req.params.sprintId as string, 10);
         const senderId = req.user!.id;
 
         const result = await this.gatewayTaskService.getTasksBySprintId(sprintId, senderId);
@@ -85,7 +85,7 @@ export class GatewayTaskController {
      * - On failure: response status code indicating the failure, response data: message describing the error.
      */
     private async createTaskBySprintId(req: Request, res: Response): Promise<void> {
-        const sprintId = parseInt(req.params.sprintId, 10);
+        const sprintId = parseInt(req.params.sprintId as string, 10);
         const data = req.body as CreateTaskDTO;
         const senderId = req.user!.id;
 
@@ -102,7 +102,7 @@ export class GatewayTaskController {
      * - On failure: response status code indicating the failure, response data: message describing the error.
      */
     private async updateTaskById(req: Request, res: Response): Promise<void> {
-        const taskId = parseInt(req.params.taskId, 10);
+        const taskId = parseInt(req.params.taskId as string, 10);
         const data = req.body as UpdateTaskDTO;
         const senderId = req.user!.id;
 
@@ -119,7 +119,7 @@ export class GatewayTaskController {
      * - On failure: response status code indicating the failure, response data: message describing the error.
      */
     private async deleteTaskById(req: Request, res: Response): Promise<void> {
-        const taskId = parseInt(req.params.taskId, 10);
+        const taskId = parseInt(req.params.taskId as string, 10);
         const senderId = req.user!.id;
 
         const result = await this.gatewayTaskService.deleteTaskById(taskId, senderId);
@@ -135,7 +135,7 @@ export class GatewayTaskController {
      * - On failure: response status code indicating the failure, response data: message describing the error.
      */
     private async addCommentByTaskId(req: Request, res: Response): Promise<void> {
-        const taskId = parseInt(req.params.taskId, 10);
+        const taskId = parseInt(req.params.taskId as string, 10);
         const data = req.body as CreateCommentDTO;
         const senderId = req.user!.id;
 
@@ -152,7 +152,7 @@ export class GatewayTaskController {
      * - On failure: response status code indicating the failure, response data: message describing the error.
      */
     private async deleteCommentById(req: Request, res: Response): Promise<void> {
-        const commentId = parseInt(req.params.commentId, 10);
+        const commentId = parseInt(req.params.commentId as string, 10);
         const senderId = req.user!.id;
 
         const result = await this.gatewayTaskService.deleteCommentById(commentId, senderId);

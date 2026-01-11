@@ -51,7 +51,7 @@ export class GatewayAnalyticsController {
      * - On failure: response status code indicating the failure, response data: message describing the error.
      */
     private async getBurndownAnalyticsBySprintId(req: Request, res: Response): Promise<void> {
-        const sprintId = parseInt(req.params.sprintId, 10);
+        const sprintId = parseInt(req.params.sprintId as string, 10);
         
         const result = await this.gatewayAnalyticsService.getBurndownAnalyticsBySprintId(sprintId);
         handleResponse(res, result);
@@ -66,7 +66,7 @@ export class GatewayAnalyticsController {
      * - On failure: response status code indicating the failure, response data: message describing the error.
      */
     private async getBurnupAnalyticsBySprintId(req: Request, res: Response): Promise<void> {
-        const sprintId = parseInt(req.params.sprintId, 10);
+        const sprintId = parseInt(req.params.sprintId as string, 10);
 
         const result = await this.gatewayAnalyticsService.getBurnupAnalyticsBySprintId(sprintId);
         handleResponse(res, result);
@@ -81,7 +81,7 @@ export class GatewayAnalyticsController {
      * - On failure: response status code indicating the failure, response data: message describing the error.
      */
     private async getVelocityAnalyticsByProjectId(req: Request, res: Response): Promise<void> {
-        const projectId = parseInt(req.params.projectId, 10);
+        const projectId = parseInt(req.params.projectId as string, 10);
 
         const result = await this.gatewayAnalyticsService.getVelocityAnalyticsByProjectId(projectId);
         handleResponse(res, result);
@@ -96,7 +96,7 @@ export class GatewayAnalyticsController {
      * - On failure: response status code indicating the failure, response data: message describing the error.
      */
     private async getBudgetTrackingByProjectId(req: Request, res: Response): Promise<void> {
-        const projectId = parseInt(req.params.projectId, 10);
+        const projectId = parseInt(req.params.projectId as string, 10);
 
         const result = await this.gatewayAnalyticsService.getBudgetTrackingByProjectId(projectId);
         handleResponse(res, result);
@@ -111,7 +111,7 @@ export class GatewayAnalyticsController {
      * - On failure: response status code indicating the failure, response data: message describing the error.
      */
     private async getResourceCostAllocationByProjectId(req: Request, res: Response): Promise<void> {
-        const projectId = parseInt(req.params.projectId, 10);
+        const projectId = parseInt(req.params.projectId as string, 10);
 
         const result = await this.gatewayAnalyticsService.getResourceCostAllocationByProjectId(projectId);
         handleResponse(res, result);
@@ -126,7 +126,7 @@ export class GatewayAnalyticsController {
      * - On failure: response status code indicating the failure, response data: message describing the error.
      */
     private async getProfitMarginByProjectId(req: Request, res: Response): Promise<void> {
-        const projectId = parseInt(req.params.projectId, 10);
+        const projectId = parseInt(req.params.projectId as string, 10);
 
         const result = await this.gatewayAnalyticsService.getProfitMarginByProjectId(projectId);
         handleResponse(res, result)
