@@ -1,4 +1,4 @@
-import { LoginUserDTO } from "../../Domain/DTOs/LoginUserDTO";
+import { LoginUserDTO } from "../../../Domain/DTOs/LoginUserDTO";
 
 export function validateLoginData(data: LoginUserDTO): { success: boolean; message?: string } {
   if (!data.username || data.username.trim().length < 3 || data.username.length > 15) {

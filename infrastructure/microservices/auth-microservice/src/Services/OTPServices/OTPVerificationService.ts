@@ -13,37 +13,57 @@ import { v4 as uuidv4 } from 'uuid';
 
 export class OTPVerificationService implements IOTPVerificationService {
   private readonly loginSessionExpirationMinutes: number = parseInt(process.env.LOGIN_SESSION_EXPIRATION_MINUTES || "5", 10);
-  private readonly logger: ILogerService;
 
   constructor(
     private userRepository: IUserRepository,
     private emailService: IEmailService,
     private sessionService: ISessionStore,
     private otpGenerator: IOTPGenerator,
-    logger: ILogerService
+    private logger: ILogerService
   ) {
-    this.logger = logger;
   }
 
   async resendOTP(browserData: BrowserData): Promise<LoginResponseType> {
+    this.logger.log(SeverityEnum.DEBUG, `Starting OTP resend workflow for user_id: ${browserData.user_id}, session_id: ${browserData.session_id}`);
+
     const user = await this.userRepository.findOne({
       where: { user_id: browserData.user_id },
       relations: ["user_role"],
     });
-    if (!user || user.is_deleted) return { authenticated: false };
+
+    this.logger.log(SeverityEnum.DEBUG, `User lookup completed for resend OTP`);
+
+    if (!user || user.is_deleted) {
+      this.logger.log(SeverityEnum.WARN, `OTP resend failed: user not found or deleted for user_id ${browserData.user_id}`);
+      return { authenticated: false };
+    }
+
+    this.logger.log(SeverityEnum.DEBUG, `Validating session for resend OTP`);
     const session = this.sessionService.validateSession(browserData.session_id, browserData.user_id);
-    if (!session) return { authenticated: false };
+    if (!session) {
+      this.logger.log(SeverityEnum.WARN, `OTP resend failed: invalid session for user_id ${browserData.user_id}`);
+      return { authenticated: false };
+    }
+
     if (this.emailService.isAvailable) {
+      this.logger.log(SeverityEnum.DEBUG, `Email service available, generating new OTP`);
       const otpCode = this.otpGenerator.generateOTP();
       const dateCreated = new Date();
       const newSessionData: LoginData = { userId: user.user_id, otpCode: otpCode, dateCreated: dateCreated };
       const newSessionId = uuidv4();
 
+      this.logger.log(SeverityEnum.DEBUG, `Sending OTP code via email to user ${user.username}`);
       const success = await this.emailService.sendOTPCode(user, otpCode);
-      if (!success) return { authenticated: false };
+      if (!success) {
+        this.logger.log(SeverityEnum.ERROR, `Failed to send OTP email to user ${user.username}`);
+        return { authenticated: false };
+      }
 
+      this.logger.log(SeverityEnum.DEBUG, `Invalidating old session and creating new one`);
       this.sessionService.deleteSession(browserData.session_id); // Invalidate old session to prevent reuse
       this.sessionService.setSession(newSessionId, newSessionData);
+
+      this.logger.log(SeverityEnum.INFO, `OTP resent successfully for user ${user.username}`);
 
       return {
         authenticated: true,
@@ -57,6 +77,7 @@ export class OTPVerificationService implements IOTPVerificationService {
       };
     }
     else {
+        this.logger.log(SeverityEnum.WARN, `Email service unavailable, proceeding with password-only login for user ${user.username}`);
         return {
           authenticated: true,
           userData: {
@@ -71,20 +92,37 @@ export class OTPVerificationService implements IOTPVerificationService {
   }
 
   async verifyOTP(browserData: BrowserData, otp: string): Promise<AuthResponseType> {
+    this.logger.log(SeverityEnum.DEBUG, `Starting OTP verification workflow for user_id: ${browserData.user_id}, session_id: ${browserData.session_id}`);
+
     const user = await this.userRepository.findOne({
       where: { user_id: browserData.user_id },
       relations: ["user_role"],
     });
-    if (!user || user.is_deleted) return { authenticated: false };
-    // this.logger.log(SeverityEnum.DEBUG, `Verifying OTP for user ${user.username} with UID ${user.user_id} and session ID: ${browserData.session_id} with OTP: ${otp}`);
-    const session = this.sessionService.validateSession(browserData.session_id, browserData.user_id);
-    if (!session) return { authenticated: false };
-    // this.logger.log(SeverityEnum.DEBUG, `Retrieved session data: ${JSON.stringify(session)}`);
-    if (session.otpCode !== otp) {
+
+    this.logger.log(SeverityEnum.DEBUG, `User lookup completed for OTP verification`);
+
+    if (!user || user.is_deleted) {
+      this.logger.log(SeverityEnum.WARN, `OTP verification failed: user not found or deleted for user_id ${browserData.user_id}`);
       return { authenticated: false };
     }
 
+    this.logger.log(SeverityEnum.DEBUG, `Validating session for OTP verification`);
+    const session = this.sessionService.validateSession(browserData.session_id, browserData.user_id);
+    if (!session) {
+      this.logger.log(SeverityEnum.WARN, `OTP verification failed: invalid session for user_id ${browserData.user_id}`);
+      return { authenticated: false };
+    }
+
+    this.logger.log(SeverityEnum.DEBUG, `Comparing provided OTP with stored OTP`);
+    if (session.otpCode !== otp) {
+      this.logger.log(SeverityEnum.WARN, `OTP verification failed: invalid OTP code for user ${user.username}`);
+      return { authenticated: false };
+    }
+
+    this.logger.log(SeverityEnum.DEBUG, `OTP verified successfully, cleaning up session`);
     this.sessionService.deleteSession(browserData.session_id);
+
+    this.logger.log(SeverityEnum.INFO, `OTP verification successful for user ${user.username}`);
 
     return {
       authenticated: true,

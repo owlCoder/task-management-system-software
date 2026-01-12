@@ -1,4 +1,4 @@
-import { RegistrationUserDTO } from "../../Domain/DTOs/RegistrationUserDTO";
+import { RegistrationUserDTO } from "../../../Domain/DTOs/RegistrationUserDTO";
 
 export function validateRegistrationData(data: RegistrationUserDTO): { success: boolean; message?: string } {
   if (!data.username || data.username.trim().length < 3 || data.username.length > 15) {
