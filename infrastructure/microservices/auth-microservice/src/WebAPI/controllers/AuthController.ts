@@ -1,12 +1,13 @@
 import { Request, Response, Router } from 'express';
 import jwt from "jsonwebtoken";
+import { env } from 'process';
+import { ILogerService } from '../../Domain/services/ILogerService';
 import { IAuthService } from '../../Domain/services/IAuthService';
 import { LoginUserDTO } from '../../Domain/DTOs/LoginUserDTO';
-import { validateLoginData } from '../validators/LoginValidator';
-import { ILogerService } from '../../Domain/services/ILogerService';
+import { validateLoginData } from '../validators/AuthValidators/LoginValidator';
 import { SeverityEnum } from '../../Domain/enums/SeverityEnum';
-import { validateOTPVerificationData } from '../validators/OtpValidator';
-import { env } from 'process';
+import { validateOTPResendData } from '../validators/OTPValidators/OtpResendValidator';
+import { validateOTPVerificationData } from '../validators/OTPValidators/OtpVerificationValidator';
 import { BrowserData } from '../../Domain/models/BrowserData';
 import { IOTPVerificationService } from '../../Domain/services/IOTPVerificationService';
 
@@ -40,30 +41,31 @@ export class AuthController {
    */
   private async login(req: Request, res: Response): Promise<void> {
     this.logerService.log(SeverityEnum.INFO, "Login request received");
-    console.log("Login request received");
 
     const data: LoginUserDTO = req.body as LoginUserDTO;
 
     // Validate login input
     const validation = validateLoginData(data);
     if (!validation.success) {
+      this.logerService.log(SeverityEnum.WARN, `Login validation failed: ${validation.message}`);
       res.status(400).json({ success: false, message: validation.message });
       return;
     }
 
-    console.log(`Login attempt for username: ${data.username}`);
+    this.logerService.log(SeverityEnum.DEBUG, `Login attempt for username: ${data.username}`);
 
     let result;
     try {
       result = await this.authService.login(data);
     } catch (error) {
-      this.logerService.log(SeverityEnum.ERROR, error as string)
+      this.logerService.log(SeverityEnum.ERROR, `Login error: ${error}`);
       res.status(500).json({ success: false, message: "Server error" });
       return;
     }
 
     if (result.authenticated) {
       if (result.userData && result.userData.otp_required === true) {
+        this.logerService.log(SeverityEnum.INFO, "OTP required for user login");
         res.status(200).json({
           success: true,
           otp_required: result.userData.otp_required,
@@ -84,6 +86,7 @@ export class AuthController {
             { expiresIn: `${this.jwtSessionExpiration}m` }
           );
 
+          this.logerService.log(SeverityEnum.INFO, "Login successful with password");
           res.status(200).json({
             success: true,
             otp_required: result.userData.otp_required,
@@ -91,11 +94,12 @@ export class AuthController {
             token
           });
         } catch (error) {
-          this.logerService.log(SeverityEnum.ERROR, error as string)
+          this.logerService.log(SeverityEnum.ERROR, `JWT generation error: ${error}`);
           res.status(500).json({ success: false, message: "Server error" });
         }
       }
     } else {
+      this.logerService.log(SeverityEnum.WARN, "Authentication failed: Invalid credentials");
       res.status(401).json({ success: false, message: "Invalid credentials!" });
     }
   }
@@ -119,16 +123,19 @@ export class AuthController {
     const validation = validateOTPVerificationData(data, otp);
 
     if (!validation.success) {
+      this.logerService.log(SeverityEnum.WARN, `OTP validation failed: ${validation.message}`);
       res.status(400).json({ success: false, message: validation.message });
       return;
     }
+
+    this.logerService.log(SeverityEnum.DEBUG, `Verifying OTP for user_id: ${user_id}, session_id: ${session_id}`);
 
     // Call the auth service to verify the OTP
     let result;
     try {
       result = await this.otpVerificationService.verifyOTP(data, otp);
     } catch (error) {
-      this.logerService.log(SeverityEnum.ERROR, error as string)
+      this.logerService.log(SeverityEnum.ERROR, `OTP verification error: ${error}`);
       res.status(500).json({ success: false, message: "Server error" });
       return;
     }
@@ -140,34 +147,44 @@ export class AuthController {
           { expiresIn: `${this.jwtSessionExpiration}m` }
         );
 
+        this.logerService.log(SeverityEnum.INFO, "OTP verification and login successful");
         res.status(200).json({ success: true, message: "OTP verified successfully", token });
       } catch (error) {
-        this.logerService.log(SeverityEnum.ERROR, error as string)
+        this.logerService.log(SeverityEnum.ERROR, `JWT generation error: ${error}`);
         res.status(500).json({ success: false, message: "Server error" });
       }
     } else {
+      this.logerService.log(SeverityEnum.WARN, "OTP verification failed: Invalid OTP");
       res.status(401).json({ success: false, message: "Invalid OTP" });
     }
   }
 
   public async resendOTP(req: Request, res: Response): Promise<void> {
     this.logerService.log(SeverityEnum.INFO, "OTP resend request received");
+
     const { user_id, session_id } = req.body;
     const data: BrowserData = { session_id, user_id };
-    // if (!validation.success) {
-    //   res.status(400).json({ success: false, message: validation.message });
-    //   return;
-    // }
+
+    const validation = validateOTPResendData(data);
+    if (!validation.success) {
+      this.logerService.log(SeverityEnum.WARN, `OTP resend validation failed: ${validation.message}`);
+      res.status(400).json({ success: false, message: validation.message });
+      return;
+    }
+
+    this.logerService.log(SeverityEnum.DEBUG, `Resending OTP for user_id: ${user_id}, session_id: ${session_id}`);
+
     let result;
     try {
       result = await this.otpVerificationService.resendOTP(data);
     } catch (error) {
-      this.logerService.log(SeverityEnum.ERROR, error as string)
+      this.logerService.log(SeverityEnum.ERROR, `OTP resend error: ${error}`);
       res.status(500).json({ success: false, message: "Server error" });
       return;
     }
     if (result.authenticated) {
       if (result.userData && result.userData.otp_required === true) {
+        this.logerService.log(SeverityEnum.INFO, "OTP resent, user needs to verify");
         res.status(200).json({
           success: true,
           otp_required: result.userData.otp_required,
@@ -188,6 +205,7 @@ export class AuthController {
             { expiresIn: `${this.jwtSessionExpiration}m` }
           );
 
+          this.logerService.log(SeverityEnum.INFO, "OTP resend successful, login completed (email offline)");
           res.status(200).json({
             success: true,
             otp_required: result.userData.otp_required,
@@ -195,11 +213,12 @@ export class AuthController {
             token
           });
         } catch (error) {
-          this.logerService.log(SeverityEnum.ERROR, error as string)
+          this.logerService.log(SeverityEnum.ERROR, `JWT generation error: ${error}`);
           res.status(500).json({ success: false, message: "Server error" });
         }
       }
     } else {
+      this.logerService.log(SeverityEnum.WARN, "OTP resend failed: Invalid credentials");
       res.status(401).json({ success: false, message: "Invalid credentials!" });
     }
   }
