@@ -13,7 +13,7 @@ import { ErrorCode } from "../Domain/enums/ErrorCode";
 const RESTRICTED_ROLES = ["SysAdmin", "Admin", "Analytics & Development Manager"];
 export class ProjectUserService implements IProjectUserService {
     private readonly userClient: AxiosInstance;
-    
+
 
     constructor(
         private readonly projectUserRepository: Repository<ProjectUser>,
@@ -53,7 +53,6 @@ export class ProjectUserService implements IProjectUserService {
 
     async assignUserToProject(data: ProjectUserAssignDTO): Promise<Result<ProjectUserDTO>> {
         const user = await this.getUserByUsername(data.username);
-        //exception delete
         if (!user) {
             return {
                 success: false,
@@ -75,7 +74,6 @@ export class ProjectUserService implements IProjectUserService {
         const project = await this.projectRepository.findOne({
             where: { project_id: data.project_id }
         });
-        //exception delete
         if (!project) {
             return {
                 success: false,
@@ -85,10 +83,10 @@ export class ProjectUserService implements IProjectUserService {
         }
 
         const existing = await this.projectUserRepository.findOne({
-            where: { project: { project_id: data. project_id }, user_id:  userId },
+            where: { project: { project_id: data.project_id }, user_id: userId },
             relations: ["project"],
         });
-        
+
         if (existing) {
             return {
                 success: false,
@@ -97,11 +95,11 @@ export class ProjectUserService implements IProjectUserService {
             };
         }
 
-        const assignments = await this.projectUserRepository. find({
+        const assignments = await this.projectUserRepository.find({
             where: { user_id: userId },
         });
 
-        const currentTotal = assignments. reduce(
+        const currentTotal = assignments.reduce(
             (sum, a) => sum + a.weekly_hours,
             0
         );
@@ -126,14 +124,14 @@ export class ProjectUserService implements IProjectUserService {
 
         const saved = await this.projectUserRepository.save(pu);
         const dto = ProjectUserMapper.toDTO(saved);
-        
-        dto. username = user.username;
+
+        dto.username = user.username;
         dto.role_name = user.role_name;
-        
+
         return { success: true, data: dto };
     }
 
-    async removeUserFromProject(project_id: number, user_id:  number): Promise<Result<boolean>> {
+    async removeUserFromProject(project_id: number, user_id: number): Promise<Result<boolean>> {
         const result = await this.projectUserRepository.delete({
             user_id,
             project: { project_id },
@@ -143,35 +141,52 @@ export class ProjectUserService implements IProjectUserService {
 
     async getUsersForProject(project_id: number): Promise<Result<ProjectUserDTO[]>> {
         const list = await this.projectUserRepository.find({
-            where: { project:  { project_id } },
+            where: { project: { project_id } },
             relations: ["project"],
         });
-        
-        const dtos = await Promise.all(
-            list.map(async (pu) => {
+
+        if (list.length === 0) {
+            return { success: true, data: [] };
+        }
+
+        const userIds = list.map(pu => pu.user_id);
+
+        try {
+            const response = await this.userClient.get<UserDTO[]>(`/users/ids`, {
+                params: { ids: userIds.join(",") },
+            });
+
+            const users = response.data;
+
+            const userMap = new Map<number, UserDTO>();
+            users.forEach(u => userMap.set(u.user_id, u));
+
+            const dtos: ProjectUserDTO[] = list.map(pu => {
                 const dto = ProjectUserMapper.toDTO(pu);
-                
-                const user = await this.getUserById(pu.user_id);
-                if (user) {
-                    dto.username = user.username;
-                    dto.role_name = user.role_name;
-                } else {
-                    dto.username = `User ${pu.user_id}`;
-                    dto.role_name = "Unknown";
-                }
-                
+                const user = userMap.get(pu.user_id);
+
+                dto.username = user ? user.username : `User ${pu.user_id}`;
+                dto.role_name = user ? user.role_name : "Unknown";
+
                 return dto;
-            })
-        );
-        
-        return { success: true, data: dtos };
+            });
+
+            return { success: true, data: dtos };
+        } catch (error: any) {
+            console.error("Error fetching users for project:", error.message);
+            return {
+                success: false,
+                code: ErrorCode.INTERNAL_ERROR,
+                error: "Failed to fetch users for project",
+            };
+        }
     }
 
     async updateWeeklyHoursForAllUsers(project_id: number, oldHours: number, newHours: number): Promise<Result<void>> {
         const projectUsers = await this.projectUserRepository.find({
             where: { project: { project_id } }
         });
-        
+
         for (const pu of projectUsers) {
             if (pu.weekly_hours === oldHours && oldHours > 0) {
                 pu.weekly_hours = newHours;
