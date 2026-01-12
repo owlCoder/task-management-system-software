@@ -39,7 +39,7 @@ export class Measurement_Service implements IMeasurement_Service {
 
         return measurements.map(m => this.toDto(m));
     }
-    async getAllCriticalMeasurements(): Promise<MeasurementDto[]> {
+    async getAllDownMeasurements(): Promise<MeasurementDto[]> {
         const measurements = await this.measurementRepository.find({
             where: { status: EOperationalStatus.Down },
             relations: ["microservice"],
