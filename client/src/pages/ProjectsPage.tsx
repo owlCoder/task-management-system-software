@@ -421,6 +421,7 @@ export const ProjectsPage: React.FC = () => {
                     isOpen={isManageUsersModalOpen}
                     onClose={handleCloseManageUsersModal}
                     onUsersUpdated={() => {}}
+                    projectAPI={projectAPI}
                 />
             </div>
         </div>

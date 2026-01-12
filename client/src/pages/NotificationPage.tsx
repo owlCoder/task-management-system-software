@@ -6,12 +6,17 @@ import NotificationCard from "../components/notification/NotificationCard";
 import NotificationSendPopUp from "../components/notification/NotificationSendPopUp";
 import type { Notification } from "../models/notification/NotificationCardDTO";
 import { NotificationType } from "../enums/NotificationType";
-import { notificationAPI } from "../api/notification/NotificationAPI";
 import { socketEventService } from "../api/notification/socketInstance";
 import toast from "react-hot-toast";
 import { useAuth } from "../hooks/useAuthHook";
+import { INotificationAPI } from "../api/notification/INotificationAPI";
 
-const NotificationPage: React.FC = () => {
+type NotificationPageProps = {
+  notificationAPI: INotificationAPI;
+};
+
+const NotificationPage: React.FC<NotificationPageProps> = ({notificationAPI}) => {
+  
   const { user } = useAuth();
   const currentUserId = user?.id || 1;
 
@@ -29,16 +34,16 @@ const NotificationPage: React.FC = () => {
   const [allNotifications, setAllNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const token  = localStorage.getItem("authToken");
 
   // UCITAJ NOTIFIKACIJE SA BACKEND-A I PODESI WEBSOCKET EVENT LISTENERS
   useEffect(() => {
     loadNotifications();
     setupWebSocket();
-
     // Cleanup - socket ostaje konektovan, samo cleanup event listenere
     return () => {
-      // Ne disconnect-uj socket, on treba da ostane aktivan!
-      // socketEventService ima cleanup metodu za event listenere
+      // Clean up all socket event listeners to prevent memory leak
+      socketEventService.removeAllListeners();
     };
   }, []);
 
@@ -47,7 +52,7 @@ const NotificationPage: React.FC = () => {
       setLoading(true);
       setError(null);
 
-      const notifications = await notificationAPI.getNotificationsByUserId(
+      const notifications = await notificationAPI.getNotificationsByUserId(token!,
         currentUserId
       );
       setAllNotifications(notifications);
@@ -188,7 +193,7 @@ const NotificationPage: React.FC = () => {
   // funkcija za mark as read
   const handleMarkAsRead = async () => {
     try {
-      await notificationAPI.markMultipleAsRead(selectedNotifications);
+      await notificationAPI.markMultipleAsRead(token!,selectedNotifications);
 
       // WebSocket će automatski ažurirati state!
       setAllNotifications(
@@ -215,7 +220,7 @@ const NotificationPage: React.FC = () => {
   // funkcija za mark as unread
   const handleMarkAsUnread = async () => {
     try {
-      await notificationAPI.markMultipleAsUnread(selectedNotifications);
+      await notificationAPI.markMultipleAsUnread(token!,selectedNotifications);
 
       // WebSocket ce automatski azurirati state!
       setAllNotifications(
@@ -242,7 +247,7 @@ const NotificationPage: React.FC = () => {
   // funkcija za delete selected
   const handleDeleteSelected = async () => {
     try {
-      await notificationAPI.deleteMultipleNotifications(selectedNotifications);
+      await notificationAPI.deleteMultipleNotifications(token!,selectedNotifications);
 
       // WebSocket ce automatski azurirati state!
       setAllNotifications(
@@ -275,7 +280,7 @@ const NotificationPage: React.FC = () => {
       );
 
       // Zatim pozovi API (WebSocket ce takodje emitovati event)
-      await notificationAPI.markAsRead(id);
+      await notificationAPI.markAsRead(token!,id);
     } catch (err) {
       console.error("Error marking notification as read:", err);
 
@@ -301,7 +306,7 @@ const NotificationPage: React.FC = () => {
     try {
       console.log("Sending notification:", { title, content, type });
 
-      await notificationAPI.createNotification({
+      await notificationAPI.createNotification(token!,{
         title,
         content,
         type,

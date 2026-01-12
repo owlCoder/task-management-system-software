@@ -46,7 +46,7 @@ export const BurnupAnalytics: React.FC<BurnupAnalyticsProps> = ({ project }) => 
                     </option>
 
                     {/* Sprint options */}
-                    {Array.from({ length: project.numberOfSprints! }, (_, i) => {
+                    {Array.from({ length: project.sprint_count! }, (_, i) => {
                         const sprintNumber = i + 1;
                         return (
                             <option

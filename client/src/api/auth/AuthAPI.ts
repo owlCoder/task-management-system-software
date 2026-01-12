@@ -15,10 +15,20 @@ export class AuthAPI implements IAuthAPI {
   }
 
   async login(data: LoginUserDTO): Promise<AuthResponseType> {
-    return (await this.axiosInstance.post("/login", data)).data;
+    try {
+      return (await this.axiosInstance.post("/login", data)).data;
+    } catch (error) {
+      console.error('Error during login:', error);
+      throw error;
+    }
   }
 
   async register(data: RegistrationUserDTO): Promise<AuthResponseType> {
-    return (await this.axiosInstance.post("/register", data)).data;
+    try {
+      return (await this.axiosInstance.post("/register", data)).data;
+    } catch (error) {
+      console.error('Error during registration:', error);
+      throw error;
+    }
   }
 }

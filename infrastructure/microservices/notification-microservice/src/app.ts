@@ -44,7 +44,7 @@ export const createApp = (notificationService: INotificationService): Applicatio
   // notification routes
   // sve rute su pod /api prefiksom
   const notificationRoutes = createNotificationRoutes(notificationService);
-  app.use("/api", notificationRoutes);
+  app.use("/api/v1", notificationRoutes);
 
   // DEBUG - Proveri da li bilo koja ruta nije matchovana
   app.use((req: Request, res: Response, next) => {

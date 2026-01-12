@@ -67,7 +67,7 @@ export class UsersController {
 
   private async getUserById(req: Request, res: Response): Promise<void> {
     try {
-      const id = parseInt(req.params.id, 10);
+      const id = parseInt(req.params.id as string, 10);
 
       if (isNaN(id)) {
         res.status(400).json({ message: "The passed id is not a number." });
@@ -98,7 +98,7 @@ export class UsersController {
 
   private async getUserByUsername(req: Request, res: Response): Promise<void> {
     try {
-      const username = req.params.username;
+      const username = req.params.username as string;
 
       const rezultat = UsernameValidation(username);
 
@@ -198,7 +198,7 @@ export class UsersController {
 
   private async logicalyDeleteUser(req: Request, res: Response): Promise<void> {
     try {
-      const id = parseInt(req.params.id, 10);
+      const id = parseInt(req.params.id as string, 10);
 
       if (isNaN(id)) {
         res.status(400).json({ message: "The passed id is not a number." });
@@ -229,7 +229,7 @@ export class UsersController {
 
   private async updateUser(req: Request, res: Response): Promise<void> {
     try {
-      const id = parseInt(req.params.id, 10);
+      const id = parseInt(req.params.id as string, 10);
 
       if (isNaN(id)) {
         res.status(400).json({ message: "The passed id is not a number" });
@@ -269,7 +269,7 @@ export class UsersController {
 
   private async setWeeklyHours(req: Request, res: Response): Promise<void> {
     try {
-      const id = parseInt(req.params.id, 10);
+      const id = parseInt(req.params.id as string, 10);
 
       if (isNaN(id)) {
         res.status(400).json({ message: "The passed id is not a number" });
@@ -336,7 +336,7 @@ export class UsersController {
     res: Response
   ): Promise<void> {
     try {
-      const impact_level = parseInt(req.params.impact_level, 10);
+      const impact_level = parseInt(req.params.impact_level as string, 10);
       if (isNaN(impact_level)) {
         res
           .status(400)

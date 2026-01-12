@@ -10,6 +10,6 @@ export interface IUserAPI {
   logicalyDeleteUserById(token: string, user_id: number): Promise<boolean>;
   updateUser(token: string,id:number, newUserData: UserUpdateDTO): Promise<UserDTO>;
   setWeeklyHours(token: string, user_id: number, weekly_working_hours: number) : Promise<UserDTO>;
-  getUserRolesForCreation(token: string) : Promise<UserRoleDTO[]>;
+  getUserRolesForCreation(token: string, impact_level: number) : Promise<UserRoleDTO[]>;
 
 }

@@ -12,7 +12,7 @@
   "dependencies": {
     "-": "^0.0.1",
     "@tailwindcss/vite": "^4.1.17",
-    "axios": "^1.12.2",
+    "axios": "^1.13.2",
     "jwt-decode": "^4.0.0",
     "motion": "^12.23.26",
     "react": "^19.2.0",

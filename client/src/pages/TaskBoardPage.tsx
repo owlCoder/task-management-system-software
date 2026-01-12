@@ -8,7 +8,6 @@ import EditTaskModal from "../components/task/EditTaskModal";
 import TaskBoardListPreview from "../components/task/TaskBoardListPreview";
 // import { TaskDetailPage } from "./TaskDetailPage";
 // import EditTaskModal from "../components/task/EditTaskModal";
-import { UpdateTaskDTO } from "../models/task/UpdateTaskDTO";
 import { TaskStatus } from "../enums/TaskStatus";
 import { TaskBoardPageProps } from "../types/props";
 
@@ -25,10 +24,6 @@ const TaskBoardPage: React.FC<TaskBoardPageProps> = ({ projectId, token }) => {
     const taskToUpdate = tasks.find((t) => t.task_id === taskId);
     if (!taskToUpdate) return;
 
-    const payload: UpdateTaskDTO = {
-      status: newStatus,
-    };
-
     const originalTasks = [...tasks];
     setTasks((prev) =>
       prev.map((t) =>
@@ -37,7 +32,7 @@ const TaskBoardPage: React.FC<TaskBoardPageProps> = ({ projectId, token }) => {
     );
 
     try {
-      await api.updateTask(taskId, payload);
+      await api.updateTaskStatus(taskId, newStatus);
     } catch (err) {
       console.error("Failed to update status on server", err);
       setTasks(originalTasks);
@@ -168,6 +163,7 @@ const TaskBoardPage: React.FC<TaskBoardPageProps> = ({ projectId, token }) => {
                   onClose={() => setEditOpen(false)}
                   task={selectedTask}
                   token={token}
+                  projectId={Number(projectId)}
                 />
               )}
             </div>

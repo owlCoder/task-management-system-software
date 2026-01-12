@@ -4,11 +4,11 @@ import { NotificationType } from '../../enums/NotificationType';
 export interface INotificationAPI {
   
   // GET operacije
-  getNotificationsByUserId(userId: number): Promise<Notification[]>;
-  getUnreadCount(userId: number): Promise<number>;
+  getNotificationsByUserId(token:string,userId: number): Promise<Notification[]>;
+  getUnreadCount(token:string,userId: number): Promise<number>;
   
   // POST operacije
-  createNotification(data: {
+  createNotification(token:string,data: {
     title: string;
     content: string;
     type: NotificationType;
@@ -16,12 +16,12 @@ export interface INotificationAPI {
   }): Promise<void>;
   
   // PATCH operacije (mark as read/unread)
-  markAsRead(id: number): Promise<void>;
-  markAsUnread(id: number): Promise<void>;
-  markMultipleAsRead(ids: number[]): Promise<void>;
-  markMultipleAsUnread(ids: number[]): Promise<void>;
+  markAsRead(token:string,id: number): Promise<void>;
+  markAsUnread(token:string,id: number): Promise<void>;
+  markMultipleAsRead(token:string,ids: number[]): Promise<void>;
+  markMultipleAsUnread(token:string,ids: number[]): Promise<void>;
   
   // DELETE operacije
-  deleteNotification(id: number): Promise<void>;
-  deleteMultipleNotifications(ids: number[]): Promise<void>;
+  deleteNotification(token:string,id: number): Promise<void>;
+  deleteMultipleNotifications(token:string,ids: number[]): Promise<void>;
 }

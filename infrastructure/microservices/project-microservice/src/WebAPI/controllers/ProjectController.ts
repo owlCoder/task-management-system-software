@@ -7,6 +7,7 @@ import { ProjectUpdateDTO } from "../../Domain/DTOs/ProjectUpdateDTO";
 import { ProjectStatus } from "../../Domain/enums/ProjectStatus";
 import { validateCreateProject, validateUpdateProject } from "../validators/ProjectValidator";
 import { IR2StorageService } from "../../Storage/R2StorageService";
+import { ReqParams } from "../../Domain/types/ReqParams";
 
 const upload = multer({
     storage: multer.memoryStorage(),
@@ -53,7 +54,7 @@ export class ProjectController {
         }
     }
 
-    private async getProjectsByUserId(req: Request, res: Response): Promise<void> {
+    private async getProjectsByUserId(req: Request<ReqParams<'userId'>>, res: Response): Promise<void> {
         try {
             const userId = parseInt(req.params.userId, 10);
             if (isNaN(userId)) {
@@ -68,7 +69,7 @@ export class ProjectController {
         }
     }
 
-    private async getProjectById(req: Request, res: Response): Promise<void> {
+    private async getProjectById(req: Request<ReqParams<'id'>>, res: Response): Promise<void> {
         try {
             const id = parseInt(req.params.id, 10);
             if (isNaN(id)) {
@@ -131,18 +132,33 @@ export class ProjectController {
                 return;
             }
 
-            const created = await this.projectService.CreateProject(data);
+            const createdResult = await this.projectService.CreateProject(data);
 
-            if (creatorUsername && created.project_id) {
-                try {
+            if(!createdResult.success){
+                if(data.image_key){
+                    await this.storageService.deleteImage(data.image_key);
+                }
+                res.status(createdResult.code).json({ message: createdResult.error });
+                return;
+            }
+
+            const created = createdResult.data;
+
+            if(creatorUsername && created.project_id){
+                try{
                     await this.projectUserService.assignUserToProject({
                         project_id: created.project_id,
                         username: creatorUsername,
                         weekly_hours: 0,
                     });
-                    console.log(`Project Manager "${creatorUsername}" automatically assigned to project ${created.project_id} with 0 weekly hours`);
-                } catch (assignError) {
-                    console.error("Failed to auto-assign Project Manager to project:", assignError);
+                    console.log( 
+                        `Project Manager "${creatorUsername}" automatically assigned to project ${created.project_id} with 0 weekly hours`
+                    );
+                } catch(assignError){
+                    console.error(
+                    "Failed to auto-assign Project Manager to project:",
+                    assignError
+                );
                 }
             }
 
@@ -153,7 +169,7 @@ export class ProjectController {
         }
     }
 
-    private async updateProject(req: Request, res: Response): Promise<void> {
+    private async updateProject(req: Request<ReqParams<'id'>>, res: Response): Promise<void> {
         try {
             const id = parseInt(req.params.id, 10);
             if (isNaN(id)) {
@@ -215,7 +231,7 @@ export class ProjectController {
         }
     }
 
-    private async deleteProject(req: Request, res: Response): Promise<void> {
+    private async deleteProject(req: Request<ReqParams<'id'>>, res: Response): Promise<void> {
         try {
             const id = parseInt(req.params.id, 10);
             if (isNaN(id)) {
@@ -234,7 +250,7 @@ export class ProjectController {
         }
     }
 
-    private async projectExists(req: Request, res: Response): Promise<void> {
+    private async projectExists(req: Request<ReqParams<'id'>>, res: Response): Promise<void> {
         try {
             const id = parseInt(req.params.id, 10);
             if (isNaN(id)) {

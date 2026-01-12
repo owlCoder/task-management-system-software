@@ -2,8 +2,8 @@ import React, { useEffect, useState } from "react";
 import { EditTaskModalProps } from "../../types/props";
 import { UpdateTaskDTO } from "../../models/task/UpdateTaskDTO";
 import { TaskAPI } from "../../api/task/TaskAPI";
-import { UserAPI } from "../../api/users/UserAPI";
-import { UserDTO } from "../../models/users/UserDTO";
+import { projectAPI } from "../../api/project/ProjectAPI";
+import { ProjectUserDTO } from "../../models/project/ProjectUserDTO";
 import { TaskStatus } from "../../enums/TaskStatus";
 import StatusDropdown from "./StatusDropdown";
 import toast from "react-hot-toast";
@@ -13,17 +13,18 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({
   onClose,
   task,
   token,
+  projectId,
+  
 }) => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [estimatedCost, setEstimatedCost] = useState(0);
   const [status, setStatus] = useState<TaskStatus>(TaskStatus.CREATED);
   const [assignedTo, setAssignedTo] = useState<number | undefined>(undefined);
-  const [users, setUsers] = useState<UserDTO[]>([]);
+  const [users, setUsers] = useState<ProjectUserDTO[]>([]);
   const [loading, setLoading] = useState(false);
 
   const api = new TaskAPI(import.meta.env.VITE_GATEWAY_URL, token);
-  const userAPI = new UserAPI();
 
   useEffect(() => {
     if (open && task) {
@@ -39,7 +40,7 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({
     if (open) {
       const fetchUsers = async () => {
         try {
-          const fetchedUsers = await userAPI.getAllUsers(token);
+          const fetchedUsers = await projectAPI.getProjectUsers(projectId);
           setUsers(fetchedUsers);
         } catch (err) {
           console.error("Failed to fetch users:", err);
@@ -200,7 +201,7 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({
               <option value="">Unassigned</option>
               {users.map((user) => (
                 <option key={user.user_id} value={user.user_id}>
-                  {user.username} ({user.email})
+                  {user.username} 
                 </option>
               ))}
             </select>

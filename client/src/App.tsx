@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { Route, Routes } from "react-router-dom";
 import { AuthPage } from "./pages/AuthPage";
 import { IAuthAPI } from "./api/auth/IAuthAPI";
@@ -15,24 +15,33 @@ import AnalyticsPage from "./pages/AnalyticsPage";
 import { Toaster } from 'react-hot-toast';
 import { socketManager } from "./api/notification/socketInstance";
 import { useAuth } from "./hooks/useAuthHook";
+import { INotificationAPI } from "./api/notification/INotificationAPI";
+import { NotificationAPI } from "./api/notification/NotificationAPI";
 
 const auth_api: IAuthAPI = new AuthAPI();
+const notification_API: INotificationAPI = new NotificationAPI(import.meta.env.VITE_GATEWAY_URL);
 
 const backgroundImageUrl = new URL("../public/bg2.png", import.meta.url).href;
 
 function App() {
-  const { user } = useAuth();
-  const currentUserId = user?.id || 1;
+  const { user, isAuthenticated } = useAuth();
+  const socketInitialized = useRef(false);
 
   useEffect(() => {
-    socketManager.connect();
-    socketManager.joinUserRoom(currentUserId);
+    if (isAuthenticated && user?.id && !socketInitialized.current) {
+      socketInitialized.current = true;
+      socketManager.connect();
+      socketManager.joinUserRoom(user.id);
+    }
 
     return () => {
-      socketManager.leaveUserRoom(currentUserId);
-      socketManager.disconnect();
+      if (!isAuthenticated && socketInitialized.current) {
+        socketManager.leaveUserRoom(user?.id || 0);
+        socketManager.disconnect();
+        socketInitialized.current = false;
+      }
     };
-  }, [currentUserId]);
+  }, [isAuthenticated, user?.id]);
 
   return (
     <div
@@ -42,7 +51,7 @@ function App() {
       <Routes>
         <Route path="/projects" element={<ProjectsPage />} />
         <Route path="/analytics" element={<AnalyticsPage />} />
-        <Route path="/notifications" element={<NotificationPage />} />
+        <Route path="/notifications" element={<NotificationPage notificationAPI={notification_API} />} />
         <Route path="/tasks" element={<TaskPage projectId={""}  />} />
         <Route path="/auth" element={<AuthPage authAPI={auth_api} />} />
         <Route path="/files" element={<FilePage />} />

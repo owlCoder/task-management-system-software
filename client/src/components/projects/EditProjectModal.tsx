@@ -2,13 +2,7 @@ import React, { useState, useEffect } from "react";
 import type { ProjectDTO } from "../../models/project/ProjectDTO";
 import { ProjectStatus } from "../../enums/ProjectStatus";
 import { hasProjectImage } from "../../helpers/image_url";
-
-type Props = {
-    project: ProjectDTO | null;
-    isOpen: boolean;
-    onClose: () => void;
-    onSave: (updated: ProjectDTO, imageFile?: File) => void;
-};
+import type { Props } from "../../types/props/EditProjectModalProps";
 
 export const EditProjectModal: React.FC<Props> = ({
     project,

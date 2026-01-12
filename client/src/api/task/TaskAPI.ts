@@ -4,6 +4,8 @@ import { UpdateTaskDTO } from "../../models/task/UpdateTaskDTO";
 import { ITaskAPI } from "./ITaskAPI";
 import { CommentDTO } from "../../models/task/CommentDTO";
 
+
+
 export class TaskAPI implements ITaskAPI {
   private baseUrl: string;
   private token: string;
@@ -22,88 +24,142 @@ export class TaskAPI implements ITaskAPI {
   }
 
   async getTasksByProject(sprintId: string): Promise<TaskDTO[]> {
-    const res = await fetch(`${this.baseUrl}/tasks/sprints/${sprintId}`, {
+    try {
+      const testSprintId = "1";
+      const res = await fetch(`${this.baseUrl}/tasks/sprints/${testSprintId}`, {
       headers: this.headers,
     });
-   if (!res.ok) {
-    throw new Error("Failed to fetch task");
-  }
+     if (!res.ok) {
+      throw new Error("Failed to fetch task");
+    }
 
-  const json = await res.json();
-  return json.data ?? json;
+    const json = await res.json();
+    return json.data ?? json;
+    } catch (error) {
+      console.error('Error fetching tasks by project:', error);
+      throw error;
+    }
   }
 
   async getTask(taskId: number): Promise<TaskDTO> {
-  const res = await fetch(`${this.baseUrl}/tasks/${taskId}`, {
-    headers: this.headers,
-  });
+    try {
+      const res = await fetch(`${this.baseUrl}/tasks/${taskId}`, {
+        headers: this.headers,
+      });
 
-  if (!res.ok) {
-    throw new Error("Failed to fetch task");
+      if (!res.ok) {
+        throw new Error("Failed to fetch task");
+      }
+
+      const json = await res.json();
+      return json.data ?? json;
+    } catch (error) {
+      console.error('Error fetching task:', error);
+      throw error;
+    }
   }
 
-  const json = await res.json();
-  return json.data ?? json;
-}
-
   async createTask(payload: CreateTaskDTO): Promise<TaskDTO> {
-    const res = await fetch(`${this.baseUrl}/task`, {
-      method: "POST",
-      headers: this.headers,
-      body: JSON.stringify(payload),
-    });
-    return res.json();
+    try {
+      const testSprint = "1";
+      const res = await fetch(`${this.baseUrl}/tasks/sprints/${testSprint}`, {
+        method: "POST",
+        headers: this.headers,
+        body: JSON.stringify(payload),
+      });
+      return res.json();
+    } catch (error) {
+      console.error('Error creating task:', error);
+      throw error;
+    }
   }
 
   async updateTask(taskId: number, payload: UpdateTaskDTO): Promise<TaskDTO> {
-    const res = await fetch(`${this.baseUrl}/task/${taskId}`, {
-      method: "PUT",
-      headers: this.headers,
-      body: JSON.stringify(payload),
-    });
-    return res.json();
+    try {
+      const res = await fetch(`${this.baseUrl}/tasks/${taskId}`, {
+        method: "PUT",
+        headers: this.headers,
+        body: JSON.stringify(payload),
+      });
+      return res.json();
+    } catch (error) {
+      console.error('Error updating task:', error);
+      throw error;
+    }
+  }
+
+  async updateTaskStatus(taskId: number, status: string): Promise<void> {
+    try {
+      const res = await fetch(`${this.baseUrl}/tasks/${taskId}/status`, {
+        method: "PATCH",
+        headers: this.headers,
+        body: JSON.stringify({status}),
+      });
+
+      if(!res.ok) {
+        throw new Error("Failed to update task status");
+      }
+    } catch (error) {
+      console.error('Error updating task status:', error);
+      throw error;
+    }
   }
 
   async deleteTask(taskId: string): Promise<void> {
-    await fetch(`${this.baseUrl}/task/${taskId}`, {
-      method: "DELETE",
-      headers: this.headers,
-    });
+    try {
+      await fetch(`${this.baseUrl}/tasks/${taskId}`, {
+        method: "DELETE",
+        headers: this.headers,
+      });
+    } catch (error) {
+      console.error('Error deleting task:', error);
+      throw error;
+    }
   }
 async uploadComment(taskId: number,userId: number,text: string): Promise<CommentDTO> {
-  const res = await fetch(`${this.baseUrl}/tasks/${taskId}/comments`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${this.token}`,
-      },
-      body: JSON.stringify({
-        userId,
-        comment: text,
-      }),
+  try {
+    const res = await fetch(`${this.baseUrl}/tasks/${taskId}/comments`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${this.token}`,
+        },
+        body: JSON.stringify({
+          userId,
+          comment: text,
+        }),
+      }
+    );
+
+    if (!res.ok) {
+      throw new Error("Failed to upload comment");
     }
-  );
 
-  if (!res.ok) {
-    throw new Error("Failed to upload comment");
+    const json = await res.json();
+    return json;
+  } catch (error) {
+    console.error('Error uploading comment:', error);
+    throw error;
   }
-
-  const json = await res.json();
-  return json; 
 }
 
 async deleteComment(commentId:number,userId:number) : Promise<void>{
-   const res = await fetch(`${this.baseUrl}/comments/${commentId}`, {
-    method: "DELETE",
-    headers: {
-      ...this.headers,
-      "x-user-id": userId.toString(),
-    },
-   });
+   try {
+     const res = await fetch(`${this.baseUrl}/comments/${commentId}`, {
+      method: "DELETE",
+      headers: {
+        ...this.headers,
+        "x-user-id": userId.toString(),
+      },
+     });
 
-   if(!res.ok){
-    throw new Error("Failed to delete comment");
+     if(!res.ok){
+      throw new Error("Failed to delete comment");
+     }
+   } catch (error) {
+     console.error('Error deleting comment:', error);
+     throw error;
    }
 }
 

@@ -8,6 +8,7 @@ import { CreateCommentDTO } from "../../../Domain/DTOs/task/CreateCommentDTO";
 import { TaskDTO } from "../../../Domain/DTOs/task/TaskDTO";
 import { UpdateTaskDTO } from "../../../Domain/DTOs/task/UpdateTaskDTO";
 import { CommentDTO } from "../../../Domain/DTOs/task/CommentDTO";
+import { TaskStatus } from "../../../Domain/enums/task/TaskStatus";
 import { TaskPolicies } from "../../../Domain/access-policies/task/TaskPolicies";
 
 // Middlewares
@@ -37,11 +38,13 @@ export class GatewayTaskController {
     private initializeRoutes() {
         const taskReadonlyAccess = [authenticate, authorize(...TaskPolicies.READONLY)];
         const taskWriteAccess = [authenticate, authorize(...TaskPolicies.WRITE)];
+        const taskStatusAccess = [authenticate, authorize(...TaskPolicies.CHANGE_STATUS)];
 
         this.router.get('/tasks/:taskId', ...taskReadonlyAccess, this.getTaskById.bind(this));
         this.router.get('/tasks/sprints/:sprintId', ...taskReadonlyAccess, this.getTasksBySprintId.bind(this));
         this.router.post('/tasks/sprints/:sprintId', ...taskWriteAccess, this.createTaskBySprintId.bind(this));
         this.router.put('/tasks/:taskId', ...taskWriteAccess, this.updateTaskById.bind(this));
+        this.router.patch('/tasks/:taskId/status', ...taskStatusAccess, this.updateTaskStatusById.bind(this));
         this.router.delete('/tasks/:taskId', ...taskWriteAccess, this.deleteTaskById.bind(this));
         this.router.post('/tasks/:taskId/comments', ...taskWriteAccess, this.addCommentByTaskId.bind(this));
         this.router.delete('/comments/:commentId', ...taskWriteAccess, this.deleteCommentById.bind(this));
@@ -111,6 +114,23 @@ export class GatewayTaskController {
 
         const result = await this.gatewayTaskService.updateTaskById(taskId, data, senderId);
         handleResponse(res, result);
+    }
+
+    /**
+     * PATCH /api/v1/tasks/:taskId/status
+     * @param {Request} req - the request object, containing the id of the task in params and task status in body as {@link TaskStatus}.
+     * @param {Response} res - the response object for the client.
+     * @returns {Promise<void>}
+     * - On success: response status 204, no data. 
+     * - On failure: response status code indicating the failure, response data: message describing the error.
+     */
+    private async updateTaskStatusById(req: Request<ReqParams<'taskId'>>, res: Response): Promise<void> {
+        const taskId = parseInt(req.params.taskId, 10);
+        const data = req.body as TaskStatus;
+        const senderId = req.user!.id;
+
+        const result = await this.gatewayTaskService.updateTaskStatusById(taskId, data, senderId);
+        handleEmptyResponse(res, result);
     }
 
     /**

@@ -216,18 +216,6 @@ export class TaskService implements ITaskService {
                 task.worker_id = updateTaskDTO.assignedTo;
                 }
             }
-            else if(user_id == task.worker_id)
-            {
-                //treba implementirati logiku za upload fajla
-                //verovatno druga metoda
-                if (updateTaskDTO.status !== undefined) {
-                    const validStatus = Object.values(TaskStatus).includes(updateTaskDTO.status);
-                    if (!validStatus) {
-                        return { success: false, errorCode: ErrorCode.INVALID_INPUT, message: "Invalid task status" };
-                    }
-                    task.task_status = updateTaskDTO.status;
-                }
-            }
             else
             {
                 return { success: false, errorCode: ErrorCode.FORBIDDEN, message: "Failed to update task" };
@@ -239,6 +227,31 @@ export class TaskService implements ITaskService {
         } catch (error) {
             return { success: false, errorCode: ErrorCode.INTERNAL_ERROR, message: "Failed to update task" };
         }
+    }
+
+    async updateTaskStatus(task_id: number, newStatus: TaskStatus, user_id: number): Promise<Result<Task>> {
+        try {
+            const task = await this.taskRepository.findOne({where: {task_id}});
+
+            if(!task) {
+                return { success: false, errorCode: ErrorCode.TASK_NOT_FOUND, message: "Task not found"};
+            }
+
+            if(user_id != task.worker_id && user_id != task.project_manager_id) {
+                return { success: false, errorCode: ErrorCode.FORBIDDEN, message: "You are not authorized to change this task's status" };
+            }
+
+            if (!Object.values(TaskStatus).includes(newStatus)) {
+                return { success: false, errorCode: ErrorCode.INVALID_INPUT, message: "Invalid task status" };
+            }
+
+            task.task_status = newStatus;
+            const updatedTask = await this.taskRepository.save(task);
+            return { success: true, data: updatedTask };
+        } catch (error) {
+            return { success: false, errorCode: ErrorCode.INTERNAL_ERROR, message: "Failed to update status" };
+        }
+        
     }
 
     async deleteTask(task_id: number,user_id: number): Promise<Result<boolean>> {
