@@ -46,14 +46,21 @@ const handleUpload = async () => {
 };
 
   useEffect(() => {
+    if(!isTaskDone) return;
     if(!task) return;
+    if(task.task_status === TaskStatus.COMPLETED) return; 
 
-    if(isTaskDone && task.task_status !== TaskStatus.COMPLETED) {
-      setTask({...task,task_status : TaskStatus.COMPLETED});
-    }
-    apiTask.updateTaskStatus(taskId,TaskStatus.COMPLETED);
-    
-  },[task,isTaskDone])
+    // Update backend
+    apiTask.updateTaskStatus(taskId, TaskStatus.COMPLETED)
+      .then(() => {
+        // Update local state samo ako je uspelo
+        setTask(prev => prev ? {...prev, task_status: TaskStatus.COMPLETED} : null);
+      })
+      .catch(err => {
+        console.error("Failed to update task status:", err);
+      });
+
+  }, [isTaskDone, taskId]) // Ukloni task iz dependencies
 
 
   const handleAddComments = async (text: string) => {

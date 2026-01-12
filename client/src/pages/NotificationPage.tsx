@@ -42,8 +42,8 @@ const NotificationPage: React.FC<NotificationPageProps> = ({notificationAPI}) =>
     setupWebSocket();
     // Cleanup - socket ostaje konektovan, samo cleanup event listenere
     return () => {
-      // Ne disconnect-uj socket, on treba da ostane aktivan!
-      // socketEventService ima cleanup metodu za event listenere
+      // Clean up all socket event listeners to prevent memory leak
+      socketEventService.removeAllListeners();
     };
   }, []);
 

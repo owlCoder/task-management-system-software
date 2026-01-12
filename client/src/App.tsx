@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { Route, Routes } from "react-router-dom";
 import { AuthPage } from "./pages/AuthPage";
 import { IAuthAPI } from "./api/auth/IAuthAPI";
@@ -24,18 +24,24 @@ const notification_API: INotificationAPI = new NotificationAPI(import.meta.env.V
 const backgroundImageUrl = new URL("../public/bg2.png", import.meta.url).href;
 
 function App() {
-  const { user } = useAuth();
-  const currentUserId = user?.id || 1;
+  const { user, isAuthenticated } = useAuth();
+  const socketInitialized = useRef(false);
 
   useEffect(() => {
-    socketManager.connect();
-    socketManager.joinUserRoom(currentUserId);
+    if (isAuthenticated && user?.id && !socketInitialized.current) {
+      socketInitialized.current = true;
+      socketManager.connect();
+      socketManager.joinUserRoom(user.id);
+    }
 
     return () => {
-      socketManager.leaveUserRoom(currentUserId);
-      socketManager.disconnect();
+      if (!isAuthenticated && socketInitialized.current) {
+        socketManager.leaveUserRoom(user?.id || 0);
+        socketManager.disconnect();
+        socketInitialized.current = false;
+      }
     };
-  }, [currentUserId]);
+  }, [isAuthenticated, user?.id]);
 
   return (
     <div

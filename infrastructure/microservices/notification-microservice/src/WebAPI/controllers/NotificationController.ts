@@ -12,7 +12,7 @@ export class NotificationController {
     this.notificationService = notificationService;
   }
 
-  async getNotificationById(req: Request, res: Response): Promise<void> {
+  async getNotificationById(req: Request<{ id: string }>, res: Response): Promise<void> {
     try {
       const validationError = NotificationValidation.validateId(req.params.id);
       if (validationError) {
@@ -20,7 +20,7 @@ export class NotificationController {
         return;
       }
 
-      const id = parseInt(req.params.id);
+      const id = parseInt(req.params.id, 10);
       if (isNaN(id)) {
         res.status(400).json({ message: 'Invalid notification ID' });
         return;
@@ -43,7 +43,7 @@ export class NotificationController {
     }
   }
 
-  async getNotificationsByUserId(req: Request, res: Response): Promise<void> {
+  async getNotificationsByUserId(req: Request<{ userId: string }>, res: Response): Promise<void> {
     try {
       const validationError = NotificationValidation.validateId(req.params.userId);
       if (validationError) {
@@ -51,7 +51,7 @@ export class NotificationController {
         return;
       }
 
-      const userId = parseInt(req.params.userId);
+      const userId = parseInt(req.params.userId, 10);
       if (isNaN(userId)) {
         res.status(400).json({ message: 'Invalid user ID' });
         return;
@@ -74,7 +74,7 @@ export class NotificationController {
     }
   }
 
-  async getUnreadCount(req: Request, res: Response): Promise<void> {
+  async getUnreadCount(req: Request<{ userId: string }>, res: Response): Promise<void> {
     try {
       const validationError = NotificationValidation.validateId(req.params.userId);
       if (validationError) {
@@ -82,7 +82,7 @@ export class NotificationController {
         return;
       }
 
-      const userId = parseInt(req.params.userId);
+      const userId = parseInt(req.params.userId, 10);
       if (isNaN(userId)) {
         res.status(400).json({ message: 'Invalid user ID' });
         return;
@@ -131,7 +131,7 @@ export class NotificationController {
     }
   }
 
-  async markAsRead(req: Request, res: Response): Promise<void> {
+  async markAsRead(req: Request<{ id: string }>, res: Response): Promise<void> {
     try {
       const validationError = NotificationValidation.validateId(req.params.id);
       if (validationError) {
@@ -139,7 +139,7 @@ export class NotificationController {
         return;
       }
 
-      const id = parseInt(req.params.id);
+      const id = parseInt(req.params.id, 10);
       if (isNaN(id)) {
         res.status(400).json({ message: 'Invalid notification ID' });
         return;
@@ -162,7 +162,7 @@ export class NotificationController {
     }
   }
 
-  async markAsUnread(req: Request, res: Response): Promise<void> {
+  async markAsUnread(req: Request<{ id: string }>, res: Response): Promise<void> {
     try {
       const validationError = NotificationValidation.validateId(req.params.id);
       if (validationError) {
@@ -170,7 +170,7 @@ export class NotificationController {
         return;
       }
 
-      const id = parseInt(req.params.id);
+      const id = parseInt(req.params.id, 10);
       if (isNaN(id)) {
         res.status(400).json({ message: 'Invalid notification ID' });
         return;
@@ -259,7 +259,7 @@ export class NotificationController {
     }
   }
 
-  async deleteNotification(req: Request, res: Response): Promise<void> {
+  async deleteNotification(req: Request<{ id: string }>, res: Response): Promise<void> {
     try {
       const validationError = NotificationValidation.validateId(req.params.id);
       if (validationError) {
@@ -267,7 +267,7 @@ export class NotificationController {
         return;
       }
 
-      const id = parseInt(req.params.id);
+      const id = parseInt(req.params.id, 10);
       if (isNaN(id)) {
         res.status(400).json({ message: 'Invalid notification ID' });
         return;

@@ -168,11 +168,16 @@ class ProjectAPIImpl implements IProjectAPI {
     }
 
     async assignUserToProject(projectId: number, username: string, weeklyHours: number): Promise<ProjectUserDTO> {
-        const response = await this.client.post<ProjectUserDTO>(`/projects/${projectId}/users`, {
-            username: username,
-            weekly_hours: weeklyHours
-        });
-        return response.data;
+        try {
+            const response = await this.client.post<ProjectUserDTO>(`/projects/${projectId}/users`, {
+                username: username,
+                weekly_hours: weeklyHours
+            });
+            return response.data;
+        } catch (error) {
+            console.error("Error assigning user to project:", error);
+            throw error;
+        }
     }
 
     async removeUserFromProject(projectId: number, userId: number): Promise<boolean> {

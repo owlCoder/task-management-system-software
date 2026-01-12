@@ -19,36 +19,61 @@ export class PlantAPI implements IPlantAPI {
   }
 
   async getAllPlants(token: string): Promise<PlantDTO[]> {
-    const response: AxiosResponse<PlantDTO[]> = await this.axiosInstance.get("/plants", {
-      headers: this.getAuthHeaders(token),
-    });
-    return response.data;
+    try {
+      const response: AxiosResponse<PlantDTO[]> = await this.axiosInstance.get("/plants", {
+        headers: this.getAuthHeaders(token),
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching all plants:', error);
+      throw error;
+    }
   }
 
   async getPlantById(id: number, token: string): Promise<PlantDTO> {
-    const response: AxiosResponse<PlantDTO> = await this.axiosInstance.get(`/plants/${id}`, {
-      headers: this.getAuthHeaders(token),
-    });
-    return response.data;
+    try {
+      const response: AxiosResponse<PlantDTO> = await this.axiosInstance.get(`/plants/${id}`, {
+        headers: this.getAuthHeaders(token),
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching plant by ID:', error);
+      throw error;
+    }
   }
 
   async createPlant(plant: PlantDTO, token: string): Promise<PlantDTO> {
-    const response: AxiosResponse<PlantDTO> = await this.axiosInstance.post("/plants", plant, {
-      headers: this.getAuthHeaders(token),
-    });
-    return response.data;
+    try {
+      const response: AxiosResponse<PlantDTO> = await this.axiosInstance.post("/plants", plant, {
+        headers: this.getAuthHeaders(token),
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error creating plant:', error);
+      throw error;
+    }
   }
 
   async updatePlant(id: number, plant: PlantDTO, token: string): Promise<PlantDTO> {
-    const response: AxiosResponse<PlantDTO> = await this.axiosInstance.put(`/plants/${id}`, plant, {
-      headers: this.getAuthHeaders(token),
-    });
-    return response.data;
+    try {
+      const response: AxiosResponse<PlantDTO> = await this.axiosInstance.put(`/plants/${id}`, plant, {
+        headers: this.getAuthHeaders(token),
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error updating plant:', error);
+      throw error;
+    }
   }
 
   async deletePlant(id: number, token: string): Promise<void> {
-    await this.axiosInstance.delete(`/plants/${id}`, {
-      headers: this.getAuthHeaders(token),
-    });
+    try {
+      await this.axiosInstance.delete(`/plants/${id}`, {
+        headers: this.getAuthHeaders(token),
+      });
+    } catch (error) {
+      console.error('Error deleting plant:', error);
+      throw error;
+    }
   }
 }
