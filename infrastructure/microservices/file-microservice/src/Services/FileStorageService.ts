@@ -27,11 +27,12 @@ export class FileStorageService implements IFileStorageService {
     }
   }
 
-  async saveFile(userUuid: string, filename: string, fileBuffer: Buffer): Promise<Result<string>> {
+  async saveFile(userUuid: number, filename: string, fileBuffer: Buffer): Promise<Result<string>> {
     try {
-      this.ensureUserDirectoryExists(userUuid);
+      const userUuidPath = userUuid.toString();
+      this.ensureUserDirectoryExists(userUuidPath);
       
-      const filePath = path.join(this.getUserDirectoryPath(userUuid), filename);
+      const filePath = path.join(this.getUserDirectoryPath(userUuidPath), filename);
       
       await fs.promises.writeFile(filePath, fileBuffer);
       

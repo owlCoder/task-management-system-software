@@ -23,10 +23,9 @@ export class FileService implements IFileService {
         : `.${fileData.fileExtension}`;
       
       const uniqueFileName = `${uuidv4()}${fileExtension}`;
-      const userUuid = uuidv4(); 
 
       const saveResult = await this.fileStorageService.saveFile(
-        userUuid, 
+        fileData.authorId, 
         uniqueFileName, 
         fileData.fileBuffer
       );
