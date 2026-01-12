@@ -48,7 +48,11 @@ export class ProjectController {
     private async getProjects(req: Request, res: Response): Promise<void> {
         try {
             const projects = await this.projectService.getProjects();
-            res.status(200).json(projects);
+            if (projects.success) {
+                res.status(200).json(projects.data);
+            } else {
+                res.status(projects.code).json({ message: projects.error });
+            }
         } catch (err) {
             res.status(500).json({ message: (err as Error).message });
         }
@@ -63,7 +67,12 @@ export class ProjectController {
             }
 
             const projects = await this.projectService.getProjectsByUserId(userId);
-            res.status(200).json(projects);
+            if (projects.success) {
+                res.status(200).json(projects.data);
+            } else {
+                res.status(projects.code).json({ message: projects.error });
+            }
+
         } catch (err) {
             res.status(500).json({ message: (err as Error).message });
         }
@@ -76,8 +85,13 @@ export class ProjectController {
                 res.status(400).json({ message: "Invalid project ID" });
                 return;
             }
+
             const project = await this.projectService.getProjectById(id);
-            res.status(200).json(project);
+            if (project.success) {
+                res.status(200).json(project.data);
+            } else {
+                res.status(project.code).json({ message: project.error });
+            }
         } catch (err) {
             res.status(500).json({ message: (err as Error).message });
         }
@@ -85,14 +99,14 @@ export class ProjectController {
 
     private parseStatus(statusStr: string | undefined): ProjectStatus {
         if (!statusStr) return ProjectStatus.NOT_STARTED;
-        
+
         const statusMap: { [key: string]: ProjectStatus } = {
             "Active": ProjectStatus.ACTIVE,
             "Paused": ProjectStatus.PAUSED,
             "Completed": ProjectStatus.COMPLETED,
             "Not Started": ProjectStatus.NOT_STARTED,
         };
-        
+
         return statusMap[statusStr] || ProjectStatus.NOT_STARTED;
     }
 
@@ -134,8 +148,8 @@ export class ProjectController {
 
             const createdResult = await this.projectService.CreateProject(data);
 
-            if(!createdResult.success){
-                if(data.image_key){
+            if (!createdResult.success) {
+                if (data.image_key) {
                     await this.storageService.deleteImage(data.image_key);
                 }
                 res.status(createdResult.code).json({ message: createdResult.error });
@@ -144,21 +158,21 @@ export class ProjectController {
 
             const created = createdResult.data;
 
-            if(creatorUsername && created.project_id){
-                try{
+            if (creatorUsername && created.project_id) {
+                try {
                     await this.projectUserService.assignUserToProject({
                         project_id: created.project_id,
                         username: creatorUsername,
                         weekly_hours: 0,
                     });
-                    console.log( 
+                    console.log(
                         `Project Manager "${creatorUsername}" automatically assigned to project ${created.project_id} with 0 weekly hours`
                     );
-                } catch(assignError){
+                } catch (assignError) {
                     console.error(
-                    "Failed to auto-assign Project Manager to project:",
-                    assignError
-                );
+                        "Failed to auto-assign Project Manager to project:",
+                        assignError
+                    );
                 }
             }
 
@@ -224,7 +238,14 @@ export class ProjectController {
             }
 
             const updated = await this.projectService.updateProject(id, data);
-            res.status(200).json(updated);
+            if (updated.success) {
+                res.status(200).json(updated.data);
+            } else {
+                if (data.image_key) {
+                    await this.storageService.deleteImage(data.image_key);
+                }
+                res.status(updated.code).json({ message: updated.error });
+            }
         } catch (err) {
             console.error("Update project error:", err);
             res.status(500).json({ message: (err as Error).message });
@@ -240,11 +261,11 @@ export class ProjectController {
             }
 
             const ok = await this.projectService.deleteProject(id);
-            if (!ok) {
-                res.status(404).json({ message: `Project with id ${id} not found` });
-                return;
+            if (ok.success) {
+                res.status(204).send();
+            } else {
+                res.status(ok.code).json({ message: ok.error });
             }
-            res.status(204).send();
         } catch (err) {
             res.status(500).json({ message: (err as Error).message });
         }
@@ -259,7 +280,11 @@ export class ProjectController {
             }
 
             const exists = await this.projectService.projectExists(id);
-            res.status(200).json({ exists });
+            if (exists.success) {
+                res.status(200).json({ exists: exists.data });
+            } else {
+                res.status(exists.code).json({ message: exists.error });
+            }
         } catch (err) {
             res.status(500).json({ message: (err as Error).message });
         }

@@ -8,7 +8,7 @@ import { ReqParams } from "../../Domain/types/ReqParams";
 export class SprintController {
     private readonly router: Router;
 
-    constructor (private readonly sprintService: ISprintService) {
+    constructor(private readonly sprintService: ISprintService) {
         this.router = Router();
         this.initializeRoutes();
     }
@@ -22,9 +22,9 @@ export class SprintController {
     }
 
     private async createSprint(req: Request<ReqParams<'projectId'>>, res: Response): Promise<void> {
-        try{
+        try {
             const projectId = parseInt(req.params.projectId, 10);
-            if(isNaN(projectId)){
+            if (isNaN(projectId)) {
                 res.status(400).json({ message: "Invalid project ID" });
                 return;
             }
@@ -34,8 +34,13 @@ export class SprintController {
                 project_id: projectId,
                 ...body
             };
+
             const created = await this.sprintService.createSprint(dto);
-            res.status(201).json(created);
+            if (created.success) {
+                res.status(201).json(created.data);
+            } else {
+                res.status(created.code).json({ message: created.error });
+            }
         } catch (err) {
             res.status(500).json({ message: (err as Error).message });
         }
@@ -44,12 +49,17 @@ export class SprintController {
     private async getSprintsByProject(req: Request<ReqParams<'projectId'>>, res: Response): Promise<void> {
         try {
             const projectId = parseInt(req.params.projectId, 10);
-            if(isNaN(projectId)){
+            if (isNaN(projectId)) {
                 res.status(400).json({ message: "Invalid project ID" });
                 return;
             }
+
             const list = await this.sprintService.getSprintsByProject(projectId);
-            res.status(200).json(list);
+            if (list.success) {
+                res.status(200).json(list.data);
+            } else {
+                res.status(list.code).json({ message: list.error });
+            }
         } catch (err) {
             res.status(500).json({ message: (err as Error).message });
         }
@@ -58,12 +68,17 @@ export class SprintController {
     private async getSprintById(req: Request<ReqParams<'id'>>, res: Response): Promise<void> {
         try {
             const sprintId = parseInt(req.params.id, 10);
-            if(isNaN(sprintId)){
+            if (isNaN(sprintId)) {
                 res.status(400).json({ message: "Invalid sprint ID" });
                 return;
             }
+
             const sprint = await this.sprintService.getSprintById(sprintId);
-            res.status(200).json(sprint);
+            if (sprint.success) {
+                res.status(200).json(sprint.data);
+            } else {
+                res.status(sprint.code).json({ message: sprint.error });
+            }
         } catch (err) {
             res.status(500).json({ message: (err as Error).message });
         }
@@ -72,13 +87,18 @@ export class SprintController {
     private async updateSprint(req: Request<ReqParams<'id'>>, res: Response): Promise<void> {
         try {
             const sprintId = parseInt(req.params.id, 10);
-            if(isNaN(sprintId)){
+            if (isNaN(sprintId)) {
                 res.status(400).json({ message: "Invalid sprint ID" });
                 return;
             }
+
             const data = req.body as SprintUpdateDTO;
             const updated = await this.sprintService.updateSprint(sprintId, data);
-            res.status(200).json(updated);
+            if (updated.success) {
+                res.status(200).json(updated.data);
+            } else {
+                res.status(updated.code).json({ message: updated.error });
+            }
         } catch (err) {
             res.status(500).json({ message: (err as Error).message });
         }
@@ -87,17 +107,18 @@ export class SprintController {
     private async deleteSprint(req: Request<ReqParams<'id'>>, res: Response): Promise<void> {
         try {
             const sprintId = parseInt(req.params.id, 10);
-            if(isNaN(sprintId)){
+            if (isNaN(sprintId)) {
                 res.status(400).json({ message: "Invalid sprint ID" });
                 return;
             }
+
             const ok = await this.sprintService.deleteSprint(sprintId);
-            if(!ok){
-                res.status(404).json({ message: "Sprint not found" });
-                return;
+            if (ok.success) {
+                res.status(204).send();
+            } else {
+                res.status(ok.code).json({ message: ok.error });
             }
-            res.status(204).send();
-        }catch (err) {
+        } catch (err) {
             res.status(500).json({ message: (err as Error).message });
         }
     }
