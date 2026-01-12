@@ -1,10 +1,13 @@
 import { MeasurementDto } from "../DTOs/Measurement_DTO";
 
-export interface IMicroservice_Service {
+export interface IMeasurement_Service {
   
-  getAllMeasurements(): MeasurementDto[];
-  getMeasurementByID(measurementID: number): MeasurementDto;
-  getMeasurementsFromMicroservice(microserviceId: number): MeasurementDto[];
-  getAllCriticalMeasurements(): MeasurementDto[];
-  deleteMeasurement(measurementID: number): void;
+  getAllMeasurements():Promise<MeasurementDto[]>;
+  getMeasurementByID(measurementID: number): Promise<MeasurementDto>;
+  getMeasurementsFromMicroservice(microserviceId: number):Promise<MeasurementDto[]>;
+  getAllCriticalMeasurements():Promise<MeasurementDto[]>;
+
+  setMeasurement(measurement: MeasurementDto):Promise<boolean>;
+
+  deleteMeasurement(measurementID: number):Promise<boolean>;
 }

@@ -1,8 +1,8 @@
 import { MicroserviceDto } from "../DTOs/Microservice_DTO";
 export interface IMicroservice_Service {
   
-  getMicroserviceByName(microserviceName: string): MicroserviceDto;
-  getMicroserviceByID(microserviceId: number): MicroserviceDto;
-  setMicroservice(microserviceId: number): void;
-  deleteMicroservice(microserviceId: number): void;
+  getMicroserviceByName(microserviceName: string): Promise<MicroserviceDto>;
+  getMicroserviceByID(microserviceId: number):Promise<MicroserviceDto>;
+  setMicroservice(microserviceId: number):Promise<boolean>;
+  deleteMicroservice(microserviceId: number):Promise<boolean>;
 }

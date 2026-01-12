@@ -1,4 +1,6 @@
-export interface MicroserviceDto {
-  microserviceId: number;
-  microserviceName: string;
+export class MicroserviceDto {
+  constructor(
+    public microserviceId: number,
+    public microserviceName: string
+  ) {}
 }
