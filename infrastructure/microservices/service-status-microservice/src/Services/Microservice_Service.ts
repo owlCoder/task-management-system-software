@@ -12,6 +12,14 @@ export class Microservice_Service implements IMicroservice_Service {
         this.microserviceRepository = Db.getRepository(Microservice);
     }
 
+    async getAllMicroservices(): Promise<MicroserviceDto[]> {
+        const microservices = await this.microserviceRepository.find({
+            order: { microservice_name: "ASC" },
+        });
+
+        return microservices.map(m => this.toDto(m));
+    }
+
     async getMicroserviceByName(microserviceName: string): Promise<MicroserviceDto> {
         const microservice = await this.microserviceRepository.findOne({
             where: { microservice_name: microserviceName },
@@ -35,18 +43,25 @@ export class Microservice_Service implements IMicroservice_Service {
 
         return this.toDto(microservice);
     }
-    async setMicroservice(microserviceId: number): Promise<boolean> {
-        const microservice = await this.microserviceRepository.findOne({
-            where: { ID_microservice: microserviceId },
+
+    async setMicroservice(microserviceName: string): Promise<boolean> {
+        const existing = await this.microserviceRepository.findOne({
+            where: { microservice_name: microserviceName },
         });
 
-        if (!microservice) {
+        if (existing) {
             return false;
         }
 
-        //TODO
+        const newMicroservice = this.microserviceRepository.create({
+            microservice_name: microserviceName
+        });
+
+        await this.microserviceRepository.save(newMicroservice);
+
         return true;
     }
+    
     async deleteMicroservice(microserviceId: number): Promise<boolean> {
         const result = await this.microserviceRepository.delete({
             ID_microservice: microserviceId,

@@ -4,8 +4,11 @@ import { Microservice_controller } from './WebAPI/controllers/Microservice_contr
 import { Measurement_controller } from './WebAPI/controllers/Measurement_controller';
 import { Measurement_Service } from './Services/Measurement_Service';
 import { Microservice_Service } from './Services/Microservice_Service';
+import { Db } from './Database/DbConnectionPool';
 
 const app = express();
+
+Db.initialize();
 
 app.use(corsPolicy);
 

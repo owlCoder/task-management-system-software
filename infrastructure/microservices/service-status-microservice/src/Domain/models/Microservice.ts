@@ -6,6 +6,7 @@ import {
   JoinColumn,
 } from "typeorm";
 
+@Entity("Microservices")
 export class Microservice{
     @PrimaryGeneratedColumn()
     ID_microservice!: number;

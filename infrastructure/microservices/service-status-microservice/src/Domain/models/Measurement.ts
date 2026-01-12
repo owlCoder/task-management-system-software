@@ -9,7 +9,7 @@ import {
 import { EOperationalStatus } from "../enums/EOperationalStatus";
 import { Microservice } from "./Microservice";
 
-@Entity("measurements")
+@Entity("Measurements")
 export class Measurement {
 
     @PrimaryGeneratedColumn()

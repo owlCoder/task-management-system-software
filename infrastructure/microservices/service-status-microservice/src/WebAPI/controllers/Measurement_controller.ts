@@ -14,11 +14,11 @@ export class Measurement_controller {
 
     private initializeRoutes(): void {
         this.router.get("/measurements", this.getAllMeasurements.bind(this));
-        this.router.get("/measurement/:microserviceId", this.getMeasurementFromMicroservice.bind(this));
-        this.router.get("/measurement/Down", this.getAllDownMeasurements.bind(this));
+        this.router.get("/:microserviceId", this.getMeasurementFromMicroservice.bind(this));
+        this.router.get("/Down", this.getAllDownMeasurements.bind(this));
 
-        this.router.patch("/measurement/set", this.setMeasurement.bind(this));
-        this.router.delete("/measurement/delete", this.deleteMeasurement.bind(this));
+        this.router.post("/set", this.setMeasurement.bind(this));
+        this.router.delete("/delete/:measurementID", this.deleteMeasurement.bind(this));
     }
 
     private async getAllMeasurements(req: Request, res: Response): Promise<void> {
@@ -32,10 +32,10 @@ export class Measurement_controller {
 
     private async getMeasurementFromMicroservice(req: Request, res: Response): Promise<void> {
 
-        const { microservice_id } = req.body as { microservice_id: number };
+        const microserviceId = Number(req.params.microserviceId);
 
         try {
-            const result = await this.measurementService.getMeasurementsFromMicroservice(microservice_id);
+            const result = await this.measurementService.getMeasurementsFromMicroservice(microserviceId);
             res.status(200).json(result);
         } catch (err) {
             res.status(500).json({ message: (err as Error).message });

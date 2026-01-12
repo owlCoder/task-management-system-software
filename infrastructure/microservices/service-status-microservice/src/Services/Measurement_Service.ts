@@ -8,13 +8,14 @@ import { Microservice } from "../Domain/models/Microservice";
 
 export class Measurement_Service implements IMeasurement_Service {
 
-    private measurementRepository: Repository<Measurement>;
-    private microserviceRepository:Repository<Microservice>
-
-    constructor() {
-        this.measurementRepository = Db.getRepository(Measurement);
-        this.microserviceRepository = Db.getRepository(Microservice);
+    private get measurementRepository(): Repository<Measurement> {
+        return Db.getRepository(Measurement);
     }
+
+    private get microserviceRepository(): Repository<Microservice> {
+        return Db.getRepository(Microservice);
+    }
+
 
     async getMeasurementByID(measurementID: number): Promise<MeasurementDto> {
         const measurement = await this.measurementRepository.findOne({
@@ -23,7 +24,7 @@ export class Measurement_Service implements IMeasurement_Service {
         });
 
         if (!measurement) {
-            return new MeasurementDto(0, 0, null as any, 0, "");
+            return new MeasurementDto(0, 0, 1, 0, "");
         }
 
         return this.toDto(measurement);
@@ -39,6 +40,7 @@ export class Measurement_Service implements IMeasurement_Service {
 
         return measurements.map(m => this.toDto(m));
     }
+
     async getAllDownMeasurements(): Promise<MeasurementDto[]> {
         const measurements = await this.measurementRepository.find({
             where: { status: EOperationalStatus.Down },
