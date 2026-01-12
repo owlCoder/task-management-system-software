@@ -38,21 +38,13 @@ export class ProjectUserController {
             }
 
             const result = await this.projectUserService.assignUserToProject(dto);
-            res.status(201).json(result);
+            if (result.success) {
+                res.status(201).json(result.data);
+            } else {
+                res.status(result.code).json({ message: result.error });
+            }
         } catch (err) {
-            const errorMessage = (err as Error).message;
-            
-            if (errorMessage.includes("not found")) {
-                res.status(404).json({ message: errorMessage });
-                return;
-            }
-            
-            if (errorMessage.includes("already assigned") || errorMessage.includes("exceed")) {
-                res.status(409).json({ message: errorMessage });
-                return;
-            }
-            
-            res.status(500).json({ message: errorMessage });
+            res.status(500).json({ message: (err as Error).message });
         }
     }
 
@@ -63,8 +55,13 @@ export class ProjectUserController {
                 res.status(400).json({ message: "Invalid project ID" });
                 return;
             }
+
             const list = await this.projectUserService.getUsersForProject(project_id);
-            res.status(200).json(list);
+            if (list.success) {
+                res.status(200).json(list.data);
+            } else {
+                res.status(list.code).json({ message: list.error });
+            }
         } catch (err) {
             res.status(500).json({ message: (err as Error).message });
         }
@@ -74,18 +71,18 @@ export class ProjectUserController {
         try {
             const project_id = parseInt(req.params.id, 10);
             const user_id = parseInt(req.params.userId, 10);
-            
+
             if (isNaN(project_id) || isNaN(user_id)) {
                 res.status(400).json({ message: "Invalid project ID or user ID" });
                 return;
             }
-            
+
             const ok = await this.projectUserService.removeUserFromProject(project_id, user_id);
-            if (!ok) {
-                res.status(404).json({ message: "Assignment not found" });
-                return;
+            if (ok.success) {
+                res.status(204).send();
+            } else {
+                res.status(ok.code).json({ message: ok.error });
             }
-            res.status(204).send();
         } catch (err) {
             res.status(500).json({ message: (err as Error).message });
         }
