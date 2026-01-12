@@ -47,6 +47,7 @@
     - `GET /tasks/:taskId`: Get specific task.
     - `GET /tasks/sprints/:sprintId`: Get tasks for specific sprint.
     - `PUT /tasks/:taskId`: Update a specific task.
+    - `PATCH /tasks/:taskId/status`: Update status of a specific task.
     - `DELETE /tasks/:taskId`: Delete a specific task.
     - `POST /tasks/sprints/:sprintId`: Add task to a specific sprint.
     - `POST /tasks/:taskId/comments`: Add comment to a specific task.

@@ -9,6 +9,7 @@ import { CreateCommentDTO } from "../../Domain/DTOs/task/CreateCommentDTO";
 import { CreateTaskDTO } from "../../Domain/DTOs/task/CreateTaskDTO";
 import { TaskDTO } from "../../Domain/DTOs/task/TaskDTO";
 import { UpdateTaskDTO } from "../../Domain/DTOs/task/UpdateTaskDTO";
+import { TaskStatus } from "../../Domain/enums/task/TaskStatus";
 import { Result } from "../../Domain/types/common/Result";
 
 // Constants
@@ -104,6 +105,27 @@ export class GatewayTaskService implements IGatewayTaskService {
             serviceName: SERVICES.TASK,
             method: HTTP_METHODS.PUT,
             url: TASK_ROUTES.UPDATE_TASK(taskId),
+            headers: {
+                'x-user-id': senderId.toString()
+            },
+            data: data
+        });
+    }
+
+    /**
+     * Updates the status of an existing task.
+     * @param {number} taskId - id of the task.
+     * @param {TaskStatus} data - new task status. 
+     * @param {number} senderId - id of the user who sent request.
+     * @returns {Promise<Result<void>>} - A promise that resolves to a Result object.
+     * - On success returns void.
+     * - On failure returns status code and error message.
+     */
+    async updateTaskStatusById(taskId: number, data: TaskStatus, senderId: number): Promise<Result<void>> {
+        return await makeAPICall<void, TaskStatus>(this.taskClient, this.errorHandlingService, {
+            serviceName: SERVICES.TASK,
+            method: HTTP_METHODS.PATCH,
+            url: TASK_ROUTES.UPDATE_TASK_STATUS(taskId),
             headers: {
                 'x-user-id': senderId.toString()
             },
