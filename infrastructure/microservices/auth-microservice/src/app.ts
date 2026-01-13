@@ -10,7 +10,7 @@ import { IAuthService } from './Domain/services/IAuthService';
 import { AuthService } from './Services/AuthenticationServices/AuthService';
 import { AuthController } from './WebAPI/controllers/AuthController';
 import { ILogerService } from './Domain/services/ILogerService';
-import { LogerService } from './Services/LogerService';
+import { LogerService } from './Services/LogerServices/LogerService';
 import { LoggingServiceEnum } from './Domain/enums/LoggingServiceEnum';
 import { SeverityEnum } from './Domain/enums/SeverityEnum';
 import { UserRole } from './Domain/models/UserRole';
@@ -23,6 +23,9 @@ import { IOTPVerificationService } from './Domain/services/IOTPVerificationServi
 import { PasswordLoginStrategy } from './Services/LoginStrategies/PasswordLoginStrategy';
 import { OtpLoginStrategy } from './Services/LoginStrategies/OtpLoginStrategy';
 import { setLoggingLevel } from './helpers/loggingHelper';
+import { ITokenNamingStrategy } from './Domain/strategies/ITokenNamingStrategy';
+import { TokenNamingStrategyFactory } from './factories/TokenNamingStrategyFactory';
+import { JWTTokenService } from './Services/JWTTokenServices/JWTTokenService';
 
 dotenv.config({ quiet: true });
 
@@ -37,7 +40,7 @@ const corsMethods = process.env.CORS_METHODS?.split(",").map(m => m.trim()) ?? [
 
 // Protected microservice from unauthorized access
 app.use(cors({
-  origin: corsOrigin,
+  // origin: corsOrigin,
   methods: corsMethods,
 }));
 
@@ -56,12 +59,12 @@ const initLogger = new LogerService(LoggingServiceEnum.APP_SERVICE);
 
   // ORM Repositories
   const userRepository: Repository<User> = Db.getRepository(User);
-  const userRoleRepository: Repository<UserRole> = Db.getRepository(UserRole);
+  // const userRoleRepository: Repository<UserRole> = Db.getRepository(UserRole);
 
   // Services
   const authLogger = new LogerService(LoggingServiceEnum.AUTH_SERVICE);
   const emailLogger = new LogerService(LoggingServiceEnum.EMAIL_SERVICE);
-  const roleLogger = new LogerService(LoggingServiceEnum.ROLE_SERVICE);
+  // const roleLogger = new LogerService(LoggingServiceEnum.ROLE_SERVICE);
   const sessionLogger = new LogerService(LoggingServiceEnum.SESSION_SERVICE);
   const otpVerificationLogger = new LogerService(LoggingServiceEnum.OTP_VERIFICATION_SERVICE);
   const emailHealthCheckerLogger = new LogerService(LoggingServiceEnum.EMAIL_HEALTH_CHECKER_SERVICE);
@@ -79,10 +82,15 @@ const initLogger = new LogerService(LoggingServiceEnum.APP_SERVICE);
   const otpVerificationService: IOTPVerificationService = new OTPVerificationService(userRepository, emailService, sessionService, otpGenerator, otpVerificationLogger);
   const logerService: ILogerService = new LogerService(LoggingServiceEnum.APP_SERVICE);
 
+  initLogger.log(SeverityEnum.DEBUG, "Initializing token naming strategy");
+
+  const tokenNamingStrategy: ITokenNamingStrategy = TokenNamingStrategyFactory.createDefaultStrategy();
+  const jwtTokenService = new JWTTokenService();
+
   initLogger.log(SeverityEnum.DEBUG, "Setting up WebAPI controllers");
 
   // WebAPI routes
-  const authController = new AuthController(authService, otpVerificationService, logerService);
+  const authController = new AuthController(authService, otpVerificationService, logerService, tokenNamingStrategy, jwtTokenService);
 
   // Registering routes
   app.use('/api/v1', authController.getRouter());

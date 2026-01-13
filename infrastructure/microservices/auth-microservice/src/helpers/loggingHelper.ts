@@ -1,4 +1,4 @@
-import { LogerService } from "../Services/LogerService";
+import { LogerService } from "../Services/LogerServices/LogerService";
 import { SeverityEnum } from "../Domain/enums/SeverityEnum";
 
 /**
@@ -9,7 +9,6 @@ import { SeverityEnum } from "../Domain/enums/SeverityEnum";
  * Development mode is detected by:
  * - NODE_ENV === 'development'
  * - LOG_LEVEL === 'DEBUG'
- * - Running with nodemon (development server)
  *
  * Available log levels: {@link SeverityEnum}
  */

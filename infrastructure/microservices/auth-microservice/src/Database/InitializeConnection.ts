@@ -1,5 +1,5 @@
 import { Db } from "./DbConnectionPool";
-import { LogerService } from "../Services/LogerService";
+import { LogerService } from "../Services/LogerServices/LogerService";
 import { LoggingServiceEnum } from "../Domain/enums/LoggingServiceEnum";
 import { SeverityEnum } from "../Domain/enums/SeverityEnum";
 
