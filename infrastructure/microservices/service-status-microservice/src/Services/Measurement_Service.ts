@@ -45,10 +45,10 @@ export class Measurement_Service implements IMeasurement_Service {
     async getAllDownMeasurements(): Promise<MeasurementDto[]> {
         const measurements = await this.measurementRepository.find({
             where: { "status": EOperationalStatus.Down },
+            relations: ['microservice']
         });
 
-        return measurements.map(m => this.toDto(m));
-    }
+        return measurements.map(m => this.toDto(m));    }
 
     async getAllMeasurements(): Promise<MeasurementDto[]> {
         const measurements = await this.measurementRepository.find({

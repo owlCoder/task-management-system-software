@@ -14,7 +14,7 @@ export class Measurement_controller {
 
     private initializeRoutes(): void {
         this.router.get("/measurements", this.getAllMeasurements.bind(this));
-        this.router.get("/:microserviceId", this.getMeasurementFromMicroservice.bind(this));
+        this.router.get("/measurement/:microserviceId", this.getMeasurementFromMicroservice.bind(this));
         this.router.get("/Down", this.getAllDownMeasurements.bind(this));
 
         this.router.post("/set", this.setMeasurement.bind(this));
