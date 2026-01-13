@@ -1,18 +1,24 @@
-import { app, BrowserWindow, Menu } from "electron";
+import { app, BrowserWindow, Menu, ipcMain, shell } from "electron";
 import path from "path";
 import { fileURLToPath } from "url";
+
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 let win: BrowserWindow | null = null;
+ipcMain.handle("open-external", async (_event, url: string) => {
+  if (!/^https?:\/\//i.test(url)) return;
+  await shell.openExternal(url);
+});
+
 
 function createWindow() {
   win = new BrowserWindow({
     width: 1000,
     height: 700,
     minWidth: 800,
-    minHeight: 600,
+    minHeight: 600, 
     frame: true,
     titleBarStyle: "default",
 

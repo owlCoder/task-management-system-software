@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 //import { IAuthAPI } from "../../api/auth/IAuthAPI";
 import { LoginUserDTO } from "../../models/auth/LoginUserDTO";
 import { useAuth } from "../../hooks/useAuthHook";
@@ -18,11 +18,34 @@ export const LoginForm: React.FC<LoginFormProps> = ({
 
   const { login } = useAuth();
   const navigate = useNavigate();
+  const googleInitializedRef = useRef(false);
+  const googleBtnDivRef = useRef<HTMLDivElement | null>(null);
+
+  const [usernameErr, setUsernameErr] = useState<string>("");
+  const [passwordErr, setPasswordErr] = useState<string>("");
+
+  function validateUsername(v: string): string {
+    const s = v.trim();
+    if (s.length === 0) return "Username is required.";
+    if (s.length < 5) return "Username must be at least 5 characters.";
+    return "";
+  }
+
+  function validatePassword(v: string): string {
+    if (v.length === 0) return "Password is required.";
+    if (v.length < 6) return "Password must be at least 6 characters.";
+    return "";
+  }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
+
     setFormData((p) => ({ ...p, [name]: value }));
+
+    if (name === "username") setUsernameErr(validateUsername(value));
+    if (name === "password") setPasswordErr(validatePassword(value));
   };
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -59,6 +82,81 @@ export const LoginForm: React.FC<LoginFormProps> = ({
     }
   };
 
+
+  useEffect(() => {
+    const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+    if (!clientId) return;
+
+    const t = setInterval(() => {
+      const googleAny = (window as any).google;
+
+      if (googleInitializedRef.current) {
+        clearInterval(t);
+        return;
+      }
+
+      if (!googleAny?.accounts?.id) return;
+
+      googleAny.accounts.id.initialize({
+        client_id: clientId,
+        ux_mode: "popup",
+        auto_select: false,
+        cancel_on_tap_outside: true,
+        callback: async (response: any) => {
+          setError("");
+          try {
+            const res = await fetch("http://localhost:5544/api/v1/auth/google-login", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ idToken: response.credential }),
+            });
+
+            const data = await res.json().catch(() => ({}));
+
+            if (!res.ok || !data.success) {
+              setError(data.message || "Google login failed");
+              return;
+            }
+
+            if(data.token) {
+              login(data.token);
+              navigate("/mainwindow");
+              return;
+            }
+            setError("No token received from Google login");
+          } catch {
+            setError("Network error during Google login");
+          }
+        },
+      });
+
+      if (googleBtnDivRef.current) {
+        const parentWidth = googleBtnDivRef.current.parentElement?.clientWidth ?? 390;
+
+        googleAny.accounts.id.renderButton(googleBtnDivRef.current, {
+          theme: "outline",
+          size: "large",
+          text: "continue_with",
+          shape: "rectangular",
+          width: parentWidth,
+          locale: "en",
+        });
+      }
+
+      googleInitializedRef.current = true;
+      clearInterval(t);
+    }, 100);
+
+    return () => clearInterval(t);
+}, [login, navigate]);
+
+  const canSubmit =
+  !isLoading &&
+  validateUsername(formData.username) === "" &&
+  validatePassword(formData.password) === "";
+
+
+
   return (
     <form className="w-full" onSubmit={handleSubmit}>
       <img
@@ -78,6 +176,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
           type="text"
           className="w-[95%] mx-auto bg-transparent border-b-[3px] border-white/40 text-white py-2 outline-none"
         />
+        {usernameErr && <p className="w-[95%] mx-auto text-red-400 text-xs mt-1">{usernameErr}</p>}
       </div>
 
       <div className="w-full mb-6">
@@ -91,19 +190,31 @@ export const LoginForm: React.FC<LoginFormProps> = ({
           type="password"
           className="w-[95%] mx-auto bg-transparent border-b-[3px] border-white/40 text-white py-2 outline-none"
         />
+        {passwordErr && <p className="w-[95%] mx-auto text-red-400 text-xs mt-1">{passwordErr}</p>}
+
       </div>
 
       {error && <p className="text-red-400 text-center text-sm">{error}</p>}
 
       <button
         type="submit"
-        disabled={isLoading}
-        className="mt-6 w-[95%] mx-auto py-2 rounded-md bg-white/90 text-black font-semibold hover:bg-white"
+        disabled={!canSubmit}
+        className="
+          mt-6 w-[95%] mx-auto py-2 rounded-md
+          bg-white/90 text-black font-semibold
+          hover:bg-white
+          disabled:opacity-50 disabled:cursor-not-allowed
+        "
       >
         {isLoading ? "Loading..." : "Login"}
       </button>
 
-   
+
+      <div className="mt-4 w-[95%] mx-auto mr-5">
+        <div ref={googleBtnDivRef} className="w-full"></div>
+      </div>
+
+
       {/*<p className="mt-4 text-center text-white/70 text-sm">
         Don't have an account?{" "}
         <span

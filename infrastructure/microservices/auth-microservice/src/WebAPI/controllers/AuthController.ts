@@ -9,6 +9,9 @@ import { validateOTPVerificationData } from '../validators/OtpValidator';
 import { env } from 'process';
 import { BrowserData } from '../../Domain/models/BrowserData';
 import { IOTPVerificationService } from '../../Domain/services/IOTPVerificationService';
+import { validateGoogleLoginData } from '../validators/GoogleLoginValidator';
+import { GoogleIdTokenVerifier } from '../../Services/Google/GoogleTokenVerifier';
+
 
 export class AuthController {
   private router: Router;
@@ -29,6 +32,7 @@ export class AuthController {
     this.router.post('/auth/login', this.login.bind(this));
     this.router.post('/auth/verify-OTP', this.verifyOTP.bind(this));
     this.router.post('/auth/resend-OTP', this.resendOTP.bind(this));
+    this.router.post('/auth/google-login', this.googleLogin.bind(this));
   }
 
   /**
@@ -203,6 +207,47 @@ export class AuthController {
       res.status(401).json({ success: false, message: "Invalid credentials!" });
     }
   }
+
+  private async googleLogin(req: Request, res: Response): Promise<void> {
+  this.logerService.log(SeverityEnum.INFO, "Google login request received");
+
+  const validation = validateGoogleLoginData(req.body);
+  if (!validation.success) {
+    res.status(400).json({ success: false, message: validation.message });
+    return;
+  }
+
+  const googleClientId = process.env.GOOGLE_CLIENT_ID;
+  if (!googleClientId) {
+    res.status(500).json({ success: false, message: "Missing GOOGLE_CLIENT_ID in env." });
+    return;
+  }
+
+  const { idToken } = req.body as { idToken: string };
+
+  try {
+    const verifier = new GoogleIdTokenVerifier(googleClientId);
+    const googleUser = await verifier.verify(idToken);
+
+    if (googleUser.email_verified === false) {
+      res.status(401).json({ success: false, message: "Google email is not verified." });
+      return;
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Google token verified",
+      google: {
+        sub: googleUser.sub,
+        email: googleUser.email,
+        name: googleUser.name,
+        picture: googleUser.picture,
+      },
+    });
+  } catch (e) {
+    res.status(401).json({ success: false, message: "Invalid Google token." });
+  }
+}
 
   public getRouter(): Router {
     return this.router;
