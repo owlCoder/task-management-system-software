@@ -24,11 +24,12 @@ export class Measurement_Service implements IMeasurement_Service {
         });
 
         if (!measurement) {
-            return new MeasurementDto(0, 0, 1, 0, "");
+            return new MeasurementDto(0, 0, EOperationalStatus.Down, 0, "");
         }
 
         return this.toDto(measurement);
     }
+    
     async getMeasurementsFromMicroservice(microserviceId: number): Promise<MeasurementDto[]> {
         const measurements = await this.measurementRepository.find({
             where: {
@@ -43,9 +44,7 @@ export class Measurement_Service implements IMeasurement_Service {
 
     async getAllDownMeasurements(): Promise<MeasurementDto[]> {
         const measurements = await this.measurementRepository.find({
-            where: { status: EOperationalStatus.Down },
-            relations: ["microservice"],
-            order: { measurement_date: "DESC" },
+            where: { "status": EOperationalStatus.Down },
         });
 
         return measurements.map(m => this.toDto(m));
@@ -56,7 +55,6 @@ export class Measurement_Service implements IMeasurement_Service {
             relations: ["microservice"],
             order: { measurement_date: "DESC" },
         });
-
         return measurements.map(m => this.toDto(m));
     }
 

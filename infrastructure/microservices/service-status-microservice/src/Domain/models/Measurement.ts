@@ -30,6 +30,7 @@ export class Measurement {
     response_time!: number;
 
     @CreateDateColumn({
+        name: "measurement_date",
         type: "datetime",
     })
     measurement_date!: Date;

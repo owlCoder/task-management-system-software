@@ -44,7 +44,7 @@ export class Measurement_controller {
 
     private async getAllDownMeasurements(req: Request, res: Response): Promise<void> {
         try {
-            const result = await this.measurementService.getAllDownMeasurements;
+            const result = await this.measurementService.getAllDownMeasurements();
             res.status(200).json(result);
         } catch (err) {
             res.status(500).json({ message: (err as Error).message });
