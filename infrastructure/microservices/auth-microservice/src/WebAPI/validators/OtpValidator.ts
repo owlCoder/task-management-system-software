@@ -1,6 +1,6 @@
 import { BrowserData } from "../../Domain/models/BrowserData";
 
-export function validateOTPVerificationData(browserData: BrowserData, otp: string): { success: boolean; message?: string } {
+export function validateOtpVerificationData(browserData: BrowserData, otp: string): { success: boolean; message?: string } {
   if (!browserData.session_id || typeof browserData.session_id !== 'string' || browserData.session_id.trim().length === 0) {
     return { success: false, message: "Invalid session ID" };
   }

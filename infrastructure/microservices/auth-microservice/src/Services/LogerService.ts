@@ -1,15 +1,39 @@
 import { LoggingServiceEnum } from "../Domain/enums/LoggingServiceEnum";
 import { ILogerService } from "../Domain/services/ILogerService";
-import { SeverityEnum } from "../Domain/enums/SeverityEnum";
+import { SeverityEnum, SeverityColors } from "../Domain/enums/SeverityEnum";
 
+/**
+ * Logger service for structured logging with configurable levels.
+ * Uses {@link SeverityEnum} for log levels and {@link LoggingServiceEnum} for service identification.
+ */
 export class LogerService implements ILogerService {
     private readonly service: LoggingServiceEnum;
+    private static logLevel: SeverityEnum = SeverityEnum.INFO; // Default to INFO
+
     constructor(service: LoggingServiceEnum) {
         this.service = service;
     }
 
     async log(severity: SeverityEnum, message: string): Promise<boolean> {
-        console.log(`${severity}[${this.service}] ${message}\x1b[0m`);
+        if (severity < LogerService.logLevel) {
+            return false; // Don't log if below the current log level
+        }
+
+        const timestamp = new Date().toISOString();
+        const level = SeverityEnum[severity].padEnd(5); // Pad to align levels
+        const service = this.service.padEnd(17); // Pad service names for alignment
+
+        console.log(`${timestamp} ${SeverityColors[severity]}${level}\x1b[0m ${service}${message}`);
         return true;
+    }
+
+    // Static method to set the global log level
+    static setLogLevel(level: SeverityEnum): void {
+        LogerService.logLevel = level;
+    }
+
+    // Static method to get the current log level
+    static getLogLevel(): SeverityEnum {
+        return LogerService.logLevel;
     }
 }

@@ -8,13 +8,14 @@ import { Microservice } from "../Domain/models/Microservice";
 
 export class Measurement_Service implements IMeasurement_Service {
 
-    private measurementRepository: Repository<Measurement>;
-    private microserviceRepository:Repository<Microservice>
-
-    constructor() {
-        this.measurementRepository = Db.getRepository(Measurement);
-        this.microserviceRepository = Db.getRepository(Microservice);
+    private get measurementRepository(): Repository<Measurement> {
+        return Db.getRepository(Measurement);
     }
+
+    private get microserviceRepository(): Repository<Microservice> {
+        return Db.getRepository(Microservice);
+    }
+
 
     async getMeasurementByID(measurementID: number): Promise<MeasurementDto> {
         const measurement = await this.measurementRepository.findOne({
@@ -23,11 +24,12 @@ export class Measurement_Service implements IMeasurement_Service {
         });
 
         if (!measurement) {
-            return new MeasurementDto(0, 0, null as any, 0, "");
+            return new MeasurementDto(0, 0, EOperationalStatus.Down, 0, "");
         }
 
         return this.toDto(measurement);
     }
+    
     async getMeasurementsFromMicroservice(microserviceId: number): Promise<MeasurementDto[]> {
         const measurements = await this.measurementRepository.find({
             where: {
@@ -39,22 +41,20 @@ export class Measurement_Service implements IMeasurement_Service {
 
         return measurements.map(m => this.toDto(m));
     }
-    async getAllCriticalMeasurements(): Promise<MeasurementDto[]> {
+
+    async getAllDownMeasurements(): Promise<MeasurementDto[]> {
         const measurements = await this.measurementRepository.find({
-            where: { status: EOperationalStatus.Down },
-            relations: ["microservice"],
-            order: { measurement_date: "DESC" },
+            where: { "status": EOperationalStatus.Down },
+            relations: ['microservice']
         });
 
-        return measurements.map(m => this.toDto(m));
-    }
+        return measurements.map(m => this.toDto(m));    }
 
     async getAllMeasurements(): Promise<MeasurementDto[]> {
         const measurements = await this.measurementRepository.find({
             relations: ["microservice"],
             order: { measurement_date: "DESC" },
         });
-
         return measurements.map(m => this.toDto(m));
     }
 

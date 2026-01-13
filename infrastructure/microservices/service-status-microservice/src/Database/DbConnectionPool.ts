@@ -1,6 +1,8 @@
 import "reflect-metadata";
 import { DataSource } from "typeorm";
 import dotenv from "dotenv";
+import { Measurement } from "../Domain/models/Measurement";
+import { Microservice } from "../Domain/models/Microservice";
 
 dotenv.config();
 
@@ -13,6 +15,6 @@ export const Db = new DataSource({
   database: process.env.DB_NAME,
   ssl: { rejectUnauthorized: false },
   synchronize: true, 
-  logging: false, 
-  entities: [] //TODO
+  logging: true, 
+  entities: [Microservice, Measurement] 
 });

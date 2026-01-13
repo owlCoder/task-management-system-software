@@ -9,7 +9,7 @@ import {
 import { EOperationalStatus } from "../enums/EOperationalStatus";
 import { Microservice } from "./Microservice";
 
-@Entity("measurements")
+@Entity("Measurements")
 export class Measurement {
 
     @PrimaryGeneratedColumn()
@@ -30,6 +30,7 @@ export class Measurement {
     response_time!: number;
 
     @CreateDateColumn({
+        name: "measurement_date",
         type: "datetime",
     })
     measurement_date!: Date;

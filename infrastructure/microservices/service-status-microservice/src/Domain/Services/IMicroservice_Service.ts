@@ -3,6 +3,8 @@ export interface IMicroservice_Service {
   
   getMicroserviceByName(microserviceName: string): Promise<MicroserviceDto>;
   getMicroserviceByID(microserviceId: number):Promise<MicroserviceDto>;
-  setMicroservice(microserviceId: number):Promise<boolean>;
+  getAllMicroservices():Promise<MicroserviceDto[]>;
+
+  setMicroservice(microserviceName: string):Promise<boolean>;
   deleteMicroservice(microserviceId: number):Promise<boolean>;
 }
