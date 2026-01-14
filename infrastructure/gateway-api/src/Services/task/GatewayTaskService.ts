@@ -9,7 +9,7 @@ import { CreateCommentDTO } from "../../Domain/DTOs/task/CreateCommentDTO";
 import { CreateTaskDTO } from "../../Domain/DTOs/task/CreateTaskDTO";
 import { TaskDTO } from "../../Domain/DTOs/task/TaskDTO";
 import { UpdateTaskDTO } from "../../Domain/DTOs/task/UpdateTaskDTO";
-import { TaskStatus } from "../../Domain/enums/task/TaskStatus";
+import { UpdateTaskStatusDTO } from "../../Domain/DTOs/task/UpdateTaskStatusDTO";
 import { Result } from "../../Domain/types/common/Result";
 
 // Constants
@@ -121,8 +121,8 @@ export class GatewayTaskService implements IGatewayTaskService {
      * - On success returns void.
      * - On failure returns status code and error message.
      */
-    async updateTaskStatusById(taskId: number, data: TaskStatus, senderId: number): Promise<Result<void>> {
-        return await makeAPICall<void, TaskStatus>(this.taskClient, this.errorHandlingService, {
+    async updateTaskStatusById(taskId: number, data: UpdateTaskStatusDTO, senderId: number): Promise<Result<void>> {
+        return await makeAPICall<void, UpdateTaskStatusDTO>(this.taskClient, this.errorHandlingService, {
             serviceName: SERVICES.TASK,
             method: HTTP_METHODS.PATCH,
             url: TASK_ROUTES.UPDATE_TASK_STATUS(taskId),

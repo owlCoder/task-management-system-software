@@ -7,6 +7,8 @@ import { LoginUserDTO } from "../../../Domain/DTOs/auth/LoginUserDTO";
 import { BrowserDataDTO } from "../../../Domain/DTOs/auth/BrowserDataDTO";
 import { AuthResponseType } from "../../../Domain/types/auth/AuthResponse";
 import { OTPVerificationDTO } from "../../../Domain/DTOs/auth/OTPVerificationDTO";
+import { GoogleLoginDataDTO } from "../../../Domain/DTOs/auth/GoogleLoginDataDTO";
+import { GoogleAuthResponseType } from "../../../Domain/types/auth/GoogleAuthResponseType";
 
 // Utils
 import { handleResponse } from "../../Utils/Http/ResponseHandler";
@@ -27,8 +29,10 @@ export class GatewayAuthController {
      */
     private initializeRoutes(): void {
         this.router.post("/login", this.login.bind(this));
+        this.router.post("/siem/login", this.siemLogin.bind(this));
         this.router.post("/verify-otp", this.verifyOtp.bind(this));
         this.router.post("/resend-otp", this.resendOtp.bind(this));
+        this.router.post("/google-login", this.googleAuth.bind(this));
     }
 
     /**
@@ -43,6 +47,21 @@ export class GatewayAuthController {
         const data = req.body as LoginUserDTO;
 
         const result = await this.gatewayAuthService.login(data);
+        handleResponse(res, result);
+    }
+
+    /**
+     * POST /api/v1/siem/login
+     * @param {Request} req - the request object, containing the login data in the body as a {@link LoginUserDTO}.
+     * @param {Response} res - the response object for the client.
+     * @returns {Promise<void>}
+     * - On success: response status 200, response data: {@link AuthResponseType}. 
+     * - On failure: response status code indicating the failure, response data: message describing the error.
+     */
+    private async siemLogin(req: Request, res: Response): Promise<void> {
+        const data = req.body as LoginUserDTO;
+
+        const result = await this.gatewayAuthService.siemLogin(data);
         handleResponse(res, result);
     }
 
@@ -73,6 +92,21 @@ export class GatewayAuthController {
         const data = req.body as BrowserDataDTO
 
         const result = await this.gatewayAuthService.resendOtp(data);
+        handleResponse(res, result);
+    }
+
+    /**
+     * POST /api/v1/google-login
+     * @param {Request} req - the request object, containing the google oauth data in the body as a {@link GoogleLoginDataDTO}.
+     * @param {Response} res - the response object for the client.
+     * @returns {Promise<void>}
+     * - On success: response status 200, response data: {@link GoogleAuthResponseType}. 
+     * - On failure: response status code indicating the failure, response data: message describing the error.
+     */
+    private async googleAuth(req: Request, res: Response): Promise<void> {
+        const data = req.body as GoogleLoginDataDTO;
+
+        const result = await this.gatewayAuthService.googleAuth(data);
         handleResponse(res, result);
     }
 

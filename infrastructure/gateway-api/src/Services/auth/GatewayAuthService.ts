@@ -8,6 +8,8 @@ import { LoginUserDTO } from "../../Domain/DTOs/auth/LoginUserDTO";
 import { AuthResponseType } from "../../Domain/types/auth/AuthResponse";
 import { BrowserDataDTO } from "../../Domain/DTOs/auth/BrowserDataDTO";
 import { OTPVerificationDTO } from "../../Domain/DTOs/auth/OTPVerificationDTO";
+import { GoogleLoginDataDTO } from "../../Domain/DTOs/auth/GoogleLoginDataDTO";
+import { GoogleAuthResponseType } from "../../Domain/types/auth/GoogleAuthResponseType";
 import { Result } from "../../Domain/types/common/Result";
 
 // Constants
@@ -47,6 +49,22 @@ export class GatewayAuthService implements IGatewayAuthService {
     }
 
     /**
+     * Sends the siem login data to the auth microservice.
+     * @param {LoginUserDTO} data - login data.
+     * @returns {Promise<Result<AuthResponseType>>} - A promise that resolves to a Result object containing the auth response data.
+     * - On success result contains the {@link AuthResponseType}
+     * - On failure result contains an error message and status code.
+     */
+    async siemLogin(data: LoginUserDTO): Promise<Result<AuthResponseType>> {
+        return await makeAPICall<AuthResponseType, LoginUserDTO>(this.authClient, this.errorHandlingService, {
+            serviceName: SERVICES.AUTH,
+            method: HTTP_METHODS.POST,
+            url: AUTH_ROUTES.SIEM_LOGIN,
+            data: data
+        });
+    }
+
+    /**
      * Requests the otp data verification from the auth microservice.
      * @param {OTPVerificationDTO} data - data needed for the verification of the otp.
      * @returns {Promise<Result<AuthResponseType>>} - A promise that resolves to a Result object containing the auth response data.
@@ -74,6 +92,22 @@ export class GatewayAuthService implements IGatewayAuthService {
             serviceName: SERVICES.AUTH,
             method: HTTP_METHODS.POST,
             url: AUTH_ROUTES.RESEND_OTP,
+            data: data
+        });
+    }
+
+    /**
+     * Sends the google oauth login data to the auth microservice.
+     * @param {GoogleLoginDataDTO} data - google oauth data.
+     * @returns {Promise<Result<GoogleAuthResponseType>>} - A promise that resolves to a Result object containing the google oauth response data.
+     * - On success result contains the {@link AuthResponseType}
+     * - On failure result contains an error message and status code.
+     */
+    async googleAuth(data: GoogleLoginDataDTO): Promise<Result<GoogleAuthResponseType>> {
+        return await makeAPICall<GoogleAuthResponseType, GoogleLoginDataDTO>(this.authClient, this.errorHandlingService, {
+            serviceName: SERVICES.AUTH,
+            method: HTTP_METHODS.POST,
+            url: AUTH_ROUTES.GOOGLE_OAUTH,
             data: data
         });
     }

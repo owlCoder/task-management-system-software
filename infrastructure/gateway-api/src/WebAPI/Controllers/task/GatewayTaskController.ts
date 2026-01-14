@@ -8,7 +8,7 @@ import { CreateCommentDTO } from "../../../Domain/DTOs/task/CreateCommentDTO";
 import { TaskDTO } from "../../../Domain/DTOs/task/TaskDTO";
 import { UpdateTaskDTO } from "../../../Domain/DTOs/task/UpdateTaskDTO";
 import { CommentDTO } from "../../../Domain/DTOs/task/CommentDTO";
-import { TaskStatus } from "../../../Domain/enums/task/TaskStatus";
+import { UpdateTaskStatusDTO } from "../../../Domain/DTOs/task/UpdateTaskStatusDTO";
 import { TaskPolicies } from "../../../Domain/access-policies/task/TaskPolicies";
 
 // Middlewares
@@ -118,7 +118,7 @@ export class GatewayTaskController {
 
     /**
      * PATCH /api/v1/tasks/:taskId/status
-     * @param {Request} req - the request object, containing the id of the task in params and task status in body as {@link TaskStatus}.
+     * @param {Request} req - the request object, containing the id of the task in params and task status in body as {@link UpdateTaskStatusDTO}.
      * @param {Response} res - the response object for the client.
      * @returns {Promise<void>}
      * - On success: response status 204, no data. 
@@ -126,7 +126,7 @@ export class GatewayTaskController {
      */
     private async updateTaskStatusById(req: Request<ReqParams<'taskId'>>, res: Response): Promise<void> {
         const taskId = parseInt(req.params.taskId, 10);
-        const data = req.body as TaskStatus;
+        const data = req.body as UpdateTaskStatusDTO;
         const senderId = req.user!.id;
 
         const result = await this.gatewayTaskService.updateTaskStatusById(taskId, data, senderId);
