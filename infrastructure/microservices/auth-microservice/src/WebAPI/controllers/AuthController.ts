@@ -43,7 +43,7 @@ export class AuthController {
   }
 
   private initializeRoutes(): void {
-    this.router.post('/auth/tmss/login', this.login.bind(this));
+    this.router.post('/auth/login', this.login.bind(this));
     this.router.post('/auth/siem/login', this.siemLogin.bind(this));
     this.router.post('/auth/verify-OTP', this.verifyOTP.bind(this));
     this.router.post('/auth/resend-OTP', this.resendOTP.bind(this));
@@ -51,7 +51,7 @@ export class AuthController {
   }
 
   /**
-   * POST /api/v1/auth/tmss/login
+   * POST /api/v1/auth/login
    * Authenticates a TMSS (Task Management System Software) user
    * @param {string} username - The username
    * @param {string} password - The password
@@ -59,14 +59,14 @@ export class AuthController {
    * @see {@link LoginUserDTO} for input structure
    */
   private async login(req: Request, res: Response): Promise<void> {
-    this.logerService.log(SeverityEnum.INFO, "TMSS login request received");
+    this.logerService.log(SeverityEnum.INFO, "Login request received");
 
     const data: LoginUserDTO = req.body as LoginUserDTO;
 
     // Validate login input
     const validation = validateLoginData(data);
     if (!validation.success) {
-      this.errorHelper.handleValidationError(res, validation.message!, "TMSS login");
+      this.errorHelper.handleValidationError(res, validation.message!, "login");
       return;
     }
 
@@ -76,27 +76,27 @@ export class AuthController {
     try {
       result = await this.authService.login(data);
     } catch (error) {
-      this.errorHelper.handleServerError(res, error, "TMSS login");
+      this.errorHelper.handleServerError(res, error, "login");
       return;
     }
 
     if (result.authenticated) {
       if (result.userData && result.userData.otp_required === true) {
-        this.logerService.log(SeverityEnum.INFO, "TMSS OTP required for user login");
+        this.logerService.log(SeverityEnum.INFO, "OTP required for user login");
         const response = this.tokenHelper.createOTPRequiredResponse(result.userData);
         res.status(200).json(response);
       }
       else if (result.userData && result.userData.otp_required === false) {
         try {
           const response = this.tokenHelper.createLoginSuccessResponseWithCustomTokenName(result.userData, "token", "Login successful");
-          this.logerService.log(SeverityEnum.INFO, "TMSS login successful with password");
+          this.logerService.log(SeverityEnum.INFO, "Login successful with password");
           res.status(200).json(response);
         } catch (error) {
           this.errorHelper.handleJWTError(res, error);
         }
       }
     } else {
-      this.errorHelper.handleAuthFailure(res, "Invalid credentials", "TMSS");
+      this.errorHelper.handleAuthFailure(res, "Invalid credentials", "login");
     }
   }
 
