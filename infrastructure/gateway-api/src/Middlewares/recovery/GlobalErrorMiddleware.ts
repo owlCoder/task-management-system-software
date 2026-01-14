@@ -28,5 +28,5 @@ export function globalErrorHandler(err: unknown, req: Request, res: Response, _n
         ? "An unexpected gateway error occurred"
         : error.message || "Bad request";
 
-    res.status(statusCode).json({message: message });
+    res.status(statusCode).json({ message: message });
 }
