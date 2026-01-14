@@ -40,7 +40,7 @@ const corsMethods = process.env.CORS_METHODS?.split(",").map(m => m.trim()) ?? [
 
 // Protected microservice from unauthorized access
 app.use(cors({
-  // origin: corsOrigin,
+  origin: corsOrigin,
   methods: corsMethods,
 }));
 

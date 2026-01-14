@@ -246,50 +246,47 @@ export class AuthController {
       this.errorHelper.handleAuthFailure(res, "Invalid credentials", "OTP resend");
     }
   }
-      res.status(401).json({ success: false, message: "Invalid credentials!" });
-    }
-  }
 
   private async googleLogin(req: Request, res: Response): Promise<void> {
-  this.logerService.log(SeverityEnum.INFO, "Google login request received");
+    this.logerService.log(SeverityEnum.INFO, "Google login request received");
 
-  const validation = validateGoogleLoginData(req.body);
-  if (!validation.success) {
-    res.status(400).json({ success: false, message: validation.message });
-    return;
-  }
-
-  const googleClientId = process.env.GOOGLE_CLIENT_ID;
-  if (!googleClientId) {
-    res.status(500).json({ success: false, message: "Missing GOOGLE_CLIENT_ID in env." });
-    return;
-  }
-
-  const { idToken } = req.body as { idToken: string };
-
-  try {
-    const verifier = new GoogleIdTokenVerifier(googleClientId);
-    const googleUser = await verifier.verify(idToken);
-
-    if (googleUser.email_verified === false) {
-      res.status(401).json({ success: false, message: "Google email is not verified." });
+    const validation = validateGoogleLoginData(req.body);
+    if (!validation.success) {
+      res.status(400).json({ success: false, message: validation.message });
       return;
     }
 
-    res.status(200).json({
-      success: true,
-      message: "Google token verified",
-      google: {
-        sub: googleUser.sub,
-        email: googleUser.email,
-        name: googleUser.name,
-        picture: googleUser.picture,
-      },
-    });
-  } catch (e) {
-    res.status(401).json({ success: false, message: "Invalid Google token." });
+    const googleClientId = process.env.GOOGLE_CLIENT_ID;
+    if (!googleClientId) {
+      res.status(500).json({ success: false, message: "Missing GOOGLE_CLIENT_ID in env." });
+      return;
+    }
+
+    const { idToken } = req.body as { idToken: string };
+
+    try {
+      const verifier = new GoogleIdTokenVerifier(googleClientId);
+      const googleUser = await verifier.verify(idToken);
+
+      if (googleUser.email_verified === false) {
+        res.status(401).json({ success: false, message: "Google email is not verified." });
+        return;
+      }
+
+      res.status(200).json({
+        success: true,
+        message: "Google token verified",
+        google: {
+          sub: googleUser.sub,
+          email: googleUser.email,
+          name: googleUser.name,
+          picture: googleUser.picture,
+        },
+      });
+    } catch (e) {
+      res.status(401).json({ success: false, message: "Invalid Google token." });
+    }
   }
-}
 
   public getRouter(): Router {
     return this.router;
