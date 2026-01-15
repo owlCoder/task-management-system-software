@@ -39,6 +39,7 @@ import { GatewayAnalyticsController } from './WebAPI/Controllers/analytics/Gatew
 import { logTraffic } from './Middlewares/logger/LoggingMiddleware';
 import { corsPolicy } from './Middlewares/cors/CorsMiddleware';
 import { bodyParserErrorHandler } from './Middlewares/parser/ParserMiddleware';
+import { invalidRouteHandler } from './Middlewares/router/RoutingErrorMiddleware';
 import { globalErrorHandler } from './Middlewares/recovery/GlobalErrorMiddleware';
 
 // Infrastructure
@@ -86,6 +87,9 @@ app.use('/api/v1', gatewayTaskController.getRouter());
 app.use('/api/v1', gatewayFileController.getRouter());
 app.use('/api/v1', gatewayNotificationController.getRouter());
 app.use('/api/v1', gatewayAnalyticsController.getRouter());
+
+// Handles calling invalid routes.
+app.use(invalidRouteHandler);
 
 // Protects the server from unexpected errors.
 app.use(globalErrorHandler);
