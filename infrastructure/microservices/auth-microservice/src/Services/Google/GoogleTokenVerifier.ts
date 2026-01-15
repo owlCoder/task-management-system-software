@@ -1,19 +1,13 @@
 import { OAuth2Client } from "google-auth-library";
+import { GoogleUserInfo } from "../../Domain/types/GoogleUserInfo";
+import { IGoogleIdTokenVerifier } from "../../Domain/services/IGoogleIdTokenVerifier";
 
-export type GoogleUserInfo = {
-  sub: string;
-  email: string;
-  email_verified?: boolean;
-  name?: string;
-  picture?: string;
-};
-
-export class GoogleIdTokenVerifier {
+export class GoogleIdTokenVerifier implements IGoogleIdTokenVerifier {
   private readonly client = new OAuth2Client();
 
   constructor(private readonly audience: string) {}
 
-  async verify(idToken: string): Promise<GoogleUserInfo> {
+  async verify(idToken: string): Promise<GoogleUserInfo | null>{
     const ticket = await this.client.verifyIdToken({
       idToken,
       audience: this.audience,
@@ -21,7 +15,7 @@ export class GoogleIdTokenVerifier {
 
     const payload = ticket.getPayload();
     if (!payload || !payload.sub || !payload.email) {
-      throw new Error("Invalid Google token payload");
+      return null;
     }
 
     return {

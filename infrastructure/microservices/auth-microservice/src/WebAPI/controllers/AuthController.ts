@@ -16,7 +16,7 @@ import { ITokenNamingStrategy } from '../../Domain/strategies/ITokenNamingStrate
 import { JWTTokenService } from '../../Services/JWTTokenServices/JWTTokenService';
 import { validateGoogleLoginData } from '../validators/GoogleLoginValidator';
 import { GoogleIdTokenVerifier } from '../../Services/Google/GoogleTokenVerifier';
-
+import { IGoogleIdTokenVerifier } from '../../Domain/services/IGoogleIdTokenVerifier';
 
 export class AuthController {
   private router: Router;
@@ -25,6 +25,7 @@ export class AuthController {
   private readonly logerService: ILogerService;
   private readonly tokenHelper: TokenHelper;
   private readonly errorHelper: ErrorHelper;
+  private readonly googleTokenVerifier: IGoogleIdTokenVerifier | null;
 
   constructor(
     authService: IAuthService,
@@ -40,6 +41,14 @@ export class AuthController {
     this.tokenHelper = new TokenHelper(tokenNamingStrategy, jwtTokenService);
     this.errorHelper = new ErrorHelper(logerService);
     this.initializeRoutes();
+
+    const googleClientId = process.env.GOOGLE_CLIENT_ID;
+    if(googleClientId) {
+      this.googleTokenVerifier = new GoogleIdTokenVerifier(googleClientId);
+    }
+    else{
+      this.googleTokenVerifier = null;
+    }
   }
 
   private initializeRoutes(): void {
@@ -252,40 +261,45 @@ export class AuthController {
 
     const validation = validateGoogleLoginData(req.body);
     if (!validation.success) {
-      res.status(400).json({ success: false, message: validation.message });
+      this.errorHelper.handleValidationError(res, validation.message!, "Google login");
       return;
     }
 
-    const googleClientId = process.env.GOOGLE_CLIENT_ID;
-    if (!googleClientId) {
-      res.status(500).json({ success: false, message: "Missing GOOGLE_CLIENT_ID in env." });
+    if(!this.googleTokenVerifier) {
+      this.errorHelper.handleServerError(res, new Error("Google Token Verifier not configured"), "Google login");
       return;
     }
 
     const { idToken } = req.body as { idToken: string };
 
+    let googleUser;
     try {
-      const verifier = new GoogleIdTokenVerifier(googleClientId);
-      const googleUser = await verifier.verify(idToken);
-
-      if (googleUser.email_verified === false) {
-        res.status(401).json({ success: false, message: "Google email is not verified." });
-        return;
-      }
-
-      res.status(200).json({
-        success: true,
-        message: "Google token verified",
-        google: {
-          sub: googleUser.sub,
-          email: googleUser.email,
-          name: googleUser.name,
-          picture: googleUser.picture,
-        },
-      });
-    } catch (e) {
-      res.status(401).json({ success: false, message: "Invalid Google token." });
+      googleUser = await this.googleTokenVerifier.verify(idToken);      
+    } catch (error) {
+      this.errorHelper.handleServerError(res, error, "Google login");
+      return;
     }
+
+    if(!googleUser) {
+      this.errorHelper.handleAuthFailure(res, "Invalid Google token", "Google login");
+      return;
+    }
+
+    if(!googleUser.email_verified) {
+      this.errorHelper.handleAuthFailure(res, "Google email not verified", "Google login");
+      return;
+    }
+
+    res.status(200).json({ 
+      success: true, 
+      message: "Google login successful", 
+      google:{
+        sub: googleUser.sub,
+        email: googleUser.email,
+        name: googleUser.name,
+        picture: googleUser.picture
+      },
+    });
   }
 
   public getRouter(): Router {

@@ -112,7 +112,6 @@ export const LoginForm: React.FC<LoginFormProps> = ({
             });
 
             const data = await res.json().catch(() => ({}));
-
             if (!res.ok || !data.success) {
               setError(data.message || "Google login failed");
               return;
@@ -123,7 +122,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
               navigate("/mainwindow");
               return;
             }
-            setError("No token received from Google login");
+            setError("");
           } catch {
             setError("Network error during Google login");
           }
