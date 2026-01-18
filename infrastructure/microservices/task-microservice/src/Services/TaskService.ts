@@ -9,12 +9,14 @@ import { UpdateTaskDTO } from "../Domain/DTOs/UpdateTaskDTO";
 import { IProjectServiceClient } from "../Domain/services/external-services/IProjectServiceClient";
 import { IUserServiceClient } from "../Domain/services/external-services/IUserServiceClient";
 import { UserRole } from "../Domain/enums/UserRole";
+import { ITaskVersionService } from "../Domain/services/ITaskVersionService";
 export class TaskService implements ITaskService {
 
     constructor(
         private readonly taskRepository: Repository<Task>,
         private readonly projectService: IProjectServiceClient,
-        private readonly userService: IUserServiceClient
+        private readonly userService: IUserServiceClient,
+        private readonly taskVersionService: ITaskVersionService
     ) {
        
     }
@@ -215,6 +217,7 @@ export class TaskService implements ITaskService {
                 if (updateTaskDTO.assignedTo !== undefined && updateTaskDTO.assignedTo > 0) {
                 task.worker_id = updateTaskDTO.assignedTo;
                 }
+                await this.taskVersionService.createVersionSnapshot(task);
             }
             else
             {
