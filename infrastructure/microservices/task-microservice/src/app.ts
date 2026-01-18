@@ -16,6 +16,9 @@ import { IProjectServiceClient } from './Domain/services/external-services/IProj
 import { ProjectServiceClient } from './Services/external-services/ProjectServiceClient';
 import { IUserServiceClient } from './Domain/services/external-services/IUserServiceClient';
 import { UserServiceClient } from './Services/external-services/UserServiceClient';
+import { TaskVersion } from './Domain/models/TaskVersion';
+import { TaskVersionService } from './Services/TaskVersionService';
+import { ITaskVersionService } from './Domain/services/ITaskVersionService';
 
 
 dotenv.config({ quiet: true });
@@ -40,16 +43,17 @@ app.use(express.json());
   // ORM Repositories
   const taskRepository: Repository<Task> = Db.getRepository(Task);
   const commentRepository: Repository<Comment> = Db.getRepository(Comment);
+  const taskVersionRepository: Repository<TaskVersion> = Db.getRepository(TaskVersion);
 
   // Services
   const projectServiceClient : IProjectServiceClient = new ProjectServiceClient();
   const userServiceClient: IUserServiceClient = new UserServiceClient();
-  const taskService : ITaskService = new TaskService(taskRepository,projectServiceClient,userServiceClient);
+  const taskVersionService: ITaskVersionService = new TaskVersionService(taskVersionRepository);
+  const taskService : ITaskService = new TaskService(taskRepository,projectServiceClient,userServiceClient,taskVersionService);
   const commentService : ICommentService = new CommentService(taskRepository,commentRepository);
 
   // WebAPI routes
-  const taskController = new TaskController(taskService,commentService);
-
+  const taskController = new TaskController(taskService,commentService,taskVersionService);
   // Registering routes
   app.use('/api/v1', taskController.getRouter());
 })();

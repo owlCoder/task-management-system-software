@@ -11,12 +11,14 @@
     import { UpdateTaskValidator } from "../validators/UpdateTaskValidator";
     import { DeleteTaskValidator } from "../validators/DeleteTaskValidator";
 import { DeleteCommentValidator } from "../validators/DeleteCommentValidator";
+import { ITaskVersionService } from "../../Domain/services/ITaskVersionService";
 
     export class TaskController {
     private readonly router: Router;
 
     constructor(private taskService: ITaskService,
-                private commentService : ICommentService
+                private commentService : ICommentService,
+                private taskVersionService: ITaskVersionService
     ) {
         this.router = Router();
         this.initializeRoutes();
@@ -45,6 +47,10 @@ import { DeleteCommentValidator } from "../validators/DeleteCommentValidator";
 
         // DEV / DUMMY
         this.router.get('/dev/dummy-tasks', this.getAllDummyTasksForProject.bind(this));
+
+        // TASK VERSIONS
+        this.router.get("/tasks/:taskId/versions", this.getTaskVersions.bind(this));
+        this.router.get("/tasks/:taskId/versions/:versionId", this.getTaskVersionById.bind(this));
     }
 
 
@@ -344,6 +350,36 @@ import { DeleteCommentValidator } from "../validators/DeleteCommentValidator";
 
         } catch (error) {
             console.log(error);
+            res.status(500).json({ message: "Internal server error" });
+        }
+    }
+
+    private async getTaskVersions(req: Request, res: Response): Promise<void> {
+    try {
+        const taskId = parseInt(req.params.taskId, 10);
+        if (isNaN(taskId)) {
+            res.status(400).json({ message: "Invalid task ID" });
+            return;
+        }
+
+        const versions = await this.taskVersionService.getVersionsForTask(taskId);
+        res.status(200).json(versions);
+    } catch (error) {
+        res.status(500).json({ message: "Internal server error" });
+    }
+}
+
+    private async getTaskVersionById(req: Request, res: Response): Promise<void> {
+        try {
+            const versionId = parseInt(req.params.versionId, 10);
+            if (isNaN(versionId)) {
+                res.status(400).json({ message: "Invalid version ID" });
+                return;
+            }
+
+            const version = await this.taskVersionService.getVersionById(versionId);
+            res.status(200).json(version);
+        } catch (error) {
             res.status(500).json({ message: "Internal server error" });
         }
     }
