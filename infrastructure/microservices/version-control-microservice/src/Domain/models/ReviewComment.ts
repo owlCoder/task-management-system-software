@@ -10,7 +10,7 @@ export class ReviewComment {
   taskId!: number;
   @Column({ type: "varchar", unique: true, nullable: false, length: 100 })
   time!: string;
-  @Column({ type: "varchar", unique: true, nullable: false, length: 100 })
+  @Column({ type: "varchar", unique: false, nullable: false, length: 100 })
   commentText!: string;
   
 }

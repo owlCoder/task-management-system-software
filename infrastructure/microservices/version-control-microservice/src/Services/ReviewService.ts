@@ -120,7 +120,7 @@ export class  ReviewService implements IReviewService {
         });
 
         review.status = ReviewStatus.REJECTED;
-        review.commentId = newComment.taskId;
+        review.commentId = newComment.commentId;
 
         await this.reviewRepository.save(review);
 
