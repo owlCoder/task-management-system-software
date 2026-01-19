@@ -1,24 +1,24 @@
-    import { Router,Request,Response } from "express";
-    import { ITaskService } from "../../Domain/services/ITaskService";
-    import { ICommentService } from "../../Domain/services/ICommentService";
-    import { CreateTaskDTO } from "../../Domain/DTOs/CreateTaskDTO";
-    import { UpdateTaskDTO } from "../../Domain/DTOs/UpdateTaskDTO";
-    import { TaskDTO } from "../../Domain/DTOs/TaskDTO";
-    import { CreateCommentDTO } from "../../Domain/DTOs/CreateCommentDTO";
-    import { taskToTaskDTO } from "../../Utils/Converters/TaskConverter";
-    import { commentToCommentDTO } from "../../Utils/Converters/CommentConverter";
-    import { errorCodeToHttpStatus } from "../../Utils/Converters/ErrorCodeConverter";
-    import { UpdateTaskValidator } from "../validators/UpdateTaskValidator";
-    import { DeleteTaskValidator } from "../validators/DeleteTaskValidator";
+import { Router, Request, Response } from "express";
+import { ITaskService } from "../../Domain/services/ITaskService";
+import { ICommentService } from "../../Domain/services/ICommentService";
+import { CreateTaskDTO } from "../../Domain/DTOs/CreateTaskDTO";
+import { UpdateTaskDTO } from "../../Domain/DTOs/UpdateTaskDTO";
+import { TaskDTO } from "../../Domain/DTOs/TaskDTO";
+import { CreateCommentDTO } from "../../Domain/DTOs/CreateCommentDTO";
+import { taskToTaskDTO } from "../../Utils/Converters/TaskConverter";
+import { commentToCommentDTO } from "../../Utils/Converters/CommentConverter";
+import { errorCodeToHttpStatus } from "../../Utils/Converters/ErrorCodeConverter";
+import { UpdateTaskValidator } from "../validators/UpdateTaskValidator";
+import { DeleteTaskValidator } from "../validators/DeleteTaskValidator";
 import { DeleteCommentValidator } from "../validators/DeleteCommentValidator";
 import { ITaskVersionService } from "../../Domain/services/ITaskVersionService";
 
-    export class TaskController {
+export class TaskController {
     private readonly router: Router;
 
     constructor(private taskService: ITaskService,
-                private commentService : ICommentService,
-                private taskVersionService: ITaskVersionService
+        private commentService: ICommentService,
+        private taskVersionService: ITaskVersionService
     ) {
         this.router = Router();
         this.initializeRoutes();
@@ -26,8 +26,21 @@ import { ITaskVersionService } from "../../Domain/services/ITaskVersionService";
     //enum za status
     //dto za servis
     //validacije
+
+    private paramAsString(p: string | string[] | undefined): string | null {
+        if (!p) return null;
+        return Array.isArray(p) ? p[0] : p;
+    }
+
+    private parseId(p: string | string[] | undefined): number | null {
+        const s = this.paramAsString(p);
+        if (!s) return null;
+        const n = Number.parseInt(s, 10);
+        return Number.isFinite(n) ? n : null;
+    }
+
     public getRouter(): Router {
-    return this.router;
+        return this.router;
     }
     private initializeRoutes() {
 
@@ -75,7 +88,7 @@ import { ITaskVersionService } from "../../Domain/services/ITaskVersionService";
             }
             const createTask: CreateTaskDTO = req.body;
 
-            const result = await this.taskService.addTaskForSprint(sprint_id, createTask,user_id);
+            const result = await this.taskService.addTaskForSprint(sprint_id, createTask, user_id);
 
             if (result.success) {
                 res.status(200).json(taskToTaskDTO(result.data));
@@ -92,7 +105,11 @@ import { ITaskVersionService } from "../../Domain/services/ITaskVersionService";
 
     async getTaskById(req: Request, res: Response): Promise<void> {
         try {
-            const taskId = parseInt(req.params.taskId, 10);
+            const taskId = this.parseId((req.params as any).taskId);
+            if (taskId === null) {
+                res.status(400).json({ error: "Invalid taskId" });
+                return;
+            }
             if (isNaN(taskId)) {
                 res.status(400).json({ message: "Invalid task ID" });
                 return;
@@ -109,7 +126,7 @@ import { ITaskVersionService } from "../../Domain/services/ITaskVersionService";
                 res.status(400).json({ message: "Invalid user id" });
                 return;
             }
-            const result = await this.taskService.getTaskById(taskId,user_id);
+            const result = await this.taskService.getTaskById(taskId, user_id);
 
             if (result.success) {
                 res.status(200).json(taskToTaskDTO(result.data));
@@ -124,7 +141,11 @@ import { ITaskVersionService } from "../../Domain/services/ITaskVersionService";
 
     async getAllTasksForSprint(req: Request, res: Response): Promise<void> {
         try {
-            const sprint_id = parseInt(req.params.sprintId, 10);
+            const sprint_id = this.parseId((req.params as any).sprint_id);
+            if (sprint_id === null) {
+                res.status(400).json({ error: "Invalid sprint_id" });
+                return;
+            }
             if (isNaN(sprint_id)) {
                 res.status(400).json({ message: "Invalid sprint ID" });
                 return;
@@ -141,7 +162,7 @@ import { ITaskVersionService } from "../../Domain/services/ITaskVersionService";
                 res.status(400).json({ message: "Invalid user id" });
                 return;
             }
-            const result = await this.taskService.getAllTasksForSprint(sprint_id,user_id);
+            const result = await this.taskService.getAllTasksForSprint(sprint_id, user_id);
 
             if (result.success) {
                 res.status(200).json(result.data.map(taskToTaskDTO));
@@ -156,7 +177,11 @@ import { ITaskVersionService } from "../../Domain/services/ITaskVersionService";
 
     async addCommentToTask(req: Request, res: Response): Promise<void> {
         try {
-            const taskId = parseInt(req.params.taskId, 10);
+            const taskId = this.parseId((req.params as any).taskId);
+            if (taskId === null) {
+                res.status(400).json({ error: "Invalid taskId" });
+                return;
+            }
             if (isNaN(taskId)) {
                 res.status(400).json({ message: "Invalid task ID" });
                 return;
@@ -175,7 +200,7 @@ import { ITaskVersionService } from "../../Domain/services/ITaskVersionService";
             }
             const createComment: CreateCommentDTO = req.body;
 
-            const result = await this.commentService.addComment(taskId, createComment,user_id);
+            const result = await this.commentService.addComment(taskId, createComment, user_id);
 
             if (result.success) {
                 res.status(200).json(commentToCommentDTO(result.data, taskId));
@@ -205,7 +230,11 @@ import { ITaskVersionService } from "../../Domain/services/ITaskVersionService";
 
     async updateTask(req: Request, res: Response): Promise<void> {
         try {
-            const taskId = parseInt(req.params.taskId, 10);
+            const taskId = this.parseId((req.params as any).taskId);
+            if (taskId === null) {
+                res.status(400).json({ error: "Invalid taskId" });
+                return;
+            }
             const taskIdValidation = DeleteTaskValidator.validateTaskId(taskId);
             if (!taskIdValidation.isValid) {
                 res.status(400).json({ message: taskIdValidation.message });
@@ -231,7 +260,7 @@ import { ITaskVersionService } from "../../Domain/services/ITaskVersionService";
                 return;
             }
 
-            const result = await this.taskService.updateTask(taskId, updateTaskDTO,user_id);
+            const result = await this.taskService.updateTask(taskId, updateTaskDTO, user_id);
 
             if (result.success) {
                 res.status(200).json(taskToTaskDTO(result.data));
@@ -247,7 +276,11 @@ import { ITaskVersionService } from "../../Domain/services/ITaskVersionService";
 
     async updateTaskStatus(req: Request, res: Response): Promise<void> {
         try {
-            const taskId = parseInt(req.params.taskId, 10);
+            const taskId = this.parseId((req.params as any).taskId);
+            if (taskId === null) {
+                res.status(400).json({ error: "Invalid taskId" });
+                return;
+            }
             if (isNaN(taskId)) {
                 res.status(400).json({ message: "Invalid task ID" });
                 return;
@@ -284,11 +317,15 @@ import { ITaskVersionService } from "../../Domain/services/ITaskVersionService";
             res.status(500).json({ message: "Internal server error" });
         }
     }
-    
+
 
     async deleteTask(req: Request, res: Response): Promise<void> {
         try {
-            const taskId = parseInt(req.params.taskId, 10);
+            const taskId = this.parseId((req.params as any).taskId);
+            if (taskId === null) {
+                res.status(400).json({ error: "Invalid taskId" });
+                return;
+            }
             const taskIdValidation = DeleteTaskValidator.validateTaskId(taskId);
             if (!taskIdValidation.isValid) {
                 res.status(400).json({ message: taskIdValidation.message });
@@ -306,7 +343,7 @@ import { ITaskVersionService } from "../../Domain/services/ITaskVersionService";
                 res.status(400).json({ message: "Invalid user id" });
                 return;
             }
-            const result = await this.taskService.deleteTask(taskId,user_id);
+            const result = await this.taskService.deleteTask(taskId, user_id);
 
             if (result.success) {
                 res.status(204).json();
@@ -322,7 +359,11 @@ import { ITaskVersionService } from "../../Domain/services/ITaskVersionService";
 
     async deleteComment(req: Request, res: Response): Promise<void> {
         try {
-            const commentId = parseInt(req.params.commentId, 10);
+            const commentId = this.parseId((req.params as any).commentId);
+            if (commentId === null) {
+                res.status(400).json({ error: "Invalid commentId" });
+                return;
+            }
             const commentIdValidation = DeleteCommentValidator.validateCommentId(commentId);
             if (!commentIdValidation.isValid) {
                 res.status(400).json({ message: commentIdValidation.message });
@@ -340,7 +381,7 @@ import { ITaskVersionService } from "../../Domain/services/ITaskVersionService";
                 res.status(400).json({ message: "Invalid user id" });
                 return;
             }
-            const result = await this.commentService.deleteComment(commentId,user_id);
+            const result = await this.commentService.deleteComment(commentId, user_id);
 
             if (result.success) {
                 res.status(204).json();
@@ -355,23 +396,27 @@ import { ITaskVersionService } from "../../Domain/services/ITaskVersionService";
     }
 
     private async getTaskVersions(req: Request, res: Response): Promise<void> {
-    try {
-        const taskId = parseInt(req.params.taskId, 10);
-        if (isNaN(taskId)) {
-            res.status(400).json({ message: "Invalid task ID" });
-            return;
-        }
+        try {
+            const taskId = this.parseId((req.params as any).taskId);
+            if (taskId === null) {
+                res.status(400).json({ error: "Invalid taskId" });
+                return;
+            }
 
-        const versions = await this.taskVersionService.getVersionsForTask(taskId);
-        res.status(200).json(versions);
-    } catch (error) {
-        res.status(500).json({ message: "Internal server error" });
+            const versions = await this.taskVersionService.getVersionsForTask(taskId);
+            res.status(200).json(versions);
+        } catch (error) {
+            res.status(500).json({ message: "Internal server error" });
+        }
     }
-}
 
     private async getTaskVersionById(req: Request, res: Response): Promise<void> {
         try {
-            const versionId = parseInt(req.params.versionId, 10);
+            const versionId = this.parseId((req.params as any).versionId);
+            if (versionId === null) {
+                res.status(400).json({ error: "Invalid versionId" });
+                return;
+            }
             if (isNaN(versionId)) {
                 res.status(400).json({ message: "Invalid version ID" });
                 return;

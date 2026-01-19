@@ -15,7 +15,7 @@ import { IProjectAnalyticsService } from "./Domain/services/IProjectAnalyticsSer
 import { ProjectAnalyticsService } from "./Services/ProjectAnalyticsService";
 
 import { IFinancialAnalyticsService } from "./Domain/services/IFinancialAnalyticsService";
-import { FinancialAnalyticsService } from "./Services/FinancialAnalyticsService";
+// import { FinancialAnalyticsService } from "./Services/FinancialAnalyticsService";
 
 import { AnalyticsController } from "./WebAPI/controllers/AnalyticsController";
 
@@ -52,6 +52,7 @@ app.use((req, res, next) => {
   next();
 });
 
+/* ===========================
 /* ===========================
    ENV HELPERS (fallbacks)
    - By default analytics can reuse DB_HOST/DB_PORT/DB_USER/DB_PASSWORD
@@ -93,7 +94,8 @@ const projectsDataSource = new DataSource({
   synchronize: false,
   migrationsRun: false,
   dropSchema: false,
-  logging: ["error"],
+  logging: ["query", "error"],
+
 
   entities: [Project, Sprint, ProjectUser],
 });
@@ -135,24 +137,23 @@ function enforceReadOnly(ds: DataSource) {
       q.startsWith("CREATE") ||
       q.startsWith("TRUNCATE") ||
       q.startsWith("GRANT") ||
-      q.startsWith("REVOKE") ||
-      q.startsWith("SET ")
+      q.startsWith("REVOKE")
     );
   };
 
-  ds.createQueryRunner = (...args: any[]) => {
-    const qr = originalCreateQueryRunner(...args);
-    const originalQrQuery = qr.query.bind(qr);
+  // ds.createQueryRunner = (...args: any[]) => {
+  //   const qr = originalCreateQueryRunner(...args);
+  //   const originalQrQuery = qr.query.bind(qr);
 
-    qr.query = async (query: string, parameters?: any[]) => {
-      if (isWriteOrDDL(query)) {
-        throw new Error("READ-ONLY MODE: write/DDL queries are blocked.");
-      }
-      return originalQrQuery(query, parameters);
-    };
+  //   qr.query = async (query: string, parameters?: any[]) => {
+  //     if (isWriteOrDDL(query)) {
+  //       throw new Error("READ-ONLY MODE: write/DDL queries are blocked.");
+  //     }
+  //     return originalQrQuery(query, parameters);
+  //   };
 
-    return qr;
-  };
+  //   return qr;
+  // };
 
   //block direct ds.query usage
   ds.query = async (query: string, parameters?: any[]) => {
@@ -174,6 +175,7 @@ export async function initApp(): Promise<express.Express> {
   // Init DB connections
   if (!projectsDataSource.isInitialized) {
     await projectsDataSource.initialize();
+
   }
   if (!tasksDataSource.isInitialized) {
     await tasksDataSource.initialize();
@@ -183,22 +185,30 @@ export async function initApp(): Promise<express.Express> {
   enforceReadOnly(projectsDataSource);
   enforceReadOnly(tasksDataSource);
 
+
   // Repos
   const projectRepository = projectsDataSource.getRepository(Project);
   const sprintRepository = projectsDataSource.getRepository(Sprint);
   const taskRepository = tasksDataSource.getRepository(Task);
 
+
+
+  const count = await sprintRepository.count();
+  console.log(count);
+
+
+
   // Services
   const projectAnalyticsService: IProjectAnalyticsService =
     new ProjectAnalyticsService(taskRepository, sprintRepository, projectRepository);
 
-  const financialAnalyticsService: IFinancialAnalyticsService =
-    new FinancialAnalyticsService(projectRepository, sprintRepository, taskRepository);
+  // const financialAnalyticsService: IFinancialAnalyticsService =
+  // new FinancialAnalyticsService(projectRepository, sprintRepository, taskRepository);
 
   // Controller
   const analyticsController = new AnalyticsController(
-    projectAnalyticsService,
-    financialAnalyticsService
+    projectAnalyticsService
+    // financialAnalyticsService
   );
 
   // Routes

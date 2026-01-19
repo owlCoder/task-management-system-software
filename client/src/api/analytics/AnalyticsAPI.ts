@@ -1,93 +1,104 @@
+import axios, { AxiosInstance } from "axios";
 import { IAnalyticsAPI } from "./IAnalyticsAPI";
+import { BurndownDto } from "../../models/analytics/BurndownDto";
+import { BurnupDto } from "../../models/analytics/BurnupDto";
 import { BudgetTrackingDto } from "../../models/analytics/BudgetTrackingDto";
 import { ProfitMarginDto } from "../../models/analytics/ProfitMarginDto";
 import { ResourceCostAllocationDto } from "../../models/analytics/ResourceCostAllocationDto";
-import { BurndownDto } from "../../models/analytics/BurndownDto";
-import { BurnupDto } from "../../models/analytics/BurnupDto";
 
 type Id = string | number;
 
 export class AnalyticsAPI implements IAnalyticsAPI {
-  private baseUrl: string;
-  private token: string;
+  private readonly axiosInstance: AxiosInstance;
 
-  constructor(baseUrl: string, token: string) {
-    this.baseUrl = baseUrl.replace(/\/+$/, "");
-    this.token = token;
-  }
-
-  /** omogucava da posle login/refresh samo setujes novi token */
-  public setToken(token: string) {
-    this.token = token;
-  }
-
-  private get headers(): Record<string, string> {
-    const headers: Record<string, string> = {
-      Accept: "application/json",
-    };
-
-    // ako nema tokena ne salji header
-    if (this.token && this.token.trim().length > 0) {
-      headers.Authorization = `Bearer ${this.token}`;
-    }
-
-    return headers;
-  }
-
-  private async request<T>(path: string): Promise<T> {
-    const res = await fetch(`${this.baseUrl}${path}`, {
-      method: "GET",
-      headers: this.headers,
+  constructor() {
+    this.axiosInstance = axios.create({
+      baseURL: import.meta.env.VITE_GATEWAY_URL,
+      headers: { "Content-Type": "application/json" },
     });
+  }
 
-    if (res.ok) {
-      return (await res.json()) as T;
-    }
+  private authHeaders(token: string) {
+    return {
+      Authorization: `Bearer ${token}`,
+    };
+  }
 
-    let details = "";
+  async getBurndownAnalytics(sprintId: Id, token: string): Promise<BurndownDto> {
     try {
-      const body = await res.json();
-      details =
-        body?.message ||
-        body?.error ||
-        body?.details ||
-        (typeof body === "string" ? body : JSON.stringify(body));
-    } catch {
-      try {
-        details = await res.text();
-      } catch {
-        details = "";
-      }
+      return (
+        await this.axiosInstance.get(`/analytics/burndown/${sprintId}`, {
+          headers: this.authHeaders(token),
+        })
+      ).data;
+    } catch (error) {
+      console.error("Error fetching burndown analytics:", error);
+      throw error;
     }
-
-    throw new Error(
-      `Analytics API error (${res.status} ${res.statusText})${
-        details ? `: ${details}` : ""
-      }`
-    );
   }
 
-  getBurndownAnalytics(sprintId: Id): Promise<BurndownDto> {
-    return this.request(`/analytics/burndown/${sprintId}`);
+  async getBurnupAnalytics(sprintId: Id, token: string): Promise<BurnupDto> {
+    try {
+      return (
+        await this.axiosInstance.get(`/analytics/burnup/${sprintId}`, {
+          headers: this.authHeaders(token),
+        })
+      ).data;
+    } catch (error) {
+      console.error("Error fetching burnup analytics:", error);
+      throw error;
+    }
   }
 
-  getBurnupAnalytics(sprintId: Id): Promise<BurnupDto> {
-    return this.request(`/analytics/burnup/${sprintId}`);
+  async getVelocityTracking(projectId: Id, token: string): Promise<number> {
+    try {
+      return (
+        await this.axiosInstance.get(`/analytics/velocity/${projectId}`, {
+          headers: this.authHeaders(token),
+        })
+      ).data;
+    } catch (error) {
+      console.error("Error fetching velocity tracking:", error);
+      throw error;
+    }
   }
 
-  getVelocityTracking(projectId: Id): Promise<number> {
-    return this.request(`/analytics/velocity/${projectId}`);
+  async getBudgetTracking(projectId: Id, token: string): Promise<BudgetTrackingDto> {
+    try {
+      return (
+        await this.axiosInstance.get(`/analytics/budget/${projectId}`, {
+          headers: this.authHeaders(token),
+        })
+      ).data;
+    } catch (error) {
+      console.error("Error fetching budget tracking:", error);
+      throw error;
+    }
   }
 
-  getBudgetTracking(projectId: Id): Promise<BudgetTrackingDto> {
-    return this.request(`/analytics/budget/${projectId}`);
+  async getProfitMargin(projectId: Id, token: string): Promise<ProfitMarginDto> {
+    try {
+      return (
+        await this.axiosInstance.get(`/analytics/profit-margin/${projectId}`, {
+          headers: this.authHeaders(token),
+        })
+      ).data;
+    } catch (error) {
+      console.error("Error fetching profit margin:", error);
+      throw error;
+    }
   }
 
-  getProfitMargin(projectId: Id): Promise<ProfitMarginDto> {
-    return this.request(`/analytics/profit-margin/${projectId}`);
-  }
-
-  getResourceCostAllocation(projectId: Id): Promise<ResourceCostAllocationDto> {
-    return this.request(`/analytics/resource-cost/${projectId}`);
+  async getResourceCostAllocation(projectId: Id, token: string): Promise<ResourceCostAllocationDto> {
+    try {
+      return (
+        await this.axiosInstance.get(`/analytics/resource-cost/${projectId}`, {
+          headers: this.authHeaders(token),
+        })
+      ).data;
+    } catch (error) {
+      console.error("Error fetching resource cost allocation:", error);
+      throw error;
+    }
   }
 }

@@ -18,20 +18,37 @@ export class ProjectAnalyticsService implements IProjectAnalyticsService {
     ) { }
 
     async getBurnDownChartsForSprintId(sprintId: number): Promise<BurndownDto> {
+        console.log("Entering getBurnDownChartsForSprintId with sprintId:", sprintId);
 
+        console.log("Sprint count:", await this.sprintRepository.count());
+        console.log("First sprint:", await this.sprintRepository.find({ take: 1 }));
         const s = await this.sprintRepository.findOne({
             where: { sprint_id: sprintId },
-            relations: { project: true },
+        });
+        console.log("prosao fetch");
+        if (!s) throw new Error("Sprint not found");
+
+        console.log("postoji sprint");
+
+        const project = await this.projectRepository.findOne({
+            where: { project_id: s.project_id },
         });
 
-        if (!s) {
-            throw new Error("Sprint not found");
-        }
+        console.log("prosao fetch na project");
 
-        const time = (s.end_date.getTime() - s.start_date.getTime()) / (1000 * 60 * 60); //allowed hours to spend in sprint
+        if (!project) throw new Error("Project not found for sprint");
+
+        console.log("postoji project");
+
+        const startDate = new Date(s.start_date);
+        const endDate = new Date(s.end_date);
+
+        const time = (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60);
+
+        console.log("time calculated:", time);
 
         const tasks = await this.taskRepository.find({ where: { sprint_id: sprintId } });
-
+        console.log("prosao fetch na tasks");
         let sum = 0;
 
         for (let i = 0; i < tasks.length; ++i)
@@ -51,22 +68,28 @@ export class ProjectAnalyticsService implements IProjectAnalyticsService {
                 real_progress: real
             });
         }
+        console.log(project.project_id, s.sprint_id);
 
-        return { project_id: s.project.project_id, sprint_id: s.sprint_id, tasks: BurndownTasks }
+        BurndownTasks.map(t => console.log(t));
+
+        return { project_id: project.project_id, sprint_id: s.sprint_id, tasks: BurndownTasks };
     }
 
     async getBurnUpChartsForSprintId(sprintId: number): Promise<BurnupDto> {
-        const sprint = await this.sprintRepository.findOne({
+        const s = await this.sprintRepository.findOne({
             where: { sprint_id: sprintId },
-            relations: { project: true },
         });
 
-        if (!sprint) {
-            throw new Error("Sprint not found");
-        }
+        if (!s) throw new Error("Sprint not found");
+
+        const project = await this.projectRepository.findOne({
+            where: { project_id: s.project_id },
+        });
+
+        if (!project) throw new Error("Project not found for sprint");
 
         const sprintDuration =
-            (sprint.end_date.getTime() - sprint.start_date.getTime()) /
+            (s.end_date.getTime() - s.start_date.getTime()) /
             (1000 * 60 * 60 * 24);
 
         const tasks = await this.taskRepository.find({
@@ -84,8 +107,8 @@ export class ProjectAnalyticsService implements IProjectAnalyticsService {
             .filter(
                 t =>
                     t.finished_at &&
-                    t.finished_at >= sprint.start_date &&
-                    t.finished_at <= sprint.end_date &&
+                    t.finished_at >= s.start_date &&
+                    t.finished_at <= s.end_date &&
                     t.finished_at <= today,
             )
             .sort(
@@ -102,7 +125,7 @@ export class ProjectAnalyticsService implements IProjectAnalyticsService {
 
             const dayFromStart =
                 (task.finished_at!.getTime() -
-                    sprint.start_date.getTime()) /
+                    s.start_date.getTime()) /
                 (1000 * 60 * 60 * 24);
 
             points.push({
@@ -112,8 +135,8 @@ export class ProjectAnalyticsService implements IProjectAnalyticsService {
         }
 
         return {
-            project_id: sprint.project.project_id,
-            sprint_id: sprint.sprint_id,
+            project_id: project.project_id,
+            sprint_id: s.sprint_id,
             sprint_duration_date: sprintDuration,
             work_amount: totalWork,
             points,
@@ -122,12 +145,12 @@ export class ProjectAnalyticsService implements IProjectAnalyticsService {
 
 
     async getVelocityForProject(projectId: number): Promise<number> {
-        const proj = await this.projectRepository.findOneBy({ project_id: projectId });
 
-        if (!proj) {
-            throw new Error("Project not found");
-        }
+        const proj = await this.projectRepository.findOne({
+            where: { project_id: projectId },
+        });
 
+        if (!proj) throw new Error("Project not found for sprint");
         const sprints = await this.sprintRepository.find({ where: { project: proj, end_date: LessThan(new Date()) } });
 
         if (sprints.length === 0)

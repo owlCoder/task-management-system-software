@@ -1,13 +1,20 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import Sidebar from "../components/dashboard/sidebar/Sidebar";
 import { AnalyticsTab } from "../enums/AnalyticsTabs";
 import { ProjectDTO } from "../models/project/ProjectDTO";
 import { projectAPI } from "../api/project/ProjectAPI";
+
 import { BurndownAnalytics } from "../components/analytics/Burndown";
 import { VelocityAnalytics } from "../components/analytics/Velocity";
 import { BurnupAnalytics } from "../components/analytics/Burnup";
 import { BudgetAnalytics } from "../components/analytics/BudgetTracking";
 
+import { AnalyticsAPI } from "../api/analytics/AnalyticsAPI";
+import { BurndownDto } from "../models/analytics/BurndownDto";
+import { BurnupDto } from "../models/analytics/BurnupDto";
+import { BudgetTrackingDto } from "../models/analytics/BudgetTrackingDto";
+
+type SprintOption = { sprint_id: number; sprint_title?: string };
 
 const TABS: { id: AnalyticsTab; label: string }[] = [
     { id: "BURNDOWN", label: "Burndown" },
@@ -20,16 +27,58 @@ const TABS: { id: AnalyticsTab; label: string }[] = [
 
 export const AnalyticsPage: React.FC = () => {
     const [activeTab, setActiveTab] = useState<AnalyticsTab>("BURNDOWN");
+
     const [projects, setProjects] = useState<ProjectDTO[]>([]);
     const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
     const [selectedProject, setSelectedProject] = useState<ProjectDTO | null>(null);
     const [loadingProjects, setLoadingProjects] = useState(true);
-    const [selectedSprint, setSelectedSprint] = useState<number | null>(null);
+
+    const [selectedSprintId, setSelectedSprintId] = useState<number | null>(null);
+
+    const [burndown, setBurndown] = useState<BurndownDto | null>(null);
+    const [burnup, setBurnup] = useState<BurnupDto | null>(null);
+    const [velocity, setVelocity] = useState<number | null>(null);
+    const [budget, setBudget] = useState<BudgetTrackingDto | null>(null);
+
+    const [loadingAnalytics, setLoadingAnalytics] = useState(false);
+    const [analyticsError, setAnalyticsError] = useState<string | null>(null);
+
+    // Instantiate API once (AuthAPI style)
+    const analyticsAPI = useMemo(() => new AnalyticsAPI(), []);
+
+    // Token from storage (adjust key if different)
+    const token = useMemo(() => localStorage.getItem("authToken") ?? "", []);
+
+    // Sprint list derived from selectedProject
+    const sprints: SprintOption[] = useMemo(() => {
+        if (!selectedProject) return [];
+
+        const anyProject = selectedProject as any;
+
+        // prefer real sprint list if exists
+        if (Array.isArray(anyProject.sprints) && anyProject.sprints.length > 0) {
+            return anyProject.sprints.map((s: any) => ({
+                sprint_id: Number(s.sprint_id),
+                sprint_title: s.sprint_title ?? s.sprint_name ?? undefined,
+            }));
+        }
+
+        // fallback: sprint_count => NOT ideal, but avoids empty UI
+        const count = Number(anyProject.sprint_count ?? 0);
+        if (!Number.isFinite(count) || count <= 0) return [];
+
+        return Array.from({ length: count }, (_, i) => ({
+            sprint_id: i + 1,
+            sprint_title: `Sprint ${i + 1}`,
+        }));
+    }, [selectedProject]);
 
     useEffect(() => {
         const loadProjects = async () => {
             try {
-                const ids = [1, 2, 3]; // MORAŠ ih imati odnekle
+                setLoadingProjects(true);
+
+                const ids = [1, 2];
                 const loadedProjects: ProjectDTO[] = [];
 
                 for (const id of ids) {
@@ -40,8 +89,9 @@ export const AnalyticsPage: React.FC = () => {
                 setProjects(loadedProjects);
 
                 if (loadedProjects.length > 0) {
-                    setSelectedProjectId(String(loadedProjects[0].project_id));
-                    setSelectedProject(loadedProjects[0]);
+                    const first = loadedProjects[0];
+                    setSelectedProjectId(String(first.project_id));
+                    setSelectedProject(first);
                 }
             } catch (e) {
                 console.error("Failed to load projects", e);
@@ -53,23 +103,86 @@ export const AnalyticsPage: React.FC = () => {
         loadProjects();
     }, []);
 
+    // Auto-select first sprint when project changes
+    useEffect(() => {
+        if (!selectedProject) return;
+
+        if (sprints.length > 0) setSelectedSprintId(sprints[0].sprint_id);
+        else setSelectedSprintId(null);
+
+        // reset analytics data
+        setBurndown(null);
+        setBurnup(null);
+        setVelocity(null);
+        setBudget(null);
+        setAnalyticsError(null);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [selectedProjectId]);
+
+    // Load analytics when tab/id changes
+    useEffect(() => {
+        const projectId = selectedProject?.project_id;
+        if (!projectId) return;
+
+        const needsSprint = activeTab === "BURNDOWN" || activeTab === "BURNUP";
+        if (needsSprint && !selectedSprintId) return;
+
+        // if no token, backend will 401 — show friendly message
+        if (!token) {
+            setAnalyticsError("Missing auth token. Please login again.");
+            return;
+        }
+
+        const load = async () => {
+            try {
+                setLoadingAnalytics(true);
+                setAnalyticsError(null);
+
+                if (activeTab === "BURNDOWN") {
+                    const data = await analyticsAPI.getBurndownAnalytics(selectedSprintId!, token);
+                    setBurndown(data);
+                } else if (activeTab === "BURNUP") {
+                    const data = await analyticsAPI.getBurnupAnalytics(selectedSprintId!, token);
+                    setBurnup(data);
+                } else if (activeTab === "VELOCITY") {
+                    const v = await analyticsAPI.getVelocityTracking(projectId, token);
+                    setVelocity(v);
+                } else if (activeTab === "BUDGET") {
+                    const b = await analyticsAPI.getBudgetTracking(projectId, token);
+                    setBudget(b);
+                }
+            } catch (err: any) {
+                console.error("Failed to load analytics", err);
+
+                // axios error format
+                const msg =
+                    err?.response?.data?.message ||
+                    err?.response?.data?.error ||
+                    err?.message ||
+                    "Failed to load analytics data";
+
+                setAnalyticsError(msg);
+            } finally {
+                setLoadingAnalytics(false);
+            }
+        };
+
+        load();
+    }, [activeTab, selectedProject?.project_id, selectedSprintId, token, analyticsAPI]);
+
     return (
         <div className="flex min-h-screen bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-[#0f172a] via-[#020617] to-black">
             <Sidebar />
 
             <main className="flex-1 p-6">
                 <header className="mb-8">
-                    <h1 className="text-3xl md:text-4xl font-bold text-white">
-                        Analytics
-                    </h1>
+                    <h1 className="text-3xl md:text-4xl font-bold text-white">Analytics</h1>
                 </header>
 
                 {/* PROJECT SELECTOR */}
                 <section className="mb-8">
                     <div className="flex flex-col sm:flex-row sm:items-center gap-4 items-center justify-center">
-                        <span className="text-white/70 font-semibold">
-                            Selected project:
-                        </span>
+                        <span className="text-white/70 font-semibold">Selected project:</span>
 
                         {loadingProjects ? (
                             <div className="text-white/40">Loading projects...</div>
@@ -109,7 +222,10 @@ export const AnalyticsPage: React.FC = () => {
                                 key={tab.id}
                                 onClick={() => setActiveTab(tab.id)}
                                 className={`rounded-2xl p-4 text-center font-semibold transition-all duration-300 border border-white/10 backdrop-blur-xl
-                                    ${active ? "bg-gradient-to-t from-[var(--palette-medium-blue)] to-[var(--palette-deep-blue)] text-white shadow-lg scale-[1.03]" : "bg-white/5 text-white/60 hover:text-white hover:-translate-y-1"}`}
+                  ${active
+                                        ? "bg-gradient-to-t from-[var(--palette-medium-blue)] to-[var(--palette-deep-blue)] text-white shadow-lg scale-[1.03]"
+                                        : "bg-white/5 text-white/60 hover:text-white hover:-translate-y-1"
+                                    }`}
                             >
                                 {tab.label}
                             </button>
@@ -119,23 +235,72 @@ export const AnalyticsPage: React.FC = () => {
 
                 {/* CONTENT CARD */}
                 <section className="bg-white/5 backdrop-blur-xl rounded-2xl p-6 shadow-lg border border-white/10 min-h-[200px] max-h-[575px]">
-                    {activeTab === "BURNDOWN" &&
+                    {analyticsError && <div className="text-red-400 mb-4">{analyticsError}</div>}
+
+                    {activeTab === "BURNDOWN" && (
                         <div>
-                            {selectedProjectId ?
-                                <BurndownAnalytics project={selectedProject!} token={""} /> : "Select project..."}
-                        </div>}
-                    {activeTab === "BURNUP" && <div>
-                        {selectedProjectId ?
-                            <BurnupAnalytics project={selectedProject!} /> : "Select project..."}
-                    </div>}
-                    {activeTab === "VELOCITY" && <div>
-                        {selectedProjectId ?
-                            <VelocityAnalytics project={selectedProject!} /> : "Select project..."}
-                    </div>}
-                    {activeTab === "BUDGET" && <div>
-                        {selectedProjectId ?
-                            <BudgetAnalytics project={selectedProject!} token={""}/> : "Select project..."}
-                    </div>}
+                            {selectedProjectId ? (
+                                <BurndownAnalytics
+                                    project={selectedProject!}
+                                    data={burndown}
+                                    loading={loadingAnalytics}
+                                    sprintId={selectedSprintId}
+                                    sprints={sprints}
+                                    onSprintChange={(id) => {
+                                        setSelectedSprintId(id);
+                                        setBurndown(null);
+                                    }}
+                                />
+                            ) : (
+                                "Select project..."
+                            )}
+                        </div>
+                    )}
+
+                    {activeTab === "BURNUP" && (
+                        <div>
+                            {selectedProjectId ? (
+                                <BurnupAnalytics
+                                    project={selectedProject!}
+                                    data={burnup}
+                                    loading={loadingAnalytics}
+                                    sprintId={selectedSprintId}
+                                    sprints={sprints}
+                                    onSprintChange={(id) => {
+                                        setSelectedSprintId(id);
+                                        setBurnup(null);
+                                    }}
+                                />
+                            ) : (
+                                "Select project..."
+                            )}
+                        </div>
+                    )}
+
+                    {activeTab === "VELOCITY" && (
+                        <div>
+                            {selectedProjectId ? (
+                                <VelocityAnalytics
+                                    project={selectedProject!}
+                                    value={velocity}
+                                    loading={loadingAnalytics}
+                                />
+                            ) : (
+                                "Select project..."
+                            )}
+                        </div>
+                    )}
+
+                    {activeTab === "BUDGET" && (
+                        <div>
+                            {selectedProjectId ? (
+                                <BudgetAnalytics project={selectedProject!} data={budget} loading={loadingAnalytics} />
+                            ) : (
+                                "Select project..."
+                            )}
+                        </div>
+                    )}
+
                     {activeTab === "PROFIT" && <div>TODO: Profit margin analytics</div>}
                     {activeTab === "RESOURCES" && <div>TODO: Resource cost analytics</div>}
                 </section>

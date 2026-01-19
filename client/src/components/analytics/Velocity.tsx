@@ -1,27 +1,19 @@
-import React, { useEffect, useState } from "react";
-import { getMockVelocityForProject } from "../../mocks/VelocityMock";
+import React from "react";
 import { ProjectDTO } from "../../models/project/ProjectDTO";
 import CountUp from "../countUp/CoutUp";
 
 interface VelocityAnalyticsProps {
     project: ProjectDTO;
+    value: number | null;
+    loading?: boolean;
 }
 
-export const VelocityAnalytics: React.FC<VelocityAnalyticsProps> = ({ project }) => {
-    const [velocity, setVelocity] = useState<number | null>(null);
-
-    useEffect(() => {
-        if (!project) return;
-
-        // simulacija API call sa delay-om
-        setVelocity(null); // reset pre učitavanja
-        const timeout = setTimeout(() => {
-            const vel = getMockVelocityForProject(Number(project.project_id));
-            setVelocity(vel);
-        }, 500);
-
-        return () => clearTimeout(timeout);
-    }, [project]);
+export const VelocityAnalytics: React.FC<VelocityAnalyticsProps> = ({
+    project,
+    value,
+    loading = false,
+}) => {
+    const isLoading = loading || value === null;
 
     return (
         <section className="flex flex-col items-center justify-center gap-4 p-6 ">
@@ -29,18 +21,19 @@ export const VelocityAnalytics: React.FC<VelocityAnalyticsProps> = ({ project })
                 Team Velocity
             </h2>
 
-            {velocity === null ? (
+            {isLoading ? (
                 <p className="text-white/50">Loading velocity...</p>
             ) : (
                 <span className="text-6xl md:text-7xl font-bold text-white">
                     <CountUp
                         from={0}
-                        to={velocity}
+                        to={value ?? 0}
                         separator=","
                         direction="up"
                         duration={1}
                         className="count-up-text"
-                    />h
+                    />
+                    h
                 </span>
             )}
 

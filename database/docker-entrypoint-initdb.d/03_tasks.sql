@@ -1,13 +1,29 @@
 -- DROP TABLE IF EXISTS tasks_db.tasks;
 
--- CREATE TABLE IF NOT EXISTS tasks_db.tasks (
---   task_id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
---   title VARCHAR(255) NOT NULL,
---   task_description VARCHAR(100), -- consider longer descriptions
---   task_status VARCHAR(100) NOT NULL, /* e.g. created, waiting, in_progress, completed */
---   attachment_file_id INT, /* reference to uploaded_files_db.uploaded_files.id if needed */
---   estimated_cost INT NULL,
---   total_hours_spent INT DEFAULT 0,
---   CONSTRAINT chk_estimated_cost_nonneg CHECK (estimated_cost >= 0 OR estimated_cost IS NULL),
---   CONSTRAINT chk_hours_nonneg CHECK (total_hours_spent >= 0)
+-- CREATE TABLE Tasks (
+--   task_id INT AUTO_INCREMENT PRIMARY KEY,
+--   sprint_id INT NULL,
+
+--   title VARCHAR(100) NOT NULL,
+--   task_description VARCHAR(100) NOT NULL,
+
+--   task_status ENUM(
+--     'CREATED',
+--     'PENDING',
+--     'IN_PROGRESS',
+--     'COMPLETED',
+--     'CANCELLED'
+--   ) NOT NULL DEFAULT 'CREATED',
+
+--   attachment_file_uuid INT NULL,
+
+--   estimated_cost INT NOT NULL DEFAULT 0,
+--   total_hours_spent INT NOT NULL DEFAULT 0,
+
+--   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+--   finished_at DATETIME NULL,
+
+--   INDEX idx_tasks_sprint_id (sprint_id),
+--   INDEX idx_tasks_status (task_status),
+--   INDEX idx_tasks_finished_at (finished_at)
 -- );

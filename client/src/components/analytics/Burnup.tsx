@@ -1,32 +1,39 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { BurnupDto } from "../../models/analytics/BurnupDto";
 import { ProjectDTO } from "../../models/project/ProjectDTO";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
-import { getMockBurnupBySprint } from "../../mocks/BurnupMock";
+import {
+    LineChart,
+    Line,
+    XAxis,
+    YAxis,
+    CartesianGrid,
+    Tooltip,
+    ResponsiveContainer,
+} from "recharts";
 
-//DA BI RADILO POTREBNO JE INSTALIRATI npm install recharts
+type SprintOption = {
+    sprint_id: number;
+    sprint_title?: string;
+};
 
 interface BurnupAnalyticsProps {
     project: ProjectDTO;
+    data: BurnupDto | null;
+    loading?: boolean;
+
+    sprintId: number | null;
+    sprints: SprintOption[];
+    onSprintChange: (id: number | null) => void;
 }
 
-export const BurnupAnalytics: React.FC<BurnupAnalyticsProps> = ({ project }) => {
-    const [selectedSprintId, setSelectedSprintId] = useState<number | null>(null);
-    const [data, setData] = useState<BurnupDto | null>(null);
-
-    // default kada se promeni projekat
-    useEffect(() => {
-        setSelectedSprintId(null);
-        setData(null);
-    }, [project]);
-
-    // load mock data kada se izabere sprint
-    useEffect(() => {
-        if (!selectedSprintId) return;
-        const mockData = getMockBurnupBySprint(selectedSprintId);
-        setData(mockData);
-    }, [selectedSprintId]);
-
+export const BurnupAnalytics: React.FC<BurnupAnalyticsProps> = ({
+    project,
+    data,
+    loading = false,
+    sprintId,
+    sprints,
+    onSprintChange,
+}) => {
     return (
         <div className="flex flex-col gap-4">
             {/* Sprint selector */}
@@ -34,50 +41,64 @@ export const BurnupAnalytics: React.FC<BurnupAnalyticsProps> = ({ project }) => 
                 <span className="text-white/70 font-semibold">Sprint:</span>
 
                 <select
-                    value={selectedSprintId ?? ""}
+                    value={sprintId ?? ""}
                     onChange={(e) => {
                         const val = e.target.value;
-                        setSelectedSprintId(val === "" ? null : Number(val));
+                        onSprintChange(val === "" ? null : Number(val));
                     }}
-                    className="bg-white/10 backdrop-blur-xl border border-white/15 rounded-xl px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-[var(--palette-medium-blue)]">
-                    {/* Default placeholder */}
-                    <option value="" disabled>
+                    className="bg-white/10 backdrop-blur-xl border border-white/15 rounded-xl px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-[var(--palette-medium-blue)]"
+                >
+                    <option value="" disabled className="bg-[#020617] text-white">
                         No Selected Sprint...
                     </option>
 
-                    {/* Sprint options */}
-                    {Array.from({ length: project.sprint_count! }, (_, i) => {
-                        const sprintNumber = i + 1;
-                        return (
-                            <option
-                                key={sprintNumber}
-                                value={sprintNumber}
-                                className="text-black" // kao Burndown
-                            >
-                                Sprint {sprintNumber}
-                            </option>
-                        );
-                    })}
+                    {sprints.map((s) => (
+                        <option
+                            key={s.sprint_id}
+                            value={s.sprint_id}
+                            className="bg-[#020617] text-white"
+                        >
+                            {s.sprint_title ? s.sprint_title : `Sprint ${s.sprint_id}`}
+                        </option>
+                    ))}
                 </select>
             </div>
 
+            {loading && <div className="text-white/50">Loading burnup...</div>}
+
+            {!loading && sprintId && !data && (
+                <div className="text-white/50">No data for selected sprint.</div>
+            )}
 
             {/* Burnup chart */}
-            {data && (
+            {!loading && data && (
                 <div className="w-full h-[450px]">
                     <ResponsiveContainer width="100%" height="100%">
-                        <LineChart data={data.points} margin={{ top: 20, right: 20, left: 0, bottom: 20 }}>
+                        <LineChart
+                            data={data.points}
+                            margin={{ top: 20, right: 20, left: 0, bottom: 20 }}
+                        >
                             <CartesianGrid strokeDasharray="3 3" stroke="#55555533" />
                             <XAxis
                                 dataKey="x"
                                 ticks={data.points
                                     .filter((_, i) => i % Math.ceil(data.points.length / 10) === 0)
-                                    .map((p) => p.x)} // uzimamo samo 10 tickova ravnomerno raspoređenih
-                                label={{ value: "Days", position: "insideBottom", offset: -10, fill: "white" }}
+                                    .map((p) => p.x)}
+                                label={{
+                                    value: "Days",
+                                    position: "insideBottom",
+                                    offset: -10,
+                                    fill: "white",
+                                }}
                                 stroke="white"
                             />
                             <YAxis
-                                label={{ value: "Work Completed", angle: -90, position: "insideLeft", fill: "white" }}
+                                label={{
+                                    value: "Work Completed",
+                                    angle: -90,
+                                    position: "insideLeft",
+                                    fill: "white",
+                                }}
                                 stroke="white"
                             />
                             <Tooltip />
