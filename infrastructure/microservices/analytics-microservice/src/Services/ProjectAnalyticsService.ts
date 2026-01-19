@@ -19,7 +19,10 @@ export class ProjectAnalyticsService implements IProjectAnalyticsService {
 
     async getBurnDownChartsForSprintId(sprintId: number): Promise<BurndownDto> {
 
-        const s = await this.sprintRepository.findOneBy({ sprint_id: sprintId });
+        const s = await this.sprintRepository.findOne({
+            where: { sprint_id: sprintId },
+            relations: { project: true },
+        });
 
         if (!s) {
             throw new Error("Sprint not found");
@@ -33,6 +36,8 @@ export class ProjectAnalyticsService implements IProjectAnalyticsService {
 
         for (let i = 0; i < tasks.length; ++i)
             sum += tasks[i].estimated_cost;
+
+        if (sum === 0) sum = 1; //to avoid division by zero
 
         let BurndownTasks: BurndownTaskDTO[] = [];
 
@@ -52,7 +57,8 @@ export class ProjectAnalyticsService implements IProjectAnalyticsService {
 
     async getBurnUpChartsForSprintId(sprintId: number): Promise<BurnupDto> {
         const sprint = await this.sprintRepository.findOne({
-            where: { sprint_id: sprintId }
+            where: { sprint_id: sprintId },
+            relations: { project: true },
         });
 
         if (!sprint) {
@@ -123,6 +129,9 @@ export class ProjectAnalyticsService implements IProjectAnalyticsService {
         }
 
         const sprints = await this.sprintRepository.find({ where: { project: proj, end_date: LessThan(new Date()) } });
+
+        if (sprints.length === 0)
+            return 0;
 
         let sum = 0;
 
