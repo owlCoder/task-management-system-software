@@ -15,6 +15,8 @@ import { FileAPI } from "../api/file/FileAPI";
 import { TaskStatus } from "../enums/TaskStatus";
 import { CommentDTO } from "../models/task/CommentDTO";
 import { TaskCommentInput } from "../components/task/TaskCommentInput";
+import { TaskVersionDiff } from "../components/task/TaskVersionDiff";
+import { TaskVersionDTO } from "../models/task/TaskVersionDTO";
 
 export const TaskDetailPage: React.FC<TaskDetailPageProps> = ({token,taskId,setClose,onEdit,
   }) => {
@@ -26,6 +28,8 @@ export const TaskDetailPage: React.FC<TaskDetailPageProps> = ({token,taskId,setC
   const [userId, setUserId] = useState<number>(0);
   const [isTaskDone,setIsTaskDone] = useState(false);
   const [comments, setComments] = useState<CommentDTO[]>([]);
+  const [versions, setVersions] = useState<TaskVersionDTO[]>([]);
+  const [versionsError, setVersionsError] = useState<string | null>(null);
 
   const apiTask = new TaskAPI(import.meta.env.VITE_GATEWAY_URL, token);
   const fileApi = new FileAPI();
@@ -105,6 +109,19 @@ const handleUpload = async () => {
     });
 }, [taskId]);
 
+  useEffect(() => {
+    apiTask
+      .getTaskVersions(taskId)
+      .then((data) => {
+        setVersions(data);
+        setVersionsError(null);
+      })
+      .catch(() => {
+        setVersions([]);
+        setVersionsError("Failed to load version history.");
+      });
+  }, [taskId]);
+
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md">
@@ -142,6 +159,14 @@ const handleUpload = async () => {
                 role={role}
                 task={task}
               />
+
+              {versionsError ? (
+                <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-3 text-xs text-red-200">
+                  {versionsError}
+                </div>
+              ) : (
+                <TaskVersionDiff versions={versions} />
+              )}
               
               <TaskCommentList comments={task.comments} onDelete={handleDeleteComments}/>
               {task.task_status!== TaskStatus.COMPLETED &&  <TaskCommentInput onSubmit={handleAddComments} />}

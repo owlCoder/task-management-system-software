@@ -3,6 +3,7 @@ import { TaskStatus } from "../../enums/TaskStatus";
 import { ProjectUserDTO } from "../../models/project/ProjectUserDTO";
 import { UserRole } from "../../enums/UserRole";
 import { CommentDTO } from "../../models/task/CommentDTO";
+import { TaskVersionDTO } from "../../models/task/TaskVersionDTO";
 
 // TaskListItem Props
 export interface TaskListItemProps {
@@ -100,4 +101,8 @@ export interface TaskStatusFilterProps {
 export interface TaskSortSelectProps {
   value: string;
   onChange: (value: string) => void;
+}
+
+export interface TaskVersionDiffProps {
+  versions: TaskVersionDTO[];
 }

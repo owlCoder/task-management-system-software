@@ -3,6 +3,7 @@ import { TaskDTO } from "../../models/task/TaskDTO";
 import { UpdateTaskDTO } from "../../models/task/UpdateTaskDTO";
 import { ITaskAPI } from "./ITaskAPI";
 import { CommentDTO } from "../../models/task/CommentDTO";
+import { TaskVersionDTO } from "../../models/task/TaskVersionDTO";
 
 
 
@@ -161,6 +162,45 @@ async deleteComment(commentId:number,userId:number) : Promise<void>{
      console.error('Error deleting comment:', error);
      throw error;
    }
+}
+
+async getTaskVersions(taskId: number): Promise<TaskVersionDTO[]> {
+  try {
+    const res = await fetch(`${this.baseUrl}/tasks/${taskId}/versions`, {
+      headers: this.headers,
+    });
+
+    if (!res.ok) {
+      throw new Error("Failed to fetch task versions");
+    }
+
+    const json = await res.json();
+    return json.data ?? json;
+  } catch (error) {
+    console.error("Error fetching task versions:", error);
+    throw error;
+  }
+}
+
+async getTaskVersion(taskId: number, versionId: number): Promise<TaskVersionDTO> {
+  try {
+    const res = await fetch(
+      `${this.baseUrl}/tasks/${taskId}/versions/${versionId}`,
+      {
+        headers: this.headers,
+      }
+    );
+
+    if (!res.ok) {
+      throw new Error("Failed to fetch task version");
+    }
+
+    const json = await res.json();
+    return json.data ?? json;
+  } catch (error) {
+    console.error("Error fetching task version:", error);
+    throw error;
+  }
 }
 
 }
