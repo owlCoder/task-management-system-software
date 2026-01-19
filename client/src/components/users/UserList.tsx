@@ -82,7 +82,11 @@ export const UserList: React.FC<UserListProps> = ({ userAPI }) => {
     }
   };
 
-  return (
+  const hasUserImage = (user: UserDTO): boolean => {
+    return !!(user.image_url && user.image_url.trim() !== "");
+  };
+
+    return (
     <div className="flex h-screen overflow-hidden">
       <main className="flex-1 p-6 flex flex-col overflow-hidden">
         <div className="w-full max-w-6xl mx-auto flex flex-col h-full">
@@ -139,10 +143,18 @@ export const UserList: React.FC<UserListProps> = ({ userAPI }) => {
                       setIsEditing(false);
                     }}
                   >
-                    <div className="w-20 h-20 rounded-full mb-4 border-2 border-white/20 shadow-md group-hover:border-white/40 transition-all flex items-center justify-center bg-white/10 backdrop-blur-sm">
-                      <span className="text-3xl font-bold text-white uppercase select-none">
-                        {u.username.charAt(0)}
-                      </span>
+                    <div className="w-20 h-20 rounded-full mb-4 border-2 border-white/20 shadow-md group-hover:border-white/40 transition-all flex items-center justify-center bg-white/10 backdrop-blur-sm overflow-hidden">
+                      {hasUserImage(u) ? (
+                        <img 
+                          src={u.image_url} 
+                          alt={`${u.username}'s profile`}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <span className="text-3xl font-bold text-white uppercase select-none">
+                          {u.username.charAt(0)}
+                        </span>
+                      )}
                     </div>
 
                     <span className="font-semibold text-white text-lg text-center">

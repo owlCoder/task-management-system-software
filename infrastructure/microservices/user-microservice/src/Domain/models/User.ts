@@ -28,6 +28,12 @@ export class User {
   @Column({ type: "varchar", length: 100, unique: true })
   email!: string;
 
+  @Column({ type: "varchar", nullable: true, length: 255 })
+  image_key!: string;
+
+  @Column({ type: "varchar", nullable: true, length: 500 })
+  image_url!: string;
+
   @Column({ type: "boolean", nullable: false, default: false })
   is_deleted!: boolean;
 

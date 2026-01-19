@@ -31,11 +31,27 @@ export const EditUserForm: React.FC<EditUserFormProps> = ({
     role_name: existingUser.role_name,
   });
 
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string>(existingUser.image_url || "");
+
  // const [weeklyHours, setWeeklyHours] = useState(0);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      setImageFile(file);
+
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -47,7 +63,8 @@ export const EditUserForm: React.FC<EditUserFormProps> = ({
         formData.username,
         formData.email,
         formData.role_name,
-        formData.password || undefined
+        formData.password || undefined,
+        imageFile || undefined
       );
 
     const updated = await userAPI.updateUser(token, existingUser.user_id, updateData);
@@ -68,6 +85,35 @@ export const EditUserForm: React.FC<EditUserFormProps> = ({
       <h3 className="text-2xl font-bold mb-6 text-white text-center">Edit User</h3>
 
       <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
+        {/* Profile Image */}
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-24 h-24 rounded-full border-2 border-white/20 shadow-md flex items-center justify-center bg-white/10 backdrop-blur-sm overflow-hidden">
+            {imagePreview ? (
+              <img 
+                src={imagePreview} 
+                alt="Profile preview" 
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <span className="text-4xl font-bold text-white uppercase select-none">
+                {existingUser.username.charAt(0)}
+              </span>
+            )}
+          </div>
+          
+          <label className="flex items-center gap-2 cursor-pointer px-4 py-2 bg-white/10 border border-white/20 rounded-lg hover:bg-white/20 transition">
+            <span className="text-white/90 text-sm">
+              {imageFile ? imageFile.name : "Choose Profile Image"}
+            </span>
+            <input
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handleImageChange}
+            />
+          </label>
+        </div>
+        
         <input type="text" name="username" value={formData.username} onChange={handleChange} placeholder="Username" className={inputClasses} required />
         <input type="email" name="email" value={formData.email} onChange={handleChange} placeholder="Email" className={inputClasses} required />
         <input type="password" name="password" value={formData.password} onChange={handleChange} placeholder="New Password (optional)" className={inputClasses} />

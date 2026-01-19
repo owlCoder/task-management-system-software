@@ -10,6 +10,7 @@ export function toUserDTO(user: User): UserDTO {
     username: user.username,
     role_name: user.user_role.role_name, //uzimamo role_name jer ucitavaju objekat get funkcije
     email: user.email,
+    image_url: user.image_url || "",
     weekly_working_hour_sum: user.weekly_working_hour_sum,
   };
 }

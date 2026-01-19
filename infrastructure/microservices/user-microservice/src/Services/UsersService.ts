@@ -9,6 +9,7 @@ import { UserUpdateDTO } from "../Domain/DTOs/UserUpdateDTO";
 import { Result } from "../Domain/types/Result";
 import { ErrorCode } from "../Domain/enums/ErrorCode";
 import { toUserDTO } from "../Helpers/Converter/toUserDTO";
+import { IR2StorageService } from "../Storage/R2StorageService";
 
 export class UsersService implements IUsersService {
   private readonly saltRounds: number = parseInt(
@@ -18,7 +19,8 @@ export class UsersService implements IUsersService {
 
   constructor(
     private userRepository: Repository<User>,
-    private userRolesRepository: Repository<UserRole>
+    private userRolesRepository: Repository<UserRole>,
+    private storageService: IR2StorageService
   ) {}
 
   /**
@@ -123,6 +125,8 @@ export class UsersService implements IUsersService {
       password_hash: hashedPassword,
       user_role: userRole,
       email: user.email,
+      image_key: "",
+      image_url: "",
     });
 
     const newUser = {
@@ -131,6 +135,8 @@ export class UsersService implements IUsersService {
       password_hash: hashedPassword,
       user_role: userRole,
       email: user.email,
+      image_key: "",
+      image_url: "",
       is_deleted: result.generatedMaps[0].is_deleted,
       weekly_working_hour_sum: result.generatedMaps[0].weekly_working_hour_sum,
     };
@@ -165,6 +171,11 @@ export class UsersService implements IUsersService {
       };
     }
 
+    // Briši sliku iz storage-a ako postoji
+    if (existingUser.image_key) {
+      await this.storageService.deleteImage(existingUser.image_key);
+    }
+
     const result = await this.userRepository.update(user_id, {
       is_deleted: true,
     });
@@ -185,7 +196,6 @@ export class UsersService implements IUsersService {
   /**
    * Update user by ID
    */
-
   async updateUserById(
     user_id: number,
     updateUserData: UserUpdateDTO
@@ -205,16 +215,15 @@ export class UsersService implements IUsersService {
 
     const currentRole = existingUser.user_role.role_name.toUpperCase();
 
-    if(currentRole === "ADMIN" || currentRole === "SYSADMIN") {
+    if (currentRole === "ADMIN" || currentRole === "SYSADMIN") {
+      updateUserData.role_name = existingUser.user_role.role_name;
 
-      updateUserData.role_name = existingUser.user_role.role_name; 
-      
       if (updateUserData.role_name !== existingUser.user_role.role_name) {
-          return {
-              success: false,
-              code: ErrorCode.FORBIDDEN,
-              error: `Chaning role is forbidden for users with role ${currentRole}`,
-          };
+        return {
+          success: false,
+          code: ErrorCode.FORBIDDEN,
+          error: `Changing role is forbidden for users with role ${currentRole}`,
+        };
       }
     }
 
@@ -234,6 +243,10 @@ export class UsersService implements IUsersService {
       };
     }
 
+    if (updateUserData.image_key !== undefined && existingUser.image_key) {
+      await this.storageService.deleteImage(existingUser.image_key);
+    }
+
     if (updateUserData.password) {
       existingUser.password_hash = await bcrypt.hash(
         updateUserData.password,
@@ -243,6 +256,13 @@ export class UsersService implements IUsersService {
 
     existingUser.email = updateUserData.email;
     existingUser.username = updateUserData.username;
+
+    if (updateUserData.image_key !== undefined) {
+      existingUser.image_key = updateUserData.image_key;
+    }
+    if (updateUserData.image_url !== undefined) {
+      existingUser.image_url = updateUserData.image_url;
+    }
 
     if (existingUser.user_role.role_name !== updateUserData.role_name) {
       const userRole: UserRole | null = await this.userRolesRepository.findOne({

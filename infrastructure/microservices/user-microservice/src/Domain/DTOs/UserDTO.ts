@@ -1,8 +1,9 @@
 export interface UserDTO {
   user_id: number;
   username: string;
-  role_name: string;
   email: string;
+  role_name: string;
+  image_url: string;
   weekly_working_hour_sum: number;
 }
 
@@ -11,5 +12,6 @@ export const DefaultUser: UserDTO = {
   username: "",
   role_name: "",
   email: "",
+  image_url: "",
   weekly_working_hour_sum: 0,
 };

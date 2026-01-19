@@ -97,10 +97,13 @@ export class GatewayUserController {
      * - On failure: response status code indicating the failure, response data: message describing the error.
      */
     private async updateUserById(req: Request<ReqParams<'userId'>>, res: Response): Promise<void> {
+        if(!req.headers['content-type']?.includes('multipart/form-data')){
+            res.status(400).json({ message: "Bad request" });
+            return;
+        }
         const userId = parseInt(req.params.userId, 10);
-        const data = req.body as UpdateUserDTO;
 
-        const result = await this.gatewayUserService.updateUserById(userId, data);
+        const result = await this.gatewayUserService.updateUserById(userId, req);
         handleResponse(res, result);
     }
 

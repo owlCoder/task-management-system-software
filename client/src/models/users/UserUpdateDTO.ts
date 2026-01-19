@@ -3,6 +3,7 @@ export class UserUpdateDTO {
     public username: string,
     public email: string,
     public role_name: string,
-    public password?: string
+    public password?: string,
+    public image_file?: File
   ) {}
 }

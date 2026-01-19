@@ -1,3 +1,6 @@
+// Framework
+import { Request } from "express";
+
 // Libraries
 import { AxiosInstance } from "axios";
 
@@ -17,7 +20,7 @@ import { SERVICES } from "../../Constants/services/Services";
 import { API_ENDPOINTS } from "../../Constants/services/APIEndpoints";
 
 // Infrastructure
-import { makeAPICall } from "../../Infrastructure/axios/APIHelpers";
+import { makeAPICall, makeAPIUploadStreamCall } from "../../Infrastructure/axios/APIHelpers";
 import { createAxiosClient } from "../../Infrastructure/axios/client/AxiosClientFactory";
 
 /**
@@ -27,7 +30,7 @@ export class GatewayUserService implements IGatewayUserService {
     private readonly userClient: AxiosInstance;
 
     constructor(private readonly errorHandlingService: IErrorHandlingService) {
-        this.userClient = createAxiosClient(API_ENDPOINTS.USER);
+        this.userClient = createAxiosClient(API_ENDPOINTS.USER, { headers: {} });
     }
 
     /**
@@ -99,12 +102,17 @@ export class GatewayUserService implements IGatewayUserService {
      * - On success returns data as {@link UserDTO}.
      * - On failure returns status code and error message.
      */
-    async updateUserById(userId: number, data: UpdateUserDTO): Promise<Result<UserDTO>> {
-        return await makeAPICall<UserDTO, UpdateUserDTO>(this.userClient, this.errorHandlingService, {
+    async updateUserById(userId: number, req: Request): Promise<Result<UserDTO>> {
+        return await makeAPIUploadStreamCall<UserDTO, Request>(this.userClient, this.errorHandlingService, {
             serviceName: SERVICES.USER,
             method: HTTP_METHODS.PUT,
             url: USER_ROUTES.UPDATE_USER(userId),
-            data: data
+            data: req,
+            headers: {
+                "Content-Type": req.headers["content-type"]!,
+                ...(req.headers["content-length"] && { 'Content-Length': req.headers["content-length"] })
+            },
+            timeout: 20000
         });
     }
 

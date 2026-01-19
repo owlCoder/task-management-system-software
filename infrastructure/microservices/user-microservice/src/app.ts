@@ -14,6 +14,7 @@ import { LogerService } from "./Services/LogerService";
 import { UserRole } from "./Domain/models/UserRole";
 import { UserRoleService } from "./Services/UserRoleService";
 import { IUserRoleService } from "./Domain/services/IUserRoleService";
+import { R2StorageService, IR2StorageService } from "./Storage/R2StorageService";
 
 dotenv.config({ quiet: true });
 
@@ -41,10 +42,14 @@ initialize_database();
 const userRepository: Repository<User> = Db.getRepository(User);
 const userRoleRepository: Repository<UserRole> = Db.getRepository(UserRole);
 
+// Storage service
+const storageService: IR2StorageService = new R2StorageService();
+
 // Services
 const userService: IUsersService = new UsersService(
   userRepository,
-  userRoleRepository
+  userRoleRepository,
+  storageService
 );
 const userRoleService: IUserRoleService = new UserRoleService(
   userRoleRepository
@@ -55,7 +60,8 @@ const logerService: ILogerService = new LogerService();
 const userController = new UsersController(
   userService,
   userRoleService,
-  logerService
+  logerService,
+  storageService
 );
 
 // Registering routes

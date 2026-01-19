@@ -1,4 +1,5 @@
 import { Router, Request, Response } from "express";
+import multer from "multer";
 import { ILogerService } from "../../Domain/services/ILogerService";
 import { IUsersService } from "../../Domain/services/IUsersService";
 import { IUserRoleService } from "../../Domain/services/IUserRoleService";
@@ -6,6 +7,22 @@ import { UserDataValidation } from "../validation/UserDataValidation";
 import { parseIds } from "../../Helpers/parseIds";
 import { UserDataUpdateValidation } from "../validation/UserDataUpdateValidation";
 import { UsernameValidation } from "../validation/UsernameValidation";
+import { IR2StorageService } from "../../Storage/R2StorageService";
+import { UserUpdateDTO } from "../../Domain/DTOs/UserUpdateDTO";
+
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: {
+    fileSize: 10 * 1024 * 1024, // 10MB
+  },
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype.startsWith("image/")) {
+      cb(null, true);
+    } else {
+      cb(new Error("Only image files are allowed"));
+    }
+  },
+});
 
 export class UsersController {
   private readonly router: Router;
@@ -13,7 +30,8 @@ export class UsersController {
   constructor(
     private readonly usersService: IUsersService,
     private readonly userRoleService: IUserRoleService,
-    private readonly logger: ILogerService
+    private readonly logger: ILogerService,
+    private readonly storageService: IR2StorageService
   ) {
     this.router = Router();
     this.initializeRoutes();
@@ -26,13 +44,10 @@ export class UsersController {
     this.router.get("/users/:id", this.getUserById.bind(this));
     this.router.post("/users", this.createUser.bind(this));
     this.router.delete("/users/:id", this.logicalyDeleteUser.bind(this));
-    this.router.put("/users/:id", this.updateUser.bind(this));
+    this.router.put("/users/:id", upload.single("image_file"), this.updateUser.bind(this));
     this.router.put("/users/:id/working-hours", this.setWeeklyHours.bind(this));
     this.router.get("/user-roles", this.getAllUserRoles.bind(this));
-    this.router.get(
-      "/user-roles/:impact_level",
-      this.getUserRoleByImpactLevel.bind(this)
-    );
+    this.router.get("/user-roles/:impact_level", this.getUserRoleByImpactLevel.bind(this));
   }
 
   /**
@@ -236,21 +251,49 @@ export class UsersController {
         return;
       }
 
-      const userData = req.body;
+      const updateData: UserUpdateDTO = {
+        username: req.body.username,
+        email: req.body.email,
+        role_name: req.body.role_name,
+        password: req.body.password || undefined,
+      };
 
-      const rezultat = UserDataUpdateValidation(userData);
+      // Handle image upload
+      if (req.file) {
+        try {
+          const uploadResult = await this.storageService.uploadImage(
+            req.file.buffer,
+            req.file.originalname,
+            req.file.mimetype
+          );
+          updateData.image_key = uploadResult.key;
+          updateData.image_url = uploadResult.url;
+        } catch (uploadError) {
+          this.logger.log(`Image upload failed: ${(uploadError as Error).message}`);
+          res.status(500).json({ message: "Failed to upload image" });
+          return;
+        }
+      }
+
+      const rezultat = UserDataUpdateValidation(updateData);
 
       if (rezultat.uspesno === false) {
+        if (updateData.image_key) {
+          await this.storageService.deleteImage(updateData.image_key);
+        }
         res.status(400).json({ message: rezultat.poruka });
         return;
       }
 
       this.logger.log(`Updating user with ID ${id}`);
-      const result = await this.usersService.updateUserById(id, userData);
+      const result = await this.usersService.updateUserById(id, updateData);
 
       if (result.success) {
         res.status(200).json(result.data);
       } else {
+        if (updateData.image_key) {
+          await this.storageService.deleteImage(updateData.image_key);
+        }
         this.logger.log(result.error);
         res.status(result.code).json(result.error);
       }

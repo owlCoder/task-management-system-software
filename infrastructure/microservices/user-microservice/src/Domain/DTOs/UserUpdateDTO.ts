@@ -3,4 +3,6 @@ export interface UserUpdateDTO {
   email: string;
   role_name: string;
   password?: string;
+  image_key?: string;
+  image_url?: string;
 }
