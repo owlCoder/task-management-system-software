@@ -2,6 +2,7 @@ import { TaskDTO } from "../../models/task/TaskDTO";
 import { CreateTaskDTO } from "../../models/task/CreateTaskDTO";
 import { UpdateTaskDTO } from "../../models/task/UpdateTaskDTO";
 import { CommentDTO } from "../../models/task/CommentDTO";
+import { TaskVersionDTO } from "../../models/task/TaskVersionDTO";
 
 export interface ITaskAPI {
   getTasksByProject(projectId: string): Promise<TaskDTO[]>;
@@ -12,4 +13,6 @@ export interface ITaskAPI {
   deleteTask(taskId: string): Promise<void>;
   uploadComment(taskId:number,userId:number,comment:string) : Promise<CommentDTO>;
   deleteComment(commentId:number,userId:number) : Promise<void>;
+  getTaskVersions(taskId: number): Promise<TaskVersionDTO[]>;
+  getTaskVersion(taskId: number, versionId: number): Promise<TaskVersionDTO>;
 }
