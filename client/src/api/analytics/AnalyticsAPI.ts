@@ -5,97 +5,89 @@ import { ResourceCostAllocationDto } from "../../models/analytics/ResourceCostAl
 import { BurndownDto } from "../../models/analytics/BurndownDto";
 import { BurnupDto } from "../../models/analytics/BurnupDto";
 
+type Id = string | number;
+
 export class AnalyticsAPI implements IAnalyticsAPI {
   private baseUrl: string;
   private token: string;
 
   constructor(baseUrl: string, token: string) {
-    this.baseUrl = baseUrl;
+    this.baseUrl = baseUrl.replace(/\/+$/, "");
     this.token = token;
   }
 
-  private get headers() {
-    return {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${this.token}`,
+  /** omogucava da posle login/refresh samo setujes novi token */
+  public setToken(token: string) {
+    this.token = token;
+  }
+
+  private get headers(): Record<string, string> {
+    const headers: Record<string, string> = {
+      Accept: "application/json",
     };
+
+    // ako nema tokena ne salji header
+    if (this.token && this.token.trim().length > 0) {
+      headers.Authorization = `Bearer ${this.token}`;
+    }
+
+    return headers;
   }
 
-  async getBurndownAnalytics(sprintId: string): Promise<BurndownDto> {
-    try {
-      const res = await fetch(`${this.baseUrl}/analytics/burndown/${sprintId}`, {
-        headers: this.headers,
-      });
-      if (!res.ok) throw new Error("Failed to fetch Burndown Analytics data");
-      return res.json();
-    } catch (error) {
-      console.error('Error fetching burndown analytics:', error);
-      throw error;
+  private async request<T>(path: string): Promise<T> {
+    const res = await fetch(`${this.baseUrl}${path}`, {
+      method: "GET",
+      headers: this.headers,
+    });
+
+    if (res.ok) {
+      return (await res.json()) as T;
     }
+
+    let details = "";
+    try {
+      const body = await res.json();
+      details =
+        body?.message ||
+        body?.error ||
+        body?.details ||
+        (typeof body === "string" ? body : JSON.stringify(body));
+    } catch {
+      try {
+        details = await res.text();
+      } catch {
+        details = "";
+      }
+    }
+
+    throw new Error(
+      `Analytics API error (${res.status} ${res.statusText})${
+        details ? `: ${details}` : ""
+      }`
+    );
   }
 
-  async getBurnupAnalytics(sprintId: string): Promise<BurnupDto> {
-    try {
-      const res = await fetch(`${this.baseUrl}/analytics/burnup/${sprintId}`, {
-        headers: this.headers,
-      });
-      if (!res.ok) throw new Error("Failed to fetch Burnup Analytics data");
-      return res.json();
-    } catch (error) {
-      console.error('Error fetching burnup analytics:', error);
-      throw error;
-    }
+  getBurndownAnalytics(sprintId: Id): Promise<BurndownDto> {
+    return this.request(`/analytics/burndown/${sprintId}`);
   }
 
-  async getVelocityTracking(projectId: string): Promise<number> {
-    try {
-      const res = await fetch(`${this.baseUrl}/analytics/velocity/${projectId}`, {
-        headers: this.headers,
-      });
-      if (!res.ok) throw new Error("Failed to fetch Velocity tracking data");
-      return res.json();
-    } catch (error) {
-      console.error('Error fetching velocity tracking:', error);
-      throw error;
-    }
+  getBurnupAnalytics(sprintId: Id): Promise<BurnupDto> {
+    return this.request(`/analytics/burnup/${sprintId}`);
   }
 
-  async getBudgetTracking(projectId: string): Promise<BudgetTrackingDto> {
-    try {
-      const res = await fetch(`${this.baseUrl}/analytics/budget/${projectId}`, {
-        headers: this.headers,
-      });
-      if (!res.ok) throw new Error("Failed to fetch Budget Tracking data");
-      return res.json();
-    } catch (error) {
-      console.error('Error fetching budget tracking:', error);
-      throw error;
-    }
+  getVelocityTracking(projectId: Id): Promise<number> {
+    return this.request(`/analytics/velocity/${projectId}`);
   }
 
-  async getProfitMargin(projectId: string): Promise<ProfitMarginDto> {
-    try {
-      const res = await fetch(`${this.baseUrl}/analytics/profit-margin/${projectId}`, {
-        headers: this.headers,
-      });
-      if (!res.ok) throw new Error("Failed to fetch Profit Margin data");
-      return res.json();
-    } catch (error) {
-      console.error('Error fetching profit margin:', error);
-      throw error;
-    }
+  getBudgetTracking(projectId: Id): Promise<BudgetTrackingDto> {
+    return this.request(`/analytics/budget/${projectId}`);
   }
 
-  async getResourceCostAllocation(projectId: string): Promise<ResourceCostAllocationDto> {
-    try {
-      const res = await fetch(`${this.baseUrl}/analytics/resource-cost/${projectId}`, {
-        headers: this.headers,
-      });
-      if (!res.ok) throw new Error("Failed to fetch Resource Cost Allocation data");
-      return res.json();
-    } catch (error) {
-      console.error('Error fetching resource cost allocation:', error);
-      throw error;
-    }
+  getProfitMargin(projectId: Id): Promise<ProfitMarginDto> {
+    return this.request(`/analytics/profit-margin/${projectId}`);
+  }
+
+  getResourceCostAllocation(projectId: Id): Promise<ResourceCostAllocationDto> {
+    return this.request(`/analytics/resource-cost/${projectId}`);
   }
 }

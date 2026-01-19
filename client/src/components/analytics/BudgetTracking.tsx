@@ -1,5 +1,4 @@
-import React, { useEffect, useState } from "react";
-import { AnalyticsAPI } from "../../api/analytics/AnalyticsAPI";
+import React from "react";
 import { ProjectDTO } from "../../models/project/ProjectDTO";
 import { BudgetTrackingDto } from "../../models/analytics/BudgetTrackingDto";
 import {
@@ -15,60 +14,26 @@ import {
 
 interface BudgetAnalyticsProps {
   project: ProjectDTO;
-  token: string;
+  data: BudgetTrackingDto | null;
+  loading?: boolean;
 }
 
 export const BudgetAnalytics: React.FC<BudgetAnalyticsProps> = ({
   project,
-  token,
+  data,
+  loading = false,
 }) => {
-  const analyticsAPI = new AnalyticsAPI(import.meta.env.VITE_GATEWAY_URL, token);
+  if (!data) {
+    return loading ? (
+      <div className="text-white/50">Loading budget data...</div>
+    ) : (
+      <div className="text-white/50">No budget data.</div>
+    );
+  }
 
-  const [data, setData] = useState<BudgetTrackingDto | null>(null);
-  const [loading, setLoading] = useState(false);
-
-  /* Kada se promeni projekat - reset podataka */
-  useEffect(() => {
-    setData(null);
-  }, [project]);
-
-  /* Fetch budget podataka sa backend-a */
-  useEffect(() => {
-    if (!project) return;
-
-    const fetchBudgetData = async () => {
-      setLoading(true);
-      try {
-        const result = await analyticsAPI.getBudgetTracking(
-          String(project.project_id)
-        );
-        console.log("Fetched budget data:", result);
-        setData(result);
-      } catch (err: any) {
-        console.error("Error fetching budget data:", err.message || err);
-        setData(null);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchBudgetData();
-  }, [project, token]);
-
-  if (!data) return loading ? <div className="text-white/50">Loading budget data...</div> : null;
-
-  /* Priprema podataka za graf */
   const chartData = [
-    {
-      name: "Planned Budget",
-      value: data.allowed_budget,
-      color: "#3b82f6",
-    },
-    {
-      name: "Actual Cost",
-      value: data.total_spent,
-      color: "#4ade80",
-    },
+    { name: "Planned Budget", value: data.allowed_budget, color: "#3b82f6" },
+    { name: "Actual Cost", value: data.total_spent, color: "#4ade80" },
     {
       name: "Remaining Budget",
       value: data.remaining_budget,
@@ -84,10 +49,7 @@ export const BudgetAnalytics: React.FC<BudgetAnalyticsProps> = ({
     <div className="flex flex-col gap-6">
       <div className="w-full h-[450px]">
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart
-            data={chartData}
-            margin={{ top: 20, right: 20, left: 0, bottom: 20 }}
-          >
+          <BarChart data={chartData} margin={{ top: 20, right: 20, left: 0, bottom: 20 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#55555533" />
             <XAxis dataKey="name" stroke="white" tick={{ fill: "white" }} />
             <YAxis
