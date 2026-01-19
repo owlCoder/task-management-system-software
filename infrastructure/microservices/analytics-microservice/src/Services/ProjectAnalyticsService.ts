@@ -79,43 +79,37 @@ export class ProjectAnalyticsService implements IProjectAnalyticsService {
         const s = await this.sprintRepository.findOne({
             where: { sprint_id: sprintId },
         });
-
+        console.log("prosao fetch");
         if (!s) throw new Error("Sprint not found");
 
         const project = await this.projectRepository.findOne({
             where: { project_id: s.project_id },
         });
-
+        console.log("prosao fetch na project");
         if (!project) throw new Error("Project not found for sprint");
 
-        const sprintDuration =
-            (s.end_date.getTime() - s.start_date.getTime()) /
-            (1000 * 60 * 60 * 24);
+        const startDate = new Date(s.start_date);
+        startDate.setHours(0, 0, 0, 0);
 
-        const tasks = await this.taskRepository.find({
-            where: { sprint_id: sprintId },
-        });
-
-        const totalWork = tasks.reduce(
-            (sum, t) => sum + t.estimated_cost,
-            0,
-        );
+        const endDate = new Date(s.end_date);
+        endDate.setHours(23, 59, 59, 999); // kraj dana
 
         const today = new Date();
+        today.setHours(23, 59, 59, 999);
 
+        const sprintDuration =
+            (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24);
+
+        const tasks = await this.taskRepository.find({ where: { sprint_id: sprintId } });
+        console.log("prosao fetch na tasks");
         const finishedTasks = tasks
-            .filter(
-                t =>
-                    t.finished_at &&
-                    t.finished_at >= s.start_date &&
-                    t.finished_at <= s.end_date &&
-                    t.finished_at <= today,
-            )
-            .sort(
-                (a, b) =>
-                    a.finished_at!.getTime() -
-                    b.finished_at!.getTime(),
-            );
+            .filter(t => t.finished_at) // ima finished_at
+            .map(t => ({ ...t, finished_at_date: new Date(t.finished_at!) }))
+            .filter(t => t.finished_at_date >= startDate && t.finished_at_date <= endDate && t.finished_at_date <= today)
+            .sort((a, b) => a.finished_at_date.getTime() - b.finished_at_date.getTime());
+
+        const totalWork = tasks.reduce((sum, t) => sum + t.estimated_cost, 0);
+
 
         const points: BurnupPointDto[] = [];
         let cumulativeWork = 0;
@@ -124,9 +118,7 @@ export class ProjectAnalyticsService implements IProjectAnalyticsService {
             cumulativeWork += task.estimated_cost;
 
             const dayFromStart =
-                (task.finished_at!.getTime() -
-                    s.start_date.getTime()) /
-                (1000 * 60 * 60 * 24);
+                (task.finished_at_date.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24);
 
             points.push({
                 x: Math.floor(dayFromStart),

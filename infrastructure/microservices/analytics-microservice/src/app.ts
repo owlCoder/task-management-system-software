@@ -94,7 +94,7 @@ const projectsDataSource = new DataSource({
   synchronize: false,
   migrationsRun: false,
   dropSchema: false,
-  logging: ["query", "error"],
+  logging: ["error"],
 
 
   entities: [Project, Sprint, ProjectUser],
