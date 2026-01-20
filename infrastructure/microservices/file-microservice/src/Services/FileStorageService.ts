@@ -1,10 +1,10 @@
-import { IFileStorageService } from '../Domain/services/IFileStorageService';
-import { Result } from '../Domain/types/Result';
-import * as fs from 'fs';
-import * as path from 'path';
+import { IFileStorageService } from "../Domain/services/IFileStorageService";
+import { Result } from "../Domain/types/Result";
+import * as fs from "fs";
+import * as path from "path";
 
 export class FileStorageService implements IFileStorageService {
-  private readonly baseDataPath = path.join(__dirname, '../../Data');
+  private readonly baseDataPath = path.join(__dirname, "../../Data");
 
   constructor() {
     this.ensureDataDirectoryExists();
@@ -27,23 +27,61 @@ export class FileStorageService implements IFileStorageService {
     }
   }
 
-  async saveFile(userUuid: number, filename: string, fileBuffer: Buffer): Promise<Result<string>> {
+  private getFileType(filename: string): "image" | "audio" | "video" | null {
+    const ext = path.extname(filename).toLowerCase();
+    if (
+      [".jpg", ".jpeg", ".png", ".gif", ".mp4", ".mov", ".avi"].includes(ext)
+    ) {
+      return ext === ".mp4" || ext === ".mov" || ext === ".avi"
+        ? "video"
+        : "image";
+    } else if ([".mp3", ".wav", ".ogg"].includes(ext)) {
+      return "audio";
+    }
+    return null;
+  }
+
+  async saveFile(
+    userUuid: number,
+    filename: string,
+    fileBuffer: Buffer,
+  ): Promise<Result<string>> {
     try {
       const userUuidPath = userUuid.toString();
       this.ensureUserDirectoryExists(userUuidPath);
-      
-      const filePath = path.join(this.getUserDirectoryPath(userUuidPath), filename);
-      
+
+      const fileType = this.getFileType(filename);
+      let storagePath;
+
+      if (fileType === "image" || fileType === "video") {
+        storagePath = path.join(
+          this.baseDataPath,
+          "media",
+          "images_videos",
+          userUuidPath,
+        );
+      } else if (fileType === "audio") {
+        storagePath = path.join(
+          this.baseDataPath,
+          "media",
+          "audio",
+          userUuidPath,
+        );
+      } else {
+        return { success: false, error: "Unsupported file type" };
+      }
+
+      const filePath = path.join(storagePath, filename);
       await fs.promises.writeFile(filePath, fileBuffer);
-      
-      return { 
-        success: true, 
-        data: path.relative(this.baseDataPath, filePath) 
+
+      return {
+        success: true,
+        data: path.relative(this.baseDataPath, filePath),
       };
     } catch (error) {
-      return { 
-        success: false, 
-        error: `Failed to save file: ${error instanceof Error ? error.message : 'Unknown error'}` 
+      return {
+        success: false,
+        error: `Failed to save file: ${error instanceof Error ? error.message : "Unknown error"}`,
       };
     }
   }
@@ -51,18 +89,18 @@ export class FileStorageService implements IFileStorageService {
   async retrieveFile(filePath: string): Promise<Result<Buffer>> {
     try {
       const fullPath = path.join(this.baseDataPath, filePath);
-      
+
       if (!fs.existsSync(fullPath)) {
-        return { success: false, error: 'File not found' };
+        return { success: false, error: "File not found" };
       }
-      
+
       const fileBuffer = await fs.promises.readFile(fullPath);
-      
+
       return { success: true, data: fileBuffer };
     } catch (error) {
-      return { 
-        success: false, 
-        error: `Failed to retrieve file: ${error instanceof Error ? error.message : 'Unknown error'}` 
+      return {
+        success: false,
+        error: `Failed to retrieve file: ${error instanceof Error ? error.message : "Unknown error"}`,
       };
     }
   }
@@ -70,18 +108,18 @@ export class FileStorageService implements IFileStorageService {
   async deleteFile(filePath: string): Promise<Result<boolean>> {
     try {
       const fullPath = path.join(this.baseDataPath, filePath);
-      
+
       if (!fs.existsSync(fullPath)) {
         return { success: true, data: false };
       }
-      
+
       await fs.promises.unlink(fullPath);
-      
+
       return { success: true, data: true };
     } catch (error) {
-      return { 
-        success: false, 
-        error: `Failed to delete file: ${error instanceof Error ? error.message : 'Unknown error'}` 
+      return {
+        success: false,
+        error: `Failed to delete file: ${error instanceof Error ? error.message : "Unknown error"}`,
       };
     }
   }
