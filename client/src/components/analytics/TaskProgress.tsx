@@ -37,7 +37,7 @@ export const TaskProgress: React.FC<TaskProgressProps> = ({ task_id, ideal, real
             <div>
                 <p className="text-sm text-white/60 mb-1">Real progress</p>
                 <div
-                    className="h-4 bg-red-400 rounded-full transition-all duration-1000 ease-out opacity-50"
+                    className="h-4 bg-yellow-400 rounded-full transition-all duration-1000 ease-out opacity-50"
                     style={{ width: `${realWidth}%` }}
                 />
             </div>

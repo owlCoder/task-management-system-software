@@ -15,7 +15,7 @@ import { IProjectAnalyticsService } from "./Domain/services/IProjectAnalyticsSer
 import { ProjectAnalyticsService } from "./Services/ProjectAnalyticsService";
 
 import { IFinancialAnalyticsService } from "./Domain/services/IFinancialAnalyticsService";
-// import { FinancialAnalyticsService } from "./Services/FinancialAnalyticsService";
+import { FinancialAnalyticsService } from "./Services/FinancialAnalyticsService";
 
 import { AnalyticsController } from "./WebAPI/controllers/AnalyticsController";
 
@@ -190,18 +190,19 @@ export async function initApp(): Promise<express.Express> {
   const projectRepository = projectsDataSource.getRepository(Project);
   const sprintRepository = projectsDataSource.getRepository(Sprint);
   const taskRepository = tasksDataSource.getRepository(Task);
+  const projectUserRepository = projectsDataSource.getRepository(ProjectUser);
 
   // Services
   const projectAnalyticsService: IProjectAnalyticsService =
     new ProjectAnalyticsService(taskRepository, sprintRepository, projectRepository);
 
-  // const financialAnalyticsService: IFinancialAnalyticsService =
-  // new FinancialAnalyticsService(projectRepository, sprintRepository, taskRepository);
+  const financialAnalyticsService: IFinancialAnalyticsService =
+    new FinancialAnalyticsService(projectRepository, sprintRepository, taskRepository, projectUserRepository);
 
   // Controller
   const analyticsController = new AnalyticsController(
-    projectAnalyticsService
-    // financialAnalyticsService
+    projectAnalyticsService,
+    financialAnalyticsService
   );
 
   // Routes

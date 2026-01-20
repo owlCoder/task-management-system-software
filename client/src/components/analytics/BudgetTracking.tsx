@@ -32,14 +32,18 @@ export const BudgetAnalytics: React.FC<BudgetAnalyticsProps> = ({
   }
 
   const chartData = [
-    { name: "Planned Budget", value: data.allowed_budget, color: "#3b82f6" },
-    { name: "Actual Cost", value: data.total_spent, color: "#4ade80" },
-    {
-      name: "Remaining Budget",
-      value: data.remaining_budget,
-      color: data.remaining_budget >= 0 ? "#facc15" : "#ef4444",
-    },
-  ];
+  { name: "Planned Budget", value: data.allowed_budget, color: "rgba(96, 165, 250, 0.6)" }, // #60A5FA
+  { name: "Actual Cost", value: data.total_spent, color: "rgba(74, 222, 128, 0.6)" },    // #4ADE80
+  {
+    name: "Remaining Budget",
+    value: data.remaining_budget,
+    color:
+      data.remaining_budget >= 0
+        ? "rgba(250, 204, 21, 0.6)"   // #FACC15
+        : "rgba(248, 113, 113, 0.6)", // #F87171
+  },
+];
+
 
   const allValues = chartData.map((d) => d.value);
   const maxValue = Math.max(...allValues) * 1.2;

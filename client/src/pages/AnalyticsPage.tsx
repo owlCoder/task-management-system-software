@@ -13,6 +13,12 @@ import { AnalyticsAPI } from "../api/analytics/AnalyticsAPI";
 import { BurndownDto } from "../models/analytics/BurndownDto";
 import { BurnupDto } from "../models/analytics/BurnupDto";
 import { BudgetTrackingDto } from "../models/analytics/BudgetTrackingDto";
+import { ProfitMarginAnalytics } from "../components/analytics/ProfitMargin";
+import { ProfitMarginDto } from "../models/analytics/ProfitMarginDto";
+import { ResourceCostAllocation } from "../components/analytics/ResourceCostAllocation";
+import { ResourceCostAllocationDto } from "../models/analytics/ResourceCostAllocationDto";
+
+
 
 type SprintOption = { sprint_id: number; sprint_title?: string };
 
@@ -39,6 +45,8 @@ export const AnalyticsPage: React.FC = () => {
     const [burnup, setBurnup] = useState<BurnupDto | null>(null);
     const [velocity, setVelocity] = useState<number | null>(null);
     const [budget, setBudget] = useState<BudgetTrackingDto | null>(null);
+    const [profitMargin, setProfitMargin] = useState<ProfitMarginDto | null>(null);
+    const [resourceCost, setResourceCost] = useState<ResourceCostAllocationDto | null>(null);
 
     const [loadingAnalytics, setLoadingAnalytics] = useState(false);
     const [analyticsError, setAnalyticsError] = useState<string | null>(null);
@@ -116,6 +124,8 @@ export const AnalyticsPage: React.FC = () => {
         setVelocity(null);
         setBudget(null);
         setAnalyticsError(null);
+        setProfitMargin(null);
+        setResourceCost(null);
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [selectedProjectId]);
 
@@ -150,7 +160,14 @@ export const AnalyticsPage: React.FC = () => {
                 } else if (activeTab === "BUDGET") {
                     const b = await analyticsAPI.getBudgetTracking(projectId, token);
                     setBudget(b);
+                } else if (activeTab === "PROFIT") {
+                    const pm = await analyticsAPI.getProfitMargin(projectId, token);
+                    setProfitMargin(pm);
+                } else if (activeTab === "RESOURCES") {
+                    const rc = await analyticsAPI.getResourceCostAllocation(projectId, token);
+                    setResourceCost(rc);
                 }
+
             } catch (err: any) {
                 console.error("Failed to load analytics", err);
 
@@ -301,8 +318,34 @@ export const AnalyticsPage: React.FC = () => {
                         </div>
                     )}
 
-                    {activeTab === "PROFIT" && <div>TODO: Profit margin analytics</div>}
-                    {activeTab === "RESOURCES" && <div>TODO: Resource cost analytics</div>}
+                    {activeTab === "PROFIT" && (
+                        <div>
+                            {selectedProjectId ? (
+                            <ProfitMarginAnalytics
+                                project={selectedProject!}
+                                data={profitMargin}
+                                loading={loadingAnalytics}
+                            />
+                            ) : (
+                            "Select project..."
+                            )}
+                        </div>
+                    )}
+
+                    {activeTab === "RESOURCES" && (
+                        <div>
+                            {selectedProjectId ? (
+                            <ResourceCostAllocation
+                                project={selectedProject!}
+                                data={resourceCost}
+                                loading={loadingAnalytics}
+                            />
+                            ) : (
+                            "Select project..."
+                            )}
+                        </div>
+                    )}
+
                 </section>
             </main>
         </div>
