@@ -41,7 +41,12 @@ export class ProjectAnalyticsService implements IProjectAnalyticsService {
 
         const time = (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60);
 
-        const tasks = await this.taskRepository.find({ where: { sprint_id: sprintId } });
+        const tasksFromSprint = await this.taskRepository.find({ where: { sprint_id: sprintId } });
+
+        // Ako Task ne zna za project_id, filtriraj po sprintu koji već znamo da je za dati project:
+        const tasks = tasksFromSprint.filter(t => t.sprint_id === s.sprint_id);
+
+
 
         let sum = 0;
 
@@ -93,7 +98,12 @@ export class ProjectAnalyticsService implements IProjectAnalyticsService {
         const sprintDuration =
             (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24);
 
-        const tasks = await this.taskRepository.find({ where: { sprint_id: sprintId } });
+        const tasksFromSprint = await this.taskRepository.find({ where: { sprint_id: sprintId } });
+
+        // Ako Task ne zna za project_id, filtriraj po sprintu koji već znamo da je za dati project:
+        const tasks = tasksFromSprint.filter(t => t.sprint_id === s.sprint_id);
+
+
 
 
         const finishedTasks = tasks
