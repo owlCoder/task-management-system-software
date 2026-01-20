@@ -191,13 +191,6 @@ export async function initApp(): Promise<express.Express> {
   const sprintRepository = projectsDataSource.getRepository(Sprint);
   const taskRepository = tasksDataSource.getRepository(Task);
 
-
-
-  const count = await sprintRepository.count();
-  console.log(count);
-
-
-
   // Services
   const projectAnalyticsService: IProjectAnalyticsService =
     new ProjectAnalyticsService(taskRepository, sprintRepository, projectRepository);

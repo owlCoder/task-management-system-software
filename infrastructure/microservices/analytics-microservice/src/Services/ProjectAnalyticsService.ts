@@ -18,37 +18,26 @@ export class ProjectAnalyticsService implements IProjectAnalyticsService {
     ) { }
 
     async getBurnDownChartsForSprintId(sprintId: number): Promise<BurndownDto> {
-        console.log("Entering getBurnDownChartsForSprintId with sprintId:", sprintId);
 
-        console.log("Sprint count:", await this.sprintRepository.count());
-        console.log("First sprint:", await this.sprintRepository.find({ take: 1 }));
         const s = await this.sprintRepository.findOne({
             where: { sprint_id: sprintId },
         });
-        console.log("prosao fetch");
-        if (!s) throw new Error("Sprint not found");
 
-        console.log("postoji sprint");
+        if (!s) throw new Error("Sprint not found");
 
         const project = await this.projectRepository.findOne({
             where: { project_id: s.project_id },
         });
 
-        console.log("prosao fetch na project");
-
         if (!project) throw new Error("Project not found for sprint");
-
-        console.log("postoji project");
 
         const startDate = new Date(s.start_date);
         const endDate = new Date(s.end_date);
 
         const time = (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60);
 
-        console.log("time calculated:", time);
-
         const tasks = await this.taskRepository.find({ where: { sprint_id: sprintId } });
-        console.log("prosao fetch na tasks");
+
         let sum = 0;
 
         for (let i = 0; i < tasks.length; ++i)
@@ -68,9 +57,6 @@ export class ProjectAnalyticsService implements IProjectAnalyticsService {
                 real_progress: real
             });
         }
-        console.log(project.project_id, s.sprint_id);
-
-        BurndownTasks.map(t => console.log(t));
 
         return { project_id: project.project_id, sprint_id: s.sprint_id, tasks: BurndownTasks };
     }
@@ -79,13 +65,15 @@ export class ProjectAnalyticsService implements IProjectAnalyticsService {
         const s = await this.sprintRepository.findOne({
             where: { sprint_id: sprintId },
         });
-        console.log("prosao fetch");
+
+
         if (!s) throw new Error("Sprint not found");
 
         const project = await this.projectRepository.findOne({
             where: { project_id: s.project_id },
         });
-        console.log("prosao fetch na project");
+
+
         if (!project) throw new Error("Project not found for sprint");
 
         const startDate = new Date(s.start_date);
@@ -101,7 +89,8 @@ export class ProjectAnalyticsService implements IProjectAnalyticsService {
             (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24);
 
         const tasks = await this.taskRepository.find({ where: { sprint_id: sprintId } });
-        console.log("prosao fetch na tasks");
+
+
         const finishedTasks = tasks
             .filter(t => t.finished_at) // ima finished_at
             .map(t => ({ ...t, finished_at_date: new Date(t.finished_at!) }))
@@ -109,7 +98,6 @@ export class ProjectAnalyticsService implements IProjectAnalyticsService {
             .sort((a, b) => a.finished_at_date.getTime() - b.finished_at_date.getTime());
 
         const totalWork = tasks.reduce((sum, t) => sum + t.estimated_cost, 0);
-
 
         const points: BurnupPointDto[] = [];
         let cumulativeWork = 0;
@@ -137,28 +125,32 @@ export class ProjectAnalyticsService implements IProjectAnalyticsService {
 
 
     async getVelocityForProject(projectId: number): Promise<number> {
-
         const proj = await this.projectRepository.findOne({
             where: { project_id: projectId },
         });
 
-        if (!proj) throw new Error("Project not found for sprint");
-        const sprints = await this.sprintRepository.find({ where: { project: proj, end_date: LessThan(new Date()) } });
+        if (!proj) throw new Error("Project not found");
 
-        if (sprints.length === 0)
-            return 0;
+        // fetch sprints koje su završene do danas, po projectId
+        const sprints = await this.sprintRepository.find({
+            where: { project_id: projectId, end_date: LessThan(new Date()) },
+        });
 
-        let sum = 0;
+        if (sprints.length === 0) return 0;
 
-        for (let i = 0; i < sprints.length; ++i)
-            sum += sprints[i].end_date.getTime() - sprints[i].start_date.getTime();
+        let sumMs = 0;
 
+        for (const sprint of sprints) {
+            const start = new Date(sprint.start_date);
+            const end = new Date(sprint.end_date);
+            sumMs += end.getTime() - start.getTime();
+        }
 
-        const avgHours = (sum / sprints.length) / (1000 * 60 * 60);
+        // average hours per sprint
+        const avgHours = (sumMs / sprints.length) / (1000 * 60 * 60);
 
         return parseFloat(avgHours.toFixed(2));
     }
-
 
 
 }       
