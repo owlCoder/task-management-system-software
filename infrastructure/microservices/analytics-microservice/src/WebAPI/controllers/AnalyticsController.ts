@@ -36,6 +36,9 @@ export class AnalyticsController {
         this.router.get('/analytics/budget/:projectId', this.getBudgetTracking.bind(this));
         this.router.get('/analytics/resource-cost/:projectId', this.getResourceCostAllocation.bind(this));
         this.router.get('/analytics/profit-margin/:projectId', this.getProfitMargin.bind(this));
+        this.router.get('/analytics/projects-last-30-days', this.getProjectsLast30Days.bind(this));
+        this.router.get('/analytics/workers-last-30-days', this.getWorkersLast30Days.bind(this));
+
     }
 
     async getBurndownAnalytics(req: Request, res: Response): Promise<void> {
@@ -198,6 +201,29 @@ export class AnalyticsController {
             res.status(500).json({ message: "Internal server error" });
         }
     }
+
+    async getProjectsLast30Days(req: Request, res: Response): Promise<void> {
+        try {
+            const result =
+                await this.projectAnalyticsService.getProjectsStartedLast30Days();
+
+            res.status(200).json(result);
+        } catch (error) {
+            res.status(500).json({ message: "Internal server error" });
+        }
+    }
+
+    async getWorkersLast30Days(req: Request, res: Response): Promise<void> {
+        try {
+            const result =
+                await this.projectAnalyticsService.getWorkersAddedLast30Days();
+
+            res.status(200).json(result);
+        } catch (error) {
+            res.status(500).json({ message: "Internal server error" });
+        }
+    }
+
 
     public getRouter(): Router {
         return this.router;

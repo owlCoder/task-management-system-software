@@ -13,13 +13,19 @@
 --   CONSTRAINT chk_allowed_budget_nonneg CHECK (allowed_budget >= 0 OR allowed_budget IS NULL)
 -- );
 
--- CREATE TABLE IF NOT EXISTS projects_db.project_user (
---   pu_id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
---   project_id INT NOT NULL,
---   user_id INT NOT NULL,
---   CONSTRAINT fk_pu_project FOREIGN KEY (project_id) REFERENCES projects_db.projects(project_id) ON DELETE CASCADE,
---   CONSTRAINT fk_pu_user FOREIGN KEY (user_id) REFERENCES users_db.users(user_id) ON DELETE CASCADE
+-- CREATE TABLE IF NOT EXISTS projects_db.project_users (
+--     pu_id INT NOT NULL AUTO_INCREMENT,
+--     user_id INT NOT NULL,
+--     weekly_hours INT NOT NULL,
+--     project_id INT NOT NULL,
+--     added_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+--     PRIMARY KEY (pu_id),
+--     KEY project_id_fk_idx (project_id),
+--     CONSTRAINT project_id_fk FOREIGN KEY (project_id) REFERENCES projects(project_id)
+--         ON DELETE CASCADE
+--         ON UPDATE CASCADE
 -- );
+
 
 -- CREATE TABLE IF NOT EXISTS projects_db.project_task (
 --   pt_id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
