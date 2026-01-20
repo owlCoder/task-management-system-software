@@ -42,7 +42,7 @@ export class ReviewController {
         return;
       }
 
-      const result = await this.reviewService.sendToReview(taskId);
+      const result = await this.reviewService.sendToReview(taskId,user_id);
 
       if (result.success) {
         res.status(200).json(result.data);
@@ -71,7 +71,19 @@ export class ReviewController {
         return;
       }
 
-      const result = await this.reviewService.approveReview(taskId);
+      const userIdHeader = req.headers["x-user-id"];
+      if (typeof userIdHeader !== "string") {
+        res.status(400).json({ message: "Missing or invalid x-user-id header" });
+        return;
+      }
+
+      const user_id = parseInt(userIdHeader, 10);
+      if (isNaN(user_id)) {
+        res.status(400).json({ message: "Invalid user id" });
+        return;
+      }
+
+      const result = await this.reviewService.approveReview(taskId,user_id);
 
       if (result.success) {
         res.status(200).json(result.data);
@@ -100,13 +112,25 @@ export class ReviewController {
         return;
       }
 
+      const userIdHeader = req.headers["x-user-id"];
+      if (typeof userIdHeader !== "string") {
+        res.status(400).json({ message: "Missing or invalid x-user-id header" });
+        return;
+      }
+
+      const user_id = parseInt(userIdHeader, 10);
+      if (isNaN(user_id)) {
+        res.status(400).json({ message: "Invalid user id" });
+        return;
+      }
+
       const { commentText } = req.body;
       if (!commentText || commentText.trim() === "") {
         res.status(400).json({ message: "Reject comment is required" });
         return;
       }
 
-      const result = await this.reviewService.rejectReview(taskId, commentText);
+      const result = await this.reviewService.rejectReview(taskId, user_id,commentText);
 
       if (result.success) {
         res.status(200).json(result.data);

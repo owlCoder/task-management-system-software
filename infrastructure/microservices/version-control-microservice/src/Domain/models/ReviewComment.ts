@@ -4,13 +4,15 @@ import {Entity,PrimaryGeneratedColumn,Column,ManyToOne,JoinColumn,OneToMany} fro
 export class ReviewComment {
   @PrimaryGeneratedColumn()
   commentId!: number;
-  @Column({ type: "int", nullable: true, default: 0 })
+  @Column({ type: "int", nullable: false })
+  reviewId!: number;
+  @Column({ type: "int", nullable: false})
   authorId!: number;
-  @Column({ type: "int", nullable: true, default: 0 })
+  @Column({ type: "int", nullable: false})
   taskId!: number;
-  @Column({ type: "varchar", unique: true, nullable: false, length: 100 })
+  @Column({ type: "varchar", nullable: false, length: 100 })
   time!: string;
-  @Column({ type: "varchar", unique: false, nullable: false, length: 100 })
+  @Column({ type: "varchar", unique: false, nullable: false })
   commentText!: string;
   
 }
