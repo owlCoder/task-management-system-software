@@ -5,7 +5,7 @@ export interface IFileStorageService {
     userUuid: number,
     filename: string,
     fileBuffer: Buffer,
-    fileType: "image" | "audio" | "video" | null,
+    fileType?: "image" | "audio" | "video" | null,
   ): Promise<Result<string>>;
   retrieveFile(filePath: string): Promise<Result<Buffer>>;
   deleteFile(filePath: string): Promise<Result<boolean>>;

@@ -45,12 +45,13 @@ export class FileStorageService implements IFileStorageService {
     userUuid: number,
     filename: string,
     fileBuffer: Buffer,
+    providedFileType?: "image" | "audio" | "video" | null,
   ): Promise<Result<string>> {
     try {
       const userUuidPath = userUuid.toString();
       this.ensureUserDirectoryExists(userUuidPath);
 
-      const fileType = this.getFileType(filename);
+      const fileType = providedFileType ?? this.getFileType(filename);
       let storagePath;
 
       if (fileType === "image" || fileType === "video") {
@@ -69,6 +70,10 @@ export class FileStorageService implements IFileStorageService {
         );
       } else {
         return { success: false, error: "Unsupported file type" };
+      }
+
+      if (!fs.existsSync(storagePath)) {
+        fs.mkdirSync(storagePath, { recursive: true });
       }
 
       const filePath = path.join(storagePath, filename);

@@ -16,6 +16,22 @@ export class FileService implements IFileService {
     private fileMapper: IFileMapper,
   ) {}
 
+  private determineFileType(
+    fileExtension: string,
+  ): "image" | "audio" | "video" | null {
+    const ext = fileExtension.toLowerCase();
+    if ([".jpg", ".jpeg", ".png", ".gif"].includes(ext)) {
+      return "image";
+    }
+    if ([".mp4", ".mov", ".avi"].includes(ext)) {
+      return "video";
+    }
+    if ([".mp3", ".wav", ".ogg"].includes(ext)) {
+      return "audio";
+    }
+    return null;
+  }
+
   async createFile(fileData: CreateFileDTO): Promise<Result<UploadedFileDTO>> {
     try {
       const fileExtension = fileData.fileExtension.startsWith(".")
@@ -24,9 +40,7 @@ export class FileService implements IFileService {
 
       const uniqueFileName = `${uuidv4()}${fileExtension}`;
 
-      const fileType = fileData.fileExtension.startsWith(".")
-        ? fileData.fileExtension
-        : `.${fileData.fileExtension}`;
+      const fileType = this.determineFileType(fileExtension);
 
       const saveResult = await this.fileStorageService.saveFile(
         fileData.authorId,
@@ -41,7 +55,7 @@ export class FileService implements IFileService {
 
       const fileModel = this.fileRepository.create({
         original_file_name: fileData.originalFileName,
-        file_type: fileData.fileType,
+        file_type: fileType ?? fileData.fileType,
         file_extension: fileExtension,
         author_id: fileData.authorId,
         path_to_file: saveResult.data!,
