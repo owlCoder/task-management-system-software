@@ -7,6 +7,10 @@ import { BurndownDto } from "../Domain/DTOs/BurndownDto";
 import { BurndownTaskDTO } from "../Domain/DTOs/BurndownTaskDto";
 import { BurnupDto } from "../Domain/DTOs/BurnupDto";
 import { BurnupPointDto } from "../Domain/DTOs/BurnupPointDto";
+import { MoreThanOrEqual } from "typeorm";
+import { buildLast30DaysMap } from "../helpers/Last30Days";
+import { TimeSeriesPointDto } from "../Domain/DTOs/TimeSeriesPointDto";
+import { ProjectUser } from "../Domain/models/ProjectUser";
 
 
 export class ProjectAnalyticsService implements IProjectAnalyticsService {
@@ -15,6 +19,7 @@ export class ProjectAnalyticsService implements IProjectAnalyticsService {
         private readonly taskRepository: Repository<Task>,
         private readonly sprintRepository: Repository<Sprint>,
         private readonly projectRepository: Repository<Project>,
+        private readonly projectUserRepository: Repository<ProjectUser>,
     ) { }
 
     async getBurnDownChartsForSprintId(sprintId: number): Promise<BurndownDto> {
@@ -36,7 +41,12 @@ export class ProjectAnalyticsService implements IProjectAnalyticsService {
 
         const time = (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60);
 
-        const tasks = await this.taskRepository.find({ where: { sprint_id: sprintId } });
+        const tasksFromSprint = await this.taskRepository.find({ where: { sprint_id: sprintId } });
+
+        // Ako Task ne zna za project_id, filtriraj po sprintu koji već znamo da je za dati project:
+        const tasks = tasksFromSprint.filter(t => t.sprint_id === s.sprint_id);
+
+
 
         let sum = 0;
 
@@ -88,7 +98,12 @@ export class ProjectAnalyticsService implements IProjectAnalyticsService {
         const sprintDuration =
             (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24);
 
-        const tasks = await this.taskRepository.find({ where: { sprint_id: sprintId } });
+        const tasksFromSprint = await this.taskRepository.find({ where: { sprint_id: sprintId } });
+
+        // Ako Task ne zna za project_id, filtriraj po sprintu koji već znamo da je za dati project:
+        const tasks = tasksFromSprint.filter(t => t.sprint_id === s.sprint_id);
+
+
 
 
         const finishedTasks = tasks
@@ -151,6 +166,64 @@ export class ProjectAnalyticsService implements IProjectAnalyticsService {
 
         return parseFloat(avgHours.toFixed(2));
     }
+
+    async getProjectsStartedLast30Days(): Promise<TimeSeriesPointDto[]> {
+        const startDateStr = new Date(
+            new Date().setDate(new Date().getDate() - 29)
+        ).toISOString().slice(0, 10);
+
+        const projects = await this.projectRepository.find({
+            where: {
+                start_date: MoreThanOrEqual(startDateStr),
+            },
+        });
+
+        const map = buildLast30DaysMap();
+
+        for (const project of projects) {
+            if (!project.start_date) continue;
+
+            const key = project.start_date.slice(0, 10);
+
+            if (map.has(key)) {
+                map.set(key, map.get(key)! + 1);
+            }
+        }
+
+        return Array.from(map.entries()).map(([date, count]) => ({
+            date,
+            count,
+        }));
+    }
+
+
+    async getWorkersAddedLast30Days(): Promise<TimeSeriesPointDto[]> {
+        const startDate = new Date();
+        startDate.setDate(startDate.getDate() - 29);
+        startDate.setHours(0, 0, 0, 0);
+
+        const projectUsers = await this.projectUserRepository.find({
+            where: {
+                added_at: MoreThanOrEqual(startDate),
+            },
+        });
+
+        const map = buildLast30DaysMap();
+
+        for (const pu of projectUsers) {
+            const key = pu.added_at.toISOString().slice(0, 10);
+
+            if (map.has(key)) {
+                map.set(key, map.get(key)! + 1);
+            }
+        }
+
+        return Array.from(map.entries()).map(([date, count]) => ({
+            date,
+            count,
+        }));
+    }
+
 
 
 }       

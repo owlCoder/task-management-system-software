@@ -20,7 +20,6 @@ interface BurnupAnalyticsProps {
     project: ProjectDTO;
     data: BurnupDto | null;
     loading?: boolean;
-
     sprintId: number | null;
     sprints: SprintOption[];
     onSprintChange: (id: number | null) => void;
@@ -58,7 +57,7 @@ export const BurnupAnalytics: React.FC<BurnupAnalyticsProps> = ({
                             value={s.sprint_id}
                             className="bg-[#020617] text-white"
                         >
-                            {s.sprint_title ? s.sprint_title : `Sprint ${s.sprint_id}`}
+                            {s.sprint_title ?? `Sprint ${s.sprint_id}`}
                         </option>
                     ))}
                 </select>
@@ -76,33 +75,47 @@ export const BurnupAnalytics: React.FC<BurnupAnalyticsProps> = ({
                     <ResponsiveContainer width="100%" height="100%">
                         <LineChart
                             data={data.points}
-                            margin={{ top: 20, right: 20, left: 0, bottom: 20 }}
+                            margin={{ top: 20, right: 20, left: 10, bottom: 20 }}
                         >
-                            <CartesianGrid strokeDasharray="3 3" stroke="#55555533" />
+                            <CartesianGrid strokeDasharray="3 3" stroke="#ffffff22" />
+
                             <XAxis
                                 dataKey="x"
-                                ticks={data.points
-                                    .filter((_, i) => i % Math.ceil(data.points.length / 10) === 0)
-                                    .map((p) => p.x)}
+                                stroke="white"
                                 label={{
                                     value: "Days",
                                     position: "insideBottom",
                                     offset: -10,
                                     fill: "white",
                                 }}
-                                stroke="white"
                             />
+
                             <YAxis
+                                stroke="white"
                                 label={{
                                     value: "Work Completed",
                                     angle: -90,
                                     position: "insideLeft",
                                     fill: "white",
                                 }}
-                                stroke="white"
                             />
-                            <Tooltip />
-                            <Line type="monotone" dataKey="y" stroke="#4ade80" strokeWidth={3} dot />
+
+                            <Tooltip
+                                contentStyle={{
+                                    backgroundColor: "#020617",
+                                    border: "1px solid #ffffff22",
+                                    color: "white",
+                                }}
+                            />
+
+                            <Line
+                                type="monotone"
+                                dataKey="y"
+                                stroke="#4ade80"
+                                strokeWidth={3}
+                                dot={{ r: 4 }}
+                                activeDot={{ r: 6 }}
+                            />
                         </LineChart>
                     </ResponsiveContainer>
                 </div>
