@@ -92,8 +92,9 @@ export class FinancialAnalyticsService implements IFinancialAnalyticsService {
 
       // 2) Load project members from projects_db.project_users
       const projectMembers = await this.projectUserRepository.find({
-        where: { project }
+        where: { project_id: project.project_id }
       });
+
 
       if (projectMembers.length === 0) {
         return {
@@ -131,12 +132,11 @@ export class FinancialAnalyticsService implements IFinancialAnalyticsService {
         project_id: project.project_id,
         resources
       };
-    } catch {
-      return {
-        project_id: projectId,
-        resources: []
-      };
+    } catch (err) {
+      console.error("getResourceCostAllocationForProject error:", err);
+      return { project_id: projectId, resources: [] };
     }
+
   }
 
   async getProfitMarginForProject(projectId: number): Promise<ProfitMarginDto> {

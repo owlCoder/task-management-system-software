@@ -13,10 +13,10 @@ export class ProjectUser {
   @PrimaryGeneratedColumn()
   pu_id!: number;
 
-  @ManyToOne(() => Project, (project) => project.project_id, {
-    nullable: false,
-    onDelete: "CASCADE",
-  })
+  @Column({ type: "int", nullable: false })
+  project_id!: number;
+
+  @ManyToOne(() => Project, { nullable: false, onDelete: "CASCADE" })
   @JoinColumn({ name: "project_id" })
   project!: Project;
 
@@ -29,3 +29,4 @@ export class ProjectUser {
   @CreateDateColumn({ type: "datetime" })
   added_at!: Date;
 }
+
