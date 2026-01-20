@@ -18,7 +18,7 @@ export class FileService implements IFileService {
 
   private determineFileType(
     fileExtension: string,
-  ): "image" | "audio" | "video" | null {
+  ): "image" | "audio" | "video" | "other" {
     const ext = fileExtension.toLowerCase();
     if ([".jpg", ".jpeg", ".png", ".gif"].includes(ext)) {
       return "image";
@@ -29,7 +29,7 @@ export class FileService implements IFileService {
     if ([".mp3", ".wav", ".ogg"].includes(ext)) {
       return "audio";
     }
-    return null;
+    return "other";
   }
 
   async createFile(fileData: CreateFileDTO): Promise<Result<UploadedFileDTO>> {

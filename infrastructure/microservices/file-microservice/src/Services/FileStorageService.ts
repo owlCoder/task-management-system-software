@@ -45,7 +45,7 @@ export class FileStorageService implements IFileStorageService {
     userUuid: number,
     filename: string,
     fileBuffer: Buffer,
-    providedFileType?: "image" | "audio" | "video" | null,
+    providedFileType?: "image" | "audio" | "video" | "other",
   ): Promise<Result<string>> {
     try {
       const userUuidPath = userUuid.toString();
