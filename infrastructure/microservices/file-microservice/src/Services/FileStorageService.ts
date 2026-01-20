@@ -1,5 +1,6 @@
 import { IFileStorageService } from "../Domain/services/IFileStorageService";
 import { Result } from "../Domain/types/Result";
+import { determineFileType } from "../helpers/FileTypeHelper";
 import * as fs from "fs";
 import * as path from "path";
 
@@ -27,20 +28,6 @@ export class FileStorageService implements IFileStorageService {
     }
   }
 
-  private getFileType(filename: string): "image" | "audio" | "video" | null {
-    const ext = path.extname(filename).toLowerCase();
-    if (
-      [".jpg", ".jpeg", ".png", ".gif", ".mp4", ".mov", ".avi"].includes(ext)
-    ) {
-      return ext === ".mp4" || ext === ".mov" || ext === ".avi"
-        ? "video"
-        : "image";
-    } else if ([".mp3", ".wav", ".ogg"].includes(ext)) {
-      return "audio";
-    }
-    return null;
-  }
-
   async saveFile(
     userUuid: number,
     filename: string,
@@ -51,7 +38,7 @@ export class FileStorageService implements IFileStorageService {
       const userUuidPath = userUuid.toString();
       this.ensureUserDirectoryExists(userUuidPath);
 
-      const fileType = providedFileType ?? this.getFileType(filename);
+      const fileType = providedFileType ?? determineFileType(filename);
       let storagePath;
 
       if (fileType === "image" || fileType === "video") {

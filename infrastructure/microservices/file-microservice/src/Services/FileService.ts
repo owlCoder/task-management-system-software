@@ -6,6 +6,7 @@ import { FileResponseDTO } from "../Domain/DTOs/FileResponseDTO";
 import { Result } from "../Domain/types/Result";
 import { UploadedFile } from "../Domain/models/UploadedFile";
 import { IFileMapper } from "../Utils/converters/IFileMapper";
+import { determineFileType } from "../helpers/FileTypeHelper";
 import { v4 as uuidv4 } from "uuid";
 import { Repository } from "typeorm";
 
@@ -16,22 +17,6 @@ export class FileService implements IFileService {
     private fileMapper: IFileMapper,
   ) {}
 
-  private determineFileType(
-    fileExtension: string,
-  ): "image" | "audio" | "video" | "other" {
-    const ext = fileExtension.toLowerCase();
-    if ([".jpg", ".jpeg", ".png", ".gif"].includes(ext)) {
-      return "image";
-    }
-    if ([".mp4", ".mov", ".avi"].includes(ext)) {
-      return "video";
-    }
-    if ([".mp3", ".wav", ".ogg"].includes(ext)) {
-      return "audio";
-    }
-    return "other";
-  }
-
   async createFile(fileData: CreateFileDTO): Promise<Result<UploadedFileDTO>> {
     try {
       const fileExtension = fileData.fileExtension.startsWith(".")
@@ -40,7 +25,7 @@ export class FileService implements IFileService {
 
       const uniqueFileName = `${uuidv4()}${fileExtension}`;
 
-      const fileType = this.determineFileType(fileExtension);
+      const fileType = determineFileType(fileExtension);
 
       const saveResult = await this.fileStorageService.saveFile(
         fileData.authorId,
