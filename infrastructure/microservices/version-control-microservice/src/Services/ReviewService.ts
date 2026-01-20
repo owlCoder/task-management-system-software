@@ -6,7 +6,6 @@ import { IReviewService } from "../Domain/services/IReview";
 import { ReviewComment } from "../Domain/models/ReviewComment";
 import { ErrorCode } from "../Domain/enums/ErrorCode";
 import { Result } from "../Domain/types/Result";
-import bcrypt from "bcryptjs";
 import { ReviewStatus } from "../Domain/enums/ReviewStatus";
 import { toReviewDTO } from "../Helpers/Converter/toReviewDTO";
 
@@ -27,26 +26,27 @@ export class  ReviewService implements IReviewService {
     };
  }
 
-   async sendToReview(taskId: number): Promise<Result<TaskReviewDTO>> {
+   async sendToReview(taskId: number,authorId : number): Promise<Result<TaskReviewDTO>> {
         let review = await this.reviewRepository.findOne({
             where: { taskId },
         });
 
         if (!review) {
-            review = await this.createReview(taskId);
+            review = await this.createReview(taskId,authorId);
         } 
         else {
             review.status = ReviewStatus.REVIEW;
+            review.time = new Date().toISOString();
             await this.reviewRepository.save(review);
         }
 
         return { success: true, data: toReviewDTO(review) };
 }
 
-    async createReview(taskId: number): Promise<Review> {
+    async createReview(taskId: number,authorId : number): Promise<Review> {
         const newReview = this.reviewRepository.create({
             taskId: taskId,
-            authorId: 0,
+            authorId: authorId,
             status: ReviewStatus.REVIEW,
             time: new Date().toISOString(),
         });
@@ -55,7 +55,7 @@ export class  ReviewService implements IReviewService {
     }
 
 
-    async approveReview(taskId: number): Promise<Result<TaskReviewDTO>> {
+    async approveReview(taskId: number,reviewedBy : number): Promise<Result<TaskReviewDTO>> {
         const review = await this.reviewRepository.findOne({
             where: { taskId },
         });
@@ -77,12 +77,14 @@ export class  ReviewService implements IReviewService {
         }
 
         review.status = ReviewStatus.APPROVED;
+        review.reviewedBy = reviewedBy;
+        review.reviewedAt = new Date().toISOString();
         await this.reviewRepository.save(review);
 
         return { success: true, data: toReviewDTO(review) };
     }
 
-    async rejectReview(taskId: number,rejectComment: string): Promise<Result<ReviewCommenntDTO>> {
+    async rejectReview(taskId: number,reviewedBy : number,rejectComment: string): Promise<Result<ReviewCommenntDTO>> {
 
         const review = await this.reviewRepository.findOne({
             where: { taskId },
@@ -113,18 +115,25 @@ export class  ReviewService implements IReviewService {
         }
 
         const newComment = await this.reviewCommentRepository.save({
+            reviewId: review.reviewId,
             taskId,
-            authorId: 0,
+            authorId: reviewedBy,
             commentText: rejectComment,
             time: new Date().toISOString(),
         });
 
         review.status = ReviewStatus.REJECTED;
         review.commentId = newComment.commentId;
+        review.reviewedBy = reviewedBy; 
+        review.reviewedAt = new Date().toISOString();
 
         await this.reviewRepository.save(review);
 
-        return {success: true,data: {taskId,commentId : newComment.commentId,
+        return {success: true,data: 
+            { 
+            commentId: newComment.commentId,
+            reviewId: newComment.reviewId, 
+            taskId,
             authorId: newComment.authorId,
             commentText: newComment.commentText,
             time: newComment.time,
