@@ -10,13 +10,15 @@ import { IProjectServiceClient } from "../Domain/services/external-services/IPro
 import { IUserServiceClient } from "../Domain/services/external-services/IUserServiceClient";
 import { UserRole } from "../Domain/enums/UserRole";
 import { ITaskVersionService } from "../Domain/services/ITaskVersionService";
+import { IFileServiceClient } from "../Domain/services/external-services/IFileServiceClient";
 export class TaskService implements ITaskService {
 
     constructor(
         private readonly taskRepository: Repository<Task>,
         private readonly projectService: IProjectServiceClient,
         private readonly userService: IUserServiceClient,
-        private readonly taskVersionService: ITaskVersionService
+        private readonly taskVersionService: ITaskVersionService,
+        private readonly fileServiceClient : IFileServiceClient
     ) {
        
     }
@@ -232,7 +234,7 @@ export class TaskService implements ITaskService {
         }
     }
 
-    async updateTaskStatus(task_id: number, newStatus: TaskStatus, user_id: number): Promise<Result<Task>> {
+    async updateTaskStatus(task_id: number, newStatus: TaskStatus, user_id: number,file_id : number): Promise<Result<Task>> {
         try {
             const task = await this.taskRepository.findOne({where: {task_id}});
 
@@ -248,6 +250,40 @@ export class TaskService implements ITaskService {
                 return { success: false, errorCode: ErrorCode.INVALID_INPUT, message: "Invalid task status" };
             }
 
+            if (newStatus === TaskStatus.COMPLETED) {
+                if (!file_id) {
+                    return { success: false, errorCode: ErrorCode.INVALID_INPUT, message: "File is required" };
+                }
+
+                const fileResult = await this.fileServiceClient.getFileMetaData(file_id);
+
+                if (!fileResult.success) {
+                    return { success: false, errorCode: ErrorCode.FILE_NOT_FOUND, message: "File not found" };
+                }
+
+                const file_type = fileResult.data.file_type;
+                const userResult = await this.userService.getUserById(user_id);
+
+                if (!userResult.success) {
+                    return { success: false, errorCode: ErrorCode.INVALID_INPUT, message: "User not found" };
+                } 
+
+                const role = userResult.data.role_name;
+
+                if (role === UserRole.ANIMATION_WORKER &&
+                    !file_type.startsWith("image/") &&
+                    !file_type.startsWith("video/")) {
+                    return { success: false, errorCode: ErrorCode.INVALID_INPUT, message: "Only image/video allowed" };
+                }
+
+                if (role === UserRole.AUDIO_MUSIC_STAGIST &&
+                    !file_type.startsWith("audio/")) {
+                    return { success: false, errorCode: ErrorCode.INVALID_INPUT, message: "Only audio allowed" };
+                }
+
+                task.attachment_file_uuid = file_id;
+            }
+            
             task.task_status = newStatus;
             const updatedTask = await this.taskRepository.save(task);
             return { success: true, data: updatedTask };

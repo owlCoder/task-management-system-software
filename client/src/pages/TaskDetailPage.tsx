@@ -30,6 +30,7 @@ export const TaskDetailPage: React.FC<TaskDetailPageProps> = ({token,taskId,setC
   const [comments, setComments] = useState<CommentDTO[]>([]);
   const [versions, setVersions] = useState<TaskVersionDTO[]>([]);
   const [versionsError, setVersionsError] = useState<string | null>(null);
+  const [uploadedFileId, setUploadedFileId] = useState<number>(0);
 
   const apiTask = new TaskAPI(import.meta.env.VITE_GATEWAY_URL, token);
   const fileApi = new FileAPI();
@@ -38,8 +39,9 @@ const handleUpload = async () => {
   if (!selectedFile) return;
 
   try {
-    await fileApi.uploadFile(token,selectedFile,userId);
+    const file_id=await fileApi.uploadFile(token,selectedFile,userId);
 
+    setUploadedFileId(file_id);
     setIsTaskDone(true);
     setUploadedFileName(selectedFile.name);
     setView("upload");
@@ -54,17 +56,15 @@ const handleUpload = async () => {
     if(!task) return;
     if(task.task_status === TaskStatus.COMPLETED) return; 
 
-    // Update backend
-    apiTask.updateTaskStatus(taskId, TaskStatus.COMPLETED)
+    apiTask.updateTaskStatus(taskId, TaskStatus.COMPLETED,uploadedFileId)
       .then(() => {
-        // Update local state samo ako je uspelo
         setTask(prev => prev ? {...prev, task_status: TaskStatus.COMPLETED} : null);
       })
       .catch(err => {
         console.error("Failed to update task status:", err);
       });
 
-  }, [isTaskDone, taskId]) // Ukloni task iz dependencies
+  }, [isTaskDone, taskId]) 
 
 
   const handleAddComments = async (text: string) => {
