@@ -12,6 +12,8 @@ import {
   Cell,
 } from "recharts";
 
+const formatMoney = (n: number) => `${n.toFixed(2)} ¥`;
+
 interface BudgetAnalyticsProps {
   project: ProjectDTO;
   data: BudgetTrackingDto | null;
@@ -62,9 +64,15 @@ export const BudgetAnalytics: React.FC<BudgetAnalyticsProps> = ({
               domain={[minValue, maxValue]}
             />
             <Tooltip
-              formatter={(value: any) =>
-                typeof value === "number" ? `${value.toFixed(2)} ¥` : value
-              }
+              contentStyle={{
+                background: "rgba(231, 233, 241, 0.92)",
+                border: "1px solid rgba(255,255,255,0.12)",
+                borderRadius: 12,
+              }}
+              labelStyle={{ color: "rgba(0, 0, 0, 0.85)" }}
+              formatter={(value: any) => {
+                return [formatMoney(Number(value)), "Cost"];
+              }}
             />
             <Bar dataKey="value">
               {chartData.map((entry, index) => (
