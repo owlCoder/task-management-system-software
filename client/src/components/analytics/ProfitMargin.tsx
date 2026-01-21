@@ -127,8 +127,14 @@ export const ProfitMarginAnalytics: React.FC<ProfitMarginAnalyticsProps> = ({
                   borderRadius: 12,
                 }}
                 labelStyle={{ color: "rgba(0, 0, 0, 0.85)" }}
-                formatter={(value: any) => {
-                  return [formatMoney(Number(value)), "Cost"];
+                formatter={(value: any, name: any) => {
+                  // name dolazi iz donutData.name
+                  const label =
+                    name === "Remaining"
+                      ? "Remaining"
+                      : "Spent";
+
+                  return [formatMoney(Number(value)), label];
                 }}
               />
               <Pie

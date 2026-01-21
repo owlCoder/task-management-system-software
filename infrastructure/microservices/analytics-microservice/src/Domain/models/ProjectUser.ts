@@ -26,7 +26,7 @@ export class ProjectUser {
   @Column({ type: "int", nullable: false })
   weekly_hours!: number;
 
-  @CreateDateColumn({ type: "datetime" })
+  @Column({ type: "datetime", nullable: false })
   added_at!: Date;
 }
 
