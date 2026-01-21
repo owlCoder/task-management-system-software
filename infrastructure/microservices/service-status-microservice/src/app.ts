@@ -5,21 +5,34 @@ import { Measurement_controller } from './WebAPI/controllers/Measurement_control
 import { Measurement_Service } from './Services/Measurement_Service';
 import { Microservice_Service } from './Services/Microservice_Service';
 import { Db } from './Database/DbConnectionPool';
+import { Health_Service } from './Services/Health_Service';
 
-const app = express();
 
-Db.initialize();
+async function bootstrap() {
+    const app = express();
 
-app.use(corsPolicy);
+    await Db.initialize();
 
-app.use(express.json());
+    app.use(corsPolicy);
+    app.use(express.json());
 
-const measurementService = new Measurement_Service();
-const microserviceService = new Microservice_Service();
-const measurementConstroller = new Measurement_controller(measurementService);
-const microserviceController = new Microservice_controller(microserviceService);
+    const measurementService = new Measurement_Service();
+    const microserviceService = new Microservice_Service();
 
-app.use("/api/v1/SSM/measurement", measurementConstroller.getRouter());
-app.use("/api/v1/SSM/microservice", microserviceController.getRouter());
+    const healthService = new Health_Service(
+        measurementService,
+        microserviceService
+    );
 
-export default app;
+    const measurementController = new Measurement_controller(measurementService);
+    const microserviceController = new Microservice_controller(microserviceService);
+
+    await healthService.start();
+
+    app.use("/api/v1/SSM/measurement", measurementController.getRouter());
+    app.use("/api/v1/SSM/microservice", microserviceController.getRouter());
+
+    return app;
+}
+
+export default bootstrap();

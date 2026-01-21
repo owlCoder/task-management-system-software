@@ -5,6 +5,7 @@ import { IMeasurement_Service } from "../Domain/Services/IMeasurement_Service";
 import { Db } from "../Database/DbConnectionPool";
 import { EOperationalStatus } from "../Domain/enums/EOperationalStatus";
 import { Microservice } from "../Domain/models/Microservice";
+import { CreateMeasurementDto } from "../Domain/DTOs/CreateMeasurement_DTO";
 
 export class Measurement_Service implements IMeasurement_Service {
 
@@ -58,7 +59,7 @@ export class Measurement_Service implements IMeasurement_Service {
         return measurements.map(m => this.toDto(m));
     }
 
-    async setMeasurement(measurement: MeasurementDto): Promise<boolean> {
+    async setMeasurement(measurement: CreateMeasurementDto): Promise<boolean> {
 
         const microservice = await this.microserviceRepository.findOne({
             where: { ID_microservice: measurement.microserviceId },
@@ -77,6 +78,7 @@ export class Measurement_Service implements IMeasurement_Service {
         await this.measurementRepository.save(entity);
         return true;
     }
+    
     async deleteMeasurement(measurementID: number): Promise<boolean> {
         const result = await this.measurementRepository.delete({
             measurement_id: measurementID,
