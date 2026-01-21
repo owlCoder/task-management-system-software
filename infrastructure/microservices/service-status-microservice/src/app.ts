@@ -6,6 +6,7 @@ import { Measurement_Service } from './Services/Measurement_Service';
 import { Microservice_Service } from './Services/Microservice_Service';
 import { Db } from './Database/DbConnectionPool';
 import { Health_Service } from './Services/Health_Service';
+import { GarbageCollector_Service } from './Services/GC_Service';
 
 
 async function bootstrap() {
@@ -27,7 +28,10 @@ async function bootstrap() {
     const measurementController = new Measurement_controller(measurementService);
     const microserviceController = new Microservice_controller(microserviceService);
 
-    await healthService.start();
+    const gc = new GarbageCollector_Service(measurementService);
+    
+    gc.start();
+    healthService.start();
 
     app.use("/api/v1/SSM/measurement", measurementController.getRouter());
     app.use("/api/v1/SSM/microservice", microserviceController.getRouter());
