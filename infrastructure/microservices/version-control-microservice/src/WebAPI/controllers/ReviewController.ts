@@ -15,6 +15,15 @@ export class ReviewController {
     return this.router;
   }
 
+  private normalizeRole(role: unknown): string {
+    if (typeof role !== "string") return "";
+    return role.trim().toUpperCase().replace(/[\s_-]+/g, "");
+  }
+
+  private isProjectManager(role: unknown): boolean {
+    return this.normalizeRole(role) === "PROJECTMANAGER";
+  }
+
   private initializeRoutes() {
     this.router.get("/reviews", this.getReviews.bind(this));
     this.router.post("/reviews/:taskId/send", this.sendReview.bind(this));
@@ -42,14 +51,12 @@ export class ReviewController {
         return;
       }
 
-      const result = await this.reviewService.sendToReview(taskId,user_id);
+      const result = await this.reviewService.sendToReview(taskId, user_id);
 
       if (result.success) {
         res.status(200).json(result.data);
       } else {
-        res
-          .status(errorCodeToHttpStatus(result.code))
-          .json({ message: result.error });
+        res.status(errorCodeToHttpStatus(result.code)).json({ message: result.error });
       }
     } catch (error) {
       console.error(error);
@@ -66,7 +73,7 @@ export class ReviewController {
       }
 
       const userRole = req.headers["x-user-role"];
-      if (userRole !== "PROJECT_MANAGER") {
+      if (!this.isProjectManager(userRole)) {
         res.status(403).json({ message: "Only Project Manager can approve review" });
         return;
       }
@@ -83,14 +90,12 @@ export class ReviewController {
         return;
       }
 
-      const result = await this.reviewService.approveReview(taskId,user_id);
+      const result = await this.reviewService.approveReview(taskId, user_id);
 
       if (result.success) {
         res.status(200).json(result.data);
       } else {
-        res
-          .status(errorCodeToHttpStatus(result.code))
-          .json({ message: result.error });
+        res.status(errorCodeToHttpStatus(result.code)).json({ message: result.error });
       }
     } catch (error) {
       console.error(error);
@@ -107,7 +112,7 @@ export class ReviewController {
       }
 
       const userRole = req.headers["x-user-role"];
-      if (userRole !== "PROJECT_MANAGER") {
+      if (!this.isProjectManager(userRole)) {
         res.status(403).json({ message: "Only Project Manager can reject review" });
         return;
       }
@@ -130,14 +135,12 @@ export class ReviewController {
         return;
       }
 
-      const result = await this.reviewService.rejectReview(taskId, user_id,commentText);
+      const result = await this.reviewService.rejectReview(taskId, user_id, commentText);
 
       if (result.success) {
         res.status(200).json(result.data);
       } else {
-        res
-          .status(errorCodeToHttpStatus(result.code))
-          .json({ message: result.error });
+        res.status(errorCodeToHttpStatus(result.code)).json({ message: result.error });
       }
     } catch (error) {
       console.error(error);
@@ -148,7 +151,7 @@ export class ReviewController {
   async getReviews(req: Request, res: Response): Promise<void> {
     try {
       const userRole = req.headers["x-user-role"];
-      if (userRole !== "PROJECT_MANAGER") {
+      if (!this.isProjectManager(userRole)) {
         res.status(403).json({ message: "Only Project Manager can view reviews" });
         return;
       }
@@ -158,9 +161,7 @@ export class ReviewController {
       if (result.success) {
         res.status(200).json(result.data);
       } else {
-        res
-          .status(errorCodeToHttpStatus(result.code))
-          .json({ message: result.error });
+        res.status(errorCodeToHttpStatus(result.code)).json({ message: result.error });
       }
     } catch (error) {
       console.error(error);

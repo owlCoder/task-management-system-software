@@ -12,8 +12,9 @@ import { ReviewController } from "./WebAPI/controllers/ReviewController";
 import { TaskTemplate } from "./Domain/models/TaskTemplate";
 import { TemplateDependency } from "./Domain/models/TemplateDependency";
 import { TemplateService } from "./Services/TemplateService";
-import { TemplateController } from "./WebAPI/TemplateConroller";
+import { TemplateController } from "./WebAPI/controllers/TemplateConroller";
 import { TaskServiceClient } from "./Services/external-services/TaskServiceClient";
+import { UserServiceClient } from "./Services/external-services/UserServiceClient";
 
 dotenv.config({ quiet: true });
 
@@ -40,7 +41,8 @@ app.use(express.json());
   const templateRepository: Repository<TaskTemplate> = Db.getRepository(TaskTemplate);
   const dependenciesRepository: Repository<TemplateDependency> = Db.getRepository(TemplateDependency);
   const taskService = new TaskServiceClient();
-  const templateService = new TemplateService(templateRepository, dependenciesRepository, taskService);
+  const userService = new UserServiceClient();
+  const templateService = new TemplateService(templateRepository, dependenciesRepository, taskService, userService);
 
   const templateController = new TemplateController(templateService);
 

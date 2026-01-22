@@ -46,33 +46,37 @@ export class GatewayVersionControlController {
         this.router.post("/templates/:templateId/dependencies/:dependsOnId", ...templateWriteAccess, this.addDependency.bind(this));
     }
 
-    private async getReviews(_req: Request, res: Response): Promise<void> {
-        const result = await this.gatewayVersionSevice.getReviews();
+    private async getReviews(req: Request, res: Response): Promise<void> {
+        const senderRole = req.user!.role; // "Project Manager"
+        const result = await this.gatewayVersionSevice.getReviews(senderRole);
         handleResponse(res, result);
     }
 
-    private async sendToReview(req: Request<ReqParams<'taskId'>>, res: Response): Promise<void> {
+    private async sendToReview(req: Request<ReqParams<"taskId">>, res: Response): Promise<void> {
         const taskId = parseInt(req.params.taskId, 10);
         const senderId = req.user!.id;
+        const senderRole = req.user!.role;
 
-        const result = await this.gatewayVersionSevice.sendToReview(taskId, senderId);
+        const result = await this.gatewayVersionSevice.sendToReview(taskId, senderId, senderRole);
         handleResponse(res, result, 201);
     }
 
-    private async acceptReview(req: Request<ReqParams<'taskId'>>, res: Response): Promise<void> {
+    private async acceptReview(req: Request<ReqParams<"taskId">>, res: Response): Promise<void> {
         const taskId = parseInt(req.params.taskId, 10);
         const senderId = req.user!.id;
+        const senderRole = req.user!.role;
 
-        const result = await this.gatewayVersionSevice.acceptReview(taskId, senderId);
+        const result = await this.gatewayVersionSevice.acceptReview(taskId, senderId, senderRole);
         handleResponse(res, result, 201);
     }
 
-    private async rejectReview(req: Request<ReqParams<'taskId'>>, res: Response): Promise<void> {
+    private async rejectReview(req: Request<ReqParams<"taskId">>, res: Response): Promise<void> {
         const taskId = parseInt(req.params.taskId, 10);
         const data = req.body as RejectReviewDTO;
         const senderId = req.user!.id;
+        const senderRole = req.user!.role;
 
-        const result = await this.gatewayVersionSevice.rejectReview(taskId, data, senderId);
+        const result = await this.gatewayVersionSevice.rejectReview(taskId, data, senderId, senderRole);
         handleResponse(res, result, 201);
     }
 

@@ -30,45 +30,51 @@ export class GatewayVersionControlService implements IGatewayVersionControlServi
         this.versionClient = createAxiosClient(API_ENDPOINTS.VERSION_CONTROL);
     }
 
-    async sendToReview(taskId: number, senderId: number): Promise<Result<ReviewDTO>> {
+    async sendToReview(taskId: number, senderId: number, senderRole: string): Promise<Result<ReviewDTO>> {
         return await makeAPICall<ReviewDTO>(this.versionClient, this.errorHandlingService, {
-            serviceName:SERVICES.VERSION_CONTROL,
-            method: HTTP_METHODS.POST,
-            url: VERSION_CONTROL_ROUTES.SEND_REVIEW(taskId),
-            headers: {
-                'x-user-id': senderId.toString()
-            }
+        serviceName: SERVICES.VERSION_CONTROL,
+        method: HTTP_METHODS.POST,
+        url: VERSION_CONTROL_ROUTES.SEND_REVIEW(taskId),
+        headers: {
+            "x-user-id": senderId.toString(),
+            "x-user-role": senderRole
+        }
         });
     }
 
-    async acceptReview(taskId: number, senderId: number): Promise<Result<ReviewDTO>> {
-         return await makeAPICall<ReviewDTO>(this.versionClient, this.errorHandlingService, {
-            serviceName:SERVICES.VERSION_CONTROL,
-            method: HTTP_METHODS.POST,
-            url: VERSION_CONTROL_ROUTES.ACCEPT_REVIEW(taskId),
-            headers: {
-                'x-user-id': senderId.toString()
-            }
+    async acceptReview(taskId: number, senderId: number, senderRole: string): Promise<Result<ReviewDTO>> {
+        return await makeAPICall<ReviewDTO>(this.versionClient, this.errorHandlingService, {
+        serviceName: SERVICES.VERSION_CONTROL,
+        method: HTTP_METHODS.POST,
+        url: VERSION_CONTROL_ROUTES.ACCEPT_REVIEW(taskId),
+        headers: {
+            "x-user-id": senderId.toString(),
+            "x-user-role": senderRole
+        }
         });
     }
 
-    async rejectReview(taskId: number, data: RejectReviewDTO, senderId: number): Promise<Result<ReviewCommentDTO>> {
-         return await makeAPICall<ReviewCommentDTO, RejectReviewDTO>(this.versionClient, this.errorHandlingService, {
-            serviceName:SERVICES.VERSION_CONTROL,
-            method: HTTP_METHODS.POST,
-            url: VERSION_CONTROL_ROUTES.REJECT_REVIEW(taskId),
-            headers: {
-                'x-user-id': senderId.toString()
-            },
-            data: data
+    async rejectReview(taskId: number, data: RejectReviewDTO, senderId: number, senderRole: string): Promise<Result<ReviewCommentDTO>> {
+        return await makeAPICall<ReviewCommentDTO, RejectReviewDTO>(this.versionClient, this.errorHandlingService, {
+        serviceName: SERVICES.VERSION_CONTROL,
+        method: HTTP_METHODS.POST,
+        url: VERSION_CONTROL_ROUTES.REJECT_REVIEW(taskId),
+        headers: {
+            "x-user-id": senderId.toString(),
+            "x-user-role": senderRole
+        },
+        data: data
         });
     }
 
-    async getReviews(): Promise<Result<ReviewDTO[]>> {
-         return await makeAPICall<ReviewDTO[]>(this.versionClient, this.errorHandlingService, {
-            serviceName:SERVICES.VERSION_CONTROL,
+    async getReviews(senderRole: string): Promise<Result<ReviewDTO[]>> {
+        return await makeAPICall<ReviewDTO[]>(this.versionClient, this.errorHandlingService, {
+            serviceName: SERVICES.VERSION_CONTROL,
             method: HTTP_METHODS.GET,
-            url: VERSION_CONTROL_ROUTES.GET_REVIEWS
+            url: VERSION_CONTROL_ROUTES.GET_REVIEWS,
+            headers: {
+            "x-user-role": senderRole
+            }
         });
     }
 
