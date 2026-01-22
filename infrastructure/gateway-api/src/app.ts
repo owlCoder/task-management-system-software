@@ -13,6 +13,7 @@ import { IGatewayTaskService } from './Domain/services/task/IGatewayTaskService'
 import { IGatewayFileService } from './Domain/services/file/IGatewayFileService';
 import { IGatewayNotificationService } from './Domain/services/notification/IGatewayNotificationService';
 import { IGatewayAnalyticsService } from './Domain/services/analytics/IGatewayAnalyticsService';
+import { IGatewayVersionControlService } from './Domain/services/version-control/IGatewayVersionControlService';
 
 // Service implementations
 import { ErrorHandlingService } from './Services/common/ErrorHandlingService';
@@ -24,6 +25,7 @@ import { GatewayTaskService } from './Services/task/GatewayTaskService';
 import { GatewayFileService } from './Services/file/GatewayFileService';
 import { GatewayNotificationService } from './Services/notification/GatewayNotificationService';
 import { GatewayAnalyticsService } from './Services/analytics/GatewayAnalyticsService';
+import { GatewayVersionControlService } from './Services/version-control/GatewayVersionControlService';
 
 // Controllers
 import { HealthController } from './WebAPI/Controllers/health/HealthController';
@@ -34,6 +36,7 @@ import { GatewayTaskController } from './WebAPI/Controllers/task/GatewayTaskCont
 import { GatewayFileController } from './WebAPI/Controllers/file/GatewayFileController';
 import { GatewayNotificationController } from './WebAPI/Controllers/notification/GatewayNotificationController';
 import { GatewayAnalyticsController } from './WebAPI/Controllers/analytics/GatewayAnalyticsController';
+import { GatewayVersionControlController } from './WebAPI/Controllers/version_control/GatewayVersionControlController';
 
 // Middlewares
 import { logTraffic } from './Middlewares/logger/LoggingMiddleware';
@@ -44,9 +47,6 @@ import { globalErrorHandler } from './Middlewares/recovery/GlobalErrorMiddleware
 
 // Infrastructure
 import { logger } from './Infrastructure/logging/Logger';
-import { IGatewayVersionControlService } from './Domain/services/version-control/IGatewayVersionControlService';
-import { GatewayVersionControlController } from './WebAPI/Controllers/version_control/GatewayVersionControlController';
-import { GatewayVersionControlService } from './Services/version-control/GatewayVersionControlService';
 
 const app = express();
 
@@ -71,6 +71,7 @@ const gatewayFileService: IGatewayFileService = new GatewayFileService(errorHand
 const gatewayNotificationService: IGatewayNotificationService = new GatewayNotificationService(errorHandlingService);
 const gatewayAnalyticsService: IGatewayAnalyticsService = new GatewayAnalyticsService(errorHandlingService);
 const gatewayVersionSevice : IGatewayVersionControlService = new GatewayVersionControlService(errorHandlingService);
+
 // Controllers
 const healthController = new HealthController();
 const gatewayAuthController = new GatewayAuthController(gatewayAuthService);
