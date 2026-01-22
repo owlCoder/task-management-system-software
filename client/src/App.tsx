@@ -17,6 +17,7 @@ import { socketManager } from "./api/notification/socketInstance";
 import { useAuth } from "./hooks/useAuthHook";
 import { INotificationAPI } from "./api/notification/INotificationAPI";
 import { NotificationAPI } from "./api/notification/NotificationAPI";
+import ProjectSprintsPage from "./pages/ProjectSprintPage";
 
 const auth_api: IAuthAPI = new AuthAPI();
 const notification_API: INotificationAPI = new NotificationAPI(import.meta.env.VITE_GATEWAY_URL);
@@ -58,6 +59,7 @@ function App() {
         <Route path="/mainwindow" element={<MainWindow />} />
         <Route path="/" element={<AuthPage authAPI={auth_api} />} />
         <Route path="/otp" element={<OtpPage />} />
+        <Route path="/sprints" element={<ProjectSprintsPage />} />
         <Route
           path="/users"
           element={
