@@ -6,9 +6,5 @@ export const ReviewPolicies = Object.freeze({
   ],
   WRITE: [
     UserRole.PROJECT_MANAGER
-  ],
-  SEND: [
-    UserRole.ANIMATION_WORKER,
-    UserRole.AUDIO_MUSIC_STAGIST
   ]
 } as const);

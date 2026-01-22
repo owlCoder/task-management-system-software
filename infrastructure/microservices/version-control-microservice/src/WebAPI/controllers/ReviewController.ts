@@ -66,7 +66,7 @@ export class ReviewController {
       }
 
       const userRole = req.headers["x-user-role"];
-      if (userRole !== "PROJECTMANAGER") {
+      if (userRole !== "PROJECT_MANAGER") {
         res.status(403).json({ message: "Only Project Manager can approve review" });
         return;
       }
@@ -107,7 +107,7 @@ export class ReviewController {
       }
 
       const userRole = req.headers["x-user-role"];
-      if (userRole !== "PROJECTMANAGER") {
+      if (userRole !== "PROJECT_MANAGER") {
         res.status(403).json({ message: "Only Project Manager can reject review" });
         return;
       }
@@ -148,7 +148,7 @@ export class ReviewController {
   async getReviews(req: Request, res: Response): Promise<void> {
     try {
       const userRole = req.headers["x-user-role"];
-      if (userRole !== "PROJECTMANAGER") {
+      if (userRole !== "PROJECT_MANAGER") {
         res.status(403).json({ message: "Only Project Manager can view reviews" });
         return;
       }

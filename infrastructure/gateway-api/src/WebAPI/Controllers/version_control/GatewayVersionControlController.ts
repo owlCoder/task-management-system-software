@@ -30,7 +30,6 @@ export class GatewayVersionControlController {
     private initializeRoutes() {
         const reviewReadAccess = [authenticate, authorize(...ReviewPolicies.READ)];
         const reviewWriteAccess = [authenticate, authorize(...ReviewPolicies.WRITE)];
-        const reviewSendAccess = [authenticate, authorize(...ReviewPolicies.SEND)];
 
         const templateReadAccess = [authenticate, authorize(...TemplatePolicies.READ)];
         const templateWriteAccess = [authenticate, authorize(...TemplatePolicies.WRITE)];
@@ -38,7 +37,7 @@ export class GatewayVersionControlController {
         this.router.get("/reviews",...reviewReadAccess,this.getReviews.bind(this));
         this.router.post("/reviews/:taskId/accept" ,...reviewWriteAccess,this.acceptReview.bind(this));
         this.router.post("/reviews/:taskId/reject" ,...reviewWriteAccess,this.rejectReview.bind(this));
-        this.router.post("/reviews/:taskId/send" ,...reviewSendAccess,this.sendToReview.bind(this));
+        this.router.post("/reviews/:taskId/send" ,authenticate,this.sendToReview.bind(this));
 
         this.router.get("/templates/:templateId",...templateReadAccess, this.getTemplate.bind(this));
         this.router.get("/templates", ...templateReadAccess, this.getAllTemplates.bind(this));
