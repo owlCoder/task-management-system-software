@@ -1,7 +1,7 @@
-import { ITemplateService } from "../Domain/services/ITemplateService";
+import { ITemplateService } from "../../Domain/services/ITemplateService";
 import { Router, Request, Response } from "express";
-import { toTemplateDTO } from "../Helpers/Converter/toTemplateDTO";
-import { errorCodeToHttpStatus } from "../Utils/Converters/ErrorCodeConverter";
+import { toTemplateDTO } from "../../Helpers/Converter/toTemplateDTO";
+import { errorCodeToHttpStatus } from "../../Utils/Converters/ErrorCodeConverter";
 
 export class TemplateController {
     private readonly router: Router;
@@ -20,7 +20,7 @@ export class TemplateController {
         this.router.get("/templates", this.getAllTemplates.bind(this));
         this.router.post("/templates", this.createTemplate.bind(this));
         this.router.post("/templates/:id/create", this.createTask.bind(this));
-        this.router.post("/:id/dependencies/:dependsOnId", this.addDependency);
+        this.router.post("/templates/:id/dependencies/:dependsOnId", this.addDependency.bind(this));
     }
 
     async getTemplateById(req: Request, res: Response): Promise<void>{
@@ -62,7 +62,16 @@ export class TemplateController {
         try {
             const templateData = req.body;
 
-            const result = await this.templateService.createTemplate(templateData);
+            const pmIdHeader = (req.headers['x-user-id']);
+
+            if(!pmIdHeader || typeof pmIdHeader !== 'string') {
+                res.status(400).json({message: "Missing x-user-id header"});
+                return;
+            }
+
+            const pm_id = parseInt(pmIdHeader, 10);
+
+            const result = await this.templateService.createTemplate(templateData, pm_id);
 
             if(result.success) {
                 res.status(201).json(result.data);
@@ -106,12 +115,21 @@ export class TemplateController {
         const templateId = parseInt(req.params.id as string, 10);
         const dependsOnId = parseInt(req.params.dependsOnId as string, 10);
 
+        const pmIdHeader = (req.headers['x-user-id']);
+
+            if(!pmIdHeader || typeof pmIdHeader !== 'string') {
+                res.status(400).json({message: "Missing x-user-id header"});
+                return;
+            }
+
+            const pm_id = parseInt(pmIdHeader, 10);
+
         if (isNaN(templateId) || isNaN(dependsOnId)) {
             res.status(400).json({ message: "Invalid IDs provided" });
             return;
         }
 
-        const result = await this.templateService.addDependency(templateId, dependsOnId);
+        const result = await this.templateService.addDependency(templateId, dependsOnId, pm_id);
 
         if (result.success) {
             res.status(204).send(); 

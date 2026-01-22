@@ -10,13 +10,15 @@ import { TemplateDependency } from "../Domain/models/TemplateDependency";
 import { TaskResponseDTO } from "../Domain/DTOs/TaskResponseDTO";
 import { CreateTaskFromTemplateDTO } from "../Domain/DTOs/TaskCreateDTO";
 import { TaskServiceClient } from "./external-services/TaskServiceClient";
+import { UserServiceClient } from "./external-services/UserServiceClient";
 
 
 export class TemplateService implements ITemplateService{
     constructor(
         private readonly templateRepository: Repository<TaskTemplate>,
         private readonly dependenciesRepository: Repository<TemplateDependency>,
-        private readonly taskService: TaskServiceClient
+        private readonly taskService: TaskServiceClient,
+        private readonly userService: UserServiceClient
     ) {
 
     }
@@ -42,8 +44,17 @@ export class TemplateService implements ITemplateService{
         return { success: true, data: templates.map((t) => toTemplateDTO(t))};
     }
 
-    async createTemplate(data: CreateTemplateDTO): Promise<Result<TaskTemplateDTO>> {
-        
+    async createTemplate(data: CreateTemplateDTO, pm_id: number): Promise<Result<TaskTemplateDTO>> {
+        const pmResult = await this.userService.getUserById(pm_id);
+
+        if (!pmResult.success) {
+            return { success: false, code: ErrorCode.NOT_FOUND, error: "User from header not found" };
+        }
+
+        if (pmResult.data.role_name !== 'PROJECT_MANAGER') {
+            return { success: false, code: ErrorCode.FORBIDDEN, error: "Only PMs can create templates" };
+        }
+
         if(!data.template_title || data.template_title.trim().length === 0) {
             return { success: false, code: ErrorCode.INVALID_INPUT, error: "Template title is required"};
         }
@@ -84,6 +95,22 @@ export class TemplateService implements ITemplateService{
             return { success: false, code: ErrorCode.NOT_FOUND, error: "Template not found" };
         }
 
+        const pmResult = await this.userService.getUserById(pm_id);
+
+        if (!pmResult.success) {
+            return { success: false, code: ErrorCode.NOT_FOUND, error: "Project Manager not found" };
+        }
+
+        if (pmResult.data.role_name !== 'PROJECT_MANAGER') {
+            return { success: false, code: ErrorCode.FORBIDDEN, error: "Only Project Managers can perform this action" };
+        }
+
+        const workerResult = await this.userService.verifyUserExists(worker_id);
+
+        if(!workerResult) {
+            return { success: false, code: ErrorCode.NOT_FOUND, error: "User not found"};
+        }
+
         const taskDTO: CreateTaskFromTemplateDTO = {
             worker_id, 
             title: template.template_title,
@@ -115,7 +142,17 @@ export class TemplateService implements ITemplateService{
 
     }
 
-    async addDependency(template_id: number, depends_on_id: number): Promise<Result<void>> {
+    async addDependency(template_id: number, depends_on_id: number, pm_id: number): Promise<Result<void>> {
+
+        const pmResult = await this.userService.getUserById(pm_id);
+
+        if (!pmResult.success) {
+            return { success: false, code: ErrorCode.NOT_FOUND, error: "User from header not found" };
+        }
+
+        if (pmResult.data.role_name !== 'PROJECT_MANAGER') {
+            return { success: false, code: ErrorCode.FORBIDDEN, error: "Only PMs can create templates" };
+        }
     
         const template = await this.templateRepository.findOne({ where: { template_id } });
         if (!template) {

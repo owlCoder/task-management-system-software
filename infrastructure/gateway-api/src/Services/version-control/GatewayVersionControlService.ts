@@ -11,6 +11,11 @@ import { makeAPICall, makeAPIUploadStreamCall } from "../../Infrastructure/axios
 import { createAxiosClient } from "../../Infrastructure/axios/client/AxiosClientFactory";
 import { IErrorHandlingService } from "../../Domain/services/common/IErrorHandlingService";
 import { VERSION_CONTROL_ROUTES } from "../../Constants/routes/version-control/Version-ControlRoutes";
+import { TaskTemplateDTO } from "../../Domain/DTOs/version-control/TaskTemplateDTO";
+import { CreateTemplateDTO } from "../../Domain/DTOs/version-control/CreateTemplateDTO";
+import { TaskResponseDTO } from "../../Domain/DTOs/version-control/TaskResponseDTO";
+import { CreateTaskDTO } from "../../Domain/DTOs/version-control/CreateTaskDTO";
+import { serialize } from "v8";
 
 
 
@@ -60,6 +65,53 @@ export class GatewayVersionControlService implements IGatewayVersionControlServi
             method: HTTP_METHODS.GET,
             url: VERSION_CONTROL_ROUTES.GET_REVIEW(),
             headers: {}
+        });
+    }
+
+    async getTemplateById(template_id: number): Promise<Result<TaskTemplateDTO>> {
+        return await makeAPICall<TaskTemplateDTO>(this.versionClient, this.errorHandlingService, {
+            serviceName: SERVICES.VERSION_CONTROL,
+            method: HTTP_METHODS.GET,
+            url: VERSION_CONTROL_ROUTES.GET_TEMPLATE(template_id),
+            headers: {}
+        });
+    }
+
+    async getAllTemplates(): Promise<Result<TaskTemplateDTO[]>> {
+        return await makeAPICall<TaskTemplateDTO[]>(this.versionClient, this.errorHandlingService, {
+            serviceName: SERVICES.VERSION_CONTROL,
+            method: HTTP_METHODS.GET,
+            url: VERSION_CONTROL_ROUTES.GET_ALL(),
+            headers: {}
+        });
+    }
+
+    async createTemplate(data: CreateTemplateDTO, pm_id: number): Promise<Result<TaskTemplateDTO>> {
+        return await makeAPICall<TaskTemplateDTO, CreateTemplateDTO>(this.versionClient, this.errorHandlingService, {
+            serviceName: SERVICES.VERSION_CONTROL,
+            method: HTTP_METHODS.POST,
+            url: VERSION_CONTROL_ROUTES.CREATE_TEMPLATE(),
+            headers: {'x-user-id': pm_id.toString()},
+            data: data,
+        });
+    }
+
+    async createTaskFromTemplate(template_id: number, sprint_id: number, worker_id: number, pm_id: number): Promise<Result<TaskResponseDTO>> {
+        return await makeAPICall<TaskResponseDTO, CreateTaskDTO>(this.versionClient, this.errorHandlingService, {
+            serviceName: SERVICES.VERSION_CONTROL,
+            method: HTTP_METHODS.POST,
+            url: VERSION_CONTROL_ROUTES.CREATE_TASK(template_id),
+            headers: { 'x-user-id': pm_id.toString() },
+            data: { sprint_id, worker_id }
+        });
+    }
+
+    async addDependency(template_id: number, depends_on_id: number, pm_id: number): Promise<Result<void>> {
+        return await makeAPICall<void>(this.versionClient, this.errorHandlingService, {
+            serviceName: SERVICES.VERSION_CONTROL,
+            method: HTTP_METHODS.POST,
+            url: VERSION_CONTROL_ROUTES.CREATE_DEPENDENCY(template_id, depends_on_id),
+            headers: {'x-user-id': pm_id.toString()}
         });
     }
     
