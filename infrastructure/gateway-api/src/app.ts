@@ -44,6 +44,9 @@ import { globalErrorHandler } from './Middlewares/recovery/GlobalErrorMiddleware
 
 // Infrastructure
 import { logger } from './Infrastructure/logging/Logger';
+import { IGatewayVersionControlService } from './Domain/services/version-control/IGatewayVersionControlService';
+import { GatewayVersionControlController } from './WebAPI/Controllers/version_control/GatewayVersionControlController';
+import { GatewayVersionControlService } from './Services/version-control/GatewayVersionControlService';
 
 const app = express();
 
@@ -67,7 +70,7 @@ const gatewayTaskService: IGatewayTaskService = new GatewayTaskService(errorHand
 const gatewayFileService: IGatewayFileService = new GatewayFileService(errorHandlingService);
 const gatewayNotificationService: IGatewayNotificationService = new GatewayNotificationService(errorHandlingService);
 const gatewayAnalyticsService: IGatewayAnalyticsService = new GatewayAnalyticsService(errorHandlingService);
-
+const gatewayVersionSevice : IGatewayVersionControlService = new GatewayVersionControlService(errorHandlingService);
 // Controllers
 const healthController = new HealthController();
 const gatewayAuthController = new GatewayAuthController(gatewayAuthService);
@@ -77,6 +80,7 @@ const gatewayTaskController = new GatewayTaskController(gatewayTaskService);
 const gatewayFileController = new GatewayFileController(gatewayFileService);
 const gatewayNotificationController = new GatewayNotificationController(gatewayNotificationService);
 const gatewayAnalyticsController = new GatewayAnalyticsController(gatewayAnalyticsService);
+const gatewayVersionController = new GatewayVersionControlController(gatewayVersionSevice);
 
 // Register routes
 app.use('/', healthController.getRouter());
@@ -87,6 +91,7 @@ app.use('/api/v1', gatewayTaskController.getRouter());
 app.use('/api/v1', gatewayFileController.getRouter());
 app.use('/api/v1', gatewayNotificationController.getRouter());
 app.use('/api/v1', gatewayAnalyticsController.getRouter());
+app.use('/api/v1', gatewayVersionController.getRouter());
 
 // Handles calling invalid routes.
 app.use(invalidRouteHandler);

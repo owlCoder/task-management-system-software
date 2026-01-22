@@ -121,11 +121,21 @@ export const ProfitMarginAnalytics: React.FC<ProfitMarginAnalyticsProps> = ({
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Tooltip
-                formatter={(value: any, name: any) =>
-                  typeof value === "number"
-                    ? [formatMoney(value), name]
-                    : [value, name]
-                }
+                contentStyle={{
+                  background: "rgba(231, 233, 241, 0.92)",
+                  border: "1px solid rgba(255,255,255,0.12)",
+                  borderRadius: 12,
+                }}
+                labelStyle={{ color: "rgba(0, 0, 0, 0.85)" }}
+                formatter={(value: any, name: any) => {
+                  // name dolazi iz donutData.name
+                  const label =
+                    name === "Remaining"
+                      ? "Remaining"
+                      : "Spent";
+
+                  return [formatMoney(Number(value)), label];
+                }}
               />
               <Pie
                 data={donutData}

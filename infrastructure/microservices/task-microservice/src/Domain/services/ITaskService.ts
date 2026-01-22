@@ -15,5 +15,5 @@ export interface ITaskService {
     ): Promise<Result<Task>>;
     updateTask(task_id: number, updateTaskDTO: UpdateTaskDTO,user_id: number): Promise<Result<Task>>;
     deleteTask(task_id: number,user_id: number): Promise<Result<boolean>>;
-    updateTaskStatus(task_id: number, newStatus: TaskStatus, user_id: number): Promise<Result<Task>>
+    updateTaskStatus(task_id: number, newStatus: TaskStatus, user_id: number,file_id? : number): Promise<Result<Task>>
 }

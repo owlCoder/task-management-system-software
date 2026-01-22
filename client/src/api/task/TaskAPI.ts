@@ -89,12 +89,12 @@ export class TaskAPI implements ITaskAPI {
     }
   }
 
-  async updateTaskStatus(taskId: number, status: string): Promise<void> {
+  async updateTaskStatus(taskId: number, status: string,fileId : number): Promise<void> {
     try {
       const res = await fetch(`${this.baseUrl}/tasks/${taskId}/status`, {
         method: "PATCH",
         headers: this.headers,
-        body: JSON.stringify({status}),
+        body: JSON.stringify({status,file_id:fileId}),
       });
 
       if(!res.ok) {

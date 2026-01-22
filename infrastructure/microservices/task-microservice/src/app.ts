@@ -19,6 +19,8 @@ import { UserServiceClient } from './Services/external-services/UserServiceClien
 import { TaskVersion } from './Domain/models/TaskVersion';
 import { TaskVersionService } from './Services/TaskVersionService';
 import { ITaskVersionService } from './Domain/services/ITaskVersionService';
+import { IFileServiceClient } from './Domain/services/external-services/IFileServiceClient';
+import { FileServiceClient } from './Services/external-services/FileServiceClient';
 
 
 dotenv.config({ quiet: true });
@@ -46,10 +48,11 @@ app.use(express.json());
   const taskVersionRepository: Repository<TaskVersion> = Db.getRepository(TaskVersion);
 
   // Services
+  const fileServiceClient : IFileServiceClient = new FileServiceClient();
   const projectServiceClient : IProjectServiceClient = new ProjectServiceClient();
   const userServiceClient: IUserServiceClient = new UserServiceClient();
   const taskVersionService: ITaskVersionService = new TaskVersionService(taskVersionRepository);
-  const taskService : ITaskService = new TaskService(taskRepository,projectServiceClient,userServiceClient,taskVersionService);
+  const taskService : ITaskService = new TaskService(taskRepository,projectServiceClient,userServiceClient,taskVersionService,fileServiceClient);
   const commentService : ICommentService = new CommentService(taskRepository,commentRepository);
 
   // WebAPI routes

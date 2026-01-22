@@ -194,7 +194,7 @@ export async function initApp(): Promise<express.Express> {
 
   // Services
   const projectAnalyticsService: IProjectAnalyticsService =
-    new ProjectAnalyticsService(taskRepository, sprintRepository, projectRepository);
+    new ProjectAnalyticsService(taskRepository, sprintRepository, projectRepository, projectUserRepository);
 
   const financialAnalyticsService: IFinancialAnalyticsService =
     new FinancialAnalyticsService(projectRepository, sprintRepository, taskRepository, projectUserRepository);

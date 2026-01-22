@@ -1,5 +1,5 @@
 import { IFileTypeValidationService } from '../Domain/services/IFileTypeValidationService';
-import * as FileType from 'file-type';
+import FileType from 'file-type';
 
 export class FileTypeValidationService implements IFileTypeValidationService {
 

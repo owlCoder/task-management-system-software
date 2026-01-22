@@ -4,6 +4,7 @@ import {
   JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
+  CreateDateColumn,
 } from "typeorm";
 import { Project } from "./Project";
 
@@ -12,17 +13,20 @@ export class ProjectUser {
   @PrimaryGeneratedColumn()
   pu_id!: number;
 
-  @ManyToOne(() => Project, (project) => project.project_id, {
-    nullable: false,
-  })
+  @Column({ type: "int", nullable: false })
+  project_id!: number;
+
+  @ManyToOne(() => Project, { nullable: false, onDelete: "CASCADE" })
   @JoinColumn({ name: "project_id" })
   project!: Project;
-  //kreira kolonu koja je fk za od tabele Project i njegovog project_id-a
 
-  @Column({ unique: false })
+  @Column({ type: "int", nullable: false })
   user_id!: number;
 
   @Column({ type: "int", nullable: false })
   weekly_hours!: number;
 
+  @Column({ type: "datetime", nullable: false })
+  added_at!: Date;
 }
+

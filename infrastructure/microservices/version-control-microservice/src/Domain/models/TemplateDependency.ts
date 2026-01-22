@@ -10,6 +10,7 @@ export class TemplateDependency {
     @JoinColumn({ name: "template_id" })
     template!: TaskTemplate;
 
-    @Column({ type: "int" })
-    depends_on_template_id!: number;
+    @ManyToOne(() => TaskTemplate)
+    @JoinColumn({ name: "depends_on_template_id" })
+    dependsOn!: TaskTemplate;
 }
