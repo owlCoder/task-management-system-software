@@ -4,16 +4,18 @@ import { ReviewCommentDTO } from "../../DTOs/version-control/ReviewCommentDTO";
 import { TaskTemplateDTO } from "../../DTOs/version-control/TaskTemplateDTO";
 import { CreateTemplateDTO } from "../../DTOs/version-control/CreateTemplateDTO";
 import { TaskResponseDTO } from "../../DTOs/version-control/TaskResponseDTO";
+import { RejectReviewDTO } from "../../DTOs/version-control/RejectReviewDTO";
+import { CreateTaskDTO } from "../../DTOs/version-control/CreateTaskDTO";
 
 export interface IGatewayVersionControlService {
-    sendToReview(taskId : number,authorId : number) : Promise<Result<ReviewDTO>>;
-    acceptReview(taskId : number,reviewedBy : number) : Promise<Result<ReviewDTO>>;
-    rejectReview(taskId : number,reviewedBy : number,rejectComment : string) : Promise<Result<ReviewCommentDTO>>;
-    getReviews() : Promise<Result<ReviewDTO[]>>;
-
-    getTemplateById(template_id: number): Promise<Result<TaskTemplateDTO>>;
+    sendToReview(taskId: number, senderId: number, senderRole: string): Promise<Result<ReviewDTO>>;
+    acceptReview(taskId: number, senderId: number, senderRole: string): Promise<Result<ReviewDTO>>;
+    rejectReview(taskId: number, data: RejectReviewDTO, senderId: number, senderRole: string): Promise<Result<ReviewCommentDTO>>;
+    getReviews(senderRole: string, status?: string): Promise<Result<ReviewDTO[]>>;
+    getReviewComment(commentId: number, senderRole: string): Promise<Result<ReviewCommentDTO>>;
+    getTemplateById(templateId: number): Promise<Result<TaskTemplateDTO>>;
     getAllTemplates(): Promise<Result<TaskTemplateDTO[]>>;
-    createTemplate(data: CreateTemplateDTO, pm_id: number): Promise<Result<TaskTemplateDTO>>;
-    createTaskFromTemplate(template_id: number, sprint_id: number,worker_id: number, pm_id: number): Promise<Result<TaskResponseDTO>>;
-    addDependency(template_id: number, depends_on_id: number, pm_id: number): Promise<Result<void>>;
+    createTemplate(data: CreateTemplateDTO, senderId: number): Promise<Result<TaskTemplateDTO>>;
+    createTaskFromTemplate(templateId: number, data: CreateTaskDTO, senderId: number): Promise<Result<TaskResponseDTO>>;
+    addDependency(templateId: number, dependsOnId: number, senderId: number): Promise<Result<void>>;
 }

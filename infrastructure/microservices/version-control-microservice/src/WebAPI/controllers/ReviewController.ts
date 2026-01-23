@@ -15,11 +15,22 @@ export class ReviewController {
     return this.router;
   }
 
+  private normalizeRole(role: unknown): string {
+    if (typeof role !== "string") return "";
+    return role.trim().toUpperCase().replace(/[\s_-]+/g, "");
+  }
+
+  private isProjectManager(role: unknown): boolean {
+    return this.normalizeRole(role) === "PROJECTMANAGER";
+  }
+
   private initializeRoutes() {
     this.router.get("/reviews", this.getReviews.bind(this));
     this.router.post("/reviews/:taskId/send", this.sendReview.bind(this));
     this.router.post("/reviews/:taskId/accept", this.approveReview.bind(this));
     this.router.post("/reviews/:taskId/reject", this.rejectReview.bind(this));
+    this.router.get("/reviews", this.getReviews.bind(this));
+    this.router.get("/reviewComments/:commentId", this.getCommentById.bind(this));
   }
 
   async sendReview(req: Request, res: Response): Promise<void> {
@@ -42,14 +53,12 @@ export class ReviewController {
         return;
       }
 
-      const result = await this.reviewService.sendToReview(taskId,user_id);
+      const result = await this.reviewService.sendToReview(taskId, user_id);
 
       if (result.success) {
         res.status(200).json(result.data);
       } else {
-        res
-          .status(errorCodeToHttpStatus(result.code))
-          .json({ message: result.error });
+        res.status(errorCodeToHttpStatus(result.code)).json({ message: result.error });
       }
     } catch (error) {
       console.error(error);
@@ -66,7 +75,7 @@ export class ReviewController {
       }
 
       const userRole = req.headers["x-user-role"];
-      if (userRole !== "PROJECTMANAGER") {
+      if (!this.isProjectManager(userRole)) {
         res.status(403).json({ message: "Only Project Manager can approve review" });
         return;
       }
@@ -83,14 +92,12 @@ export class ReviewController {
         return;
       }
 
-      const result = await this.reviewService.approveReview(taskId,user_id);
+      const result = await this.reviewService.approveReview(taskId, user_id);
 
       if (result.success) {
         res.status(200).json(result.data);
       } else {
-        res
-          .status(errorCodeToHttpStatus(result.code))
-          .json({ message: result.error });
+        res.status(errorCodeToHttpStatus(result.code)).json({ message: result.error });
       }
     } catch (error) {
       console.error(error);
@@ -107,7 +114,7 @@ export class ReviewController {
       }
 
       const userRole = req.headers["x-user-role"];
-      if (userRole !== "PROJECTMANAGER") {
+      if (!this.isProjectManager(userRole)) {
         res.status(403).json({ message: "Only Project Manager can reject review" });
         return;
       }
@@ -130,14 +137,12 @@ export class ReviewController {
         return;
       }
 
-      const result = await this.reviewService.rejectReview(taskId, user_id,commentText);
+      const result = await this.reviewService.rejectReview(taskId, user_id, commentText);
 
       if (result.success) {
         res.status(200).json(result.data);
       } else {
-        res
-          .status(errorCodeToHttpStatus(result.code))
-          .json({ message: result.error });
+        res.status(errorCodeToHttpStatus(result.code)).json({ message: result.error });
       }
     } catch (error) {
       console.error(error);
@@ -148,20 +153,44 @@ export class ReviewController {
   async getReviews(req: Request, res: Response): Promise<void> {
     try {
       const userRole = req.headers["x-user-role"];
-      if (userRole !== "PROJECTMANAGER") {
+      if (!this.isProjectManager(userRole)) {
         res.status(403).json({ message: "Only Project Manager can view reviews" });
         return;
       }
 
-      const result = await this.reviewService.getTaskForReview();
+      const statusRaw = (req.query.status as string | undefined)?.toUpperCase();
+      const status =
+        !statusRaw ? "REVIEW" :
+        (["REVIEW","APPROVED","REJECTED","ALL"].includes(statusRaw) ? statusRaw : "REVIEW");
 
-      if (result.success) {
-        res.status(200).json(result.data);
-      } else {
-        res
-          .status(errorCodeToHttpStatus(result.code))
-          .json({ message: result.error });
+      const result = await this.reviewService.getReviews(status as any);
+
+      if (result.success) res.status(200).json(result.data);
+      else res.status(errorCodeToHttpStatus(result.code)).json({ message: result.error });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  }
+
+  async getCommentById(req: Request, res: Response): Promise<void> {
+    try {
+      const userRole = req.headers["x-user-role"];
+      if (!this.isProjectManager(userRole)) {
+        res.status(403).json({ message: "Only Project Manager can view review comments" });
+        return;
       }
+
+      const commentId = Number(req.params.commentId);
+      if (isNaN(commentId)) {
+        res.status(400).json({ message: "Invalid comment ID" });
+        return;
+      }
+
+      const result = await this.reviewService.getCommentById(commentId);
+
+      if (result.success) res.status(200).json(result.data);
+      else res.status(errorCodeToHttpStatus(result.code)).json({ message: result.error });
     } catch (error) {
       console.error(error);
       res.status(500).json({ message: "Internal server error" });

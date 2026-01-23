@@ -1,79 +1,97 @@
+// Libraries
+import { AxiosInstance } from "axios";
+
+// Domain
+import { IErrorHandlingService } from "../../Domain/services/common/IErrorHandlingService";
+import { IGatewayVersionControlService } from "../../Domain/services/version-control/IGatewayVersionControlService";
 import { ReviewCommentDTO } from "../../Domain/DTOs/version-control/ReviewCommentDTO";
 import { ReviewDTO } from "../../Domain/DTOs/version-control/ReviewDTO";
-import { IGatewayVersionControlService } from "../../Domain/services/version-control/IGatewayVersionControlService";
-import { Result } from "../../Domain/types/common/Result";
-import { Request } from "express";
-import { AxiosInstance } from "axios";
-import { HTTP_METHODS } from "../../Constants/common/HttpMethods";
-import { SERVICES } from "../../Constants/services/Services";
-import { API_ENDPOINTS } from "../../Constants/services/APIEndpoints";
-import { makeAPICall, makeAPIUploadStreamCall } from "../../Infrastructure/axios/APIHelpers";
-import { createAxiosClient } from "../../Infrastructure/axios/client/AxiosClientFactory";
-import { IErrorHandlingService } from "../../Domain/services/common/IErrorHandlingService";
-import { VERSION_CONTROL_ROUTES } from "../../Constants/routes/version-control/Version-ControlRoutes";
 import { TaskTemplateDTO } from "../../Domain/DTOs/version-control/TaskTemplateDTO";
 import { CreateTemplateDTO } from "../../Domain/DTOs/version-control/CreateTemplateDTO";
 import { TaskResponseDTO } from "../../Domain/DTOs/version-control/TaskResponseDTO";
 import { CreateTaskDTO } from "../../Domain/DTOs/version-control/CreateTaskDTO";
-import { serialize } from "v8";
+import { RejectReviewDTO } from "../../Domain/DTOs/version-control/RejectReviewDTO";
+import { Result } from "../../Domain/types/common/Result";
 
+// Constants
+import { HTTP_METHODS } from "../../Constants/common/HttpMethods";
+import { SERVICES } from "../../Constants/services/Services";
+import { API_ENDPOINTS } from "../../Constants/services/APIEndpoints";
+import { VERSION_CONTROL_ROUTES } from "../../Constants/routes/version-control/VersionControlRoutes";
 
+// Infrastructure
+import { createAxiosClient } from "../../Infrastructure/axios/client/AxiosClientFactory";
+import { makeAPICall } from "../../Infrastructure/axios/APIHelpers";
 
 export class GatewayVersionControlService implements IGatewayVersionControlService {
     private readonly versionClient: AxiosInstance;
         
     constructor(private readonly errorHandlingService: IErrorHandlingService){
-        this.versionClient = createAxiosClient(API_ENDPOINTS.VERSION_CONTROL, { headers: {} });
+        this.versionClient = createAxiosClient(API_ENDPOINTS.VERSION_CONTROL);
     }
 
-    async sendToReview(taskId: number, authorId: number): Promise<Result<ReviewDTO>> {
+    async sendToReview(taskId: number, senderId: number, senderRole: string): Promise<Result<ReviewDTO>> {
         return await makeAPICall<ReviewDTO>(this.versionClient, this.errorHandlingService, {
-            serviceName:SERVICES.VERSION_CONTROL,
-            method: HTTP_METHODS.POST,
-            url: VERSION_CONTROL_ROUTES.SEND_REVIEW(taskId),
-            headers: {
-                'x-user-id': authorId.toString()
-            }
-        });
-    }
-    async acceptReview(taskId: number, reviewedBy: number): Promise<Result<ReviewDTO>> {
-         return await makeAPICall<ReviewDTO>(this.versionClient, this.errorHandlingService, {
-            serviceName:SERVICES.VERSION_CONTROL,
-            method: HTTP_METHODS.POST,
-            url: VERSION_CONTROL_ROUTES.ACCEPT_REVIEW(taskId),
-            headers: {
-                'x-user-id': reviewedBy.toString()
-            }
-        });
-    }
-    async rejectReview(taskId: number, reviewedBy: number, rejectComment: string): Promise<Result<ReviewCommentDTO>> {
-         return await makeAPICall<ReviewCommentDTO,{ commentText: string }>(this.versionClient, this.errorHandlingService, {
-            serviceName:SERVICES.VERSION_CONTROL,
-            method: HTTP_METHODS.POST,
-            url: VERSION_CONTROL_ROUTES.REJECT_REVIEW(taskId),
-            headers: {
-                'x-user-id': reviewedBy.toString()
-            },
-            data: {
-                commentText: rejectComment
-            }
-        });
-    }
-    async getReviews(): Promise<Result<ReviewDTO[]>> {
-         return await makeAPICall<ReviewDTO[]>(this.versionClient, this.errorHandlingService, {
-            serviceName:SERVICES.VERSION_CONTROL,
-            method: HTTP_METHODS.GET,
-            url: VERSION_CONTROL_ROUTES.GET_REVIEW(),
-            headers: {}
+        serviceName: SERVICES.VERSION_CONTROL,
+        method: HTTP_METHODS.POST,
+        url: VERSION_CONTROL_ROUTES.SEND_REVIEW(taskId),
+        headers: {
+            "x-user-id": senderId.toString(),
+            "x-user-role": senderRole
+        }
         });
     }
 
-    async getTemplateById(template_id: number): Promise<Result<TaskTemplateDTO>> {
+    async acceptReview(taskId: number, senderId: number, senderRole: string): Promise<Result<ReviewDTO>> {
+        return await makeAPICall<ReviewDTO>(this.versionClient, this.errorHandlingService, {
+        serviceName: SERVICES.VERSION_CONTROL,
+        method: HTTP_METHODS.POST,
+        url: VERSION_CONTROL_ROUTES.ACCEPT_REVIEW(taskId),
+        headers: {
+            "x-user-id": senderId.toString(),
+            "x-user-role": senderRole
+        }
+        });
+    }
+
+    async rejectReview(taskId: number, data: RejectReviewDTO, senderId: number, senderRole: string): Promise<Result<ReviewCommentDTO>> {
+        return await makeAPICall<ReviewCommentDTO, RejectReviewDTO>(this.versionClient, this.errorHandlingService, {
+        serviceName: SERVICES.VERSION_CONTROL,
+        method: HTTP_METHODS.POST,
+        url: VERSION_CONTROL_ROUTES.REJECT_REVIEW(taskId),
+        headers: {
+            "x-user-id": senderId.toString(),
+            "x-user-role": senderRole
+        },
+        data: data
+        });
+    }
+
+    async getReviews(senderRole: string, status?: string): Promise<Result<ReviewDTO[]>> {
+        const url = status ? `${VERSION_CONTROL_ROUTES.GET_REVIEWS}?status=${encodeURIComponent(status)}` : VERSION_CONTROL_ROUTES.GET_REVIEWS;
+
+        return await makeAPICall<ReviewDTO[]>(this.versionClient, this.errorHandlingService, {
+            serviceName: SERVICES.VERSION_CONTROL,
+            method: HTTP_METHODS.GET,
+            url,
+            headers: { "x-user-role": senderRole }
+        });
+    }
+
+    async getReviewComment(commentId: number, senderRole: string): Promise<Result<ReviewCommentDTO>> {
+        return await makeAPICall<ReviewCommentDTO>(this.versionClient, this.errorHandlingService, {
+            serviceName: SERVICES.VERSION_CONTROL,
+            method: HTTP_METHODS.GET,
+            url: VERSION_CONTROL_ROUTES.GET_REVIEW_COMMENT(commentId),
+            headers: { "x-user-role": senderRole }
+        });
+    }
+
+    async getTemplateById(templateId: number): Promise<Result<TaskTemplateDTO>> {
         return await makeAPICall<TaskTemplateDTO>(this.versionClient, this.errorHandlingService, {
             serviceName: SERVICES.VERSION_CONTROL,
             method: HTTP_METHODS.GET,
-            url: VERSION_CONTROL_ROUTES.GET_TEMPLATE(template_id),
-            headers: {}
+            url: VERSION_CONTROL_ROUTES.GET_TEMPLATE(templateId)
         });
     }
 
@@ -81,37 +99,42 @@ export class GatewayVersionControlService implements IGatewayVersionControlServi
         return await makeAPICall<TaskTemplateDTO[]>(this.versionClient, this.errorHandlingService, {
             serviceName: SERVICES.VERSION_CONTROL,
             method: HTTP_METHODS.GET,
-            url: VERSION_CONTROL_ROUTES.GET_ALL(),
-            headers: {}
+            url: VERSION_CONTROL_ROUTES.GET_ALL
         });
     }
 
-    async createTemplate(data: CreateTemplateDTO, pm_id: number): Promise<Result<TaskTemplateDTO>> {
+    async createTemplate(data: CreateTemplateDTO, senderId: number): Promise<Result<TaskTemplateDTO>> {
         return await makeAPICall<TaskTemplateDTO, CreateTemplateDTO>(this.versionClient, this.errorHandlingService, {
             serviceName: SERVICES.VERSION_CONTROL,
             method: HTTP_METHODS.POST,
-            url: VERSION_CONTROL_ROUTES.CREATE_TEMPLATE(),
-            headers: {'x-user-id': pm_id.toString()},
-            data: data,
+            url: VERSION_CONTROL_ROUTES.CREATE_TEMPLATE,
+            headers: {
+                'x-user-id': senderId.toString()
+            },
+            data: data
         });
     }
 
-    async createTaskFromTemplate(template_id: number, sprint_id: number, worker_id: number, pm_id: number): Promise<Result<TaskResponseDTO>> {
+    async createTaskFromTemplate(templateId: number, data: CreateTaskDTO, senderId: number): Promise<Result<TaskResponseDTO>> {
         return await makeAPICall<TaskResponseDTO, CreateTaskDTO>(this.versionClient, this.errorHandlingService, {
             serviceName: SERVICES.VERSION_CONTROL,
             method: HTTP_METHODS.POST,
-            url: VERSION_CONTROL_ROUTES.CREATE_TASK(template_id),
-            headers: { 'x-user-id': pm_id.toString() },
-            data: { sprint_id, worker_id }
+            url: VERSION_CONTROL_ROUTES.CREATE_TASK(templateId),
+            headers: { 
+                'x-user-id': senderId.toString() 
+            },
+            data: data
         });
     }
 
-    async addDependency(template_id: number, depends_on_id: number, pm_id: number): Promise<Result<void>> {
+    async addDependency(templateId: number, dependsOnId: number, senderId: number): Promise<Result<void>> {
         return await makeAPICall<void>(this.versionClient, this.errorHandlingService, {
             serviceName: SERVICES.VERSION_CONTROL,
             method: HTTP_METHODS.POST,
-            url: VERSION_CONTROL_ROUTES.CREATE_DEPENDENCY(template_id, depends_on_id),
-            headers: {'x-user-id': pm_id.toString()}
+            url: VERSION_CONTROL_ROUTES.CREATE_DEPENDENCY(templateId, dependsOnId),
+            headers: {
+                'x-user-id': senderId.toString()
+            }
         });
     }
     

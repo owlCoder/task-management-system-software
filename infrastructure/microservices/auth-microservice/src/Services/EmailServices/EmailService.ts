@@ -28,21 +28,21 @@ export class EmailService implements IEmailService {
     const emailBody = EmailTemplates.getOTPLoginBody(user.username, otpCode, this.loginSessionExpirationMinutes);
 
     try {
-      // await axios.post(
-      //   `${this.emailServiceUrl}/SendMessage`,
-      //   {
-      //     user: user.email,
-      //     header: emailSubject,
-      //     message: emailBody
-      //   },
-      //   {
-      //     headers: { "Content-Type": "application/json" },
-      //     timeout: 5000
-      //   }
-      // );
+      await axios.post(
+        `${this.emailServiceUrl}/SendMessage`,
+        {
+          user: user.email,
+          header: emailSubject,
+          message: emailBody
+        },
+        {
+          headers: { "Content-Type": "application/json" },
+          timeout: 5000
+        }
+      );
 
-      // console.log(`\x1b[34m[MailingService]\x1b[0m Sent OTP email to ${user.email} for user ${user.username}`);
-      // console.log(`\x1b[34m[MailingService]\x1b[0m Email content:\nSubject: ${emailSubject}\nBody: ${emailBody}`);
+      this.logger.log(SeverityEnum.DEBUG,`\x1b[34m[MailingService]\x1b[0m Sent OTP email to ${user.email} for user ${user.username}`);
+      this.logger.log(SeverityEnum.DEBUG,`\x1b[34m[MailingService]\x1b[0m Email content:\nSubject: ${emailSubject}\nBody: ${emailBody}`);
 
       this.logger.log(SeverityEnum.INFO, `Sent OTP email to ${user.email} for user ${user.username} and UID ${user.user_id} with OTP: ${otpCode}`);
       return true;

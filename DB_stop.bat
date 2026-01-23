@@ -1,3 +1,4 @@
-docker compose stop mysql
-echo MySQL container stopped.
+cd database
+call stop.bat
+cd ..
 pause

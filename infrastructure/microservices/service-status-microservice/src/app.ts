@@ -7,6 +7,9 @@ import { Microservice_Service } from './Services/Microservice_Service';
 import { Db } from './Database/DbConnectionPool';
 import { Health_Service } from './Services/Health_Service';
 import { GarbageCollector_Service } from './Services/GC_Service';
+import { LoggerService } from './Services/LoggerService';
+import { logger } from './infrastructure/Logger';
+
 
 
 async function bootstrap() {
@@ -19,19 +22,21 @@ async function bootstrap() {
 
     const measurementService = new Measurement_Service();
     const microserviceService = new Microservice_Service();
+    const loggerService = new LoggerService(logger);
+
 
     const healthService = new Health_Service(
         measurementService,
         microserviceService
     );
 
-    const measurementController = new Measurement_controller(measurementService);
-    const microserviceController = new Microservice_controller(microserviceService);
+    const measurementController = new Measurement_controller(measurementService,loggerService);
+    const microserviceController = new Microservice_controller(microserviceService,loggerService);
 
     const gc = new GarbageCollector_Service(measurementService);
     
-    gc.start();
-    healthService.start();
+    await gc.start();
+    await healthService.start();
 
     app.use("/api/v1/SSM/measurement", measurementController.getRouter());
     app.use("/api/v1/SSM/microservice", microserviceController.getRouter());

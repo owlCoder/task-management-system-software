@@ -72,14 +72,18 @@ success=false
 
 while [ $retryCount -lt $maxRetries ] && [ "$success" = false ]; do
     echo "Running docker compose up -d... (attempt $((retryCount + 1)))"
-    output=$($docker_cmd compose up -d 2>&1)
-    if echo "$output" | grep -q "unable to get image"; then
+    output=$($docker_cmd compose -f ../docker-compose.yml up -d mysql 2>&1)
+    exit_code=$?
+    if [ $exit_code -eq 0 ]; then
+        echo "Docker Compose started successfully."
+        success=true
+    elif echo "$output" | grep -q "unable to get image"; then
         echo "Error detected: unable to get image. Retrying in 5 seconds..."
         sleep 5
         retryCount=$((retryCount + 1))
     else
-        echo "Docker Compose started successfully."
-        success=true
+        echo "Failed with other error: $output"
+        success=false
     fi
 done
 

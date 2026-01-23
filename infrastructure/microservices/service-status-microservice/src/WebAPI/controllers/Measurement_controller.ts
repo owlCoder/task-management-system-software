@@ -2,13 +2,17 @@ import { Router, Request, Response } from "express";
 import { IMeasurement_Service } from "../../Domain/Services/IMeasurement_Service";
 import { CreateMeasurementDto } from "../../Domain/DTOs/CreateMeasurement_DTO";
 import { validateMeasurementDto } from "../validators/Measurement_validator";
+import { ILoggerService } from "../../Domain/Services/ILoggerService";
 
 
 export class Measurement_controller {
     private readonly router: Router;
+    private readonly LoggerService: ILoggerService;
 
-    constructor(private readonly measurementService: IMeasurement_Service) {
+
+    constructor(private readonly measurementService: IMeasurement_Service, private readonly loggerService:ILoggerService) {
         this.router = Router();
+        this.LoggerService = loggerService;
         this.initializeRoutes();
     }
 
@@ -62,6 +66,7 @@ export class Measurement_controller {
             const validationError = validateMeasurementDto(dto);
             if (validationError) {
                 res.status(400).json({ message: validationError });
+                this.LoggerService.warn("MEASUREMENT_CONTROLLER",`Validation failed: ${validationError}`);
                 return;
             }
 
@@ -71,6 +76,7 @@ export class Measurement_controller {
                 res.status(201).json({ message: "Measurement created successfully" });
             } else {
                 res.status(400).json({ message: "Microservice not found" });
+                this.LoggerService.warn("MEASUREMENT_CONTROLLER",`Microservice not found: ${req.body.microserviceId}`);
             }
 
         } catch (err) {
@@ -84,6 +90,8 @@ export class Measurement_controller {
 
             if (isNaN(measurementID) || measurementID <= 0) {
                 res.status(400).json({ message: "measurementID must be a positive number" });
+                this.LoggerService.warn("MEASUREMENT_CONTROLLER",`Invalid measurementID: ${req.params.measurementID}`
+);
                 return;
             }
 
@@ -93,6 +101,7 @@ export class Measurement_controller {
                 res.status(200).json({ success: true });
             } else {
                 res.status(404).json({ message: `Measurement with ID ${measurementID} not found` });
+                this.LoggerService.warn("MEASUREMENT_CONTROLLER",`Measurement not found: ${measurementID}`);
             }
 
         } catch (err) {

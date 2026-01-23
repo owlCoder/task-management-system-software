@@ -4,4 +4,5 @@ export type AnalyticsTab =
     | "VELOCITY"
     | "BUDGET"
     | "PROFIT"
-    | "RESOURCES";
+    | "RESOURCES"
+    | "LAST_30_DAYS";

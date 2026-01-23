@@ -17,6 +17,8 @@ import { socketManager } from "./api/notification/socketInstance";
 import { useAuth } from "./hooks/useAuthHook";
 import { INotificationAPI } from "./api/notification/INotificationAPI";
 import { NotificationAPI } from "./api/notification/NotificationAPI";
+import ReviewInboxPage from "./pages/ReviewInboxPage";
+import StatusesPage from "./pages/StatusesPage";
 import ProjectSprintsPage from "./pages/ProjectSprintPage";
 
 const auth_api: IAuthAPI = new AuthAPI();
@@ -58,6 +60,7 @@ function App() {
         <Route path="/mainwindow" element={<MainWindow />} />
         <Route path="/" element={<AuthPage authAPI={auth_api} />} />
         <Route path="/otp" element={<OtpPage />} />
+        <Route path="/reviews" element={<ReviewInboxPage />} />
         <Route path="/projects/:projectId/sprints" element={<ProjectSprintsPage />} />
         <Route path="/projects/:projectId/sprints/:sprintId/tasks" element={<TaskPage />} />
         <Route
@@ -68,6 +71,7 @@ function App() {
             </ProtectedRoute>
           }
         />
+        <Route path="/statuses" element={<StatusesPage />} />
       </Routes>
       <Toaster position="top-center" />
     </div>

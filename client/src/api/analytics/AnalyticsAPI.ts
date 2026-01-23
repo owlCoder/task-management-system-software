@@ -5,6 +5,7 @@ import { BurnupDto } from "../../models/analytics/BurnupDto";
 import { BudgetTrackingDto } from "../../models/analytics/BudgetTrackingDto";
 import { ProfitMarginDto } from "../../models/analytics/ProfitMarginDto";
 import { ResourceCostAllocationDto } from "../../models/analytics/ResourceCostAllocationDto";
+import { TimeSeriesPointDto } from "../../models/analytics/TimeSeriesPointDto";
 
 type Id = string | number;
 
@@ -101,4 +102,31 @@ export class AnalyticsAPI implements IAnalyticsAPI {
       throw error;
     }
   }
+
+  async getProjectsLast30Days(token: string): Promise<TimeSeriesPointDto[]> {
+    try {
+      return (
+        await this.axiosInstance.get(`/analytics/projects-last-30-days`, {
+          headers: this.authHeaders(token),
+        })
+      ).data;
+    } catch (error) {
+      console.error("Error fetching projects last 30 days:", error);
+      throw error;
+    }
+  }
+
+  async getWorkersLast30Days(token: string): Promise<TimeSeriesPointDto[]> {
+    try {
+      return (
+        await this.axiosInstance.get(`/analytics/workers-last-30-days`, {
+          headers: this.authHeaders(token),
+        })
+      ).data;
+    } catch (error) {
+      console.error("Error fetching workers last 30 days:", error);
+      throw error;
+    }
+  }
+
 }
