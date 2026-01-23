@@ -1,14 +1,14 @@
 import React from "react";
-import { ServiceOperationalStatus } from "../../types/ServiceOperationalStatus";
+import { EOperationalStatus } from "../../enums/EOperatinalStatus"
 import { ServiceStatusRowProps } from "../../types/ServiceStatusRowProps";
 
 
 
 
 
-const statusStyles: Record<ServiceOperationalStatus, string> = {
+const statusStyles: Record<EOperationalStatus, string> = {
     Operational: "bg-green-500/20 text-green-400 border-green-500/30",
-    "Partial Outage": "bg-yellow-500/20 text-yellow-400 border-yellow-500/30",
+    "PartialOutage": "bg-yellow-500/20 text-yellow-400 border-yellow-500/30",
     Down: "bg-red-500/20 text-red-400 border-red-500/30",
 };
 

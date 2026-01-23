@@ -18,6 +18,44 @@ export class Measurement_Service implements IMeasurement_Service {
     }
 
 
+    async getNewMeasurements(): Promise<MeasurementDto[]> {
+
+        const subQuery = this.measurementRepository
+            .createQueryBuilder("m2")
+            .select("MAX(m2.measurement_date)")
+            .where("m2.ID_microservice = m.ID_microservice");
+
+        const measurements = await this.measurementRepository
+            .createQueryBuilder("m")
+            .leftJoinAndSelect("m.microservice", "microservice")
+            .where(`m.measurement_date = (${subQuery.getQuery()})`)
+            .getMany();
+
+        return measurements.map(m => this.toDto(m));
+    }
+
+    async getAverageUptime(): Promise<{ microserviceId: number; uptime: number }[]> {
+    const result = await this.measurementRepository
+        .createQueryBuilder("m")
+        .select("m.ID_microservice", "microserviceId")
+        .addSelect(
+            `ROUND(
+                (SUM(CASE WHEN m.status = :operational THEN 1 ELSE 0 END) * 100.0)
+                / COUNT(*),
+            2)`,
+            "uptime"
+        )
+        .setParameter("operational", EOperationalStatus.Operational)
+        .groupBy("m.ID_microservice")
+        .getRawMany();
+
+    return result.map(r => ({
+        microserviceId: Number(r.microserviceId),
+        uptime: Number(r.uptime),
+    }));
+}
+
+
     async getMeasurementByID(measurementID: number): Promise<MeasurementDto> {
         const measurement = await this.measurementRepository.findOne({
             where: { measurement_id: measurementID },
@@ -30,7 +68,7 @@ export class Measurement_Service implements IMeasurement_Service {
 
         return this.toDto(measurement);
     }
-    
+
     async getMeasurementsFromMicroservice(microserviceId: number): Promise<MeasurementDto[]> {
         const measurements = await this.measurementRepository.find({
             where: {
@@ -49,7 +87,8 @@ export class Measurement_Service implements IMeasurement_Service {
             relations: ['microservice']
         });
 
-        return measurements.map(m => this.toDto(m));    }
+        return measurements.map(m => this.toDto(m));
+    }
 
     async getAllMeasurements(): Promise<MeasurementDto[]> {
         const measurements = await this.measurementRepository.find({
@@ -78,7 +117,7 @@ export class Measurement_Service implements IMeasurement_Service {
         await this.measurementRepository.save(entity);
         return true;
     }
-    
+
     async deleteMeasurement(measurementID: number): Promise<boolean> {
         const result = await this.measurementRepository.delete({
             measurement_id: measurementID,
