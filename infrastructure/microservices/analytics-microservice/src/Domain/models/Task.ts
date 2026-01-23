@@ -1,7 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn } from "typeorm";
 import { TaskStatus } from "../enums/TaskStatus";
 
-@Entity("Tasks")
+@Entity("tasks")
 export class Task {
   @PrimaryGeneratedColumn()
   task_id!: number;
