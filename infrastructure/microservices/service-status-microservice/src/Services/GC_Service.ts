@@ -3,9 +3,9 @@ import { EOperationalStatus } from "../Domain/enums/EOperationalStatus";
 import { IGC_Service } from "../Domain/Services/IGC_Service";
 import { Measurement_Service } from "./Measurement_Service";
 
-const GC_INTERVAL = Number(process.env.GC_INTERVAL) || 60_000;
-const RETENTION_OK = Number(process.env.GC_RETENTION_OK) || 1_000;
-const RETENTION_DOWN = Number(process.env.GC_RETENTION_DOWN) || 5_000;
+const GC_INTERVAL = 60_000;
+const RETENTION_OK = 20_000;
+const RETENTION_DOWN =  50_000;
 
 
 export class GarbageCollector_Service implements IGC_Service {
@@ -24,6 +24,7 @@ export class GarbageCollector_Service implements IGC_Service {
             );
         }, GC_INTERVAL);
     }
+
     async stop(): Promise<void> {
         if (this.intervalId) {
             clearInterval(this.intervalId);
@@ -68,5 +69,4 @@ export class GarbageCollector_Service implements IGC_Service {
             );
         }
     }
-
 }
