@@ -12,6 +12,7 @@ import {
   Cell,
 } from "recharts";
 import { AnalyticsExportService } from "../../services/analytics/ExportToPDF";
+import ExportButton from "./ExportButton";
 
 const formatMoney = (n: number) => `${n.toFixed(2)} ¥`;
 
@@ -54,7 +55,7 @@ export const BudgetAnalytics: React.FC<BudgetAnalyticsProps> = ({
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="w-full h-[450px]">
+      <div className="w-full h-[430px]">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={chartData} margin={{ top: 20, right: 20, left: 0, bottom: 20 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#55555533" />
@@ -84,13 +85,13 @@ export const BudgetAnalytics: React.FC<BudgetAnalyticsProps> = ({
         </ResponsiveContainer>
       </div>
       {data && (
-        <button
-          className="bg-blue-600 text-white px-4 py-2 rounded mt-4 hover:bg-blue-700"
+        <ExportButton
           onClick={() => AnalyticsExportService.exportBudget({ project, data })}
-        >
-          Export to PDF
-        </button>
+          label="Export Budget Tracking for this project"
+          classname="ml-6 mr-6"
+        />
       )}
+
     </div>
   );
 };

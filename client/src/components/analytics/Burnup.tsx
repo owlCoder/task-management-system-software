@@ -11,6 +11,7 @@ import {
     ResponsiveContainer,
 } from "recharts";
 import { AnalyticsExportService } from "../../services/analytics/ExportToPDF";
+import ExportButton from "./ExportButton";
 
 type SprintOption = {
     sprint_id: number;
@@ -72,7 +73,7 @@ export const BurnupAnalytics: React.FC<BurnupAnalyticsProps> = ({
 
             {/* Burnup chart */}
             {!loading && data && (
-                <div className="w-full h-[450px]">
+                <div className="w-full h-[390px]">
                     <ResponsiveContainer width="100%" height="100%">
                         <LineChart
                             data={data.points}
@@ -122,13 +123,13 @@ export const BurnupAnalytics: React.FC<BurnupAnalyticsProps> = ({
                 </div>
             )}
 
-            <button
-                className="bg-blue-600 text-white px-4 py-2 rounded mt-4 hover:bg-blue-700 disabled:opacity-50"
+            <ExportButton
                 onClick={() => data && AnalyticsExportService.exportBurnup({ project, data, sprintId: sprintId! })}
-                disabled={!data || !sprintId}
-            >
-                Export to PDF
-            </button>
+                label="Export Burnup Analytics for this project"
+                classname="ml-6 mr-6"
+            />
+
+
         </div>
     );
 };

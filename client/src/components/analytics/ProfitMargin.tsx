@@ -9,6 +9,7 @@ import {
 import { ProjectDTO } from "../../models/project/ProjectDTO";
 import { ProfitMarginDto } from "../../models/analytics/ProfitMarginDto";
 import { AnalyticsExportService } from "../../services/analytics/ExportToPDF";
+import ExportButton from "./ExportButton";
 
 interface ProfitMarginAnalyticsProps {
   project: ProjectDTO;
@@ -71,7 +72,7 @@ export const ProfitMarginAnalytics: React.FC<ProfitMarginAnalyticsProps> = ({
 
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-3">
       {/* KPI row */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="bg-white/5 border border-white/10 rounded-2xl p-4">
@@ -91,15 +92,18 @@ export const ProfitMarginAnalytics: React.FC<ProfitMarginAnalyticsProps> = ({
 
         <div className="bg-white/5 border border-white/10 rounded-2xl p-4">
           <p className="text-sm text-white/60">{profit >= 0 ? "Profit" : "Loss"}</p>
-          <p className="text-xl font-semibold" style={{ color: marginColor }}>
-            {formatMoney(profit)}
-          </p>
-          <p className="text-sm mt-1 text-white/60">
-            Margin:{" "}
-            <span style={{ color: marginColor, fontWeight: 600 }}>
-              {margin.toFixed(2)}%
-            </span>
-          </p>
+          <div className="flex flex-row">
+            <p className="text-xl font-semibold" style={{ color: marginColor }}>
+              {formatMoney(profit)}
+
+            </p>
+            <p className="text-sm mt-2 ml-3 text-white/60">
+              Margin:{" "}
+              <span style={{ color: marginColor, fontWeight: 600 }}>
+                {margin.toFixed(2)}%
+              </span>
+            </p>
+          </div>
         </div>
       </div>
 
@@ -107,7 +111,7 @@ export const ProfitMarginAnalytics: React.FC<ProfitMarginAnalyticsProps> = ({
       <div className="bg-white/5 border border-white/10 rounded-2xl p-4">
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-white font-semibold">Profit margin tracking</h3>
-          <span
+          {/* <span
             className="text-sm px-3 py-1 rounded-full border border-white/10"
             style={{
               color: marginColor,
@@ -115,10 +119,10 @@ export const ProfitMarginAnalytics: React.FC<ProfitMarginAnalyticsProps> = ({
             }}
           >
             {margin.toFixed(2)}%
-          </span>
+          </span> */}
         </div>
 
-        <div className="w-full h-[320px] relative">
+        <div className="w-full h-[270px] relative">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Tooltip
@@ -167,13 +171,13 @@ export const ProfitMarginAnalytics: React.FC<ProfitMarginAnalyticsProps> = ({
           </div>
         </div>
       </div>
+
       {data && (
-        <button
-          className="bg-blue-600 text-white px-4 py-2 rounded mt-4 hover:bg-blue-700"
+        <ExportButton
           onClick={() => AnalyticsExportService.exportProfitMargin({ project, data })}
-        >
-          Export to PDF
-        </button>
+          label="Export Profit Margin Tracking for this project"
+          classname="mt-2 ml-4 mr-4"
+        />
       )}
     </div>
   );

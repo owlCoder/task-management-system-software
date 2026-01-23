@@ -3,6 +3,7 @@ import { BurndownDto } from "../../models/analytics/BurndownDto";
 import { ProjectDTO } from "../../models/project/ProjectDTO";
 import { TaskProgress } from "./TaskProgress";
 import { AnalyticsExportService } from "../../services/analytics/ExportToPDF";
+import ExportButton from "./ExportButton";
 
 type SprintOption = {
     sprint_id: number;
@@ -66,27 +67,23 @@ export const BurndownAnalytics: React.FC<BurndownAnalyticsProps> = ({
             {!loading && sprintId && !data && (
                 <div className="text-white/50">No data for selected sprint.</div>
             )}
+            <div className="flex flex-col">
 
-            {!loading && data && (
-                <div className="flex-1 overflow-y-auto max-h-[450px] flex flex-col gap-4">
-                    {data.tasks.map((task) => (
-                        <TaskProgress
-                            key={task.task_id}
-                            task_id={task.task_id}
-                            ideal={task.ideal_progress}
-                            real={task.real_progress}
-                        />
-                    ))}
-                </div>
-            )}
+                {!loading && data && (
+                    <div className="flex-1 overflow-y-auto max-h-[370px] flex flex-col gap-4">
+                        {data.tasks.map((task) => (
+                            <TaskProgress
+                                key={task.task_id}
+                                task_id={task.task_id}
+                                ideal={task.ideal_progress}
+                                real={task.real_progress}
+                            />
+                        ))}
+                    </div>
+                )}
 
-            <button
-                className="bg-blue-600 text-white px-4 py-2 rounded mt-4 hover:bg-blue-700 disabled:opacity-50"
-                onClick={() => data && AnalyticsExportService.exportBurndown({ project, data, sprintId: sprintId! })}
-                disabled={!data || !sprintId}
-            >
-                Export to PDF
-            </button>
+                <ExportButton onClick={() => data && AnalyticsExportService.exportBurndown({ project, data, sprintId: sprintId! })} label="Export Burndown Analytics for this project" classname="mt-7 ml-4 mr-4" />
+            </div>
         </div>
     );
 };

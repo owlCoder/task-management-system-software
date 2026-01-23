@@ -11,6 +11,7 @@ import { MoreThanOrEqual } from "typeorm";
 import { buildLast30DaysMap } from "../helpers/Last30Days";
 import { TimeSeriesPointDto } from "../Domain/DTOs/TimeSeriesPointDto";
 import { ProjectUser } from "../Domain/models/ProjectUser";
+import { roundToTwo } from "../helpers/RoundToTwo";
 
 
 export class ProjectAnalyticsService implements IProjectAnalyticsService {
@@ -63,8 +64,8 @@ export class ProjectAnalyticsService implements IProjectAnalyticsService {
 
             BurndownTasks.push({
                 task_id: tasks[i].task_id,
-                ideal_progress: ideal,
-                real_progress: real
+                ideal_progress: roundToTwo(ideal),
+                real_progress: roundToTwo(real),
             });
         }
 
@@ -103,9 +104,6 @@ export class ProjectAnalyticsService implements IProjectAnalyticsService {
         // Ako Task ne zna za project_id, filtriraj po sprintu koji već znamo da je za dati project:
         const tasks = tasksFromSprint.filter(t => t.sprint_id === s.sprint_id);
 
-
-
-
         const finishedTasks = tasks
             .filter(t => t.finished_at) // ima finished_at
             .map(t => ({ ...t, finished_at_date: new Date(t.finished_at!) }))
@@ -125,14 +123,15 @@ export class ProjectAnalyticsService implements IProjectAnalyticsService {
 
             points.push({
                 x: Math.floor(dayFromStart),
-                y: cumulativeWork,
+                y: roundToTwo(cumulativeWork),
             });
+
         }
 
         return {
             project_id: project.project_id,
             sprint_id: s.sprint_id,
-            sprint_duration_date: sprintDuration,
+            sprint_duration_date: Math.ceil(sprintDuration),
             work_amount: totalWork,
             points,
         };
@@ -164,7 +163,7 @@ export class ProjectAnalyticsService implements IProjectAnalyticsService {
         // average hours per sprint
         const avgHours = (sumMs / sprints.length) / (1000 * 60 * 60);
 
-        return parseFloat(avgHours.toFixed(2));
+        return parseFloat(roundToTwo(avgHours).toString());
     }
 
     async getProjectsStartedLast30Days(): Promise<TimeSeriesPointDto[]> {

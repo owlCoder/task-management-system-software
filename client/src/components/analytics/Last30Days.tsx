@@ -11,6 +11,7 @@ import {
 import { TimeSeriesPointDto } from "../../models/analytics/TimeSeriesPointDto";
 import { formatDateRS } from "../../helpers/formatDateRS";
 import { AnalyticsExportService } from "../../services/analytics/ExportToPDF";
+import ExportButton from "./ExportButton";
 
 interface Props {
     projects: TimeSeriesPointDto[] | null;
@@ -35,63 +36,59 @@ export const Last30DaysAnalytics: React.FC<Props> = ({
         await AnalyticsExportService.exportLast30Days({ projects, workers });
     };
 
-    return (<div className="grid">
-        <span className="text-center items-center text-lg text-white/50 italic mt-2 mb-5">statistics of <strong>all</strong> projects and workers in the previous 30 days</span>
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 h-full">
-            {/* PROJECTS */}
+    return (
+        <div className="grid">
+            <span className="text-center items-center text-lg text-white/50 italic mt-2 mb-5">statistics of <strong>all</strong> projects and workers in the previous 30 days</span>
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 h-full">
+                {/* PROJECTS */}
 
-            <div className="bg-white/5 rounded-xl p-4 border border-white/10">
-                <h3 className="text-white font-semibold mb-4">
-                    Projects started (last 30 days)
-                </h3>
+                <div className="bg-white/5 rounded-xl p-4 border border-white/10">
+                    <h3 className="text-white font-semibold mb-4">
+                        Projects started (last 30 days)
+                    </h3>
 
-                <ResponsiveContainer width="100%" height={300}>
-                    <LineChart data={projects}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
-                        <XAxis dataKey="date" stroke="rgba(255,255,255,0.6)" tickFormatter={formatDateRS} />
-                        <YAxis stroke="rgba(255,255,255,0.6)" />
-                        <Tooltip />
-                        <Line
-                            type="monotone"
-                            dataKey="count"
-                            stroke="#38bdf8"
-                            strokeWidth={2}
-                            dot={false}
-                        />
-                    </LineChart>
-                </ResponsiveContainer>
+                    <ResponsiveContainer width="100%" height={300}>
+                        <LineChart data={projects}>
+                            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
+                            <XAxis dataKey="date" stroke="rgba(255,255,255,0.6)" tickFormatter={formatDateRS} />
+                            <YAxis stroke="rgba(255,255,255,0.6)" />
+                            <Tooltip />
+                            <Line
+                                type="monotone"
+                                dataKey="count"
+                                stroke="#38bdf8"
+                                strokeWidth={2}
+                                dot={false}
+                            />
+                        </LineChart>
+                    </ResponsiveContainer>
+                </div>
+
+                {/* WORKERS */}
+                <div className="bg-white/5 rounded-xl p-4 border border-white/10">
+                    <h3 className="text-white font-semibold mb-4">
+                        Workers added (last 30 days)
+                    </h3>
+
+                    <ResponsiveContainer width="100%" height={300}>
+                        <LineChart data={workers}>
+                            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
+                            <XAxis dataKey="date" stroke="rgba(255,255,255,0.6)" tickFormatter={formatDateRS} />
+                            <YAxis stroke="rgba(255,255,255,0.6)" />
+                            <Tooltip />
+                            <Line
+                                type="monotone"
+                                dataKey="count"
+                                stroke="#4ade80"
+                                strokeWidth={2}
+                                dot={false}
+                            />
+                        </LineChart>
+                    </ResponsiveContainer>
+                </div>
             </div>
-
-            {/* WORKERS */}
-            <div className="bg-white/5 rounded-xl p-4 border border-white/10">
-                <h3 className="text-white font-semibold mb-4">
-                    Workers added (last 30 days)
-                </h3>
-
-                <ResponsiveContainer width="100%" height={300}>
-                    <LineChart data={workers}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
-                        <XAxis dataKey="date" stroke="rgba(255,255,255,0.6)" tickFormatter={formatDateRS} />
-                        <YAxis stroke="rgba(255,255,255,0.6)" />
-                        <Tooltip />
-                        <Line
-                            type="monotone"
-                            dataKey="count"
-                            stroke="#4ade80"
-                            strokeWidth={2}
-                            dot={false}
-                        />
-                    </LineChart>
-                </ResponsiveContainer>
-            </div>
+            <ExportButton onClick={handleExport} label="Export Last 30 Days Analytics"
+                classname="mt-5 ml-4 mr-4" />
         </div>
-        <button
-            className="bg-blue-600 text-white px-4 py-2 rounded mb-4 hover:bg-blue-700"
-            onClick={handleExport}
-        >
-            Export to PDF
-        </button>
-
-    </div>
     );
 };

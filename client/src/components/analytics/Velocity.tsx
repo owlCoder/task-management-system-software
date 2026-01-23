@@ -2,6 +2,7 @@ import React from "react";
 import { ProjectDTO } from "../../models/project/ProjectDTO";
 import CountUp from "../countUp/CoutUp";
 import { AnalyticsExportService } from "../../services/analytics/ExportToPDF";
+import ExportButton from "./ExportButton";
 
 interface VelocityAnalyticsProps {
     project: ProjectDTO;
@@ -45,12 +46,11 @@ export const VelocityAnalytics: React.FC<VelocityAnalyticsProps> = ({
             </p>
 
             {!isLoading && (
-                <button
-                    className="bg-blue-600 text-white px-4 py-2 rounded mt-4 hover:bg-blue-700"
+                <ExportButton
                     onClick={() => AnalyticsExportService.exportVelocity({ project, value: value! })}
-                >
-                    Export to PDF
-                </button>
+                    label="Export Velocity Tracking for this project"
+                />
+
             )}
         </section>
     );

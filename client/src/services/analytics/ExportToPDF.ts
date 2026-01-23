@@ -203,7 +203,7 @@ export class AnalyticsExportService {
               .progress-bar { display: inline-block; width: calc(100% - 130px); height: 24px; background: #e5e5e5; border-radius: 4px; position: relative; }
               .progress-fill { height: 100%; border-radius: 4px; transition: width 0.3s; }
               .progress-fill.ideal { background: #60A5FA; }
-              .progress-fill.real { background: #4ADE80; }
+              .progress-fill.real { background: #FACC15; }
               .progress-text { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); font-size: 11px; font-weight: bold; color: #333; }
               footer { font-size: 10px; text-align: center; margin-top: 40px; padding-top: 10px; border-top: 1px solid #ddd; color: #666; }
             </style>
