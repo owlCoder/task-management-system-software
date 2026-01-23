@@ -18,6 +18,7 @@ import { useAuth } from "./hooks/useAuthHook";
 import { INotificationAPI } from "./api/notification/INotificationAPI";
 import { NotificationAPI } from "./api/notification/NotificationAPI";
 import ReviewInboxPage from "./pages/ReviewInboxPage";
+import StatusesPage from "./pages/StatusesPage";
 
 const auth_api: IAuthAPI = new AuthAPI();
 const notification_API: INotificationAPI = new NotificationAPI(import.meta.env.VITE_GATEWAY_URL);
@@ -68,6 +69,7 @@ function App() {
             </ProtectedRoute>
           }
         />
+        <Route path="/statuses" element={<StatusesPage />} />
       </Routes>
       <Toaster position="top-center" />
     </div>
