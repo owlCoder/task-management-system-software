@@ -58,19 +58,24 @@ set retryCount=0
 :composeLoop
 set /a attempt=retryCount+1
 echo Running docker compose up -d... ^(attempt %attempt%^)
-docker compose up -d > output.txt 2>&1
-findstr "unable to get image" output.txt >nul
-if %errorlevel% equ 0 (
-    echo Error detected: unable to get image. Retrying in 5 seconds...
-    timeout /t 5 /nobreak >nul
-    set /a retryCount+=1
-    if %retryCount% lss %maxRetries% goto composeLoop
-    echo Failed to run docker compose up -d after %maxRetries% attempts.
-    pause
-    exit /b 1
-) else (
+docker compose -f ../docker-compose.yml up -d mysql > output.txt 2>&1
+set exit_code=%errorlevel%
+if %exit_code% equ 0 (
     echo Docker Compose started successfully.
     goto end
+) else (
+    findstr "unable to get image" output.txt >nul
+    if %errorlevel% equ 0 (
+        echo Error detected: unable to get image. Retrying in 5 seconds...
+        timeout /t 5 /nobreak >nul
+        set /a retryCount+=1
+        goto composeLoop
+    ) else (
+        echo Failed with other error.
+        type output.txt
+        pause
+        exit /b 1
+    )
 )
 
 :end
