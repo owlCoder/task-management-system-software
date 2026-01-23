@@ -20,28 +20,64 @@ export class  ReviewService implements IReviewService {
     async getTaskForReview(): Promise<Result<TaskReviewDTO[]>> {
         const reviews = await this.reviewRepository.find({
         where: { status: ReviewStatus.REVIEW }
-    });
-
-    return {success: true,data: reviews.map((r) => toReviewDTO(r))
-    };
- }
-
-   async sendToReview(taskId: number,authorId : number): Promise<Result<TaskReviewDTO>> {
-        let review = await this.reviewRepository.findOne({
-            where: { taskId },
         });
 
+        return {success: true,data: reviews.map((r) => toReviewDTO(r))
+        };
+    }
+
+    async getReviews(status?: ReviewStatus | "ALL"): Promise<Result<TaskReviewDTO[]>> {
+        const where =
+        !status || status === ReviewStatus.REVIEW
+            ? { status: ReviewStatus.REVIEW }
+            : status === "ALL"
+            ? {}
+            : { status };
+
+        const reviews = await this.reviewRepository.find({
+        where: where as any,
+        order: { reviewId: "DESC" },
+        });
+
+        return { success: true, data: reviews.map((r) => toReviewDTO(r)) };
+    }
+
+    async getCommentById(commentId: number): Promise<Result<ReviewCommenntDTO>> {
+        const c = await this.reviewCommentRepository.findOne({ where: { commentId } });
+        if (!c) {
+        return { success: false, code: ErrorCode.NOT_FOUND, error: `Comment ${commentId} not found` };
+        }
+        return {
+        success: true,
+        data: {
+            commentId: c.commentId,
+            reviewId: c.reviewId,
+            taskId: c.taskId,
+            authorId: c.authorId,
+            commentText: c.commentText,
+            time: c.time,
+        },
+        };
+    }
+
+    async sendToReview(taskId: number, authorId: number): Promise<Result<TaskReviewDTO>> {
+        let review = await this.reviewRepository.findOne({ where: { taskId } });
+
         if (!review) {
-            review = await this.createReview(taskId,authorId);
-        } 
-        else {
-            review.status = ReviewStatus.REVIEW;
-            review.time = new Date().toISOString();
-            await this.reviewRepository.save(review);
+        review = await this.createReview(taskId, authorId);
+        } else {
+        review.status = ReviewStatus.REVIEW;
+        review.time = new Date().toISOString();
+
+        review.reviewedBy = null as any;
+        review.reviewedAt = null as any;
+        review.commentId = 0;
+
+        await this.reviewRepository.save(review);
         }
 
         return { success: true, data: toReviewDTO(review) };
-}
+    }
 
     async createReview(taskId: number,authorId : number): Promise<Review> {
         const newReview = this.reviewRepository.create({
@@ -49,6 +85,9 @@ export class  ReviewService implements IReviewService {
             authorId: authorId,
             status: ReviewStatus.REVIEW,
             time: new Date().toISOString(),
+            reviewedBy: null as any,
+            reviewedAt: null as any,
+            commentId: 0,
         });
 
         return await this.reviewRepository.save(newReview);

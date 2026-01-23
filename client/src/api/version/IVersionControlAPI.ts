@@ -11,4 +11,8 @@ export interface IVersionControlAPI {
   rejectTaskReview(taskId: number, commentText: string): Promise<ReviewCommentDTO>;
 
   getReviewHistoryByTaskId(taskId: number): Promise<(TaskReviewDTO | ReviewCommentDTO)[]>;
+
+  getReviews(status?: "REVIEW" | "APPROVED" | "REJECTED" | "ALL"): Promise<TaskReviewDTO[]>;
+  
+  getReviewComment(commentId: number): Promise<ReviewCommentDTO>;
 }

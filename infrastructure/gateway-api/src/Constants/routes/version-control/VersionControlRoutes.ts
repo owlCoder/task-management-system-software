@@ -8,4 +8,5 @@ export const VERSION_CONTROL_ROUTES = Object.freeze({
     CREATE_TEMPLATE: `/templates`,
     CREATE_TASK : (templateId: number) => `/templates/${templateId}/create`,
     CREATE_DEPENDENCY: (templateId: number, dependsOnId: number) => `/templates/${templateId}/dependencies/${dependsOnId}`,
+    GET_REVIEW_COMMENT: (commentId: number) => `/reviewComments/${commentId}`,
 } as const);

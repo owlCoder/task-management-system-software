@@ -11,8 +11,8 @@ export interface IGatewayVersionControlService {
     sendToReview(taskId: number, senderId: number, senderRole: string): Promise<Result<ReviewDTO>>;
     acceptReview(taskId: number, senderId: number, senderRole: string): Promise<Result<ReviewDTO>>;
     rejectReview(taskId: number, data: RejectReviewDTO, senderId: number, senderRole: string): Promise<Result<ReviewCommentDTO>>;
-    getReviews(senderRole: string): Promise<Result<ReviewDTO[]>>;
-
+    getReviews(senderRole: string, status?: string): Promise<Result<ReviewDTO[]>>;
+    getReviewComment(commentId: number, senderRole: string): Promise<Result<ReviewCommentDTO>>;
     getTemplateById(templateId: number): Promise<Result<TaskTemplateDTO>>;
     getAllTemplates(): Promise<Result<TaskTemplateDTO[]>>;
     createTemplate(data: CreateTemplateDTO, senderId: number): Promise<Result<TaskTemplateDTO>>;

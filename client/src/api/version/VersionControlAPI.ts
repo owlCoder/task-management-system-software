@@ -41,13 +41,7 @@ class VersionControlAPIImpl implements IVersionControlAPI {
   }
 
   async getTasksInReview(): Promise<TaskReviewDTO[]> {
-    try {
-      const response = await this.client.get<TaskReviewDTO[]>(`/reviews`);
-      return response.data;
-    } catch (error) {
-      console.error("Error fetching tasks in review:", error);
-      throw error;
-    }
+    return this.getReviews("REVIEW");
   }
 
   async sendTaskToReview(taskId: number): Promise<TaskReviewDTO> {
@@ -97,6 +91,27 @@ class VersionControlAPIImpl implements IVersionControlAPI {
       return response.data;
     } catch (error) {
       console.error("Error fetching review history by task ID:", error);
+      throw error;
+    }
+  }
+
+  async getReviews(status?: "REVIEW" | "APPROVED" | "REJECTED" | "ALL"): Promise<TaskReviewDTO[]> {
+    try {
+      const qs = status ? `?status=${encodeURIComponent(status)}` : "";
+      const response = await this.client.get<TaskReviewDTO[]>(`/reviews${qs}`);
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching reviews:", error);
+      throw error;
+    }
+  }
+
+  async getReviewComment(commentId: number): Promise<ReviewCommentDTO> {
+    try {
+      const response = await this.client.get<ReviewCommentDTO>(`/reviewComments/${commentId}`);
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching review comment:", error);
       throw error;
     }
   }

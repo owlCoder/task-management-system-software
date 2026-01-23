@@ -44,11 +44,23 @@ export class GatewayVersionControlController {
         this.router.post("/templates", ...templateWriteAccess, this.createTemplate.bind(this));
         this.router.post("/templates/:templateId/create", ...templateWriteAccess, this.createTask.bind(this));
         this.router.post("/templates/:templateId/dependencies/:dependsOnId", ...templateWriteAccess, this.addDependency.bind(this));
+        this.router.get("/reviewComments/:commentId", ...reviewReadAccess, this.getReviewComment.bind(this));
+
     }
 
     private async getReviews(req: Request, res: Response): Promise<void> {
-        const senderRole = req.user!.role; // "Project Manager"
-        const result = await this.gatewayVersionSevice.getReviews(senderRole);
+        const senderRole = req.user!.role;
+        const status = typeof req.query.status === "string" ? req.query.status : undefined;
+
+        const result = await this.gatewayVersionSevice.getReviews(senderRole, status);
+        handleResponse(res, result);
+    }
+
+    private async getReviewComment(req: Request<ReqParams<"commentId">>, res: Response): Promise<void> {
+        const commentId = parseInt(req.params.commentId, 10);
+        const senderRole = req.user!.role;
+
+        const result = await this.gatewayVersionSevice.getReviewComment(commentId, senderRole);
         handleResponse(res, result);
     }
 

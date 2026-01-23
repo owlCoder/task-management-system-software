@@ -67,14 +67,23 @@ export class GatewayVersionControlService implements IGatewayVersionControlServi
         });
     }
 
-    async getReviews(senderRole: string): Promise<Result<ReviewDTO[]>> {
+    async getReviews(senderRole: string, status?: string): Promise<Result<ReviewDTO[]>> {
+        const url = status ? `${VERSION_CONTROL_ROUTES.GET_REVIEWS}?status=${encodeURIComponent(status)}` : VERSION_CONTROL_ROUTES.GET_REVIEWS;
+
         return await makeAPICall<ReviewDTO[]>(this.versionClient, this.errorHandlingService, {
             serviceName: SERVICES.VERSION_CONTROL,
             method: HTTP_METHODS.GET,
-            url: VERSION_CONTROL_ROUTES.GET_REVIEWS,
-            headers: {
-            "x-user-role": senderRole
-            }
+            url,
+            headers: { "x-user-role": senderRole }
+        });
+    }
+
+    async getReviewComment(commentId: number, senderRole: string): Promise<Result<ReviewCommentDTO>> {
+        return await makeAPICall<ReviewCommentDTO>(this.versionClient, this.errorHandlingService, {
+            serviceName: SERVICES.VERSION_CONTROL,
+            method: HTTP_METHODS.GET,
+            url: VERSION_CONTROL_ROUTES.GET_REVIEW_COMMENT(commentId),
+            headers: { "x-user-role": senderRole }
         });
     }
 
