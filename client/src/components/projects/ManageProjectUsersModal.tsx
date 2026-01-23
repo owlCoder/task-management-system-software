@@ -183,17 +183,17 @@ export const ManageProjectUsersModal: React.FC<Props> = ({
                                             <div className="flex items-center gap-3">
                                                 <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-sm font-medium uppercase">
                                                     {user.image_url ? (
-    <img
-        src={user.image_url}
-        alt={user.username || "User"}
-        className="w-8 h-8 rounded-full object-cover border border-white/20"
-        onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = "/default-avatar.png"; }} // fallback na default sliku
-    />
-) : (
-    <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-sm font-medium uppercase">
-        {user.username?.charAt(0) || "U"}
-    </div>
-)}
+                                                        <img
+                                                            src={user.image_url}
+                                                            alt={user.username || "User"}
+                                                            className="w-8 h-8 rounded-full object-cover border border-white/20"
+                                                            onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = "/default-avatar.png"; }} // fallback na default sliku
+                                                        />
+                                                    ) : (
+                                                        <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-sm font-medium uppercase">
+                                                            {user.username?.charAt(0) || "U"}
+                                                        </div>
+                                                    )}
                                                 </div>
                                                 <div>
                                                     <span className="text-sm text-white font-medium">

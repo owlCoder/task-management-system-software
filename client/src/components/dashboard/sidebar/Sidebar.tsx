@@ -15,7 +15,7 @@ const Sidebar: React.FC = () => {
 
   return (
     <aside
-      className={`w-54 h-screen bg-white/10 backdrop-blur-xl border-r border-white/20 shadow-[4px_0_25px_rgba(0,0,0,0.25)] p-4 flex flex-col justify-between rounded-tr-xl rounded-br-xl overflow-hidden`}
+      className={`w-56 h-screen bg-white/10 backdrop-blur-xl border-r border-white/20 shadow-[4px_0_25px_rgba(0,0,0,0.25)] p-4 flex flex-col justify-between rounded-tr-xl rounded-br-xl overflow-hidden`}
     >
       {/* Top: Logo */}
       <div className="pt-4 pb-4 flex items-center justify-center">
@@ -96,9 +96,18 @@ const Sidebar: React.FC = () => {
 
       {/* Bottom: User info */}
       <div className="mt-6 pt-4 border-t border-white/10 flex items-center gap-3 relative">
-        <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-sm font-semibold text-white/90">
-          {user?.username.charAt(0).toUpperCase()}
-        </div>
+       <div className="w-9 h-9 rounded-full overflow-hidden flex items-center justify-center bg-white/10 shrink-0">
+        {user?.image_url ? (
+          <img
+            src={user.image_url}
+            alt={user.username}
+            className="w-full h-full object-cover"
+            style={{minWidth: '100%', minHeight: '100%'}}
+          />
+        ) : (
+          <span className="text-lg font-bold text-white">{user?.username?.charAt(0).toUpperCase()}</span>
+        )}
+      </div>
 
         <div className="text-sm flex-1">
           <div className="font-semibold text-white">{user?.username}</div>
@@ -109,7 +118,7 @@ const Sidebar: React.FC = () => {
         <button
           onClick={handleLogout}
           aria-label="Logout"
-          className="p-2 rounded-md hover:bg-white/10 text-white/80 hover:text-white transition"
+          className="p-2 rounded-md hover:bg-white/10 text-white/80 hover:text-white transition cursor-pointer"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"

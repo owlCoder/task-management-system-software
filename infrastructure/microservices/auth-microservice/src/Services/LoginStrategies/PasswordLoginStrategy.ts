@@ -17,6 +17,7 @@ export class PasswordLoginStrategy implements ILoginStrategy {
         username: user.username,
         email: user.email,
         role: user.user_role.role_name,
+        image_url: user.image_url !== null ? user.image_url : undefined,
         otp_required: false
       }
     };

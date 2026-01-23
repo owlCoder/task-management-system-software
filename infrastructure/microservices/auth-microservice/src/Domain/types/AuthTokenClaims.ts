@@ -3,4 +3,5 @@ export type AuthTokenClaims = {
   username: string;
   email: string;
   role: string;
+  image_url?: string;
 };

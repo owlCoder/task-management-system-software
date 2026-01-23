@@ -37,4 +37,7 @@ export class User {
 
   @Column({ type: "int", nullable: true, default: 0 })
   weekly_working_hour_sum!: number;
+  
+  @Column({ type: "varchar", length: 255, nullable: true })
+  image_url!: string | null; 
 }

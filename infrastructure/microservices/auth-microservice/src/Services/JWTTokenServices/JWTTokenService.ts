@@ -12,7 +12,7 @@ export class JWTTokenService {
   /**
    * Generates a JWT token from user claims
    */
-  generateToken(claims: { id: number; username: string; email: string; role: string }): string {
+  generateToken(claims: { id: number; username: string; email: string; role: string, image_url?: string }): string {
     return jwt.sign(
       claims,
       process.env.JWT_SECRET ?? "",
@@ -29,12 +29,16 @@ export class JWTTokenService {
       return '';
     }
 
+    console.log('userData.image_url:', userData.image_url);
+console.log('userData:', userData);
     return this.generateToken({
       id: userData.user_id,
       username: userData.username,
       email: userData.email,
-      role: userData.role
+      role: userData.role,
+      image_url: userData.image_url
     });
+
   }
 
   /**
@@ -45,7 +49,8 @@ export class JWTTokenService {
       id: userData.user_id,
       username: userData.username,
       email: userData.email,
-      role: userData.role
+      role: userData.role,
+      image_url: userData.image_url
     });
   }
 }
