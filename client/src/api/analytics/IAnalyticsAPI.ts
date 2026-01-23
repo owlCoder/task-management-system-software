@@ -3,6 +3,7 @@ import { BurnupDto } from "../../models/analytics/BurnupDto";
 import { BudgetTrackingDto } from "../../models/analytics/BudgetTrackingDto";
 import { ProfitMarginDto } from "../../models/analytics/ProfitMarginDto";
 import { ResourceCostAllocationDto } from "../../models/analytics/ResourceCostAllocationDto";
+import { TimeSeriesPointDto } from "../../models/analytics/TimeSeriesPointDto";
 
 type Id = string | number;
 
@@ -13,4 +14,6 @@ export interface IAnalyticsAPI {
   getBudgetTracking(projectId: Id, token: string): Promise<BudgetTrackingDto>;
   getProfitMargin(projectId: Id, token: string): Promise<ProfitMarginDto>;
   getResourceCostAllocation(projectId: Id, token: string): Promise<ResourceCostAllocationDto>;
+  getProjectsLast30Days(token: string): Promise<TimeSeriesPointDto[]>;
+  getWorkersLast30Days(token: string): Promise<TimeSeriesPointDto[]>;
 }

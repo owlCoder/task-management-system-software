@@ -3,11 +3,13 @@ import Sidebar from "../components/dashboard/sidebar/Sidebar";
 import { AnalyticsTab } from "../enums/AnalyticsTabs";
 import { ProjectDTO } from "../models/project/ProjectDTO";
 import { projectAPI } from "../api/project/ProjectAPI";
+import { TimeSeriesPointDto } from "../models/analytics/TimeSeriesPointDto";
 
 import { BurndownAnalytics } from "../components/analytics/Burndown";
 import { VelocityAnalytics } from "../components/analytics/Velocity";
 import { BurnupAnalytics } from "../components/analytics/Burnup";
 import { BudgetAnalytics } from "../components/analytics/BudgetTracking";
+import { Last30DaysAnalytics } from "../components/analytics/Last30Days";
 
 import { AnalyticsAPI } from "../api/analytics/AnalyticsAPI";
 import { BurndownDto } from "../models/analytics/BurndownDto";
@@ -23,6 +25,7 @@ import { ResourceCostAllocationDto } from "../models/analytics/ResourceCostAlloc
 type SprintOption = { sprint_id: number; sprint_title?: string };
 
 const TABS: { id: AnalyticsTab; label: string }[] = [
+    { id: "LAST_30_DAYS", label: "Last 30 Days" },
     { id: "BURNDOWN", label: "Burndown" },
     { id: "BURNUP", label: "Burnup" },
     { id: "VELOCITY", label: "Velocity" },
@@ -32,7 +35,7 @@ const TABS: { id: AnalyticsTab; label: string }[] = [
 ];
 
 export const AnalyticsPage: React.FC = () => {
-    const [activeTab, setActiveTab] = useState<AnalyticsTab>("BURNDOWN");
+    const [activeTab, setActiveTab] = useState<AnalyticsTab>("LAST_30_DAYS");
 
     const [projects, setProjects] = useState<ProjectDTO[]>([]);
     const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
@@ -47,7 +50,8 @@ export const AnalyticsPage: React.FC = () => {
     const [budget, setBudget] = useState<BudgetTrackingDto | null>(null);
     const [profitMargin, setProfitMargin] = useState<ProfitMarginDto | null>(null);
     const [resourceCost, setResourceCost] = useState<ResourceCostAllocationDto | null>(null);
-
+    const [projectsLast30Days, setProjectsLast30Days] = useState<TimeSeriesPointDto[] | null>(null);
+    const [workersLast30Days, setWorkersLast30Days] = useState<TimeSeriesPointDto[] | null>(null);
     const [loadingAnalytics, setLoadingAnalytics] = useState(false);
     const [analyticsError, setAnalyticsError] = useState<string | null>(null);
 
@@ -126,6 +130,9 @@ export const AnalyticsPage: React.FC = () => {
         setAnalyticsError(null);
         setProfitMargin(null);
         setResourceCost(null);
+        setProjectsLast30Days(null);
+        setWorkersLast30Days(null);
+
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [selectedProjectId]);
 
@@ -167,6 +174,16 @@ export const AnalyticsPage: React.FC = () => {
                     const rc = await analyticsAPI.getResourceCostAllocation(projectId, token);
                     setResourceCost(rc);
                 }
+                else if (activeTab === "LAST_30_DAYS") {
+                    const [projects, workers] = await Promise.all([
+                        analyticsAPI.getProjectsLast30Days(token),
+                        analyticsAPI.getWorkersLast30Days(token),
+                    ]);
+
+                    setProjectsLast30Days(projects);
+                    setWorkersLast30Days(workers);
+                }
+
 
             } catch (err: any) {
                 console.error("Failed to load analytics", err);
@@ -230,7 +247,7 @@ export const AnalyticsPage: React.FC = () => {
                 </section>
 
                 {/* TAB CARDS */}
-                <section className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
+                <section className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-4 mb-8">
                     {TABS.map((tab) => {
                         const active = tab.id === activeTab;
 
@@ -321,13 +338,13 @@ export const AnalyticsPage: React.FC = () => {
                     {activeTab === "PROFIT" && (
                         <div>
                             {selectedProjectId ? (
-                            <ProfitMarginAnalytics
-                                project={selectedProject!}
-                                data={profitMargin}
-                                loading={loadingAnalytics}
-                            />
+                                <ProfitMarginAnalytics
+                                    project={selectedProject!}
+                                    data={profitMargin}
+                                    loading={loadingAnalytics}
+                                />
                             ) : (
-                            "Select project..."
+                                "Select project..."
                             )}
                         </div>
                     )}
@@ -335,16 +352,25 @@ export const AnalyticsPage: React.FC = () => {
                     {activeTab === "RESOURCES" && (
                         <div>
                             {selectedProjectId ? (
-                            <ResourceCostAllocation
-                                project={selectedProject!}
-                                data={resourceCost}
-                                loading={loadingAnalytics}
-                            />
+                                <ResourceCostAllocation
+                                    project={selectedProject!}
+                                    data={resourceCost}
+                                    loading={loadingAnalytics}
+                                />
                             ) : (
-                            "Select project..."
+                                "Select project..."
                             )}
                         </div>
                     )}
+
+                    {activeTab === "LAST_30_DAYS" && (
+                        <Last30DaysAnalytics
+                            projects={projectsLast30Days}
+                            workers={workersLast30Days}
+                            loading={loadingAnalytics}
+                        />
+                    )}
+
 
                 </section>
             </main>
