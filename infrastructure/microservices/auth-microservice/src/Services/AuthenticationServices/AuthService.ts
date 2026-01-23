@@ -50,8 +50,9 @@ export class AuthService implements IAuthService {
 
     this.logger.log(SeverityEnum.INFO, `TMSS login successful for user ${data.username} with UID ${user.user_id}`);
 
-    // When email service is down, users can still login using password strategy
-    const strategy = this.emailService.isAvailable ? this.otpStrategy : this.passwordStrategy;
+    // In development mode, skip email/OTP and use password strategy directly
+    const isDevelopment = process.env.NODE_ENV === 'development';
+    const strategy = isDevelopment || !this.emailService.isAvailable ? this.passwordStrategy : this.otpStrategy;
     const result = await strategy.authenticate(user);
 
     return result;
@@ -86,8 +87,9 @@ export class AuthService implements IAuthService {
 
     this.logger.log(SeverityEnum.INFO, `SIEM login successful for SysAdmin user ${data.username} with UID ${user.user_id}`);
 
-    // When email service is down, users can still login using password strategy
-    const strategy = this.emailService.isAvailable ? this.otpStrategy : this.passwordStrategy;
+    // In development mode, skip email/OTP and use password strategy directly
+    const isDevelopment = process.env.NODE_ENV === 'development';
+    const strategy = isDevelopment || !this.emailService.isAvailable ? this.passwordStrategy : this.otpStrategy;
     const result = await strategy.authenticate(user);
 
     return result;
