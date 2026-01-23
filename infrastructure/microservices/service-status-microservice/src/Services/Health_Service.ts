@@ -1,6 +1,6 @@
 import axios from "axios";
 import { IHealth_Service } from "../Domain/Services/IHealth_Service";
-import { loadMicroservicesFromEnv } from "../Helpers/loadMicroservicesFromEnv";
+import { loadMicroservices } from "../Helpers/loadMicroservices";
 import { CreateMeasurementDto } from "../Domain/DTOs/CreateMeasurement_DTO";
 import { EOperationalStatus } from "../Domain/enums/EOperationalStatus";
 import { Measurement_Service } from "./Measurement_Service";
@@ -24,7 +24,7 @@ export class Health_Service implements IHealth_Service {
     async start(): Promise<void> {
 
 
-        const envServices = loadMicroservicesFromEnv();
+        const envServices = loadMicroservices();
 
         const dbServices = await this.microserviceService.getAllMicroservices();
 
