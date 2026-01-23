@@ -96,6 +96,7 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
 
     try {
       setLoading(true);
+
       await api.createTask(payload);
       toast.success("Task created successfully!");
       onClose();

@@ -1,5 +1,5 @@
 import axios, { AxiosInstance } from "axios";
-import { ISprintAPI } from "./ISprintAPI";
+import { ISprintAPI, SprintCreateDTO } from "./ISprintAPI";
 import { SprintDTO } from "../../models/sprint/SprintDto";
 import { readValueByKey } from "../../helpers/local_storage";
 
@@ -27,6 +27,18 @@ export class SprintAPI implements ISprintAPI {
       `/projects/${projectId}/sprints`
     );
     return res.data;
+  }
+
+  async createSprint(projectId: number, data: SprintCreateDTO): Promise<SprintDTO> {
+    const res = await this.client.post<SprintDTO>(
+      `/projects/${projectId}/sprints`,
+      data
+    );
+    return res.data;
+  }
+
+  async deleteSprint(sprintId: number): Promise<void> {
+    await this.client.delete(`/sprints/${sprintId}`);
   }
 }
 

@@ -1,6 +1,6 @@
 
 export interface TaskListPageProps {
-  projectId: string;
+  projectId?: string;
 }
 
 export interface TaskDetailPageProps {

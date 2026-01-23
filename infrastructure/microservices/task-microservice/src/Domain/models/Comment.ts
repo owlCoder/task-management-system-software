@@ -8,7 +8,7 @@ import {
      } from "typeorm";
 import { Task } from "./Task";
 
-@Entity()
+@Entity("comments")
 export class Comment {
     @PrimaryGeneratedColumn()
     comment_id!: number;

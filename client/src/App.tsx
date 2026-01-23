@@ -53,13 +53,13 @@ function App() {
         <Route path="/projects" element={<ProjectsPage />} />
         <Route path="/analytics" element={<AnalyticsPage />} />
         <Route path="/notifications" element={<NotificationPage notificationAPI={notification_API} />} />
-        <Route path="/tasks" element={<TaskPage projectId={""}  />} />
         <Route path="/auth" element={<AuthPage authAPI={auth_api} />} />
         <Route path="/files" element={<FilePage />} />
         <Route path="/mainwindow" element={<MainWindow />} />
         <Route path="/" element={<AuthPage authAPI={auth_api} />} />
         <Route path="/otp" element={<OtpPage />} />
-        <Route path="/sprints" element={<ProjectSprintsPage />} />
+        <Route path="/projects/:projectId/sprints" element={<ProjectSprintsPage />} />
+        <Route path="/projects/:projectId/sprints/:sprintId/tasks" element={<TaskPage />} />
         <Route
           path="/users"
           element={

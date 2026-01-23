@@ -221,7 +221,7 @@ export const ProjectDetailsModal: React.FC<Props> = ({
                     <button
                         type="button"
                         onClick={() => {
-                            navigate("/sprints", { state: { projectId: project.project_id } });
+                            navigate(`/projects/${project.project_id}/sprints`);
                             onClose();
                         }}
 
