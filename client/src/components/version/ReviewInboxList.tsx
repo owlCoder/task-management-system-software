@@ -44,8 +44,8 @@ export const ReviewInboxList: React.FC<Props> = ({
         const showActions =
           r.status === "REVIEW" && typeof onApprove === "function" && typeof onReject === "function";
 
-        const hasComment = r.status === "REJECTED" && !!(r as any).commentId && (r as any).commentId !== 0;
-        const commentId = hasComment ? Number((r as any).commentId) : 0;
+        const commentId = Number(r.commentId ?? 0);
+        const hasComment = r.status === "REJECTED" && commentId !== 0;
         const commentText = hasComment ? rejectionComments?.[commentId] : undefined;
 
         const authorName = authorNamesById?.[r.authorId] ?? `#${r.authorId}`;
