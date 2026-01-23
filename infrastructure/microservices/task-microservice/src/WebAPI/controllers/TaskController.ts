@@ -69,8 +69,8 @@ export class TaskController {
 
     async addTaskForSprint(req: Request, res: Response): Promise<void> {
         try {
-            const sprint_id = Number(req.params.sprintId);
-            if (isNaN(sprint_id)) {
+            const sprintId = Number(req.params.sprintId);
+            if (isNaN(sprintId)) {
                 res.status(400).json({ message: "Invalid sprint ID" });
                 return;
             }
@@ -88,7 +88,7 @@ export class TaskController {
             }
             const createTask: CreateTaskDTO = req.body;
 
-            const result = await this.taskService.addTaskForSprint(sprint_id, createTask, user_id);
+            const result = await this.taskService.addTaskForSprint(sprintId, createTask, user_id);
 
             if (result.success) {
                 res.status(200).json(taskToTaskDTO(result.data));
@@ -141,12 +141,12 @@ export class TaskController {
 
     async getAllTasksForSprint(req: Request, res: Response): Promise<void> {
         try {
-            const sprint_id = this.parseId((req.params as any).sprint_id);
-            if (sprint_id === null) {
+            const sprintId = this.parseId((req.params as any).sprintId);
+            if (sprintId === null) {
                 res.status(400).json({ error: "Invalid sprint_id" });
                 return;
             }
-            if (isNaN(sprint_id)) {
+            if (isNaN(sprintId)) {
                 res.status(400).json({ message: "Invalid sprint ID" });
                 return;
             }
@@ -162,7 +162,7 @@ export class TaskController {
                 res.status(400).json({ message: "Invalid user id" });
                 return;
             }
-            const result = await this.taskService.getAllTasksForSprint(sprint_id, user_id);
+            const result = await this.taskService.getAllTasksForSprint(sprintId, user_id);
 
             if (result.success) {
                 res.status(200).json(result.data.map(taskToTaskDTO));

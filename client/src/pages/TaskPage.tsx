@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 import Sidebar from "../components/dashboard/sidebar/Sidebar";
 import TaskListItem from "../components/task/TaskListItem";
 import TaskListPreview from "../components/task/TaskListPreview";
@@ -23,6 +24,9 @@ const TaskPage: React.FC<TaskListPageProps> = ({ projectId }) => {
   const { token } = useAuth();
   if (!token) return null;
 
+  const { projectId: projectIdParam, sprintId } = useParams();
+  const effectiveProjectId = projectId && projectId.trim() !== "" ? projectId : (projectIdParam ?? "");
+  const sprintIdNum = sprintId ? Number(sprintId) : null;
   const [tasks, setTasks] = useState<TaskDTO[]>([]);
   const [users, setUsers] = useState<ProjectUserDTO[]>([]);
   const [loading, setLoading] = useState(true);
@@ -99,9 +103,17 @@ const TaskPage: React.FC<TaskListPageProps> = ({ projectId }) => {
   useEffect(() => {
     const load = async () => {
       try {
+        if(!effectiveProjectId){
+          setTasks([]);
+          setUsers([]);
+          setLoading(false);
+          return;
+        }
         const [tasksData, usersData] = await Promise.all([
-          api.getTasksByProject(projectId),
-          projectAPI.getProjectUsers(Number(projectId))
+          sprintIdNum
+            ? api.getTasksBySprint(sprintIdNum)
+            : api.getTasksByProject(effectiveProjectId),
+          projectAPI.getProjectUsers(Number(effectiveProjectId))
         ]);
         setTasks(tasksData);
         setUsers(usersData);
@@ -116,7 +128,7 @@ const TaskPage: React.FC<TaskListPageProps> = ({ projectId }) => {
     };
 
     load();
-  }, [projectId, token]);
+  }, [effectiveProjectId, sprintIdNum, token]);
 
   if (loading) {
     return <div className="text-white p-6">Loading tasks...</div>;
@@ -281,7 +293,7 @@ const TaskPage: React.FC<TaskListPageProps> = ({ projectId }) => {
       <CreateTaskModal
         open={open}
         onClose={() => setOpen(false)}
-        projectId={projectId}
+        projectId={effectiveProjectId}
         token={token}
       />
 
@@ -291,7 +303,7 @@ const TaskPage: React.FC<TaskListPageProps> = ({ projectId }) => {
           onClose={() => setEditOpen(false)}
           task={selectedTask}
           token={token}
-          projectId={Number(projectId)}
+          projectId={Number(effectiveProjectId)}
         />
       )}
     </div>

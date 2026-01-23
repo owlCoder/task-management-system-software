@@ -1,6 +1,7 @@
 import React from "react";
 import { ProjectDTO } from "../../models/project/ProjectDTO";
 import CountUp from "../countUp/CoutUp";
+import { AnalyticsExportService } from "../../services/analytics/ExportToPDF";
 
 interface VelocityAnalyticsProps {
     project: ProjectDTO;
@@ -37,9 +38,20 @@ export const VelocityAnalytics: React.FC<VelocityAnalyticsProps> = ({
                 </span>
             )}
 
+
+
             <p className="text-white/60 text-center">
                 Average team hours spent per sprint across completed sprints.
             </p>
+
+            {!isLoading && (
+                <button
+                    className="bg-blue-600 text-white px-4 py-2 rounded mt-4 hover:bg-blue-700"
+                    onClick={() => AnalyticsExportService.exportVelocity({ project, value: value! })}
+                >
+                    Export to PDF
+                </button>
+            )}
         </section>
     );
 };

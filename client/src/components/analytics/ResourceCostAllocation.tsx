@@ -11,6 +11,7 @@ import {
 } from "recharts";
 import { ProjectDTO } from "../../models/project/ProjectDTO";
 import { ResourceCostAllocationDto } from "../../models/analytics/ResourceCostAllocationDto";
+import { AnalyticsExportService } from "../../services/analytics/ExportToPDF";
 
 interface ResourceCostAllocationProps {
   project: ProjectDTO;
@@ -61,15 +62,15 @@ export const ResourceCostAllocation: React.FC<ResourceCostAllocationProps> = ({
   //   return m;
   // }, [project]);
 
-const chartData = resources
-  .map((r: any) => {
-    const userId = Number(r.user_id);
-    const cost = Number(r.total_cost ?? 0);
-    const percent = total > 0 ? (cost / total) * 100 : 0;
+  const chartData = resources
+    .map((r: any) => {
+      const userId = Number(r.user_id);
+      const cost = Number(r.total_cost ?? 0);
+      const percent = total > 0 ? (cost / total) * 100 : 0;
 
-    return { userId, name: "User " + String(userId), cost, percent };
-  })
-  .sort((a: any, b: any) => b.cost - a.cost);
+      return { userId, name: "User " + String(userId), cost, percent };
+    })
+    .sort((a: any, b: any) => b.cost - a.cost);
 
   return (
     <div className="flex flex-col gap-4">
@@ -152,6 +153,14 @@ const chartData = resources
           </div>
         </div>
       </div>
+      {data && (
+        <button
+          className="bg-blue-600 text-white px-4 py-2 rounded mt-4 hover:bg-blue-700"
+          onClick={() => AnalyticsExportService.exportResources({ project, data })}
+        >
+          Export to PDF
+        </button>
+      )}
     </div>
   );
 };

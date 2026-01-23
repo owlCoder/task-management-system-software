@@ -3,6 +3,7 @@ import type { ProjectDTO } from "../../models/project/ProjectDTO";
 import { ProjectStatus } from "../../enums/ProjectStatus";
 import { hasProjectImage } from "../../helpers/image_url";
 import type { Props } from "../../types/props/ProjectDetailsModalProps";
+import { useNavigate } from "react-router-dom";
 
 const getStatusColor = (status: ProjectStatus): string => {
     switch (status) {
@@ -36,6 +37,8 @@ export const ProjectDetailsModal: React.FC<Props> = ({
     onClose,
     onEdit,
 }) => {
+    const navigate = useNavigate();
+
     if (!isOpen || !project) return null;
 
     const handleBackdropClick = (e: React.MouseEvent) => {
@@ -217,7 +220,11 @@ export const ProjectDetailsModal: React.FC<Props> = ({
                 <div className="px-6 py-4 border-t border-white/10 flex justify-center gap-3">
                     <button
                         type="button"
-                        onClick={() => alert(`Navigate to sprints for: ${project.project_name}`)}
+                        onClick={() => {
+                            navigate(`/projects/${project.project_id}/sprints`);
+                            onClose();
+                        }}
+
                         className="
                             px-6 py-2 rounded-lg text-sm font-semibold
                             bg-gradient-to-t

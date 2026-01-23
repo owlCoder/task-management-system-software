@@ -10,7 +10,7 @@ import {
 import { TaskStatus } from "../enums/TaskStatus";
 import { Comment } from "./Comment";
 
-@Entity("Tasks") 
+@Entity("tasks") 
 export class Task {
   //ici preko sprint id a ne project id
   //datum zavrsetka

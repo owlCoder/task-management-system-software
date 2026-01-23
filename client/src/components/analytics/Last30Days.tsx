@@ -10,6 +10,7 @@ import {
 } from "recharts";
 import { TimeSeriesPointDto } from "../../models/analytics/TimeSeriesPointDto";
 import { formatDateRS } from "../../helpers/formatDateRS";
+import { AnalyticsExportService } from "../../services/analytics/ExportToPDF";
 
 interface Props {
     projects: TimeSeriesPointDto[] | null;
@@ -29,6 +30,10 @@ export const Last30DaysAnalytics: React.FC<Props> = ({
     if (!projects || !workers) {
         return <div className="text-white/40">No data available.</div>;
     }
+
+    const handleExport = async () => {
+        await AnalyticsExportService.exportLast30Days({ projects, workers });
+    };
 
     return (<div className="grid">
         <span className="text-center items-center text-lg text-white/50 italic mt-2 mb-5">statistics of <strong>all</strong> projects and workers in the previous 30 days</span>
@@ -80,6 +85,13 @@ export const Last30DaysAnalytics: React.FC<Props> = ({
                 </ResponsiveContainer>
             </div>
         </div>
+        <button
+            className="bg-blue-600 text-white px-4 py-2 rounded mb-4 hover:bg-blue-700"
+            onClick={handleExport}
+        >
+            Export to PDF
+        </button>
+
     </div>
     );
 };

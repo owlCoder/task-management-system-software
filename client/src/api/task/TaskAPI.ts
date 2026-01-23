@@ -24,20 +24,34 @@ export class TaskAPI implements ITaskAPI {
     };
   }
 
-  async getTasksByProject(sprintId: string): Promise<TaskDTO[]> {
-    try {
-      const testSprintId = "1";
-      const res = await fetch(`${this.baseUrl}/tasks/sprints/${testSprintId}`, {
+  async getTasksByProject(projectId: string): Promise<TaskDTO[]> {
+    const res = await fetch(`${this.baseUrl}/tasks/projects/${projectId}`, {
       headers: this.headers,
     });
-     if (!res.ok) {
-      throw new Error("Failed to fetch task");
+
+    if (!res.ok) {
+      throw new Error("Failed to fetch tasks by project");
     }
 
     const json = await res.json();
     return json.data ?? json;
+  }
+
+
+  async getTasksBySprint(sprintId: number): Promise<TaskDTO[]> {
+    try {
+      const res = await fetch(`${this.baseUrl}/tasks/sprints/${sprintId}`, {
+        headers: this.headers,
+      });
+
+      if (!res.ok) {
+        throw new Error("Failed to fetch tasks by sprint");
+      }
+
+      const json = await res.json();
+      return json.data ?? json;
     } catch (error) {
-      console.error('Error fetching tasks by project:', error);
+      console.error("Error fetching tasks by sprint:", error);
       throw error;
     }
   }
@@ -61,19 +75,15 @@ export class TaskAPI implements ITaskAPI {
   }
 
   async createTask(payload: CreateTaskDTO): Promise<TaskDTO> {
-    try {
-      const testSprint = "1";
-      const res = await fetch(`${this.baseUrl}/tasks/sprints/${testSprint}`, {
-        method: "POST",
-        headers: this.headers,
-        body: JSON.stringify(payload),
-      });
-      return res.json();
-    } catch (error) {
-      console.error('Error creating task:', error);
-      throw error;
-    }
+    const testSprint = "1"; 
+    const res = await fetch(`${this.baseUrl}/tasks/sprints/${testSprint}`, {
+      method: "POST",
+      headers: this.headers,
+      body: JSON.stringify(payload),
+    });
+    return res.json();
   }
+
 
   async updateTask(taskId: number, payload: UpdateTaskDTO): Promise<TaskDTO> {
     try {
