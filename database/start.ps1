@@ -87,14 +87,18 @@ $success = $false
 while ($retryCount -lt $maxRetries -and -not $success) {
     Write-Host "Running docker compose up -d... (attempt $($retryCount + 1))"
     try {
-        $output = docker compose up -d 2>&1
-        if ($output -like "*unable to get image*") {
+        $output = docker compose -f ../docker-compose.yml up -d mysql 2>&1
+        $exitCode = $LASTEXITCODE
+        if ($exitCode -eq 0) {
+            Write-Host "Docker Compose started successfully."
+            $success = $true
+        } elseif ($output -like "*unable to get image*") {
             Write-Host "Error detected: unable to get image. Retrying in 5 seconds..."
             Start-Sleep -Seconds 5
             $retryCount++
         } else {
-            Write-Host "Docker Compose started successfully."
-            $success = $true
+            Write-Host "Failed with other error: $output"
+            $success = $false
         }
     } catch {
         Write-Host "Error: Failed to run docker compose up -d. $($_.Exception.Message)"
