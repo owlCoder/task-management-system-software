@@ -11,6 +11,7 @@ import {
   ResponsiveContainer,
   Cell,
 } from "recharts";
+import { AnalyticsExportService } from "../../services/analytics/ExportToPDF";
 
 const formatMoney = (n: number) => `${n.toFixed(2)} ¥`;
 
@@ -34,17 +35,17 @@ export const BudgetAnalytics: React.FC<BudgetAnalyticsProps> = ({
   }
 
   const chartData = [
-  { name: "Planned Budget", value: data.allowed_budget, color: "rgba(96, 165, 250, 0.6)" }, // #60A5FA
-  { name: "Actual Cost", value: data.total_spent, color: "rgba(74, 222, 128, 0.6)" },    // #4ADE80
-  {
-    name: "Remaining Budget",
-    value: data.remaining_budget,
-    color:
-      data.remaining_budget >= 0
-        ? "rgba(250, 204, 21, 0.6)"   // #FACC15
-        : "rgba(248, 113, 113, 0.6)", // #F87171
-  },
-];
+    { name: "Planned Budget", value: data.allowed_budget, color: "rgba(96, 165, 250, 0.6)" }, // #60A5FA
+    { name: "Actual Cost", value: data.total_spent, color: "rgba(74, 222, 128, 0.6)" },    // #4ADE80
+    {
+      name: "Remaining Budget",
+      value: data.remaining_budget,
+      color:
+        data.remaining_budget >= 0
+          ? "rgba(250, 204, 21, 0.6)"   // #FACC15
+          : "rgba(248, 113, 113, 0.6)", // #F87171
+    },
+  ];
 
 
   const allValues = chartData.map((d) => d.value);
@@ -82,6 +83,14 @@ export const BudgetAnalytics: React.FC<BudgetAnalyticsProps> = ({
           </BarChart>
         </ResponsiveContainer>
       </div>
+      {data && (
+        <button
+          className="bg-blue-600 text-white px-4 py-2 rounded mt-4 hover:bg-blue-700"
+          onClick={() => AnalyticsExportService.exportBudget({ project, data })}
+        >
+          Export to PDF
+        </button>
+      )}
     </div>
   );
 };

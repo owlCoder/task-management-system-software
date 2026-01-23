@@ -10,6 +10,7 @@ import {
     Tooltip,
     ResponsiveContainer,
 } from "recharts";
+import { AnalyticsExportService } from "../../services/analytics/ExportToPDF";
 
 type SprintOption = {
     sprint_id: number;
@@ -120,6 +121,14 @@ export const BurnupAnalytics: React.FC<BurnupAnalyticsProps> = ({
                     </ResponsiveContainer>
                 </div>
             )}
+
+            <button
+                className="bg-blue-600 text-white px-4 py-2 rounded mt-4 hover:bg-blue-700 disabled:opacity-50"
+                onClick={() => data && AnalyticsExportService.exportBurnup({ project, data, sprintId: sprintId! })}
+                disabled={!data || !sprintId}
+            >
+                Export to PDF
+            </button>
         </div>
     );
 };

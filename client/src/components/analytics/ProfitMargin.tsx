@@ -8,6 +8,7 @@ import {
 } from "recharts";
 import { ProjectDTO } from "../../models/project/ProjectDTO";
 import { ProfitMarginDto } from "../../models/analytics/ProfitMarginDto";
+import { AnalyticsExportService } from "../../services/analytics/ExportToPDF";
 
 interface ProfitMarginAnalyticsProps {
   project: ProjectDTO;
@@ -46,20 +47,20 @@ export const ProfitMarginAnalytics: React.FC<ProfitMarginAnalyticsProps> = ({
   const donutData =
     allowed > 0
       ? [
-          { name: "Used", value: used },
-          { name: "Remaining", value: remaining },
-        ]
+        { name: "Used", value: used },
+        { name: "Remaining", value: remaining },
+      ]
       : [
-          // If allowed is 0, just show cost as a single slice to avoid weird chart.
-          { name: "Cost", value: Math.max(cost, 0) || 1 },
-        ];
+        // If allowed is 0, just show cost as a single slice to avoid weird chart.
+        { name: "Cost", value: Math.max(cost, 0) || 1 },
+      ];
 
   const COLORS =
     allowed > 0
       ? [
-          "rgba(96, 165, 250, 0.6)",  // #60A5FA
-          "rgba(250, 204, 21, 0.6)",  // #FACC15
-        ]
+        "rgba(96, 165, 250, 0.6)",  // #60A5FA
+        "rgba(250, 204, 21, 0.6)",  // #FACC15
+      ]
       : ["rgba(248, 113, 113, 0.6)"]; // #F87171
 
 
@@ -166,6 +167,14 @@ export const ProfitMarginAnalytics: React.FC<ProfitMarginAnalyticsProps> = ({
           </div>
         </div>
       </div>
+      {data && (
+        <button
+          className="bg-blue-600 text-white px-4 py-2 rounded mt-4 hover:bg-blue-700"
+          onClick={() => AnalyticsExportService.exportProfitMargin({ project, data })}
+        >
+          Export to PDF
+        </button>
+      )}
     </div>
   );
 };
