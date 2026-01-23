@@ -127,6 +127,7 @@ export class ProjectUserService implements IProjectUserService {
 
         dto.username = user.username;
         dto.role_name = user.role_name;
+        dto.image_url = user.image_url;
 
         return { success: true, data: dto };
     }
@@ -167,6 +168,7 @@ export class ProjectUserService implements IProjectUserService {
 
                 dto.username = user ? user.username : `User ${pu.user_id}`;
                 dto.role_name = user ? user.role_name : "Unknown";
+                dto.image_url = user?.image_url || undefined; //
 
                 return dto;
             });

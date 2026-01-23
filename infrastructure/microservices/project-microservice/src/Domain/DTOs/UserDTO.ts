@@ -4,4 +4,5 @@ export interface UserDTO {
   role_name: string;
   email: string;
   weekly_working_hour_sum: number;
+  image_url?: string; //
 }
