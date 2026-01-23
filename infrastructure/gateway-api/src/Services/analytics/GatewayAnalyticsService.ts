@@ -20,6 +20,7 @@ import { API_ENDPOINTS } from "../../Constants/services/APIEndpoints";
 // Infrastructure
 import { makeAPICall } from "../../Infrastructure/axios/APIHelpers";
 import { createAxiosClient } from "../../Infrastructure/axios/client/AxiosClientFactory";
+import { TimeSeriesPointDto } from "../../Domain/DTOs/analytics/TimeSeriesPointDTO";
 
 /**
  * Makes API requests to the Analytics Microservice.
@@ -120,5 +121,30 @@ export class GatewayAnalyticsService implements IGatewayAnalyticsService {
             url: ANALYTICS_ROUTES.PROFIT_MARGIN_BY_PROJECT(projectId)
         });
     }
+
+    async getProjectsLast30Days(): Promise<Result<TimeSeriesPointDto[]>> {
+        return await makeAPICall<TimeSeriesPointDto[]>(
+            this.analyticsClient,
+            this.errorHandlingService,
+            {
+                serviceName: SERVICES.ANALYTICS,
+                method: HTTP_METHODS.GET,
+                url: ANALYTICS_ROUTES.PROJECTS_LAST_30_DAYS,
+            }
+        );
+    }
+
+    async getWorkersLast30Days(): Promise<Result<TimeSeriesPointDto[]>> {
+        return await makeAPICall<TimeSeriesPointDto[]>(
+            this.analyticsClient,
+            this.errorHandlingService,
+            {
+                serviceName: SERVICES.ANALYTICS,
+                method: HTTP_METHODS.GET,
+                url: ANALYTICS_ROUTES.WORKERS_LAST_30_DAYS,
+            }
+        );
+    }
+
 
 }

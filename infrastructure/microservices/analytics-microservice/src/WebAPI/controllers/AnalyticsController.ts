@@ -214,10 +214,11 @@ export class AnalyticsController {
     }
 
     async getWorkersLast30Days(req: Request, res: Response): Promise<void> {
+        console.log("Received request for workers added in last 30 days");
         try {
             const result =
                 await this.projectAnalyticsService.getWorkersAddedLast30Days();
-
+            console.log("Returning result:", result);
             res.status(200).json(result);
         } catch (error) {
             res.status(500).json({ message: "Internal server error" });

@@ -43,6 +43,9 @@ export class GatewayAnalyticsController {
         this.router.get('/analytics/budget/:projectId', ...analyticsReadonlyAccess, this.getBudgetTrackingByProjectId.bind(this));
         this.router.get('/analytics/resource-cost/:projectId', ...analyticsReadonlyAccess, this.getResourceCostAllocationByProjectId.bind(this));
         this.router.get('/analytics/profit-margin/:projectId', ...analyticsReadonlyAccess, this.getProfitMarginByProjectId.bind(this));
+        this.router.get('/analytics/projects-last-30-days', ...analyticsReadonlyAccess, this.getProjectsLast30Days.bind(this));
+        this.router.get('/analytics/workers-last-30-days', ...analyticsReadonlyAccess, this.getWorkersLast30Days.bind(this));
+
     }
 
     /**
@@ -55,7 +58,7 @@ export class GatewayAnalyticsController {
      */
     private async getBurndownAnalyticsBySprintId(req: Request<ReqParams<'sprintId'>>, res: Response): Promise<void> {
         const sprintId = parseInt(req.params.sprintId, 10);
-        
+
         const result = await this.gatewayAnalyticsService.getBurndownAnalyticsBySprintId(sprintId);
         handleResponse(res, result);
     }
@@ -119,7 +122,7 @@ export class GatewayAnalyticsController {
         const result = await this.gatewayAnalyticsService.getResourceCostAllocationByProjectId(projectId);
         handleResponse(res, result);
     }
-    
+
     /**
      * GET /api/v1/analytics/profit-margin/:projectId
      * @param {Request} req - the request object, containing the id of the project in params.
@@ -134,6 +137,17 @@ export class GatewayAnalyticsController {
         const result = await this.gatewayAnalyticsService.getProfitMarginByProjectId(projectId);
         handleResponse(res, result)
     }
+
+    private async getProjectsLast30Days(req: Request, res: Response): Promise<void> {
+        const result = await this.gatewayAnalyticsService.getProjectsLast30Days();
+        handleResponse(res, result);
+    }
+
+    private async getWorkersLast30Days(req: Request, res: Response): Promise<void> {
+        const result = await this.gatewayAnalyticsService.getWorkersLast30Days();
+        handleResponse(res, result);
+    }
+
 
     public getRouter(): Router {
         return this.router;
