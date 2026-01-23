@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+﻿import React, { useEffect, useMemo, useState } from "react";
 import { TaskVersionDTO } from "../../models/task/TaskVersionDTO";
 import { TaskVersionDiffProps } from "../../types/props";
 
@@ -6,7 +6,7 @@ const formatDateValue = (value?: Date | string | null): string => {
   if (!value) return "N/A";
   const parsed = new Date(value);
   if (Number.isNaN(parsed.getTime())) return String(value);
-  return parsed.toLocaleDateString();
+  return parsed.toLocaleString();
 };
 
 const formatMoney = (value?: number | null): string => {
@@ -24,7 +24,7 @@ const buildVersionLabel = (version: TaskVersionDTO): string => {
   const createdLabel = Number.isNaN(createdAt.getTime())
     ? "Unknown time"
     : createdAt.toLocaleString();
-  return `v${version.version_number} • ${createdLabel}`;
+  return `v${version.version_number} -> ${createdLabel}`;
 };
 
 export const TaskVersionDiff: React.FC<TaskVersionDiffProps> = ({ versions }) => {
@@ -57,6 +57,14 @@ export const TaskVersionDiff: React.FC<TaskVersionDiffProps> = ({ versions }) =>
     [versions, rightId]
   );
 
+  const hasDiff =
+    !!leftVersion &&
+    !!rightVersion &&
+    (leftVersion.task_description !== rightVersion.task_description ||
+      leftVersion.estimated_cost !== rightVersion.estimated_cost ||
+      leftVersion.due_date !== rightVersion.due_date ||
+      leftVersion.worker_id !== rightVersion.worker_id);
+
   const renderRow = (
     label: string,
     leftValue: string,
@@ -65,12 +73,21 @@ export const TaskVersionDiff: React.FC<TaskVersionDiffProps> = ({ versions }) =>
     const isChanged = leftValue !== rightValue;
     const leftClass = isChanged ? "text-red-200" : "text-white/80";
     const rightClass = isChanged ? "text-green-200" : "text-white/80";
+    const badgeClass = isChanged
+      ? "bg-red-500/10 text-red-200 border-red-500/20"
+      : "bg-emerald-500/10 text-emerald-200 border-emerald-500/20";
+    const badgeText = isChanged ? "Changed" : "No change";
 
     return (
       <div className="grid grid-cols-[130px_1fr_1fr] gap-3 py-2 border-t border-white/10">
-        <span className="text-xs uppercase tracking-wider text-white/50">
-          {label}
-        </span>
+        <div className="flex items-center gap-2">
+          <span className="text-xs uppercase tracking-wider text-white/50">
+            {label}
+          </span>
+          <span className={`text-[10px] uppercase tracking-wider border px-2 py-0.5 rounded-full ${badgeClass}`}>
+            {badgeText}
+          </span>
+        </div>
         <div className={`text-sm leading-relaxed ${leftClass}`}>
           {leftValue}
         </div>
@@ -115,7 +132,7 @@ export const TaskVersionDiff: React.FC<TaskVersionDiffProps> = ({ versions }) =>
             ))}
           </select>
 
-          <span className="text-white/40 text-sm">→</span>
+          <span className="text-white/40 text-sm">-</span>
 
           <select
             value={rightId ?? ""}
@@ -146,6 +163,11 @@ export const TaskVersionDiff: React.FC<TaskVersionDiffProps> = ({ versions }) =>
         </p>
       ) : leftVersion && rightVersion ? (
         <div className="mt-3">
+          {!hasDiff && (
+            <div className="mb-3 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs text-white/60">
+              No changes between selected versions.
+            </div>
+          )}
           {renderRow(
             "Description",
             leftVersion.task_description || "N/A",
