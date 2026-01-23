@@ -14,11 +14,12 @@ export class Microservice_controller {
 
     private initializeRoutes(): void {
         this.router.get("/microservices", this.getAllMicroservices.bind(this));
-
         this.router.post("/create", this.createMicroservice.bind(this));
 
         this.router.delete("/delete/:microserviceID", this.deleteMicroservice.bind(this));
     }
+
+
 
     private async getAllMicroservices(req: Request, res: Response): Promise<void> {
         try {

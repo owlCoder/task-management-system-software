@@ -30,7 +30,7 @@ async function bootstrap() {
         microserviceService
     );
 
-    const measurementController = new Measurement_controller(measurementService,loggerService);
+    const measurementController = new Measurement_controller(measurementService,loggerService,microserviceService);
     const microserviceController = new Microservice_controller(microserviceService,loggerService);
 
     const gc = new GarbageCollector_Service(measurementService);

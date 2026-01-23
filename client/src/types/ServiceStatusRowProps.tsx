@@ -1,7 +1,8 @@
-import { ServiceOperationalStatus } from "./ServiceOperationalStatus";
+import { EOperationalStatus } from "../enums/EOperatinalStatus";
+
 
 export type ServiceStatusRowProps = {
     serviceName: string;
     uptimePercent: number;
-    status: ServiceOperationalStatus;
+    status: EOperationalStatus;
 };
