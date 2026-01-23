@@ -32,7 +32,8 @@ const TaskBoardPage: React.FC<TaskBoardPageProps> = ({ projectId, token }) => {
     );
 
     try {
-      await api.updateTaskStatus(taskId, newStatus);
+      const fileId = Number(taskToUpdate.attachment_file_uuid ?? 0);
+      await api.updateTaskStatus(taskId, newStatus, fileId);
     } catch (err) {
       console.error("Failed to update status on server", err);
       setTasks(originalTasks);
