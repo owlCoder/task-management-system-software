@@ -18,7 +18,7 @@ export class Measurement_Service implements IMeasurement_Service {
             .delete()
             .from(Measurement)
             .where("status != :status", { status: EOperationalStatus.Down })
-            .andWhere("measurementDate < :cutoff", { cutoff: cutoffDate })
+            .andWhere("measurement_date < :cutoff", { cutoff: cutoffDate })
             .execute();
 
         return result.affected ?? 0;
@@ -33,7 +33,7 @@ export class Measurement_Service implements IMeasurement_Service {
             .delete()
             .from(Measurement)
             .where("status = :status", { status })
-            .andWhere("measurementDate < :cutoff", { cutoff: cutoffDate })
+            .andWhere("measurement_date < :cutoff", { cutoff: cutoffDate })
             .execute();
 
         return result.affected ?? 0;

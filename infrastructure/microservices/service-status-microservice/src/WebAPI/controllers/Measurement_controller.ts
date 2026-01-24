@@ -9,23 +9,17 @@ import { time } from "console";
 
 export class Measurement_controller {
     private readonly router: Router;
-    private readonly LoggerService: ILoggerService;
-    private readonly measurementService: IMeasurement_Service;
-    private readonly microserviceService: IMicroservice_Service;
 
-    constructor(private readonly measurementservice: IMeasurement_Service, private readonly loggerService: ILoggerService, private readonly microserviceservice: IMicroservice_Service) {
+    constructor(private readonly measurementService: IMeasurement_Service, private readonly LoggerService: ILoggerService, private readonly microserviceService: IMicroservice_Service) {
         this.router = Router();
-        this.LoggerService = loggerService;
-        this.measurementService = measurementservice;
-        this.microserviceService = microserviceservice;
         this.initializeRoutes();
     }
 
     private initializeRoutes(): void {
         this.router.get("/measurements", this.getAllMeasurements.bind(this));
-        this.router.get("/measurement/:microserviceId", this.getMeasurementFromMicroservice.bind(this));
         this.router.get("/Down", this.getAllDownMeasurements.bind(this));
-        this.router.get("/ServiceStatus", this.getServiceStatus.bind(this));
+        this.router.get("/service-status", this.getServiceStatus.bind(this));
+        this.router.get("/measurement/:microserviceId", this.getMeasurementFromMicroservice.bind(this));
 
         this.router.post("/set", this.setMeasurement.bind(this));
         this.router.delete("/delete/:measurementID", this.deleteMeasurement.bind(this));
@@ -43,6 +37,13 @@ export class Measurement_controller {
     private async getMeasurementFromMicroservice(req: Request, res: Response): Promise<void> {
 
         const microserviceId = Number(req.params.microserviceId);
+        if (!Number.isInteger(microserviceId) || microserviceId <= 0) {
+
+            this.LoggerService.warn("MEASUREMENT_CONTROLLER",`Invalid microserviceId received: ${req.params.microserviceId}`);
+            res.status(400).json({ message: "Invalid microserviceId. It must be a positive number." });
+            return;
+        }
+
 
         try {
             const result = await this.measurementService.getMeasurementsFromMicroservice(microserviceId);
