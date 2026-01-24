@@ -96,4 +96,38 @@ export class TokenHelper {
       message
     };
   }
+  /**
+ * Creates successful login response for Google authentication
+ */
+/**
+ * Creates successful login response for Google authentication
+ */
+createGoogleLoginSuccessResponse(userData: LoginTokenClaims, message: string = "Google login successful"): AuthResponse {
+    if (userData.otp_required === false && 'google_id_required' in userData) {
+        
+        const token = this.jwtTokenService.generateGoogleJWTToken(userData);
+        
+        const tokenName = this.tokenNamingStrategy.getTokenName(userData.username);
+        
+        const response: any = {
+            success: true,
+            message,
+            otp_required: false,
+            user: {
+                email: userData.email,
+                image_url: userData.image_url 
+            }
+        };
+
+        response[tokenName] = token; 
+
+        return response as TokenAuthResponse;
+    }
+
+    return {
+        success: false,
+        message: "Invalid Google token claims provided",
+        otp_required: false
+    };
+  }
 }

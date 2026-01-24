@@ -59,7 +59,7 @@ const initLogger = new LogerService(LoggingServiceEnum.APP_SERVICE);
 
   // ORM Repositories
   const userRepository: Repository<User> = Db.getRepository(User);
-  // const userRoleRepository: Repository<UserRole> = Db.getRepository(UserRole);
+  const userRoleRepository: Repository<UserRole> = Db.getRepository(UserRole);
 
   // Services
   const authLogger = new LogerService(LoggingServiceEnum.AUTH_SERVICE);
@@ -78,7 +78,7 @@ const initLogger = new LogerService(LoggingServiceEnum.APP_SERVICE);
   const sessionService = new SessionService(sessionLogger);
   const passwordStrategy = new PasswordLoginStrategy(authLogger);
   const otpStrategy = new OtpLoginStrategy(emailService, sessionService, otpGenerator, authLogger);
-  const authService: IAuthService = new AuthService(userRepository, passwordStrategy, otpStrategy, emailService, authLogger);
+  const authService: IAuthService = new AuthService(userRepository, passwordStrategy, otpStrategy, emailService, authLogger,userRoleRepository);
   const otpVerificationService: IOTPVerificationService = new OTPVerificationService(userRepository, emailService, sessionService, otpGenerator, otpVerificationLogger);
   const logerService: ILogerService = new LogerService(LoggingServiceEnum.APP_SERVICE);
 

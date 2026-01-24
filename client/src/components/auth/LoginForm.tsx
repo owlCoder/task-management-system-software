@@ -84,69 +84,64 @@ export const LoginForm: React.FC<LoginFormProps> = ({
 
 
   useEffect(() => {
-    const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
-    if (!clientId) return;
+  const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+  if (!clientId) return;
 
-    const t = setInterval(() => {
-      const googleAny = (window as any).google;
+  const t = setInterval(() => {
+    const googleAny = (window as any).google;
 
-      if (googleInitializedRef.current) {
-        clearInterval(t);
-        return;
-      }
-
-      if (!googleAny?.accounts?.id) return;
-
-      googleAny.accounts.id.initialize({
-        client_id: clientId,
-        ux_mode: "popup",
-        auto_select: false,
-        cancel_on_tap_outside: true,
-        callback: async (response: any) => {
-          setError("");
-          try {
-            const res = await fetch("http://localhost:5544/api/v1/auth/google-login", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ idToken: response.credential }),
-            });
-
-            const data = await res.json().catch(() => ({}));
-            if (!res.ok || !data.success) {
-              setError(data.message || "Google login failed");
-              return;
-            }
-
-            if(data.token) {
-              login(data.token);
-              navigate("/mainwindow");
-              return;
-            }
-            setError("");
-          } catch {
-            setError("Network error during Google login");
-          }
-        },
-      });
-
-      if (googleBtnDivRef.current) {
-        const parentWidth = googleBtnDivRef.current.parentElement?.clientWidth ?? 390;
-
-        googleAny.accounts.id.renderButton(googleBtnDivRef.current, {
-          theme: "outline",
-          size: "large",
-          text: "continue_with",
-          shape: "rectangular",
-          width: parentWidth,
-          locale: "en",
-        });
-      }
-
-      googleInitializedRef.current = true;
+    if (googleInitializedRef.current) {
       clearInterval(t);
-    }, 100);
+      return;
+    }
 
-    return () => clearInterval(t);
+    if (!googleAny?.accounts?.id) return;
+
+    googleAny.accounts.id.initialize({
+      client_id: clientId,
+      ux_mode: "popup",
+      auto_select: false,
+      cancel_on_tap_outside: true,
+      callback: async (response: any) => {
+        setError("");
+        try {
+          const data = await authAPI.googleLogin({ idToken: response.credential });
+
+          if (data.success) {
+
+            if (data.token) {
+               login(data.token);
+               navigate("/mainwindow");
+            } else {
+               console.log("Logged in via Google", data);
+            }
+          } else {
+            setError(data.message || "Google login failed");
+          }
+        } catch (err: any) {
+          console.error(err);
+          setError(err.response?.data?.message || "Network error during Google login");
+        }
+      },
+    });
+
+    if (googleBtnDivRef.current) {
+      const parentWidth = googleBtnDivRef.current.parentElement?.clientWidth ?? 390;
+      googleAny.accounts.id.renderButton(googleBtnDivRef.current, {
+        theme: "outline",
+        size: "large",
+        text: "continue_with",
+        shape: "rectangular",
+        width: parentWidth,
+        locale: "en",
+      });
+    }
+
+    googleInitializedRef.current = true;
+    clearInterval(t);
+  }, 100);
+
+  return () => clearInterval(t);
 }, [login, navigate]);
 
   const canSubmit =

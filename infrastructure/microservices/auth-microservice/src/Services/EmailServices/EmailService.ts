@@ -6,6 +6,7 @@ import { IEmailService } from "../../Domain/services/IEmailService";
 import { IHealthChecker } from "../../Domain/services/IHealthChecker";
 import { EmailTemplates } from "./EmailTemplates";
 import { buildEmailServiceUrl } from "./EmailUrlHelper";
+import { UserDTO } from "../../Domain/DTOs/UserDTO";
 
 export class EmailService implements IEmailService {
   private readonly emailServiceUrl: string = buildEmailServiceUrl();
@@ -22,7 +23,7 @@ export class EmailService implements IEmailService {
     return this.healthChecker.isAvailable;
   }
 
-  async sendOTPCode(user: User, otpCode: string): Promise<boolean> {
+  async sendOTPCode(user: UserDTO, otpCode: string): Promise<boolean> {
     // Email content
     const emailSubject = EmailTemplates.getOTPLoginSubject(user.username);
     const emailBody = EmailTemplates.getOTPLoginBody(user.username, otpCode, this.loginSessionExpirationMinutes);

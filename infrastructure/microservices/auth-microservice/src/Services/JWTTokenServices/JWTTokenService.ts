@@ -12,7 +12,7 @@ export class JWTTokenService {
   /**
    * Generates a JWT token from user claims
    */
-  generateToken(claims: { id: number; username: string; email: string; role: string, image_url?: string }): string {
+  generateToken(claims: { id: number; username?: string; email: string; role: string, image_url?: string }): string {
     return jwt.sign(
       claims,
       process.env.JWT_SECRET ?? "",
@@ -53,4 +53,23 @@ console.log('userData:', userData);
       image_url: userData.image_url
     });
   }
+  /**
+   * Generates a JWT token for Google authenticated users
+   */
+  generateGoogleJWTToken(userData: LoginTokenClaims): string {
+    // We use email as username 
+    if(userData.google_id_required)
+    {
+      return this.generateToken({
+        id: userData.user_id,
+        username: userData.email, 
+        email: userData.email,
+        role: userData.role,
+        image_url: userData.image_url
+      });
+    }
+    else
+      return '';
+  }
 }
+

@@ -8,6 +8,7 @@ import { IOTPGenerator } from "../../Domain/services/IOTPGenerator";
 import { LoginData } from "../../Domain/models/LoginData";
 import { User } from "../../Domain/models/User";
 import { v4 as uuidv4 } from 'uuid';
+import { UserDTO } from "../../Domain/DTOs/UserDTO";
 
 export class OtpLoginStrategy implements ILoginStrategy {
   private readonly loginSessionExpirationMinutes: number = parseInt(process.env.LOGIN_SESSION_EXPIRATION_MINUTES || "5", 10);
@@ -19,7 +20,7 @@ export class OtpLoginStrategy implements ILoginStrategy {
     private readonly logger: ILogerService
   ) {}
 
-  async authenticate(user: User): Promise<LoginResponseType> {
+  async authenticate(user: UserDTO): Promise<LoginResponseType> {
     const otpCode = this.otpGenerator.generateOTP();
     const dateCreated = new Date();
     const sessionData: LoginData = { userId: user.user_id, otpCode: otpCode, dateCreated: dateCreated };
@@ -40,6 +41,7 @@ export class OtpLoginStrategy implements ILoginStrategy {
       authenticated: true,
       userData: {
         user_id: user.user_id,
+        google_id_required : false,
         session_id: sessionId,
         otp_required: true,
         iat: Math.floor(sessionData.dateCreated.getTime() / 1000),

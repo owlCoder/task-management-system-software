@@ -10,6 +10,7 @@ import { ISessionStore } from "../../Domain/services/ISessionStore";
 import { IOTPGenerator } from "../../Domain/services/IOTPGenerator";
 import { LoginData } from "../../Domain/models/LoginData";
 import { v4 as uuidv4 } from 'uuid';
+import { UserDTO } from "../../Domain/DTOs/UserDTO";
 
 export class OTPVerificationService implements IOTPVerificationService {
   private readonly loginSessionExpirationMinutes: number = parseInt(process.env.LOGIN_SESSION_EXPIRATION_MINUTES || "5", 10);
@@ -44,6 +45,13 @@ export class OTPVerificationService implements IOTPVerificationService {
       this.logger.log(SeverityEnum.WARN, `OTP resend failed: invalid session for user_id ${browserData.user_id}`);
       return { authenticated: false };
     }
+    const userDTO = {
+      user_id : user.user_id,
+      username: user.username ??  user.google_id ?? "username",
+      user_role: user.user_role,
+      email: user.email,
+      image_url: user.image_url
+      }
 
     if (this.emailService.isAvailable) {
       this.logger.log(SeverityEnum.DEBUG, `Email service available, generating new OTP`);
@@ -53,7 +61,8 @@ export class OTPVerificationService implements IOTPVerificationService {
       const newSessionId = uuidv4();
 
       this.logger.log(SeverityEnum.DEBUG, `Sending OTP code via email to user ${user.username}`);
-      const success = await this.emailService.sendOTPCode(user, otpCode);
+      
+      const success = await this.emailService.sendOTPCode(userDTO, otpCode);
       if (!success) {
         this.logger.log(SeverityEnum.ERROR, `Failed to send OTP email to user ${user.username}`);
         return { authenticated: false };
@@ -70,6 +79,7 @@ export class OTPVerificationService implements IOTPVerificationService {
         userData: {
           user_id: user.user_id,
           session_id: newSessionId,
+          google_id_required : false,
           otp_required: true,
           iat: Math.floor(newSessionData.dateCreated.getTime() / 1000),
           exp: Math.floor(newSessionData.dateCreated.getTime() / 1000) + this.loginSessionExpirationMinutes * 60,
@@ -81,10 +91,11 @@ export class OTPVerificationService implements IOTPVerificationService {
         return {
           authenticated: true,
           userData: {
-            user_id: user.user_id,
-            username: user.username,
-            email: user.email,
-            role: user.user_role.role_name,
+            user_id: userDTO.user_id,
+            google_id_required : false,
+            username: userDTO.username,
+            email: userDTO.email,
+            role: userDTO.user_role.role_name,
             otp_required: false
           }
         };
@@ -123,14 +134,20 @@ export class OTPVerificationService implements IOTPVerificationService {
     this.sessionService.deleteSession(browserData.session_id);
 
     this.logger.log(SeverityEnum.INFO, `OTP verification successful for user ${user.username}`);
-
+    const userDTO = {
+      user_id : user.user_id,
+      username: user.username ??  user.google_id ?? "username",
+      user_role: user.user_role,
+      email: user.email,
+      image_url: user.image_url
+      }
     return {
       authenticated: true,
       userData: {
-        user_id: user.user_id,
-        username: user.username,
-        email: user.email,
-        role: user.user_role.role_name,
+        user_id: userDTO.user_id,
+        username: userDTO.username,
+        email: userDTO.email,
+        role: userDTO.user_role.role_name,
       }
     };
   }

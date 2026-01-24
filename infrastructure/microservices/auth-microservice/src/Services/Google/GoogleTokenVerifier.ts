@@ -1,5 +1,5 @@
 import { OAuth2Client } from "google-auth-library";
-import { GoogleUserInfo } from "../../Domain/types/GoogleUserInfo";
+import { GoogleUserInfoDTO } from "../../Domain/DTOs/GoogleUserInfoDTO";
 import { IGoogleIdTokenVerifier } from "../../Domain/services/IGoogleIdTokenVerifier";
 
 export class GoogleIdTokenVerifier implements IGoogleIdTokenVerifier {
@@ -7,7 +7,7 @@ export class GoogleIdTokenVerifier implements IGoogleIdTokenVerifier {
 
   constructor(private readonly audience: string) {}
 
-  async verify(idToken: string): Promise<GoogleUserInfo | null>{
+  async verify(idToken: string): Promise<GoogleUserInfoDTO | null>{
     const ticket = await this.client.verifyIdToken({
       idToken,
       audience: this.audience,

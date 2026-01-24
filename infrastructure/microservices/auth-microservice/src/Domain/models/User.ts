@@ -16,11 +16,11 @@ export class User {
   @PrimaryGeneratedColumn()
   user_id!: number;
 
-  @Column({ type: "varchar", unique: true, nullable: false, length: 100 })
-  username!: string;
+  @Column({ type: "varchar", unique: true, nullable: true, length: 100 })
+  username?: string | null; // Google useri ne moraju imati username, vec email
 
-  @Column({ type: "varchar", nullable: false })
-  password_hash!: string;
+  @Column({ type: "varchar", nullable: true })
+  password_hash?: string | null; // zbog google user-a
 
   @ManyToOne(() => UserRole, (user_role) => user_role.users, {
     nullable: false,
@@ -40,4 +40,7 @@ export class User {
   
   @Column({ type: "varchar", length: 255, nullable: true })
   image_url!: string | null; 
+
+  @Column({ type: "varchar", unique: true, nullable: true })
+  google_id!: string | null;
 }

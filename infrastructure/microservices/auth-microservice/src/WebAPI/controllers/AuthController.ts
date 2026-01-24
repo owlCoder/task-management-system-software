@@ -290,17 +290,16 @@ export class AuthController {
       return;
     }
 
-    res.status(200).json({ 
-      success: true, 
-      message: "Google login successful", 
-      google:{
-        sub: googleUser.sub,
-        email: googleUser.email,
-        name: googleUser.name,
-        picture: googleUser.picture
-      },
-    });
-  }
+    const result = await this.authService.googleLogin(googleUser);
+
+    if (result.authenticated && result.userData) {
+        // Samo jedna linija - helper pravi kompletan odgovor
+        const response = this.tokenHelper.createGoogleLoginSuccessResponse(result.userData);
+        res.status(200).json(response);
+    } else {
+        this.errorHelper.handleAuthFailure(res, "Invalid Google credentials", "Google login");
+    }
+}
 
   public getRouter(): Router {
     return this.router;

@@ -8,6 +8,7 @@ import { AuthTokenClaims } from "./AuthTokenClaims";
 type SessionClaims = {
   user_id: number;
   otp_required: true;
+  google_id_required: false;
   session_id: string;
   iat: number; // Issued at
   exp: number; // Expires at
@@ -15,6 +16,19 @@ type SessionClaims = {
 
 type UserClaims = AuthTokenClaims & {
   otp_required: false;
+  google_id_required: false;
 };
 
-export type LoginTokenClaims = SessionClaims | UserClaims;
+type GoogleTokenClaims = {
+  user_id: number;
+  google_id_required: true;
+  google_id: string;
+  email: string;
+  role: string;
+  image_url?: string;
+  otp_required: false;
+  username: string;
+};
+
+
+export type LoginTokenClaims = SessionClaims | UserClaims | GoogleTokenClaims;
