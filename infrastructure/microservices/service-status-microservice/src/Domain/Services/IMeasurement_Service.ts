@@ -9,6 +9,8 @@ export interface IMeasurement_Service {
   getAllDownMeasurements():Promise<MeasurementDto[]>;
   getNewMeasurements():Promise<MeasurementDto[]>;
   getAverageUptime(): Promise<{ microserviceId: number; uptime: number }[]>
+  getAverageResponseTime(days: number): Promise<{ time: string; avgResponseTime: number }[]>
+
 
   setMeasurement(measurement: MeasurementDto):Promise<boolean>;
 

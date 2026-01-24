@@ -19,11 +19,30 @@ export class Measurement_controller {
         this.router.get("/measurements", this.getAllMeasurements.bind(this));
         this.router.get("/Down", this.getAllDownMeasurements.bind(this));
         this.router.get("/service-status", this.getServiceStatus.bind(this));
+        this.router.get("/average-response-time/:days", this.getAvgResponseTime.bind(this))
         this.router.get("/measurement/:microserviceId", this.getMeasurementFromMicroservice.bind(this));
 
         this.router.post("/set", this.setMeasurement.bind(this));
         this.router.delete("/delete/:measurementID", this.deleteMeasurement.bind(this));
     }
+
+    private async getAvgResponseTime(req: Request, res: Response): Promise<void> {
+        const days = Number(req.params.days);
+
+        if (isNaN(days) || days <= 0) {
+            res.status(400).json({ message: "days must be a positive number" });
+            this.LoggerService.warn("MEASUREMENT_CONTROLLER", `Invalid number of days received: ${req.params.microserviceId}`);
+            return;
+        }
+
+        try {
+            const result = await this.measurementService.getAverageResponseTime(days);
+            res.status(200).json(result);
+        } catch (err) {
+            res.status(500).json({ message: (err as Error).message });
+        }
+    }
+
 
     private async getAllMeasurements(req: Request, res: Response): Promise<void> {
         try {
@@ -39,7 +58,7 @@ export class Measurement_controller {
         const microserviceId = Number(req.params.microserviceId);
         if (!Number.isInteger(microserviceId) || microserviceId <= 0) {
 
-            this.LoggerService.warn("MEASUREMENT_CONTROLLER",`Invalid microserviceId received: ${req.params.microserviceId}`);
+            this.LoggerService.warn("MEASUREMENT_CONTROLLER", `Invalid microserviceId received: ${req.params.microserviceId}`);
             res.status(400).json({ message: "Invalid microserviceId. It must be a positive number." });
             return;
         }

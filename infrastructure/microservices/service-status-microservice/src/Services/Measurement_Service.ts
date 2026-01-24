@@ -48,6 +48,26 @@ export class Measurement_Service implements IMeasurement_Service {
     }
 
 
+    async getAverageResponseTime(days: number): Promise<{ time: string; avgResponseTime: number }[]> {
+
+        const fromDate = new Date();
+        fromDate.setDate(fromDate.getDate() - days);
+
+        const result = await this.measurementRepository
+            .createQueryBuilder("m")
+            .select(`DATE_FORMAT(m.measurement_date, '%Y-%m-%d %H:%i')`,"time")
+            .addSelect(`ROUND(AVG(m.response_time), 2)`,"avgResponseTime")
+            .where("m.measurement_date >= :fromDate")
+            .setParameter("fromDate", fromDate)
+            .groupBy(`DATE_FORMAT(m.measurement_date, '%Y-%m-%d %H:%i')`)
+            .orderBy(`time`, "ASC")
+            .getRawMany();
+
+        return result.map(r => ({time: r.time,avgResponseTime: Number(r.avgResponseTime),
+        }));
+    }
+
+
     async getNewMeasurements(): Promise<MeasurementDto[]> {
 
         const subQuery = this.measurementRepository
@@ -65,16 +85,15 @@ export class Measurement_Service implements IMeasurement_Service {
     }
 
     async getAverageUptime(): Promise<{ microserviceId: number; uptime: number }[]> {
+        const fourteenDaysAgo = new Date();
+        fourteenDaysAgo.setDate(fourteenDaysAgo.getDate() - 14);
+
         const result = await this.measurementRepository
             .createQueryBuilder("m")
             .select("m.ID_microservice", "microserviceId")
-            .addSelect(
-                `ROUND(
-                (SUM(CASE WHEN m.status = :operational THEN 1 ELSE 0 END) * 100.0)
-                / COUNT(*),
-            2)`,
-                "uptime"
-            )
+            .addSelect(`ROUND((SUM(CASE WHEN m.status = :operational THEN 1 ELSE 0 END) * 100.0)/ COUNT(*),2)`, "uptime")
+            .where("m.measurement_date >= :fromDate")
+            .setParameter("fromDate", fourteenDaysAgo)
             .setParameter("operational", EOperationalStatus.Operational)
             .groupBy("m.ID_microservice")
             .getRawMany();
@@ -84,6 +103,7 @@ export class Measurement_Service implements IMeasurement_Service {
             uptime: Number(r.uptime),
         }));
     }
+
 
 
     async getMeasurementByID(measurementID: number): Promise<MeasurementDto> {
