@@ -133,6 +133,7 @@ export class UsersService implements IUsersService {
       user_id: result.identifiers[0].user_id,
       username: user.username,
       password_hash: hashedPassword,
+      google_id: "",
       user_role: userRole,
       email: user.email,
       image_key: "",

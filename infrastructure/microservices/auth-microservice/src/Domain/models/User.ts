@@ -43,4 +43,7 @@ export class User {
 
   @Column({ type: "varchar", unique: true, nullable: true })
   google_id!: string | null;
+
+  @Column({ type: "varchar", nullable: true, length: 255 })
+  image_key!: string;
 }

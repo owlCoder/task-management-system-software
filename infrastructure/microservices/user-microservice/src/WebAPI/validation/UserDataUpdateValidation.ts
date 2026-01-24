@@ -8,9 +8,12 @@ export function UserDataUpdateValidation(
   var poruka: string = "";
 
   // Validacija username-a
-  var result = UsernameValidation(UserData.username);
+  if(UserData.username)
+  {
+    var result = UsernameValidation(UserData.username);
 
-  poruka = result.poruka ?? "";
+    poruka = result.poruka ?? "";
+  }
 
   //Validacija email-a
   if (
