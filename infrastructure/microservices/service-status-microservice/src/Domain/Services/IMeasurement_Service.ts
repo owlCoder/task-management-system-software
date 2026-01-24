@@ -1,4 +1,5 @@
 import { MeasurementDto } from "../DTOs/Measurement_DTO";
+import { EOperationalStatus } from "../enums/EOperationalStatus";
 
 export interface IMeasurement_Service {
   
@@ -11,5 +12,7 @@ export interface IMeasurement_Service {
 
   setMeasurement(measurement: MeasurementDto):Promise<boolean>;
 
+  deleteOldNonDownMeasurements(olderThanMs: number): Promise<number>
+  deleteOldMeasurements(status: EOperationalStatus,olderThanMs: number): Promise<number> 
   deleteMeasurement(measurementID: number):Promise<boolean>;
 }

@@ -47,6 +47,9 @@ import { globalErrorHandler } from './Middlewares/recovery/GlobalErrorMiddleware
 
 // Infrastructure
 import { logger } from './Infrastructure/logging/Logger';
+import { IGatewayServiceStatusService } from './Domain/services/service-status/IGatewayServiceStatusService';
+import { GatewayServiceStatusService } from './Services/service-status/GatewayServiceStatusService';
+import { GatewayServiceStatusController } from './WebAPI/Controllers/service-status/GatewayServiceStatusControllers';
 
 const app = express();
 
@@ -71,6 +74,7 @@ const gatewayFileService: IGatewayFileService = new GatewayFileService(errorHand
 const gatewayNotificationService: IGatewayNotificationService = new GatewayNotificationService(errorHandlingService);
 const gatewayAnalyticsService: IGatewayAnalyticsService = new GatewayAnalyticsService(errorHandlingService);
 const gatewayVersionSevice : IGatewayVersionControlService = new GatewayVersionControlService(errorHandlingService);
+const gatewayServiceStatusService : IGatewayServiceStatusService = new GatewayServiceStatusService(errorHandlingService);
 
 // Controllers
 const healthController = new HealthController();
@@ -82,6 +86,8 @@ const gatewayFileController = new GatewayFileController(gatewayFileService);
 const gatewayNotificationController = new GatewayNotificationController(gatewayNotificationService);
 const gatewayAnalyticsController = new GatewayAnalyticsController(gatewayAnalyticsService);
 const gatewayVersionController = new GatewayVersionControlController(gatewayVersionSevice);
+const gatewayServiceStatusController = new GatewayServiceStatusController(gatewayServiceStatusService);
+
 
 // Register routes
 app.use('/', healthController.getRouter());
@@ -93,6 +99,9 @@ app.use('/api/v1', gatewayFileController.getRouter());
 app.use('/api/v1', gatewayNotificationController.getRouter());
 app.use('/api/v1', gatewayAnalyticsController.getRouter());
 app.use('/api/v1', gatewayVersionController.getRouter());
+app.use('/api/v1', gatewayServiceStatusController.getRouter());
+
+
 
 // Handles calling invalid routes.
 app.use(invalidRouteHandler);

@@ -6,5 +6,6 @@ export const API_ENDPOINTS = Object.freeze({
     FILE: process.env.FILE_SERVICE_API!,
     NOTIFICATION: process.env.NOTIFICATION_SERVICE_API!,
     ANALYTICS: process.env.ANALYTICS_SERVICE_API!,
+    SERVICE_STATUS: process.env.SERVICE_STATUS_API!,
     VERSION_CONTROL: process.env.VERSION_SERVICE_API!
 } as const);

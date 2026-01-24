@@ -9,6 +9,36 @@ import { CreateMeasurementDto } from "../Domain/DTOs/CreateMeasurement_DTO";
 
 export class Measurement_Service implements IMeasurement_Service {
 
+
+    async deleteOldNonDownMeasurements(olderThanMs: number): Promise<number> {
+        const cutoffDate = new Date(Date.now() - olderThanMs);
+
+        const result = await this.measurementRepository
+            .createQueryBuilder()
+            .delete()
+            .from(Measurement)
+            .where("status != :status", { status: EOperationalStatus.Down })
+            .andWhere("measurementDate < :cutoff", { cutoff: cutoffDate })
+            .execute();
+
+        return result.affected ?? 0;
+    }
+
+
+    async deleteOldMeasurements(status: EOperationalStatus, olderThanMs: number): Promise<number> {
+        const cutoffDate = new Date(Date.now() - olderThanMs);
+
+        const result = await this.measurementRepository
+            .createQueryBuilder()
+            .delete()
+            .from(Measurement)
+            .where("status = :status", { status })
+            .andWhere("measurementDate < :cutoff", { cutoff: cutoffDate })
+            .execute();
+
+        return result.affected ?? 0;
+    }
+
     private get measurementRepository(): Repository<Measurement> {
         return Db.getRepository(Measurement);
     }
@@ -35,25 +65,25 @@ export class Measurement_Service implements IMeasurement_Service {
     }
 
     async getAverageUptime(): Promise<{ microserviceId: number; uptime: number }[]> {
-    const result = await this.measurementRepository
-        .createQueryBuilder("m")
-        .select("m.ID_microservice", "microserviceId")
-        .addSelect(
-            `ROUND(
+        const result = await this.measurementRepository
+            .createQueryBuilder("m")
+            .select("m.ID_microservice", "microserviceId")
+            .addSelect(
+                `ROUND(
                 (SUM(CASE WHEN m.status = :operational THEN 1 ELSE 0 END) * 100.0)
                 / COUNT(*),
             2)`,
-            "uptime"
-        )
-        .setParameter("operational", EOperationalStatus.Operational)
-        .groupBy("m.ID_microservice")
-        .getRawMany();
+                "uptime"
+            )
+            .setParameter("operational", EOperationalStatus.Operational)
+            .groupBy("m.ID_microservice")
+            .getRawMany();
 
-    return result.map(r => ({
-        microserviceId: Number(r.microserviceId),
-        uptime: Number(r.uptime),
-    }));
-}
+        return result.map(r => ({
+            microserviceId: Number(r.microserviceId),
+            uptime: Number(r.uptime),
+        }));
+    }
 
 
     async getMeasurementByID(measurementID: number): Promise<MeasurementDto> {
