@@ -17,12 +17,6 @@ export class SocketEventService implements ISocketEventService {
     socket?.on(SocketEvents.NOTIFICATION_CREATED, callback);
   }
 
-  // Registruje listener za notification:updated event
-  onNotificationUpdated(callback: (notification: Notification) => void): void {
-    const socket = this.socketManager.getSocket();
-    socket?.on(SocketEvents.NOTIFICATION_UPDATED, callback);
-  }
-
   // Registruje listener za notification:deleted event
   onNotificationDeleted(callback: (data: { id: number }) => void): void {
     const socket = this.socketManager.getSocket();

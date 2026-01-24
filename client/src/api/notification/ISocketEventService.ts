@@ -3,7 +3,6 @@ import type { Notification } from "../../models/notification/NotificationCardDTO
 export interface ISocketEventService {
   // Notification event handlers
   onNotificationCreated(callback: (notification: Notification) => void): void;
-  onNotificationUpdated(callback: (notification: Notification) => void): void;
   onNotificationDeleted(callback: (data: { id: number }) => void): void;
   onNotificationMarkedRead(callback: (notification: Notification) => void): void;
   onNotificationMarkedUnread(callback: (notification: Notification) => void): void;
