@@ -38,8 +38,8 @@ async function bootstrap() {
     await gc.start();
     await healthService.start();
 
-    app.use("/api/v1/SSM/measurement", measurementController.getRouter());
-    app.use("/api/v1/SSM/microservice", microserviceController.getRouter());
+    app.use("/api/v1/measurements", measurementController.getRouter());
+    app.use("/api/v1/microservice", microserviceController.getRouter());
 
     return app;
 }

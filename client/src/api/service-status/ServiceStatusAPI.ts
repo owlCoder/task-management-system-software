@@ -42,7 +42,7 @@ export class ServiceStatusAPI implements  IServiceStatusAPI {
 
     async getServiceStatus(): Promise<ServiceStatusDTO[]> {
         try {
-            const response = await this.client.get<ServiceStatusDTO[]>(`/SSM/measurement/ServiceStatus`);
+            const response = await this.client.get<ServiceStatusDTO[]>(`/measurements/service-status`);
             return response.data;
         } catch (error) {
             console.error("Error getting status of microservices:", error);

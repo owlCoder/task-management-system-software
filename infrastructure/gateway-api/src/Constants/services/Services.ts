@@ -6,5 +6,6 @@ export const SERVICES = Object.freeze({
     FILE: "File Service",
     NOTIFICATION: "Notification Service",
     ANALYTICS: "Analytics Service",
-    VERSION_CONTROL : "Version-Control Service"
+    VERSION_CONTROL : "Version-Control Service",
+    SERVICE_STATUS:"Service-Status Service"
 } as const);

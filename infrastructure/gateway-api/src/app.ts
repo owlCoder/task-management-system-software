@@ -1,5 +1,7 @@
-// Framework and Config
+// Framework
 import express from 'express';
+
+// Config
 import dotenv from 'dotenv';
 dotenv.config({ quiet: true });
 
@@ -14,6 +16,7 @@ import { IGatewayFileService } from './Domain/services/file/IGatewayFileService'
 import { IGatewayNotificationService } from './Domain/services/notification/IGatewayNotificationService';
 import { IGatewayAnalyticsService } from './Domain/services/analytics/IGatewayAnalyticsService';
 import { IGatewayVersionControlService } from './Domain/services/version-control/IGatewayVersionControlService';
+import { IGatewayServiceStatusService } from './Domain/services/service-status/IGatewayServiceStatusService';
 
 // Service implementations
 import { ErrorHandlingService } from './Services/common/ErrorHandlingService';
@@ -26,6 +29,7 @@ import { GatewayFileService } from './Services/file/GatewayFileService';
 import { GatewayNotificationService } from './Services/notification/GatewayNotificationService';
 import { GatewayAnalyticsService } from './Services/analytics/GatewayAnalyticsService';
 import { GatewayVersionControlService } from './Services/version-control/GatewayVersionControlService';
+import { GatewayServiceStatusService } from './Services/service-status/GatewayServiceStatusService';
 
 // Controllers
 import { HealthController } from './WebAPI/Controllers/health/HealthController';
@@ -37,6 +41,7 @@ import { GatewayFileController } from './WebAPI/Controllers/file/GatewayFileCont
 import { GatewayNotificationController } from './WebAPI/Controllers/notification/GatewayNotificationController';
 import { GatewayAnalyticsController } from './WebAPI/Controllers/analytics/GatewayAnalyticsController';
 import { GatewayVersionControlController } from './WebAPI/Controllers/version_control/GatewayVersionControlController';
+import { GatewayServiceStatusController } from './WebAPI/Controllers/service-status/GatewayServiceStatusController';
 
 // Middlewares
 import { logTraffic } from './Middlewares/logger/LoggingMiddleware';
@@ -71,6 +76,7 @@ const gatewayFileService: IGatewayFileService = new GatewayFileService(errorHand
 const gatewayNotificationService: IGatewayNotificationService = new GatewayNotificationService(errorHandlingService);
 const gatewayAnalyticsService: IGatewayAnalyticsService = new GatewayAnalyticsService(errorHandlingService);
 const gatewayVersionSevice : IGatewayVersionControlService = new GatewayVersionControlService(errorHandlingService);
+const gatewayServiceStatusService : IGatewayServiceStatusService = new GatewayServiceStatusService(errorHandlingService);
 
 // Controllers
 const healthController = new HealthController();
@@ -82,6 +88,7 @@ const gatewayFileController = new GatewayFileController(gatewayFileService);
 const gatewayNotificationController = new GatewayNotificationController(gatewayNotificationService);
 const gatewayAnalyticsController = new GatewayAnalyticsController(gatewayAnalyticsService);
 const gatewayVersionController = new GatewayVersionControlController(gatewayVersionSevice);
+const gatewayServiceStatusController = new GatewayServiceStatusController(gatewayServiceStatusService);
 
 // Register routes
 app.use('/', healthController.getRouter());
@@ -93,6 +100,7 @@ app.use('/api/v1', gatewayFileController.getRouter());
 app.use('/api/v1', gatewayNotificationController.getRouter());
 app.use('/api/v1', gatewayAnalyticsController.getRouter());
 app.use('/api/v1', gatewayVersionController.getRouter());
+app.use('/api/v1', gatewayServiceStatusController.getRouter());
 
 // Handles calling invalid routes.
 app.use(invalidRouteHandler);

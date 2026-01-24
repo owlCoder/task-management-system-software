@@ -4,18 +4,15 @@ import { ILoggerService } from "../../Domain/Services/ILoggerService";
 
 export class Microservice_controller {
     private readonly router: Router;
-    private readonly LoggerService: ILoggerService;
 
-    constructor(private readonly microservicetService: IMicroservice_Service, private readonly loggerService: ILoggerService) {
+    constructor(private readonly microservicetService: IMicroservice_Service, private readonly LoggerService: ILoggerService) {
         this.router = Router();
-        this.LoggerService = loggerService;
         this.initializeRoutes();
     }
 
     private initializeRoutes(): void {
         this.router.get("/microservices", this.getAllMicroservices.bind(this));
         this.router.post("/create", this.createMicroservice.bind(this));
-
         this.router.delete("/delete/:microserviceID", this.deleteMicroservice.bind(this));
     }
 
