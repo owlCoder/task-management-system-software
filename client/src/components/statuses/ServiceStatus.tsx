@@ -11,19 +11,30 @@ export const ServiceStatus: React.FC = () => {
     const [loading, setLoading] = useState<boolean>(true);
 
     useEffect(() => {
+        let isMounted = true;
+
         const fetchServiceStatus = async () => {
             try {
                 const data = await serviceStatusApi.getServiceStatus();
-                setServices(data);
+                if (isMounted) {
+                    setServices(data);
+                }
             } catch (err) {
                 console.error("Failed to load service status", err);
             } finally {
-                setLoading(false);
+                if (isMounted) {
+                    setLoading(false);
+                }
             }
         };
 
         fetchServiceStatus();
+
+        const intervalId = setInterval(fetchServiceStatus, 30_000);
+
+        return () => {isMounted = false;clearInterval(intervalId);};
     }, []);
+
 
     return (
         <div className="w-full">

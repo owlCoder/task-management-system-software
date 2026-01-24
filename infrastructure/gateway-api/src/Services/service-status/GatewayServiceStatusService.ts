@@ -17,6 +17,7 @@ import { SERVICE_STATUS_ROUTES } from "../../Constants/routes/service-status/Ser
 // Infrastructure
 import { createAxiosClient } from "../../Infrastructure/axios/client/AxiosClientFactory";
 import { makeAPICall } from "../../Infrastructure/axios/APIHelpers";
+import { AverageTimeDTO } from "../../Domain/DTOs/service-status/AverageTimeDTO";
 
 export class GatewayServiceStatusService implements IGatewayServiceStatusService {
     private readonly serviceStatusClient: AxiosInstance;
@@ -46,6 +47,14 @@ export class GatewayServiceStatusService implements IGatewayServiceStatusService
             serviceName: SERVICES.SERVICE_STATUS,
             method: HTTP_METHODS.GET,
             url: SERVICE_STATUS_ROUTES.GET_SERIVCE_STATUS,
+        });
+    }
+
+    async getAvgResponseTime(days:number):Promise<Result<AverageTimeDTO[]>>{
+        return await makeAPICall<AverageTimeDTO[]>(this.serviceStatusClient, this.errorHandlingService, {
+            serviceName: SERVICES.SERVICE_STATUS,
+            method: HTTP_METHODS.GET,
+            url: SERVICE_STATUS_ROUTES.GET_AVG_RESPONSE_TIME(days),
         });
     }
 
