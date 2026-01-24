@@ -14,6 +14,7 @@ import { TokenHelper } from '../../helpers/TokenHelper';
 import { ErrorHelper } from '../../helpers/ErrorHelper';
 import { ITokenNamingStrategy } from '../../Domain/strategies/ITokenNamingStrategy';
 import { JWTTokenService } from '../../Services/JWTTokenServices/JWTTokenService';
+import { IJWTTokenService } from '../../Domain/services/IJWTTokenService';
 import { validateGoogleLoginData } from '../validators/GoogleLoginValidator';
 import { GoogleIdTokenVerifier } from '../../Services/Google/GoogleTokenVerifier';
 import { IGoogleIdTokenVerifier } from '../../Domain/services/IGoogleIdTokenVerifier';
@@ -32,7 +33,7 @@ export class AuthController {
     otpVerificationService: IOTPVerificationService,
     logerService: ILogerService,
     tokenNamingStrategy: ITokenNamingStrategy,
-    jwtTokenService: JWTTokenService
+    jwtTokenService: IJWTTokenService
   ) {
     this.router = Router();
     this.authService = authService;

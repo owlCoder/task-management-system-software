@@ -2,11 +2,12 @@ import jwt from 'jsonwebtoken';
 import { env } from 'process';
 import { LoginTokenClaims } from '../../Domain/types/LoginTokenClaims';
 import { AuthTokenClaims } from '../../Domain/types/AuthTokenClaims';
+import { IJWTTokenService } from '../../Domain/services/IJWTTokenService';
 
 /**
  * Service responsible for JWT token generation
  */
-export class JWTTokenService {
+export class JWTTokenService implements IJWTTokenService {
   private readonly jwtSessionExpiration: number = parseInt(env.JWT_SESSION_EXPIRATION_MINUTES || '30', 10);
 
   /**

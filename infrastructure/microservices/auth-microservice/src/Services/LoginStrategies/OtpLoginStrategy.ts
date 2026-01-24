@@ -6,7 +6,6 @@ import { ILogerService } from "../../Domain/services/ILogerService";
 import { SeverityEnum } from "../../Domain/enums/SeverityEnum";
 import { IOTPGenerator } from "../../Domain/services/IOTPGenerator";
 import { LoginData } from "../../Domain/models/LoginData";
-import { User } from "../../Domain/models/User";
 import { v4 as uuidv4 } from 'uuid';
 import { UserDTO } from "../../Domain/DTOs/UserDTO";
 

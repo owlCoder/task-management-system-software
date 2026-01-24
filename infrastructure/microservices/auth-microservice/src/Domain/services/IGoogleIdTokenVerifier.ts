@@ -1,5 +1,5 @@
-import { GoogleUserInfo } from "../DTOs/GoogleUserInfoDTO";
+import { GoogleUserInfoDTO } from "../DTOs/GoogleUserInfoDTO";
 
 export interface IGoogleIdTokenVerifier {
-  verify(idToken: string): Promise<GoogleUserInfo | null>;
+  verify(idToken: string): Promise<GoogleUserInfoDTO | null>;
 }

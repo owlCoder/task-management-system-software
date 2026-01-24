@@ -1,6 +1,5 @@
 import { ILoginStrategy } from "../../Domain/services/ILoginStrategy";
 import { LoginResponseType } from "../../Domain/types/LoginResponse";
-import { User } from "../../Domain/models/User";
 import { ILogerService } from "../../Domain/services/ILogerService";
 import { SeverityEnum } from "../../Domain/enums/SeverityEnum";
 import { UserDTO } from "../../Domain/DTOs/UserDTO";
