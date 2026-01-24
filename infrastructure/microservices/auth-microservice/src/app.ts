@@ -1,31 +1,48 @@
+// External libraries
 import express from 'express';
 import cors from 'cors';
 import "reflect-metadata";
-import { initialize_database } from './Database/InitializeConnection';
 import dotenv from 'dotenv';
 import { Repository } from 'typeorm';
-import { User } from './Domain/models/User';
+
+// Database
 import { Db } from './Database/DbConnectionPool';
-import { IAuthService } from './Domain/services/IAuthService';
-import { AuthService } from './Services/AuthenticationServices/AuthService';
-import { AuthController } from './WebAPI/controllers/AuthController';
-import { ILogerService } from './Domain/services/ILogerService';
-import { LogerService } from './Services/LogerServices/LogerService';
+import { initialize_database } from './Database/InitializeConnection';
+
+// Domain models
+import { User } from './Domain/models/User';
+import { UserRole } from './Domain/models/UserRole';
+
+// Enums
 import { LoggingServiceEnum } from './Domain/enums/LoggingServiceEnum';
 import { SeverityEnum } from './Domain/enums/SeverityEnum';
-import { UserRole } from './Domain/models/UserRole';
-import { SessionService } from './Services/SessionServices/SessionService';
-import { EmailService } from './Services/EmailServices/EmailService';
-import { OTPGenerator } from './Services/OTPServices/OTPGenerator';
-import { EmailHealthChecker } from './Services/EmailServices/EmailHealthChecker';
-import { OTPVerificationService } from './Services/OTPServices/OTPVerificationService';
+
+// Interfaces
+import { IAuthService } from './Domain/services/IAuthService';
+import { ILogerService } from './Domain/services/ILogerService';
 import { IOTPVerificationService } from './Domain/services/IOTPVerificationService';
+import { ITokenNamingStrategy } from './Domain/strategies/ITokenNamingStrategy';
+
+// Helpers
 import { PasswordLoginStrategy } from './Services/LoginStrategies/PasswordLoginStrategy';
 import { OtpLoginStrategy } from './Services/LoginStrategies/OtpLoginStrategy';
-import { setLoggingLevel } from './helpers/loggingHelper';
-import { ITokenNamingStrategy } from './Domain/strategies/ITokenNamingStrategy';
-import { TokenNamingStrategyFactory } from './factories/TokenNamingStrategyFactory';
 import { JWTTokenService } from './Services/JWTTokenServices/JWTTokenService';
+import { EmailHealthChecker } from './Services/EmailServices/EmailHealthChecker';
+import { OTPGenerator } from './Services/OTPServices/OTPGenerator';
+import { setLoggingLevel } from './helpers/loggingHelper';
+import { TokenNamingStrategyFactory } from './factories/TokenNamingStrategyFactory';
+
+
+// Services
+import { AuthService } from './Services/AuthenticationServices/AuthService';
+import { LogerService } from './Services/LogerServices/LogerService';
+import { SessionService } from './Services/SessionServices/SessionService';
+import { EmailService } from './Services/EmailServices/EmailService';
+import { OTPVerificationService } from './Services/OTPServices/OTPVerificationService';
+
+// Controllers
+import { AuthController } from './WebAPI/controllers/AuthController';
+import { IEmailService } from './Domain/services/IEmailService';
 
 dotenv.config({ quiet: true });
 
@@ -74,11 +91,11 @@ const initLogger = new LogerService(LoggingServiceEnum.APP_SERVICE);
   const otpGenerator = new OTPGenerator();
   const healthChecker = new EmailHealthChecker(emailHealthCheckerLogger);
 
-  const emailService = new EmailService(emailLogger, healthChecker);
+  const emailService : IEmailService = new EmailService(emailLogger, healthChecker);
   const sessionService = new SessionService(sessionLogger);
   const passwordStrategy = new PasswordLoginStrategy(authLogger);
   const otpStrategy = new OtpLoginStrategy(emailService, sessionService, otpGenerator, authLogger);
-  const authService: IAuthService = new AuthService(userRepository, passwordStrategy, otpStrategy, emailService, authLogger,userRoleRepository);
+  const authService: IAuthService = new AuthService(userRepository, passwordStrategy, otpStrategy, emailService, authLogger, userRoleRepository);
   const otpVerificationService: IOTPVerificationService = new OTPVerificationService(userRepository, emailService, sessionService, otpGenerator, otpVerificationLogger);
   const logerService: ILogerService = new LogerService(LoggingServiceEnum.APP_SERVICE);
 

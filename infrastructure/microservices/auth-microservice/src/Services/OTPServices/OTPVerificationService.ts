@@ -10,7 +10,6 @@ import { ISessionStore } from "../../Domain/services/ISessionStore";
 import { IOTPGenerator } from "../../Domain/services/IOTPGenerator";
 import { LoginData } from "../../Domain/models/LoginData";
 import { v4 as uuidv4 } from 'uuid';
-import { UserDTO } from "../../Domain/DTOs/UserDTO";
 
 export class OTPVerificationService implements IOTPVerificationService {
   private readonly loginSessionExpirationMinutes: number = parseInt(process.env.LOGIN_SESSION_EXPIRATION_MINUTES || "5", 10);

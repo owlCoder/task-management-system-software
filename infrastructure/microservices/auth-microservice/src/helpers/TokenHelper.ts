@@ -3,6 +3,7 @@ import { AuthTokenClaims } from '../Domain/types/AuthTokenClaims';
 import { ITokenNamingStrategy } from '../Domain/strategies/ITokenNamingStrategy';
 import { TokenAuthResponse, AuthResponse } from '../Domain/types/AuthResponseTypes';
 import { JWTTokenService } from '../Services/JWTTokenServices/JWTTokenService';
+import { IJWTTokenService } from '../Domain/services/IJWTTokenService';
 
 /**
  * Helper class for token response creation
@@ -11,7 +12,7 @@ import { JWTTokenService } from '../Services/JWTTokenServices/JWTTokenService';
 export class TokenHelper {
   constructor(
     private readonly tokenNamingStrategy: ITokenNamingStrategy,
-    private readonly jwtTokenService: JWTTokenService
+    private readonly jwtTokenService: IJWTTokenService
   ) {}
 
   /**
