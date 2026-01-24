@@ -257,6 +257,7 @@ export class AuthController {
   }
 
   private async googleLogin(req: Request, res: Response): Promise<void> {
+    
     this.logerService.log(SeverityEnum.INFO, "Google login request received");
 
     const validation = validateGoogleLoginData(req.body);

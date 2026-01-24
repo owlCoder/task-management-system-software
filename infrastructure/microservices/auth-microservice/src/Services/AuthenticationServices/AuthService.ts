@@ -78,10 +78,11 @@ export class AuthService implements IAuthService {
       where: { email: data.email },
       relations: ["user_role"],
     });
+    console.log("CAO");
     if(user == null)
     {
-      const role = await this.userRoleRepository.findOne({ where: { role_name: "project_manager" } });
-    
+      const role = await this.userRoleRepository.findOne({ where: { role_name: "Project Manager" } });
+      console.log(role);
       const newUser = this.userRepository.create({
       email: data.email,
       image_url: data.picture,
@@ -89,8 +90,8 @@ export class AuthService implements IAuthService {
       google_id: data.sub
     });
 
-    user = await this.userRepository.save(newUser);
-    this.logger.log(SeverityEnum.INFO, `New user registered via Google: ${data.email}`);
+      user = await this.userRepository.save(newUser);
+      this.logger.log(SeverityEnum.INFO, `New user registered via Google: ${data.email}`);
     }
     else
     {
