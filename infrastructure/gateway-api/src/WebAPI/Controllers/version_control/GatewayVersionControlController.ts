@@ -34,12 +34,12 @@ export class GatewayVersionControlController {
         const templateReadAccess = [authenticate, authorize(...TemplatePolicies.READ)];
         const templateWriteAccess = [authenticate, authorize(...TemplatePolicies.WRITE)];
 
-        this.router.get("/reviews",...reviewReadAccess,this.getReviews.bind(this));
-        this.router.post("/reviews/:taskId/accept" ,...reviewWriteAccess,this.acceptReview.bind(this));
-        this.router.post("/reviews/:taskId/reject" ,...reviewWriteAccess,this.rejectReview.bind(this));
-        this.router.post("/reviews/:taskId/send" ,authenticate,this.sendToReview.bind(this));
+        this.router.get("/reviews", ...reviewReadAccess, this.getReviews.bind(this));
+        this.router.post("/reviews/:taskId/accept", ...reviewWriteAccess, this.acceptReview.bind(this));
+        this.router.post("/reviews/:taskId/reject", ...reviewWriteAccess, this.rejectReview.bind(this));
+        this.router.post("/reviews/:taskId/send", authenticate, this.sendToReview.bind(this));
 
-        this.router.get("/templates/:templateId",...templateReadAccess, this.getTemplate.bind(this));
+        this.router.get("/templates/:templateId", ...templateReadAccess, this.getTemplate.bind(this));
         this.router.get("/templates", ...templateReadAccess, this.getAllTemplates.bind(this));
         this.router.post("/templates", ...templateWriteAccess, this.createTemplate.bind(this));
         this.router.post("/templates/:templateId/create", ...templateWriteAccess, this.createTask.bind(this));
@@ -52,11 +52,11 @@ export class GatewayVersionControlController {
         const senderRole = req.user!.role;
         const status = typeof req.query.status === "string" ? req.query.status : undefined;
 
-        const result = await this.gatewayVersionSevice.getReviews(senderRole, status);
+        const result = await this.gatewayVersionSevice.getReviews(senderRole, { status });
         handleResponse(res, result);
     }
 
-    private async getReviewComment(req: Request<ReqParams<"commentId">>, res: Response): Promise<void> {
+    private async getReviewComment(req: Request<ReqParams<'commentId'>>, res: Response): Promise<void> {
         const commentId = parseInt(req.params.commentId, 10);
         const senderRole = req.user!.role;
 
@@ -64,7 +64,7 @@ export class GatewayVersionControlController {
         handleResponse(res, result);
     }
 
-    private async sendToReview(req: Request<ReqParams<"taskId">>, res: Response): Promise<void> {
+    private async sendToReview(req: Request<ReqParams<'taskId'>>, res: Response): Promise<void> {
         const taskId = parseInt(req.params.taskId, 10);
         const senderId = req.user!.id;
         const senderRole = req.user!.role;
@@ -73,7 +73,7 @@ export class GatewayVersionControlController {
         handleResponse(res, result, 201);
     }
 
-    private async acceptReview(req: Request<ReqParams<"taskId">>, res: Response): Promise<void> {
+    private async acceptReview(req: Request<ReqParams<'taskId'>>, res: Response): Promise<void> {
         const taskId = parseInt(req.params.taskId, 10);
         const senderId = req.user!.id;
         const senderRole = req.user!.role;
@@ -82,7 +82,7 @@ export class GatewayVersionControlController {
         handleResponse(res, result, 201);
     }
 
-    private async rejectReview(req: Request<ReqParams<"taskId">>, res: Response): Promise<void> {
+    private async rejectReview(req: Request<ReqParams<'taskId'>>, res: Response): Promise<void> {
         const taskId = parseInt(req.params.taskId, 10);
         const data = req.body as RejectReviewDTO;
         const senderId = req.user!.id;

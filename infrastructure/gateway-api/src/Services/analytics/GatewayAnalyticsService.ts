@@ -123,28 +123,19 @@ export class GatewayAnalyticsService implements IGatewayAnalyticsService {
     }
 
     async getProjectsLast30Days(): Promise<Result<TimeSeriesPointDto[]>> {
-        return await makeAPICall<TimeSeriesPointDto[]>(
-            this.analyticsClient,
-            this.errorHandlingService,
-            {
-                serviceName: SERVICES.ANALYTICS,
-                method: HTTP_METHODS.GET,
-                url: ANALYTICS_ROUTES.PROJECTS_LAST_30_DAYS,
-            }
-        );
+        return await makeAPICall<TimeSeriesPointDto[]>(this.analyticsClient, this.errorHandlingService, {
+            serviceName: SERVICES.ANALYTICS,
+            method: HTTP_METHODS.GET,
+            url: ANALYTICS_ROUTES.PROJECTS_LAST_30_DAYS,
+        });
     }
 
     async getWorkersLast30Days(): Promise<Result<TimeSeriesPointDto[]>> {
-        return await makeAPICall<TimeSeriesPointDto[]>(
-            this.analyticsClient,
-            this.errorHandlingService,
-            {
-                serviceName: SERVICES.ANALYTICS,
-                method: HTTP_METHODS.GET,
-                url: ANALYTICS_ROUTES.WORKERS_LAST_30_DAYS,
-            }
-        );
+        return await makeAPICall<TimeSeriesPointDto[]>(this.analyticsClient, this.errorHandlingService, {
+            serviceName: SERVICES.ANALYTICS,
+            method: HTTP_METHODS.GET,
+            url: ANALYTICS_ROUTES.WORKERS_LAST_30_DAYS,
+        });
     }
-
 
 }

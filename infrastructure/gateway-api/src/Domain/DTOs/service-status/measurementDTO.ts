@@ -1,12 +1,9 @@
-import { EOperationalStatus } from "../../enums/service-status/EOperationalStatus";
+import { OperationalStatus } from "../../enums/service-status/OperationalStatus";
 
-export class MeasurementDto {
-  constructor(
-    public measurementId: number,
-    public microserviceId: number,
-    public status: EOperationalStatus,
-    public responseTime: number,
-    public measurementDate: string
-  ) {}
-
+export interface MeasurementDTO {
+	measurementId: number;
+	microserviceId: number;
+	status: OperationalStatus;
+	responseTime: number;
+	measurementDate: string;
 }

@@ -1,10 +1,7 @@
-import { EOperationalStatus } from "../../enums/service-status/EOperationalStatus";
+import { OperationalStatus } from "../../enums/service-status/OperationalStatus";
 
-
-export class ServiceStatusDto {
-  constructor(
-    public readonly microserviceName: string,
-    public readonly uptime: number,
-    public readonly status: EOperationalStatus
-  ) {}
+export interface ServiceStatusDTO {
+	microserviceName: string;
+	uptime: number;
+	status: OperationalStatus;
 }
