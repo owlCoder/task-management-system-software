@@ -3,6 +3,8 @@ import Sidebar from "../components/dashboard/sidebar/Sidebar";
 import { AnalyticsTab } from "../enums/AnalyticsTabs";
 import { ProjectDTO } from "../models/project/ProjectDTO";
 import { projectAPI } from "../api/project/ProjectAPI";
+import { sprintAPI } from "../api/sprint/SprintAPI";
+import { SprintDTO } from "../models/sprint/SprintDto";
 import { TimeSeriesPointDto } from "../models/analytics/TimeSeriesPointDto";
 
 import { BurndownAnalytics } from "../components/analytics/Burndown";
@@ -43,6 +45,9 @@ export const AnalyticsPage: React.FC = () => {
     const [loadingProjects, setLoadingProjects] = useState(true);
 
     const [selectedSprintId, setSelectedSprintId] = useState<number | null>(null);
+    const [projectSprints, setProjectSprints] = useState<SprintDTO[]>([]);
+    const [loadingSprints, setLoadingSprints] = useState(false);
+
 
     const [burndown, setBurndown] = useState<BurndownDto | null>(null);
     const [burnup, setBurnup] = useState<BurnupDto | null>(null);
@@ -61,29 +66,34 @@ export const AnalyticsPage: React.FC = () => {
     // Token from storage (adjust key if different)
     const token = useMemo(() => localStorage.getItem("authToken") ?? "", []);
 
-    // Sprint list derived from selectedProject
-    const sprints: SprintOption[] = useMemo(() => {
-        if (!selectedProject) return [];
+    // // Sprint list derived from selectedProject
+    // const sprints: SprintOption[] = useMemo(() => {
+    //     if (!selectedProject) return [];
 
-        const anyProject = selectedProject as any;
+    //     const anyProject = selectedProject as any;
 
-        // prefer real sprint list if exists
-        if (Array.isArray(anyProject.sprints) && anyProject.sprints.length > 0) {
-            return anyProject.sprints.map((s: any) => ({
-                sprint_id: Number(s.sprint_id),
-                sprint_title: s.sprint_title ?? s.sprint_name ?? undefined,
-            }));
-        }
+    //     // prefer real sprint list if exists
+    //     if (Array.isArray(anyProject.sprints) && anyProject.sprints.length > 0) {
+    //         return anyProject.sprints.map((s: any) => ({
+    //             sprint_id: Number(s.sprint_id),
+    //             sprint_title: s.sprint_title ?? s.sprint_name ?? undefined,
+    //         }));
+    //     }
 
-        // fallback: sprint_count => NOT ideal, but avoids empty UI
-        const count = Number(anyProject.sprint_count ?? 0);
-        if (!Number.isFinite(count) || count <= 0) return [];
+    //     // fallback: sprint_count => NOT ideal, but avoids empty UI
+    //     const count = Number(anyProject.sprint_count ?? 0);
+    //     if (!Number.isFinite(count) || count <= 0) return [];
 
-        return Array.from({ length: count }, (_, i) => ({
-            sprint_id: i + 1,
-            sprint_title: `Sprint ${i + 1}`,
-        }));
-    }, [selectedProject]);
+    //     return Array.from({ length: count }, (_, i) => ({
+    //         sprint_id: i + 1,
+    //         sprint_title: `Sprint ${i + 1}`,
+    //     }));
+    // }, [selectedProject]);
+
+    const sprints: SprintOption[] = useMemo(
+        () => projectSprints.map(s => ({ sprint_id: s.sprint_id, sprint_title: s.sprint_title })),
+        [projectSprints]
+    );
 
     useEffect(() => {
         const loadProjects = async () => {
@@ -119,7 +129,7 @@ export const AnalyticsPage: React.FC = () => {
     useEffect(() => {
         if (!selectedProject) return;
 
-        if (sprints.length > 0) setSelectedSprintId(sprints[0].sprint_id);
+        if (projectSprints.length > 0) setSelectedSprintId(projectSprints[0].sprint_id);
         else setSelectedSprintId(null);
 
         // reset analytics data
@@ -135,6 +145,41 @@ export const AnalyticsPage: React.FC = () => {
 
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [selectedProjectId]);
+
+    useEffect(() => {
+        const projectId = selectedProject?.project_id;
+        if (!projectId) return;
+
+        const loadSprints = async () => {
+            try {
+            setLoadingSprints(true);
+            const s = await sprintAPI.getSprintsByProject(projectId);
+            setProjectSprints(s);
+
+            // auto-select first sprint for burndown/burnup
+            if (s.length > 0) setSelectedSprintId(s[0].sprint_id);
+            else setSelectedSprintId(null);
+            } catch (e) {
+            console.error("Failed to load sprints for project", e);
+            setProjectSprints([]);
+            setSelectedSprintId(null);
+            } finally {
+            setLoadingSprints(false);
+            }
+        };
+
+        loadSprints();
+
+        setBurndown(null);
+        setBurnup(null);
+        setVelocity(null);
+        setBudget(null);
+        setAnalyticsError(null);
+        setProfitMargin(null);
+        setResourceCost(null);
+        setProjectsLast30Days(null);
+        setWorkersLast30Days(null);
+    }, [selectedProject?.project_id]);
 
     // Load analytics when tab/id changes
     useEffect(() => {
@@ -279,7 +324,7 @@ export const AnalyticsPage: React.FC = () => {
                                     data={burndown}
                                     loading={loadingAnalytics}
                                     sprintId={selectedSprintId}
-                                    sprints={sprints}
+                                    sprints={projectSprints}
                                     onSprintChange={(id) => {
                                         setSelectedSprintId(id);
                                         setBurndown(null);
@@ -299,7 +344,7 @@ export const AnalyticsPage: React.FC = () => {
                                     data={burnup}
                                     loading={loadingAnalytics}
                                     sprintId={selectedSprintId}
-                                    sprints={sprints}
+                                    sprints={projectSprints}
                                     onSprintChange={(id) => {
                                         setSelectedSprintId(id);
                                         setBurnup(null);

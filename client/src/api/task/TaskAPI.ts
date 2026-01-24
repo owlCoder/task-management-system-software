@@ -137,7 +137,7 @@ async uploadComment(taskId: number,userId: number,text: string): Promise<Comment
           Authorization: `Bearer ${this.token}`,
         },
         body: JSON.stringify({
-          userId,
+          user_id: userId,
           comment: text,
         }),
       }

@@ -17,6 +17,7 @@ import { CommentDTO } from "../models/task/CommentDTO";
 import { TaskCommentInput } from "../components/task/TaskCommentInput";
 import { TaskVersionDiff } from "../components/task/TaskVersionDiff";
 import { TaskVersionDTO } from "../models/task/TaskVersionDTO";
+import { TaskVersionHistoryDropdown } from "../components/task/TaskVersionHistoryDropdown";
 
 export const TaskDetailPage: React.FC<TaskDetailPageProps> = ({token,taskId,setClose,onEdit,
   }) => {
@@ -31,6 +32,7 @@ export const TaskDetailPage: React.FC<TaskDetailPageProps> = ({token,taskId,setC
   const [versions, setVersions] = useState<TaskVersionDTO[]>([]);
   const [versionsError, setVersionsError] = useState<string | null>(null);
   const [uploadedFileId, setUploadedFileId] = useState<number>(0);
+  //const [historyOpen, setHistoryOpen] = useState(false);
 
   const apiTask = new TaskAPI(import.meta.env.VITE_GATEWAY_URL, token);
   const fileApi = new FileAPI();
@@ -71,24 +73,24 @@ const handleUpload = async () => {
     if (!text.trim()) return;
     
     const newComment = await apiTask.uploadComment(taskId, userId, text);
-    setComments((prev) => [...prev,newComment]);
+    setComments(prev => [...prev, newComment]);
   };
 
  
  const handleDeleteComments = async (commentId: number) => {
-  await apiTask.deleteComment(commentId, userId);
+    await apiTask.deleteComment(commentId, userId);
 
-  setTask(prev => {
-    if (!prev) return prev;
-
-    return {
-      ...prev,
-      comments: prev.comments.filter(
-        c => c.comment_id !== commentId
-      ),
-    };
-  });
-};
+    setTask(prev => {
+      if (!prev) return prev;
+      setComments(prev => prev.filter(c => c.comment_id !== commentId));
+      return {
+        ...prev,
+        comments: prev.comments.filter(
+          c => c.comment_id !== commentId
+        ),
+      };
+    });
+  };
 
 
   useEffect(() => {
@@ -160,6 +162,11 @@ const handleUpload = async () => {
                 task={task}
               />
 
+              <TaskVersionHistoryDropdown
+                versions={versions}
+                error={versionsError}
+              />
+
               {versionsError ? (
                 <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-3 text-xs text-red-200">
                   {versionsError}
@@ -168,7 +175,7 @@ const handleUpload = async () => {
                 <TaskVersionDiff versions={versions} />
               )}
               
-              <TaskCommentList comments={task.comments} onDelete={handleDeleteComments}/>
+              <TaskCommentList comments={comments} onDelete={handleDeleteComments} />
               {task.task_status!== TaskStatus.COMPLETED &&  <TaskCommentInput onSubmit={handleAddComments} />}
 
               {task.task_status!== TaskStatus.COMPLETED &&  view === "upload" && (
