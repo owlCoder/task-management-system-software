@@ -35,19 +35,28 @@ export const useReviewInbox = ({ token, userRole, userApi, taskApi }: Params) =>
   const [authorNamesById, setAuthorNamesById] = useState<Record<number, string>>({});
   const [taskTitlesById, setTaskTitlesById] = useState<Record<number, string>>({});
 
-  const ensureUsersLoaded = useCallback(async () => {
-    if (Object.keys(authorNamesById).length > 0) return;
+  const ensureUsersLoaded = useCallback(
+    async (list: TaskReviewDTO[]) => {
+      const authorIds = Array.from(
+        new Set(list.map((x) => Number(x.authorId)).filter((id) => Number.isFinite(id) && id > 0))
+      );
 
-    try {
-      const users: UserDTO[] = await userApi.getAllUsers(token);
-      const map: Record<number, string> = {};
-      for (const u of users) map[u.user_id] = u.username;
-      setAuthorNamesById(map);
-    } catch (e) {
-      console.error(e);
-      // fallback #id
-    }
-  }, [authorNamesById, token, userApi]);
+      const missing = authorIds.filter((id) => authorNamesById[id] == null);
+      if (!missing.length) return;
+
+      try {
+        const users: UserDTO[] = await userApi.getUsersByIds(token, missing);
+        const map: Record<number, string> = {};
+        for (const u of users) map[u.user_id] = u.username;
+
+        setAuthorNamesById((prev) => ({ ...prev, ...map }));
+      } catch (e) {
+        console.error(e);
+        // fallback ostaje Author #id
+      }
+    },
+    [authorNamesById, token, userApi]
+  );
 
   const ensureTaskTitlesLoaded = useCallback(
     async (list: TaskReviewDTO[]) => {
@@ -90,7 +99,7 @@ export const useReviewInbox = ({ token, userRole, userApi, taskApi }: Params) =>
 
         setItems(list);
 
-        await ensureUsersLoaded();
+        await ensureUsersLoaded(list);
         await ensureTaskTitlesLoaded(list);
 
         // ako gledamo REJECTED ili ALL povlaci komentare po commentId

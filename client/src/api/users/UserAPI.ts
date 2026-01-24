@@ -140,4 +140,20 @@ export class UserAPI implements IUserAPI {
       throw error;
     }
   }
+
+  async getUsersByIds(token: string, ids: number[]): Promise<UserDTO[]> {
+    try {
+      return (
+        await this.axiosInstance.get<UserDTO[]>(`/users/ids?ids=${ids.join(",")}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        })
+      ).data;
+    } catch (error) {
+      console.error("Error fetching users by ids:", error);
+      throw error;
+    }
+  }
 }

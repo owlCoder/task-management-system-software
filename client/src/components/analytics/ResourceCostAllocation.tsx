@@ -18,6 +18,7 @@ interface ResourceCostAllocationProps {
   project: ProjectDTO;
   data: ResourceCostAllocationDto | null;
   loading?: boolean;
+  usernamesById?: Record<number, string>;
 }
 
 const formatMoney = (n: number) => `${n.toFixed(2)} ¥`;
@@ -26,6 +27,7 @@ export const ResourceCostAllocation: React.FC<ResourceCostAllocationProps> = ({
   project,
   data,
   loading = false,
+  usernamesById = {},
 }) => {
   if (!data) {
     return loading ? (
@@ -69,7 +71,8 @@ export const ResourceCostAllocation: React.FC<ResourceCostAllocationProps> = ({
       const cost = Number(r.total_cost ?? 0);
       const percent = total > 0 ? (cost / total) * 100 : 0;
 
-      return { userId, name: "User " + String(userId), cost, percent };
+      const label = (usernamesById && usernamesById[userId]) ? usernamesById[userId] : `User ${userId}`;
+      return { userId, name: label, cost, percent };
     })
     .sort((a: any, b: any) => b.cost - a.cost);
 
@@ -155,7 +158,7 @@ export const ResourceCostAllocation: React.FC<ResourceCostAllocationProps> = ({
       </div>
       {data && (
         <ExportButton
-          onClick={() => AnalyticsExportService.exportResources({ project, data })}
+          onClick={() => AnalyticsExportService.exportResources({ project, data, usernamesById  })}
           label="Export Resource Cost Allocation for this project"
           classname="ml-4 mr-4"
         />

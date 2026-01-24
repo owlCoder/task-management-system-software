@@ -4,6 +4,7 @@ import { AnalyticsTab } from "../enums/AnalyticsTabs";
 import { ProjectDTO } from "../models/project/ProjectDTO";
 import { projectAPI } from "../api/project/ProjectAPI";
 import { sprintAPI } from "../api/sprint/SprintAPI";
+import { UserAPI } from "../api/users/UserAPI";
 import { SprintDTO } from "../models/sprint/SprintDto";
 import { TimeSeriesPointDto } from "../models/analytics/TimeSeriesPointDto";
 
@@ -47,7 +48,7 @@ export const AnalyticsPage: React.FC = () => {
     const [selectedSprintId, setSelectedSprintId] = useState<number | null>(null);
     const [projectSprints, setProjectSprints] = useState<SprintDTO[]>([]);
     const [loadingSprints, setLoadingSprints] = useState(false);
-
+    const [usernamesById, setUsernamesById] = useState<Record<number, string>>({});
 
     const [burndown, setBurndown] = useState<BurndownDto | null>(null);
     const [burnup, setBurnup] = useState<BurnupDto | null>(null);
@@ -62,6 +63,7 @@ export const AnalyticsPage: React.FC = () => {
 
     // Instantiate API once (AuthAPI style)
     const analyticsAPI = useMemo(() => new AnalyticsAPI(), []);
+    const userAPI = new UserAPI();
 
     // Token from storage (adjust key if different)
     const token = useMemo(() => localStorage.getItem("authToken") ?? "", []);
@@ -218,6 +220,21 @@ export const AnalyticsPage: React.FC = () => {
                 } else if (activeTab === "RESOURCES") {
                     const rc = await analyticsAPI.getResourceCostAllocation(projectId, token);
                     setResourceCost(rc);
+
+                    const ids = Array.from(
+                        new Set((rc.resources ?? []).map(r => Number(r.user_id)).filter(id => Number.isFinite(id) && id > 0))
+                    );
+
+                    if (ids.length > 0) {
+                        const users = await userAPI.getUsersByIds(token, ids);
+
+                        const map: Record<number, string> = {};
+                        for (const u of users) map[u.user_id] = u.username;
+
+                        setUsernamesById(map);
+                    } else {
+                        setUsernamesById({});
+                    }
                 }
                 else if (activeTab === "LAST_30_DAYS") {
                     const [projects, workers] = await Promise.all([
@@ -401,6 +418,7 @@ export const AnalyticsPage: React.FC = () => {
                                     project={selectedProject!}
                                     data={resourceCost}
                                     loading={loadingAnalytics}
+                                    usernamesById={usernamesById}
                                 />
                             ) : (
                                 "Select project..."

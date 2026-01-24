@@ -46,6 +46,7 @@ interface ProfitMarginPayload {
 interface ResourcesPayload {
   project: ProjectDTO;
   data: ResourceCostAllocationDto;
+  usernamesById?: Record<number, string>;
 }
 
 export class AnalyticsExportService {
@@ -517,7 +518,7 @@ export class AnalyticsExportService {
    * RESOURCES
    */
   static async exportResources(payload: ResourcesPayload) {
-    const { project, data } = payload;
+    const { project, data, usernamesById = {} } = payload;
     const dateStr = this.formatDate();
     const projectName = project.project_name?.replace(/[^a-zA-Z0-9]/g, '') || `PROJ${project.project_id}`;
     const filename = `RESOURCES_${projectName}_${dateStr}.pdf`;
@@ -528,7 +529,7 @@ export class AnalyticsExportService {
 
     const chartData = resources
       .map((r: any) => ({
-        name: `User ${r.user_id}`,
+        name: usernamesById[Number(r.user_id)] ?? `User ${r.user_id}`,
         value: Number(r.total_cost ?? 0),
         color: "rgba(96, 165, 250, 0.6)"
       }))
@@ -575,7 +576,7 @@ export class AnalyticsExportService {
         <table>
           <thead>
             <tr>
-              <th>User ID</th>
+              <th>User</th>
               <th>Cost (¥)</th>
               <th>Percentage</th>
             </tr>

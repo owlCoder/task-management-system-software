@@ -36,7 +36,9 @@ export class GatewayUserController {
     private initializeRoutes() {
         const userReadonlyAccess = [authenticate, authorize(...UserPolicies.READONLY)];
         const userWriteAccess = [authenticate, authorize(...UserPolicies.WRITE)];
+        const userMultipleReadAccess = [authenticate, authorize(...UserPolicies.READ_MULTIPLE)];
 
+        this.router.get("/users/ids", ...userMultipleReadAccess, this.getUsersByIds.bind(this));
         this.router.post("/users", ...userWriteAccess, this.createUser.bind(this));
         this.router.get("/users/:userId", ...userReadonlyAccess, this.getUserById.bind(this));
         this.router.get("/users", ...userReadonlyAccess, this.getUsers.bind(this));
@@ -88,6 +90,17 @@ export class GatewayUserController {
         handleResponse(res, result);
     }
 
+    private async getUsersByIds(req: Request, res: Response): Promise<void> {
+        const idsParam = req.query.ids as string | undefined;
+
+        const ids = (idsParam ?? "")
+            .split(",")
+            .map((x) => parseInt(x.trim(), 10))
+            .filter((n) => Number.isFinite(n) && n > 0);
+
+        const result = await this.gatewayUserService.getUsersByIds(ids);
+        handleResponse(res, result);
+    }
     /**
      * PUT /api/v1/users/:userId
      * @param {Request} req - the request object, containing the user data in the body as a {@link UpdateUserDTO} and user id in params.
