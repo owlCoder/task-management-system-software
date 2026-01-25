@@ -21,6 +21,7 @@ import { API_ENDPOINTS } from "../../Constants/services/APIEndpoints";
 // Infrastructure
 import { makeAPICall } from "../../Infrastructure/axios/APIHelpers";
 import { createAxiosClient } from "../../Infrastructure/axios/client/AxiosClientFactory";
+import { TaskVersionDTO } from "../../Domain/DTOs/task/TaskVersionDTO";
 
 /**
  * Makes API requests to the Task Microservice.
@@ -186,6 +187,28 @@ export class GatewayTaskService implements IGatewayTaskService {
             serviceName: SERVICES.TASK,
             method: HTTP_METHODS.DELETE,
             url: TASK_ROUTES.DELETE_COMMENT(commentId),
+            headers: {
+                'x-user-id': senderId.toString()
+            }
+        });
+    }
+
+    async getTaskVersions(taskId: number, senderId: number): Promise<Result<TaskVersionDTO[]>> {
+        return await makeAPICall<TaskVersionDTO[]>(this.taskClient, this.errorHandlingService, {
+            serviceName: SERVICES.TASK,
+            method: HTTP_METHODS.GET,
+            url: TASK_ROUTES.GET_TASK_VERSIONS(taskId),
+            headers: {
+                'x-user-id': senderId.toString()
+            }
+        });
+    }
+
+    async getTaskVersion(taskId: number, versionId: number, senderId: number): Promise<Result<TaskVersionDTO>> {
+        return await makeAPICall<TaskVersionDTO>(this.taskClient, this.errorHandlingService, {
+            serviceName: SERVICES.TASK,
+            method: HTTP_METHODS.GET,
+            url: TASK_ROUTES.GET_TASK_VERSION(taskId, versionId),
             headers: {
                 'x-user-id': senderId.toString()
             }

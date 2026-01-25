@@ -16,6 +16,7 @@ export interface EditTaskModalProps {
   task: TaskDTO;
   token: string;
   projectId: number;
+  onUpdated?: () => void;
 }
 
 // FileUpload Props

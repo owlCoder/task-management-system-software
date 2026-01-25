@@ -173,66 +173,102 @@ export class TaskService implements ITaskService {
     }
 
 
-    async getTaskById(task_id: number,user_id: number): Promise<Result<Task>> {
-        try {
-            const task = await this.taskRepository.findOne({
-                where: { task_id },
-                relations: ["comments"]
-            });
-            if (!task) {
-                return {success:false,errorCode: ErrorCode.TASK_NOT_FOUND};
-            }
-            if(user_id == task.worker_id || user_id == task.project_manager_id)
-                return {success: true,data: task}
-            else
-                return { success:false,errorCode: ErrorCode.FORBIDDEN};
-        } catch (error) {
-            return {success:false,errorCode: ErrorCode.INTERNAL_ERROR};
+    async getTaskById(task_id: number, user_id: number): Promise<Result<Task>> {
+    try {
+        const task = await this.taskRepository.findOne({
+        where: { task_id },
+        relations: ["comments"],
+        });
+
+        if (!task) {
+            return { success: false, errorCode: ErrorCode.TASK_NOT_FOUND, message: "Task not found" };
         }
+
+        if (user_id === task.worker_id || user_id === task.project_manager_id) {
+            return { success: true, data: task };
+        }
+
+        const sprintResult = await this.projectService.getSprintById(task.sprint_id);
+        if (!sprintResult.success) {
+            return { success: false, errorCode: ErrorCode.SPRINT_NOT_FOUND, message: "Sprint not found" };
+        }
+
+        const project_id = sprintResult.data.project_id;
+
+        const usersResult = await this.projectService.getUsersForProject(project_id);
+        if (!usersResult.success) {
+            return { success: false, errorCode: ErrorCode.INVALID_INPUT, message: "Failed to get project users" };
+        }
+
+        const userExists = usersResult.data.some((u: any) => u.user_id === user_id);
+        if (!userExists) {
+            return { success: false, errorCode: ErrorCode.FORBIDDEN, message: "User is not assigned to this project" };
+        }
+
+        return { success: true, data: task };
+    } catch (error) {
+        return { success: false, errorCode: ErrorCode.INTERNAL_ERROR, message: "Internal server error" };
     }
+}
     
-    async updateTask(task_id: number, updateTaskDTO: UpdateTaskDTO,user_id: number
-    ): Promise<Result<Task>> {
-        try {
+    async updateTask(task_id: number, updateTaskDTO: UpdateTaskDTO, user_id: number): Promise<Result<Task>> {
+    try {
             const task = await this.taskRepository.findOne({
-                where: { task_id },
-                relations: ["comments"]
-            });
+            where: { task_id },
+            relations: ["comments"],
+        });
 
-            if (!task) {
-                return { success: false, errorCode: ErrorCode.TASK_NOT_FOUND, message: "Task not found" };
-            }
-            console.log(task);
-            if(user_id == task.project_manager_id)
-            {
-                if (updateTaskDTO.title !== undefined && updateTaskDTO.title.trim().length > 0) {
-                    task.title = updateTaskDTO.title;
-                }
-
-                if (updateTaskDTO.description !== undefined && updateTaskDTO.description.trim().length > 0) {
-                    task.task_description = updateTaskDTO.description;
-                }
-
-                if (updateTaskDTO.estimatedCost !== undefined && updateTaskDTO.estimatedCost >= 0) {
-                    task.estimated_cost = updateTaskDTO.estimatedCost;
-                }
-                if (updateTaskDTO.assignedTo !== undefined && updateTaskDTO.assignedTo > 0) {
-                task.worker_id = updateTaskDTO.assignedTo;
-                }
-                await this.taskVersionService.createVersionSnapshot(task);
-            }
-            else
-            {
-                return { success: false, errorCode: ErrorCode.FORBIDDEN, message: "Failed to update task" };
-            }
-
-            const updatedTask = await this.taskRepository.save(task);
-            return { success: true, data: updatedTask };
-
-        } catch (error) {
-            return { success: false, errorCode: ErrorCode.INTERNAL_ERROR, message: "Failed to update task" };
+        if (!task) {
+            return { success: false, errorCode: ErrorCode.TASK_NOT_FOUND, message: "Task not found" };
         }
+
+        const userResult = await this.userService.getUserById(user_id);
+        if (!userResult.success) {
+            return { success: false, errorCode: ErrorCode.INVALID_INPUT, message: "User not found" };
+        }
+
+        const role_name = userResult.data.role_name;
+        if (role_name !== UserRole.PROJECT_MANAGER && role_name !== UserRole.ADMIN && role_name !== UserRole.SYSTEM_ADMIN) {
+            return { success: false, errorCode: ErrorCode.FORBIDDEN, message: "Only project managers can update tasks" };
+        }
+
+        const sprintResult = await this.projectService.getSprintById(task.sprint_id);
+        if (!sprintResult.success) {
+            return { success: false, errorCode: ErrorCode.SPRINT_NOT_FOUND, message: "Sprint not found" };
+        }
+
+        const project_id = sprintResult.data.project_id;
+        const usersResult = await this.projectService.getUsersForProject(project_id);
+        if (!usersResult.success) {
+            return { success: false, errorCode: ErrorCode.INVALID_INPUT, message: "Failed to get project users" };
+        }
+
+        const isOnProject = usersResult.data.some((u: any) => u.user_id === user_id);
+        if (!isOnProject) {
+            return { success: false, errorCode: ErrorCode.FORBIDDEN, message: "User is not assigned to this project" };
+        }
+
+        if (updateTaskDTO.title !== undefined) task.title = updateTaskDTO.title;
+        if (updateTaskDTO.description !== undefined) task.task_description = updateTaskDTO.description;
+        if (updateTaskDTO.estimatedCost !== undefined) task.estimated_cost = updateTaskDTO.estimatedCost;
+
+        if (updateTaskDTO.assignedTo !== undefined) {
+            const assigneeOnProject = usersResult.data.some((u: any) => u.user_id === updateTaskDTO.assignedTo);
+            if (!assigneeOnProject) {
+                return { success: false, errorCode: ErrorCode.INVALID_INPUT, message: "Assignee is not assigned to this project" };
+            }
+        task.worker_id = updateTaskDTO.assignedTo;
+        }
+
+        const updatedTask = await this.taskRepository.save(task);
+
+        await this.taskVersionService.createVersionSnapshot(updatedTask);
+
+        return { success: true, data: updatedTask };
+    } catch {
+        return { success: false, errorCode: ErrorCode.INTERNAL_ERROR, message: "Failed to update task" };
     }
+}
 
     async updateTaskStatus(task_id: number, newStatus: TaskStatus, user_id: number,file_id : number): Promise<Result<Task>> {
         try {

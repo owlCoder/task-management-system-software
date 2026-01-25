@@ -2,6 +2,7 @@ import { CommentDTO } from "../../DTOs/task/CommentDTO";
 import { CreateCommentDTO } from "../../DTOs/task/CreateCommentDTO";
 import { CreateTaskDTO } from "../../DTOs/task/CreateTaskDTO";
 import { TaskDTO } from "../../DTOs/task/TaskDTO";
+import { TaskVersionDTO } from "../../DTOs/task/TaskVersionDTO";
 import { UpdateTaskDTO } from "../../DTOs/task/UpdateTaskDTO";
 import { UpdateTaskStatusDTO } from "../../DTOs/task/UpdateTaskStatusDTO";
 import { Result } from "../../types/common/Result";
@@ -15,4 +16,6 @@ export interface IGatewayTaskService {
     deleteTaskById(taskId: number, senderId: number): Promise<Result<void>>;
     addCommentByTaskId(taskId: number, data: CreateCommentDTO, senderId: number): Promise<Result<CommentDTO>>;
     deleteCommentById(commentId: number, senderId: number): Promise<Result<void>>;
+    getTaskVersions(taskId: number, senderId: number): Promise<Result<TaskVersionDTO[]>>;
+    getTaskVersion(taskId: number, versionId: number, senderId: number): Promise<Result<TaskVersionDTO>>;
 }

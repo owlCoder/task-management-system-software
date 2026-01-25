@@ -48,6 +48,8 @@ export class GatewayTaskController {
         this.router.delete('/tasks/:taskId', ...taskWriteAccess, this.deleteTaskById.bind(this));
         this.router.post('/tasks/:taskId/comments', ...taskWriteAccess, this.addCommentByTaskId.bind(this));
         this.router.delete('/comments/:commentId', ...taskWriteAccess, this.deleteCommentById.bind(this));
+        this.router.get('/tasks/:taskId/versions', ...taskReadonlyAccess, this.getTaskVersions.bind(this));
+        this.router.get('/tasks/:taskId/versions/:versionId', ...taskReadonlyAccess, this.getTaskVersionById.bind(this));
     }
 
     /**
@@ -180,6 +182,39 @@ export class GatewayTaskController {
 
         const result = await this.gatewayTaskService.deleteCommentById(commentId, senderId);
         handleEmptyResponse(res, result);
+    }
+
+    /**
+     * GET /api/v1/tasks/:taskId/versions
+     * @param {Request} req - the request object, containing the id of the task in params.
+     * @param {Response} res - the response object for the client.
+     * @returns {Promise<void>}
+     * - On success: response status 200, response data: {@link TaskVersionDTO[]}. 
+     * - On failure: response status code indicating the failure, response data: message describing the error.
+     */
+    private async getTaskVersions(req: Request<ReqParams<'taskId'>>, res: Response): Promise<void> {
+        const taskId = parseInt(req.params.taskId, 10);
+        const senderId = req.user!.id;
+
+        const result = await this.gatewayTaskService.getTaskVersions(taskId, senderId);
+        handleResponse(res, result);
+    }
+
+    /**
+     * GET /api/v1/tasks/:taskId/versions/:versionId
+     * @param {Request} req - the request object, containing the id of the task and version in params.
+     * @param {Response} res - the response object for the client.
+     * @returns {Promise<void>}
+     * - On success: response status 200, response data: {@link TaskVersionDTO}. 
+     * - On failure: response status code indicating the failure, response data: message describing the error.
+     */
+    private async getTaskVersionById(req: Request<ReqParams<'taskId' | 'versionId'>>, res: Response): Promise<void> {
+        const taskId = parseInt(req.params.taskId, 10);
+        const versionId = parseInt(req.params.versionId, 10);
+        const senderId = req.user!.id;
+
+        const result = await this.gatewayTaskService.getTaskVersion(taskId, versionId, senderId);
+        handleResponse(res, result);
     }
 
     public getRouter(): Router {

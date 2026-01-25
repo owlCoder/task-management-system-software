@@ -39,6 +39,7 @@ const TaskPage: React.FC<TaskListPageProps> = ({ projectId }) => {
   const [showBoard, setShowBoard] = useState(false);
   const api = new TaskAPI(import.meta.env.VITE_GATEWAY_URL, token);
   const selectedTask = tasks.find((t) => t.task_id === selectedtaskId);
+  const [detailRefreshKey, setDetailRefreshKey] = useState(0);
 
   const handleStatusChange = async (taskId: number, newStatus: TaskStatus) => {
     const taskToUpdate = tasks.find((t) => t.task_id === taskId);
@@ -100,35 +101,40 @@ const TaskPage: React.FC<TaskListPageProps> = ({ projectId }) => {
       }
     });
 
+
+  const reloadTasks = async () => {
+    if (!effectiveProjectId) {
+      setTasks([]);
+      setUsers([]);
+      setLoading(false);
+      return;
+    }
+
+    const [tasksData, usersData] = await Promise.all([
+      sprintIdNum
+        ? api.getTasksBySprint(sprintIdNum)
+        : api.getTasksByProject(effectiveProjectId),
+      projectAPI.getProjectUsers(Number(effectiveProjectId)),
+    ]);
+
+    setTasks(tasksData);
+    setUsers(usersData);
+};
   useEffect(() => {
     const load = async () => {
       try {
-        if(!effectiveProjectId){
-          setTasks([]);
-          setUsers([]);
-          setLoading(false);
-          return;
-        }
-        const [tasksData, usersData] = await Promise.all([
-          sprintIdNum
-            ? api.getTasksBySprint(sprintIdNum)
-            : api.getTasksByProject(effectiveProjectId),
-          projectAPI.getProjectUsers(Number(effectiveProjectId))
-        ]);
-        setTasks(tasksData);
-        setUsers(usersData);
+        setLoading(true);
+        await reloadTasks();
       } catch (err) {
         console.error("Failed to fetch tasks", err);
-        setTasks(
-          []
-        );
+        setTasks([]);
       } finally {
         setLoading(false);
       }
     };
 
     load();
-  }, [effectiveProjectId, sprintIdNum, token]);
+}, [effectiveProjectId, sprintIdNum, token]);
 
   if (loading) {
     return <div className="text-white p-6">Loading tasks...</div>;
@@ -225,6 +231,7 @@ const TaskPage: React.FC<TaskListPageProps> = ({ projectId }) => {
 
           {selectedtaskId !== null && (
             <TaskDetailPage
+              key={selectedtaskId - detailRefreshKey}
               taskId={selectedtaskId}
               token={token}
               setClose={() => setSelectedTaskId(null)}
@@ -299,11 +306,15 @@ const TaskPage: React.FC<TaskListPageProps> = ({ projectId }) => {
 
       {editOpen && selectedTask && (
         <EditTaskModal
-          open={editOpen}
-          onClose={() => setEditOpen(false)}
-          task={selectedTask}
-          token={token}
-          projectId={Number(effectiveProjectId)}
+            open={editOpen}
+            onClose={() => setEditOpen(false)}
+            task={selectedTask}
+            token={token}
+            projectId={Number(effectiveProjectId)}
+            onUpdated={async () => {
+              await reloadTasks();
+              setDetailRefreshKey((k) => k + 1);
+            }}
         />
       )}
     </div>
