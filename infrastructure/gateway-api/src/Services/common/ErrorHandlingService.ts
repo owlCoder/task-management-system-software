@@ -7,6 +7,10 @@ import { IErrorHandlingService } from "../../Domain/services/common/IErrorHandli
 import { Result } from "../../Domain/types/common/Result";
 import { UpstreamedErrorDetails } from "../../Domain/types/common/UpstreamedErrorDetails";
 
+// Constants
+import { SERVICES } from "../../Constants/services/Services";
+import { ERROR_CODE } from "../../Constants/error/ErrorCodes";
+
 /**
  * Centralized error handler for client requests.
  */
@@ -112,7 +116,13 @@ export class ErrorHandlingService implements IErrorHandlingService {
      * @returns {Result<never>} containing the status code 500 and error message.
      */
     private handleInternalError(error: unknown, method: string, url: string): Result<never> {
-        this.loggerService.err("Gateway", "GATEWAY_ERROR", url, method, `Gateway error ${error instanceof Error ? `- ${error.message}` : ""}`);
+        this.loggerService.err(
+            SERVICES.SELF, 
+            ERROR_CODE.INTERNAL, 
+            url, 
+            method, 
+            `Gateway error ${error instanceof Error ? `- ${error.message}` : ""}`
+        );
 
         return {
             success: false,

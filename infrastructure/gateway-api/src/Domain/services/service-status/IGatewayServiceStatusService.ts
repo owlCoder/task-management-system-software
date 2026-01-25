@@ -7,5 +7,5 @@ export interface IGatewayServiceStatusService {
     getAllMeasurements(): Promise<Result<MeasurementDTO[]>>;
     getAllDownMeasurements(): Promise<Result<MeasurementDTO[]>>;
     getServiceStauts(): Promise<Result<ServiceStatusDTO[]>>;
-    getAvgResponseTime(days:number):Promise<Result<AverageTimeDTO[]>>
+    getAvgResponseTime(days: number): Promise<Result<AverageTimeDTO[]>>;
 }

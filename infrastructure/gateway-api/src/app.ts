@@ -52,6 +52,9 @@ import { globalErrorHandler } from './Middlewares/recovery/GlobalErrorMiddleware
 
 // Infrastructure
 import { logger } from './Infrastructure/logging/Logger';
+import { initSIEMService } from './Infrastructure/siem/service/SIEMServiceInstance';
+import { ISIEMService } from './Infrastructure/siem/configs/services/ISIEMService';
+import { SIEMService } from './Infrastructure/siem/service/SIEMService';
 
 const app = express();
 
@@ -66,6 +69,10 @@ app.use(corsPolicy, logTraffic, express.json(), bodyParserErrorHandler);
 // Core infrastructure
 const loggerService: ILoggerService = new LoggerService(logger);
 const errorHandlingService: IErrorHandlingService = new ErrorHandlingService(loggerService);
+const siemService: ISIEMService = new SIEMService(loggerService);
+
+// Service that sends events to SIEM.
+initSIEMService(siemService);
 
 // Domain services
 const gatewayAuthService: IGatewayAuthService = new GatewayAuthService(errorHandlingService);

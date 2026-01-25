@@ -5,8 +5,14 @@ import { Request, Response, NextFunction } from "express";
 import { UserRole } from "../../Domain/enums/user/UserRole";
 import { AuthTokenClaimsType } from "../../Domain/types/auth/AuthTokenClaims";
 
+// Constants
+import { SERVICES } from "../../Constants/services/Services";
+import { ERROR_CODE } from "../../Constants/error/ErrorCodes";
+
 // Infrastructure
 import { logger } from "../../Infrastructure/logging/Logger";
+import { getSIEMService } from "../../Infrastructure/siem/service/SIEMServiceInstance";
+import { generateEvent } from "../../Infrastructure/siem/utils/events/GenerateEvent";
 
 /**
  * Middleware to authorize users based on their roles.
@@ -21,15 +27,19 @@ export const authorize = (...permittedRoles: UserRole[]) => {
     	const user = req.user as AuthTokenClaimsType;
 
     	if (!user || !permittedRoles.includes(user.role)) {
-			const message = "Access denied";
+			const message = "Unauthorized - access denied";
 
 			logger.warn({
-				service: "Gateway",
-				code: "AUTHORIZATION_ERR",
+				service: SERVICES.SELF,
+				code: ERROR_CODE.AUTHORIZATION,
 				method: req.method,
 				url: req.url,
 				ip: req.ip
 			}, message);
+
+			getSIEMService().sendEvent(
+				generateEvent(SERVICES.SELF, req, 403, message, ERROR_CODE.AUTHORIZATION)
+			);
 
 			res.status(403).json({ message: message });
 			return;

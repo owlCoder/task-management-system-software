@@ -1,8 +1,14 @@
 // Framework
 import { Request, Response, NextFunction } from "express";
 
+// Constants
+import { SERVICES } from "../../Constants/services/Services";
+import { ERROR_CODE } from "../../Constants/error/ErrorCodes";
+
 // Infrastructure
 import { logger } from "../../Infrastructure/logging/Logger";
+import { getSIEMService } from "../../Infrastructure/siem/service/SIEMServiceInstance";
+import { generateEvent } from "../../Infrastructure/siem/utils/events/GenerateEvent";
 
 /**
  * Middleware for handling unexpected errors.
@@ -17,8 +23,8 @@ export function globalErrorHandler(err: unknown, req: Request, res: Response, _n
     const statusCode = err && (typeof err === 'object') && ('status' in err) && (typeof err.status === 'number') ? err.status : 500;
 
     logger.error({
-        service: "Gateway",
-        code: "CRITICAL_ERR",
+        service: SERVICES.SELF,
+        code: ERROR_CODE.CRITICAL,
         method: req.method,
         url: req.url,
         ip: req.ip,
@@ -27,6 +33,10 @@ export function globalErrorHandler(err: unknown, req: Request, res: Response, _n
     const message = statusCode >= 500 
         ? "An unexpected gateway error occurred"
         : error.message || "Bad request";
+
+    getSIEMService().sendEvent(
+        generateEvent(SERVICES.SELF, req, statusCode, message, ERROR_CODE.CRITICAL)
+    );
 
     res.status(statusCode).json({ message: message });
 }

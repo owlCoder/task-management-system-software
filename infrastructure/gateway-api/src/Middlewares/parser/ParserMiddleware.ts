@@ -1,8 +1,14 @@
 // Framework
 import { Request, Response, NextFunction } from "express";
 
+// Constants
+import { SERVICES } from "../../Constants/services/Services";
+import { ERROR_CODE } from "../../Constants/error/ErrorCodes";
+
 // Infrastructure
 import { logger } from "../../Infrastructure/logging/Logger";
+import { getSIEMService } from "../../Infrastructure/siem/service/SIEMServiceInstance";
+import { generateEvent } from "../../Infrastructure/siem/utils/events/GenerateEvent";
 
 /**
  * Captures errors caused by express json parser.
@@ -34,12 +40,16 @@ export function bodyParserErrorHandler(err: unknown, req: Request, res: Response
 
         if (message) {
             logger.warn({
-                service: "Gateway",
-                code: "JSON_PARSER_ERR",
+                service: SERVICES.SELF,
+                code: ERROR_CODE.JSON_PARSER,
                 method: req.method,
                 url: req.url,
                 ip: req.ip
             }, message);
+
+            getSIEMService().sendEvent(
+                generateEvent(SERVICES.SELF, req, status, message, ERROR_CODE.JSON_PARSER)
+            );
             
             res.status(status).json({ message: message });
             return; 

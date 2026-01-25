@@ -1,6 +1,9 @@
 // Framework
 import { Request, Response, NextFunction } from "express";
 
+// Constants
+import { SERVICES } from "../../Constants/services/Services";
+
 // Infrastructure
 import { logger } from "../../Infrastructure/logging/Logger";
 
@@ -18,7 +21,7 @@ import { logger } from "../../Infrastructure/logging/Logger";
  */
 export function logTraffic(req: Request, res: Response, next: NextFunction): void {
     logger.info({
-        service: "Gateway",
+        service: SERVICES.SELF,
         method: req.method,
         url: req.url,
         code: "REQUEST",
@@ -35,7 +38,7 @@ export function logTraffic(req: Request, res: Response, next: NextFunction): voi
         }
 
         logger[logLevel]({
-            service: "Gateway",
+            service: SERVICES.SELF,
             method: req.method,
             url: req.originalUrl,
             code: "RESPONSE",

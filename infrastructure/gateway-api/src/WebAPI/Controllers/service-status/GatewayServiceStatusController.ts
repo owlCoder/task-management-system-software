@@ -9,6 +9,8 @@ import { authenticate } from "../../../Middlewares/authentication/AuthMiddleware
 
 // Utils
 import { handleResponse } from "../../Utils/Http/ResponseHandler";
+
+// Infrastructure
 import { ReqParams } from "../../../Infrastructure/express/types/ReqParams";
 
 export class GatewayServiceStatusController {
@@ -26,7 +28,7 @@ export class GatewayServiceStatusController {
         this.router.get('/measurements/service-status', authenticate, this.getServiceStatus.bind(this));
     }
     
-    private async getAvgResponseTime(req: Request<ReqParams<"days">>,res: Response): Promise<void> {
+    private async getAvgResponseTime(req: Request<ReqParams<'days'>>, res: Response): Promise<void> {
         const days = parseInt(req.params.days, 10);
         const result = await this.gatewayServiceStatusService.getAvgResponseTime(days);
 

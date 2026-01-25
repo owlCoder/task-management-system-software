@@ -7,8 +7,14 @@ import jwt from "jsonwebtoken";
 // Domain
 import { AuthTokenClaimsType } from "../../Domain/types/auth/AuthTokenClaims";
 
+// Constants
+import { SERVICES } from "../../Constants/services/Services";
+import { ERROR_CODE } from "../../Constants/error/ErrorCodes";
+
 // Infrastructure
 import { logger } from "../../Infrastructure/logging/Logger";
+import { getSIEMService } from "../../Infrastructure/siem/service/SIEMServiceInstance";
+import { generateEvent } from "../../Infrastructure/siem/utils/events/GenerateEvent";
 
 declare global {
   	namespace Express {
@@ -31,15 +37,19 @@ export const authenticate = (req: Request, res: Response, next: NextFunction): v
   	const authHeader = req.headers.authorization;
 
   	if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    	const message = "Token is missing";
+    	const message = "Authentication failed - token is missing";
 
     	logger.warn({
-			service: "Gateway",
-			code: "AUTHENTICATION_ERR",
+			service: SERVICES.SELF,
+			code: ERROR_CODE.AUTHENTICATION,
 			method: req.method,
 			url: req.url,
 			ip: req.ip
     	}, message);
+
+		getSIEMService().sendEvent(
+            generateEvent(SERVICES.SELF, req, 401, message, ERROR_CODE.AUTHENTICATION)
+        );
 
     	res.status(401).json({ message: message });
     	return;
@@ -57,15 +67,19 @@ export const authenticate = (req: Request, res: Response, next: NextFunction): v
 
     	next();
   	} catch (err) {
-    	const message = "Invalid token provided";
+    	const message = "Authentication failed - invalid token provided";
 
     	logger.warn({
-			service: "Gateway",
-			code: "AUTHENTICATION_ERR",
+			service: SERVICES.SELF,
+			code: ERROR_CODE.AUTHENTICATION,
 			method: req.method,
 			url: req.url,
 			ip: req.ip
     	}, message);
+
+		getSIEMService().sendEvent(
+            generateEvent(SERVICES.SELF, req, 401, message, ERROR_CODE.AUTHENTICATION)
+        );
 
     	res.status(401).json({ message: message });
   	}

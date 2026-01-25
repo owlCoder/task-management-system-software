@@ -1,4 +1,8 @@
+// Framework
 import { Request, Response, Router } from "express";
+
+// Constants
+import { SERVICES } from "../../../Constants/services/Services";
 
 export class HealthController {
     private readonly router: Router;
@@ -25,7 +29,7 @@ export class HealthController {
     private healthCheck(_req: Request, res: Response): void {
         res.status(200).json({
             status: "OK",
-            service: "Gateway",
+            service: SERVICES.SELF,
             timestamp: new Date().toISOString(),
             uptime: Math.floor(process.uptime())
         });
