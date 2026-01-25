@@ -45,17 +45,20 @@ class VersionControlAPIImpl implements IVersionControlAPI {
   }
 
   async sendTaskToReview(taskId: number): Promise<TaskReviewDTO> {
-    try {
-      const response = await this.client.post<TaskReviewDTO>(
-        `/reviews/${taskId}/send`,
-        {}
-      );
-      return response.data;
-    } catch (error) {
-      console.error("Error sending task to review:", error);
-      throw error;
+  const userId = localStorage.getItem("userId");
+
+  const response = await this.client.post<TaskReviewDTO>(
+    `/reviews/${taskId}/send`,
+    {},
+    {
+      headers: {
+        "x-user-id": userId ?? ""
+      }
     }
-  }
+  );
+
+  return response.data;
+}
 
   async approveTaskReview(taskId: number): Promise<TaskReviewDTO> {
     try {

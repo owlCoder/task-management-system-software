@@ -87,7 +87,7 @@ export class  ReviewService implements IReviewService {
             time: new Date().toISOString(),
             reviewedBy: null as any,
             reviewedAt: null as any,
-            commentId: 0,
+            commentId: null as any,
         });
 
         return await this.reviewRepository.save(newReview);
