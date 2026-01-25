@@ -13,7 +13,7 @@ type EditUserFormProps = {
   onClose: () => void;
 };
 
-const inputClasses = "w-full px-4 py-3 rounded-xl text-white bg-black/20 backdrop-blur-md border border-white/10 placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:bg-black/30 transition-all shadow-inner";
+const inputClasses = "w-full px-4 py-3 rounded-xl text-white bg-white/5 backdrop-blur-md border border-white/20 placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:bg-white/10 transition-all shadow-inner";
 
 export const EditUserForm: React.FC<EditUserFormProps> = ({
   userAPI,
@@ -81,81 +81,62 @@ export const EditUserForm: React.FC<EditUserFormProps> = ({
   };
 
   return (
-    <div className="p-8 rounded-3xl bg-white/10 backdrop-blur-xl border border-white/15 w-full max-w-md mx-auto shadow-2xl">
-      <h3 className="text-2xl font-bold mb-6 text-white text-center">Edit User</h3>
+  <div className="p-8 rounded-3xl bg-white/15 backdrop-blur-2xl border border-white/20 w-full max-w-md mx-auto shadow-[0_20px_50px_rgba(0,0,0,0.3)]">
+    <h3 className="text-2xl font-bold mb-6 text-white text-center tracking-tight">Edit User</h3>
 
-      <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
-        {/* Profile Image */}
-        <div className="flex flex-col items-center gap-3">
-          <div className="w-24 h-24 rounded-full border-2 border-white/20 shadow-md flex items-center justify-center bg-white/10 backdrop-blur-sm overflow-hidden">
-            {imagePreview ? (
-              <img 
-                src={imagePreview} 
-                alt="Profile preview" 
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <span className="text-4xl font-bold text-white uppercase select-none">
-                {existingUser.username.charAt(0)}
-              </span>
-            )}
-          </div>
-          
-          <label className="flex items-center gap-2 cursor-pointer px-4 py-2 bg-white/10 border border-white/20 rounded-lg hover:bg-white/20 transition">
-            <span className="text-white/90 text-sm">
-              {imageFile ? imageFile.name : "Choose Profile Image"}
+    <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
+      <div className="flex flex-col items-center gap-3 mb-2">
+        <div className="w-24 h-24 rounded-full border-2 border-white/40 shadow-xl flex items-center justify-center bg-white/10 overflow-hidden">
+          {imagePreview ? (
+            <img src={imagePreview} className="w-full h-full object-cover" />
+          ) : (
+            <span className="text-4xl font-bold text-white/80 uppercase">
+              {existingUser.username.charAt(0)}
             </span>
-            <input
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={handleImageChange}
-            />
-          </label>
+          )}
         </div>
-        
-        <input type="text" name="username" value={formData.username} onChange={handleChange} placeholder="Username" className={inputClasses} required />
-        <input type="email" name="email" value={formData.email} onChange={handleChange} placeholder="Email" className={inputClasses} required />
-        <input type="password" name="password" value={formData.password} onChange={handleChange} placeholder="New Password (optional)" className={inputClasses} />
+        <label className="cursor-pointer px-4 py-1 rounded-full bg-white/10 border border-white/20 hover:bg-white/20 transition">
+          <span className="text-white text-xs font-medium">Change Photo</span>
+          <input type="file" className="hidden" onChange={handleImageChange} />
+        </label>
+      </div>
+      
+      <div className="space-y-4">
+        <input type="text" name="username" className={inputClasses} value={formData.username} onChange={handleChange} placeholder="Username" />
+        <input type="email" name="email" className={inputClasses} value={formData.email} onChange={handleChange} placeholder="Email" />
+        <input type="password" name="password" className={inputClasses} value={formData.password} onChange={handleChange} placeholder="New Password (optional)" />
         
         <div className="flex flex-col gap-1">
-          {isRestricted && <label className="text-[10px] text-blue-400 ml-2 uppercase tracking-wider">Role changes disabled for Admin</label>}
           <select 
             name="role_name" 
-            value={formData.role_name} 
-            onChange={handleChange} 
+            className={inputClasses}
+            value={formData.role_name}
+            onChange={handleChange}
             disabled={isRestricted}
-            className={`${inputClasses} ${isRestricted ? "opacity-50 cursor-not-allowed border-blue-500/30" : ""}`}
           >
             {Object.values(UserRole).map(role => (
-              <option key={role} value={role} className="bg-slate-900">{role}</option>
+              <option key={role} value={role} className="bg-[#1a2b4b] text-white">{role}</option>
             ))}
           </select>
         </div>
+      </div>
 
-        {/*
-        <div className="flex flex-col gap-1">
-          <label className="text-xs text-white/40 ml-2">Weekly Working Hours</label>
-          <input type="number" name="workinghours" value={weeklyHours} onChange={(e) => setWeeklyHours(Number(e.target.value))} className={inputClasses} />
-        </div>  */}
-         
-
-        <div className="flex gap-3 mt-6">
-          <button 
-            type="submit" 
-            className="flex-1 h-[50px] rounded-full bg-gradient-to-t from-[var(--palette-medium-blue)] to-[var(--palette-deep-blue)] text-white font-bold shadow-lg hover:-translate-y-1 transition-all duration-300"
-          >
-            Save Changes
-          </button>
-          <button 
-            type="button" 
-            onClick={onClose} 
-            className="flex-1 h-[50px] rounded-full bg-white/5 hover:bg-white/10 text-white font-semibold border border-white/10 transition-all duration-300"
-          >
-            Cancel
-          </button>
-        </div>
-      </form>
-    </div>
-  );
+      <div className="flex gap-4 mt-8">
+        <button 
+          type="submit" 
+          className="flex-1 h-[50px] rounded-2xl bg-gradient-to-r from-blue-500 to-blue-600 text-white font-bold shadow-lg hover:shadow-blue-500/30 hover:-translate-y-0.5 transition-all duration-300"
+        >
+          Save Changes
+        </button>
+        <button 
+          type="button" 
+          onClick={onClose} 
+          className="flex-1 h-[50px] rounded-2xl bg-white/5 hover:bg-white/10 text-white/80 font-semibold border border-white/10 transition-all"
+        >
+          Cancel
+        </button>
+      </div>
+    </form>
+  </div>
+);
 };

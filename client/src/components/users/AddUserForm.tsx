@@ -4,9 +4,9 @@ import { UserDTO } from "../../models/users/UserDTO";
 import { UserCreationDTO } from "../../models/users/UserCreationDTO";
 import { UserRoleDTO } from "../../models/users/UserRoleDTO";
 import toast from "react-hot-toast";
-import { jwtDecode } from "jwt-decode"; // Uvoz biblioteke
+import { jwtDecode } from "jwt-decode";
 
-const inputClasses = "w-full px-4 py-3 rounded-xl text-white bg-black/20 backdrop-blur-md border border-white/10 placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:bg-black/30 transition-all shadow-inner";
+const inputClasses = "w-full px-4 py-3 rounded-xl text-white bg-white/10 backdrop-blur-md border border-white/20 placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:bg-white/20 transition-all shadow-inner";
 
 type AddUserFormProps = {
   userAPI: IUserAPI;
@@ -15,7 +15,6 @@ type AddUserFormProps = {
   onClose: () => void;
 };
 
-// Interfejs za tvoj token (prilagodi polja ako se zovu drugačije)
 interface MyTokenPayload {
   impact_level?: number;
   role?: string;
@@ -41,19 +40,12 @@ export const AddUserForm: React.FC<AddUserFormProps> = ({
     const fetchRoles = async () => {
       try {
         setLoadingRoles(true);
-        
-        // 1. Dekodiramo token da uzmemo impact_level
-        let impactLevel = 1; // Default ako nešto pođe po zlu
+        let impactLevel = 1;
         if (token) {
           const decoded = jwtDecode<MyTokenPayload>(token);
-          // Ako tvoj backend šalje impact_level u tokenu, uzimamo ga
           impactLevel = decoded.impact_level || 1;
-          console.log("Dohvatam uloge za impact level:", impactLevel);
         }
-
-        // 2. Pozivamo API sa dinamičkim impactLevel-om
         const roles = await userAPI.getUserRolesForCreation(token, impactLevel);
-        
         setAvailableRoles(roles);
         if (roles.length > 0) {
           setFormData(prev => ({ ...prev, role_name: roles[0].role_name }));
@@ -65,7 +57,6 @@ export const AddUserForm: React.FC<AddUserFormProps> = ({
         setLoadingRoles(false);
       }
     };
-    
     fetchRoles();
   }, [token, userAPI]);
 
@@ -84,13 +75,13 @@ export const AddUserForm: React.FC<AddUserFormProps> = ({
       onClose();
     } catch (err) {
       console.error("Failed to add user:", err);
-      toast.error("Error adding user. Check if username/email already exists.");
+      toast.error("Error adding user.");
     }
   };
 
   return (
-    <div className="p-8 rounded-3xl bg-white/10 backdrop-blur-xl border border-white/15 w-full max-w-md mx-auto shadow-2xl">
-      <h3 className="text-2xl font-bold mb-6 text-white text-center">Add New User</h3>
+    <div className="p-8 rounded-3xl bg-white/15 backdrop-blur-2xl border border-white/20 w-full max-w-md mx-auto shadow-[0_20px_50px_rgba(0,0,0,0.3)]">
+      <h3 className="text-2xl font-bold mb-6 text-white text-center tracking-tight">Add New User</h3>
 
       <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
         <input type="text" name="username" value={formData.username} onChange={handleChange} placeholder="Username" className={inputClasses} required />
@@ -108,25 +99,25 @@ export const AddUserForm: React.FC<AddUserFormProps> = ({
             <option>Loading roles...</option>
           ) : (
             availableRoles.map((role) => (
-              <option key={role.user_role_id} value={role.role_name} className="bg-slate-900">
+              <option key={role.user_role_id} value={role.role_name} className="bg-[#1a2b4b]">
                 {role.role_name.replace(/_/g, " ")} 
               </option>
             ))
           )}
         </select>
 
-        <div className="flex gap-3 mt-6">
+        <div className="flex gap-4 mt-8">
           <button 
             type="submit" 
             disabled={loadingRoles}
-            className="flex-1 h-[50px] rounded-full bg-gradient-to-t from-[var(--palette-medium-blue)] to-[var(--palette-deep-blue)] text-white font-bold shadow-lg hover:-translate-y-1 transition-all duration-300 disabled:opacity-50"
+            className="flex-1 h-[50px] rounded-2xl bg-gradient-to-r from-blue-500 to-blue-600 text-white font-bold shadow-lg hover:shadow-blue-500/30 hover:-translate-y-0.5 transition-all duration-300 disabled:opacity-50"
           >
             Add User
           </button>
           <button 
             type="button" 
             onClick={onClose} 
-            className="flex-1 h-[50px] rounded-full bg-white/5 hover:bg-white/10 text-white font-semibold border border-white/10 transition-all duration-300"
+            className="flex-1 h-[50px] rounded-2xl bg-white/5 hover:bg-white/10 text-white/80 font-semibold border border-white/10 transition-all"
           >
             Cancel
           </button>

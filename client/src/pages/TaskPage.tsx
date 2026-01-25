@@ -15,7 +15,7 @@ import TaskSortSelect from "../components/task/TaskSortSelect";
 import { SortOption } from "../types/SortOption";
 import { TaskDetailPage } from "./TaskDetailPage";
 import TaskBoardListPreview from "../components/task/TaskBoardListPreview";
-import { UpdateTaskDTO } from "../models/task/UpdateTaskDTO";
+//import { UpdateTaskDTO } from "../models/task/UpdateTaskDTO";
 import { TaskStatus } from "../enums/TaskStatus";
 import { TaskListPageProps } from "../types/props";
 import { useAuth } from "../hooks/useAuthHook";
@@ -43,27 +43,25 @@ const TaskPage: React.FC<TaskListPageProps> = ({ projectId }) => {
   const [detailRefreshKey, setDetailRefreshKey] = useState(0);
 
   const handleStatusChange = async (taskId: number, newStatus: TaskStatus) => {
-    const taskToUpdate = tasks.find((t) => t.task_id === taskId);
-    if (!taskToUpdate) return;
+  const taskToUpdate = tasks.find((t) => t.task_id === taskId);
+  if (!taskToUpdate) return;
 
-    const payload: UpdateTaskDTO = {
-      status: newStatus,
-    };
+  const originalTasks = [...tasks];
+  setTasks((prev) =>
+    prev.map((t) =>
+      t.task_id === taskId ? { ...t, task_status: newStatus } : t
+    )
+  );
 
-    const originalTasks = [...tasks];
-    setTasks((prev) =>
-      prev.map((t) =>
-        t.task_id === taskId ? { ...t, task_status: newStatus } : t
-      )
-    );
-
-    try {
-      await api.updateTask(taskId, payload);
-    } catch (err) {
-      console.error("Failed to update status on server", err);
-      setTasks(originalTasks);
-    }
-  };
+  try {
+    const fileId = Number(taskToUpdate.attachment_file_uuid ?? 0);
+    await api.updateTaskStatus(taskId, newStatus, fileId);
+    
+  } catch (err) {
+    console.error("Update failed:", err);
+    setTasks(originalTasks);
+  }
+};
 
   const filteredAndSortedTasks = tasks
     .filter((task) => {

@@ -21,24 +21,25 @@ const TaskBoardPage: React.FC<TaskBoardPageProps> = ({ projectId, token }) => {
   const selectedTask = tasks.find((t) => t.task_id === selectedtaskId);
 
   const handleStatusChange = async (taskId: number, newStatus: TaskStatus) => {
-    const taskToUpdate = tasks.find((t) => t.task_id === taskId);
-    if (!taskToUpdate) return;
+  const taskToUpdate = tasks.find((t) => t.task_id === taskId);
+  if (!taskToUpdate) return;
 
-    const originalTasks = [...tasks];
-    setTasks((prev) =>
-      prev.map((t) =>
-        t.task_id === taskId ? { ...t, task_status: newStatus } : t
-      )
-    );
+  const originalTasks = [...tasks];
 
-    try {
-      const fileId = Number(taskToUpdate.attachment_file_uuid ?? 0);
-      await api.updateTaskStatus(taskId, newStatus, fileId);
-    } catch (err) {
-      console.error("Failed to update status on server", err);
-      setTasks(originalTasks);
-    }
-  };
+  setTasks((prev) =>
+    prev.map((t) =>
+      t.task_id === taskId ? { ...t, task_status: newStatus } : t
+    )
+  );
+
+  try {
+    const fileId = Number(taskToUpdate.attachment_file_uuid ?? 0);
+    await api.updateTaskStatus(taskId, newStatus, fileId);
+  } catch (err) {
+    console.error("Update failed:", err);
+    setTasks(originalTasks);
+  }
+};
 
   useEffect(() => {
     const load = async () => {
