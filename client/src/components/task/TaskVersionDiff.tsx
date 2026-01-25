@@ -79,8 +79,8 @@ export const TaskVersionDiff: React.FC<TaskVersionDiffProps> = ({ versions }) =>
     const badgeText = isChanged ? "Changed" : "No change";
 
     return (
-      <div className="grid grid-cols-[130px_1fr_1fr] gap-3 py-2 border-t border-white/10">
-        <div className="flex items-center gap-2">
+      <div className="grid grid-cols-[170px_1fr_1fr] items-center gap-3 py-2 border-t border-white/10">
+        <div className="flex items-center gap-2 whitespace-nowrap">
           <span className="text-xs uppercase tracking-wider text-white/50">
             {label}
           </span>
