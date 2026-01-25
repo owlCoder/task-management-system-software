@@ -91,7 +91,7 @@ const projectsDataSource = new DataSource({
   database: env("PROJECTS_DB_NAME", "projects_db"),
   ssl: buildSsl(),
 
-  synchronize: true,
+  synchronize: false, //NE PALI
   migrationsRun: false,
   dropSchema: false,
   logging: ["error"],
@@ -110,7 +110,7 @@ const tasksDataSource = new DataSource({
   database: env("TASKS_DB_NAME", "tasks_db"),
   ssl: buildSsl(),
 
-  synchronize: true,
+  synchronize: false, //NE PALI
   migrationsRun: false,
   dropSchema: false,
   logging: ["error"],

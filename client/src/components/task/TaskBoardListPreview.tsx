@@ -8,6 +8,7 @@ const TaskListPreview: React.FC<TaskBoardListPreviewProps> = ({
   onSelect,
   selectedTaskId,
   onStatusChange,
+  users,
 }) => {
   return (
     <div className="flex gap-6 h-full overflow-x-auto pb-6 custom-scrollbar items-start">
@@ -18,6 +19,7 @@ const TaskListPreview: React.FC<TaskBoardListPreviewProps> = ({
         onSelect={onSelect}
         selectedTaskId={selectedTaskId}
         onStatusChange={onStatusChange}
+        users={users}
       />
 
       <TaskColumn
@@ -27,6 +29,7 @@ const TaskListPreview: React.FC<TaskBoardListPreviewProps> = ({
         onSelect={onSelect}
         selectedTaskId={selectedTaskId}
         onStatusChange={onStatusChange}
+        users={users}
       />
 
       <TaskColumn
@@ -36,6 +39,7 @@ const TaskListPreview: React.FC<TaskBoardListPreviewProps> = ({
         onSelect={onSelect}
         selectedTaskId={selectedTaskId}
         onStatusChange={onStatusChange}
+        users={users}
       />
 
       <TaskColumn
@@ -45,6 +49,7 @@ const TaskListPreview: React.FC<TaskBoardListPreviewProps> = ({
         onSelect={onSelect}
         selectedTaskId={selectedTaskId}
         onStatusChange={onStatusChange}
+        users={users}
       />
 
       <TaskColumn
@@ -54,6 +59,7 @@ const TaskListPreview: React.FC<TaskBoardListPreviewProps> = ({
         onSelect={onSelect}
         selectedTaskId={selectedTaskId}
         onStatusChange={onStatusChange}
+        users={users}
       />
     </div>
   );

@@ -19,6 +19,7 @@ import { UpdateTaskDTO } from "../models/task/UpdateTaskDTO";
 import { TaskStatus } from "../enums/TaskStatus";
 import { TaskListPageProps } from "../types/props";
 import { useAuth } from "../hooks/useAuthHook";
+import { UserAPI } from "../api/users/UserAPI";
 
 const TaskPage: React.FC<TaskListPageProps> = ({ projectId }) => {
   const { token } = useAuth();
@@ -118,7 +119,64 @@ const TaskPage: React.FC<TaskListPageProps> = ({ projectId }) => {
     ]);
 
     setTasks(tasksData);
-    setUsers(usersData);
+    let mergedUsers = usersData;
+    const userMap = new Map(
+      usersData
+        .filter((u) => typeof u.user_id === "number")
+        .map((u) => [u.user_id, u])
+    );
+    const missingIds = Array.from(
+      new Set(
+        tasksData
+          .map((task) => task.worker_id)
+          .filter((id): id is number => typeof id === "number")
+          .filter((id) => {
+            const existing = userMap.get(id);
+            return !existing || !existing.username || existing.username.trim() === "";
+          })
+      )
+    );
+
+    if (missingIds.length > 0) {
+      try {
+        const userApi = new UserAPI();
+        const fetchedUsers = await userApi.getUsersByIds(token, missingIds);
+
+        mergedUsers = usersData.map((user) => {
+          if (!user.user_id) {
+            return user;
+          }
+          const fetched = fetchedUsers.find((u) => u.user_id === user.user_id);
+          if (!fetched || (user.username && user.username.trim() !== "")) {
+            return user;
+          }
+          return {
+            ...user,
+            username: fetched.username,
+            role_name: fetched.role_name,
+            image_url: fetched.image_url,
+          };
+        });
+
+        const existingIds = new Set(mergedUsers.map((u) => u.user_id));
+        const extraUsers = fetchedUsers
+          .filter((u) => !existingIds.has(u.user_id))
+          .map((u) => ({
+            project_id: Number(effectiveProjectId),
+            user_id: u.user_id,
+            weekly_hours: 0,
+            username: u.username,
+            role_name: u.role_name,
+            image_url: u.image_url,
+          }));
+
+        mergedUsers = [...mergedUsers, ...extraUsers];
+      } catch (err) {
+        console.error("Failed to fetch missing user details", err);
+      }
+    }
+
+    setUsers(mergedUsers);
 };
   useEffect(() => {
     const load = async () => {
@@ -248,6 +306,7 @@ const TaskPage: React.FC<TaskListPageProps> = ({ projectId }) => {
                 onSelect={setSelectedTaskId}
                 selectedTaskId={selectedtaskId}
                 onStatusChange={handleStatusChange}
+                users={users}
               />
             ) : (
               <>

@@ -22,6 +22,13 @@ export class TaskService implements ITaskService {
     ) {
        
     }
+    
+    private filterTasksForRole(tasks: Task[], userId: number, roleName: string): Task[] {
+        if (roleName === UserRole.ANIMATION_WORKER || roleName === UserRole.AUDIO_MUSIC_STAGIST) {
+            return tasks.filter((task) => Number(task.worker_id) === Number(userId));
+        }
+        return tasks;
+    }
 //#region Dummy data for development
 
    private readonly dummyTasks: Task[] = [
@@ -93,25 +100,46 @@ export class TaskService implements ITaskService {
 
             const project_id = sprintResult.data.project_id;
 
-            const usersResult = await this.projectService.getUsersForProject(project_id);
-            if (!usersResult.success) {
-                return { success: false, errorCode: ErrorCode.INVALID_INPUT, message: "Failed to get project users" };
+            const userResult = await this.userService.getUserById(user_id);
+            if (!userResult.success) {
+                return { success: false, errorCode: ErrorCode.USER_NOT_FOUND, message: "User not found" };
             }
-            
-            const userExists = usersResult.data.some((user: any) => user.user_id === user_id);
-            if (!userExists) {
-                return { success: false, errorCode: ErrorCode.INVALID_INPUT, message: "User is not assigned to this project" };
+
+            const roleName = userResult.data.role_name;
+
+            if (roleName !== UserRole.ANIMATION_WORKER && roleName !== UserRole.AUDIO_MUSIC_STAGIST) {
+                const usersResult = await this.projectService.getUsersForProject(project_id);
+                if (!usersResult.success) {
+                    return { success: false, errorCode: ErrorCode.INVALID_INPUT, message: "Failed to get project users" };
+                }
+
+                const userExists = usersResult.data.some((user: any) => (user.user_id ?? user.id) === user_id);
+                if (!userExists) {
+                    return { success: false, errorCode: ErrorCode.INVALID_INPUT, message: "User is not assigned to this project" };
+                }
             }
 
             const tasks = await this.taskRepository.find({
                 where: { sprint_id },
                 relations: ["comments"]
             });
-            return {success: true,data : tasks}
+            const filteredTasks = this.filterTasksForRole(tasks, user_id, roleName);
+
+            if ((roleName === UserRole.ANIMATION_WORKER || roleName === UserRole.AUDIO_MUSIC_STAGIST) &&
+                filteredTasks.length === 0) {
+                const workerTasks = await this.taskRepository.find({
+                    where: { worker_id: user_id },
+                    relations: ["comments"]
+                });
+                return { success: true, data: workerTasks };
+            }
+
+            return {success: true,data : filteredTasks}
         } catch (error) {
             return {success: false,errorCode:ErrorCode.NONE}
         }
     }
+
     
     
     async addTaskForSprint(sprint_id: number, createTaskDTO: CreateTaskDTO,user_id: number): Promise<Result<Task>> {
@@ -149,10 +177,10 @@ export class TaskService implements ITaskService {
         if (!workerId) {
         return { success: false, errorCode: ErrorCode.INVALID_INPUT, message: "Task must be assigned to a worker" };
         }
-        //provera da li se workerid nalazi u projects-user tabeli
+        //provera da li se workerid nalazi u project_users tabeli
         const userExists = usersResult.data.some((u: any) => (u.user_id ?? u.id) === workerId);
         if (!userExists) {
-            return { success: false, errorCode: ErrorCode.INVALID_INPUT, message: "User is not assigned to this project" };
+            return { success: false, errorCode: ErrorCode.FORBIDDEN, message: "User is not assigned to this project" };
         }
         if (!title || title.trim().length === 0) {
             return { success: false, errorCode: ErrorCode.INVALID_INPUT, message: "Title is required" };
@@ -195,8 +223,13 @@ export class TaskService implements ITaskService {
             return { success: false, errorCode: ErrorCode.TASK_NOT_FOUND, message: "Task not found" };
         }
 
-        if (user_id === task.worker_id || user_id === task.project_manager_id) {
+        if (Number(user_id) === Number(task.worker_id) || Number(user_id) === Number(task.project_manager_id)) {
             return { success: true, data: task };
+        }
+
+        const userResult = await this.userService.getUserById(user_id);
+        if (!userResult.success) {
+            return { success: false, errorCode: ErrorCode.USER_NOT_FOUND, message: "User not found" };
         }
 
         const sprintResult = await this.projectService.getSprintById(task.sprint_id);
@@ -211,9 +244,14 @@ export class TaskService implements ITaskService {
             return { success: false, errorCode: ErrorCode.INVALID_INPUT, message: "Failed to get project users" };
         }
 
-        const userExists = usersResult.data.some((u: any) => u.user_id === user_id);
+        const userExists = usersResult.data.some((u: any) => (u.user_id ?? u.id) === user_id);
         if (!userExists) {
             return { success: false, errorCode: ErrorCode.FORBIDDEN, message: "User is not assigned to this project" };
+        }
+
+        if (userResult.data.role_name === UserRole.ANIMATION_WORKER ||
+            userResult.data.role_name === UserRole.AUDIO_MUSIC_STAGIST) {
+            return { success: false, errorCode: ErrorCode.FORBIDDEN, message: "User is not assigned to this task" };
         }
 
         return { success: true, data: task };

@@ -21,6 +21,7 @@ export interface TaskColumnProps {
   onSelect: (taskId: number) => void;
   selectedTaskId: number | null;
   onStatusChange: (taskId: number, newStatus: TaskStatus) => void;
+  users?: ProjectUserDTO[];
 }
 
 // TaskBoardListPreview Props
@@ -29,6 +30,7 @@ export interface TaskBoardListPreviewProps {
   onSelect: (taskId: number) => void;
   selectedTaskId: number | null;
   onStatusChange: (taskId: number, newStatus: TaskStatus) => void;
+  users?: ProjectUserDTO[];
 }
 
 // TaskListPreview Props

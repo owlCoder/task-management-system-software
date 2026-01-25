@@ -10,6 +10,7 @@ const TaskColumn: React.FC<TaskColumnProps> = ({
   onSelect,
   selectedTaskId,
   onStatusChange,
+  users,
 }) => {
   const columnTasks = tasks.filter((task) => task.task_status === status);
 
@@ -73,7 +74,7 @@ const TaskColumn: React.FC<TaskColumnProps> = ({
                   : ""
               }`}
             >
-              <TaskListItem task={task} onSelect={onSelect} />
+              <TaskListItem task={task} onSelect={onSelect} users={users} />
             </div>
           ))
         ) : (
