@@ -37,21 +37,31 @@ export const TaskDetailPage: React.FC<TaskDetailPageProps> = ({token,taskId,setC
   const apiTask = new TaskAPI(import.meta.env.VITE_GATEWAY_URL, token);
   const fileApi = new FileAPI();
 
-const handleUpload = async () => {
-  if (!selectedFile) return;
+  const dedupeComments = (arr: CommentDTO[]) => {
+    const map = new Map<number, CommentDTO>();
+    for (const c of arr) {
+      if (c?.comment_id != null) map.set(c.comment_id, c);
+    }
+    return Array.from(map.values()).sort(
+      (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+    );
+  };
 
-  try {
-    const file_id=await fileApi.uploadFile(token,selectedFile,userId);
+  const handleUpload = async () => {
+    if (!selectedFile) return;
 
-    setUploadedFileId(file_id);
-    setIsTaskDone(true);
-    setUploadedFileName(selectedFile.name);
-    setView("upload");
-  } catch (e) {
-    console.error(e);
-    alert("Upload failed");
-  }
-};
+    try {
+      const file_id=await fileApi.uploadFile(token,selectedFile,userId);
+
+      setUploadedFileId(file_id);
+      setIsTaskDone(true);
+      setUploadedFileName(selectedFile.name);
+      setView("upload");
+    } catch (e) {
+      console.error(e);
+      alert("Upload failed");
+    }
+  };
 
   useEffect(() => {
     if(!isTaskDone) return;
@@ -70,28 +80,31 @@ const handleUpload = async () => {
 
 
   const handleAddComments = async (text: string) => {
-    if (!text.trim()) return;
-    
-    const newComment = await apiTask.uploadComment(taskId, userId, text);
-    setComments(prev => [...prev, newComment]);
+    const trimmed = text.trim();
+    if (!trimmed) return;
+
+    const newComment = await apiTask.uploadComment(taskId, userId, trimmed);
+
+    setComments((prev) => dedupeComments([...(prev ?? []), newComment]));
+
+    setTask((prev) =>
+      prev
+        ? { ...prev, comments: dedupeComments([...(prev.comments ?? []), newComment]) }
+        : prev
+    );
   };
 
  
  const handleDeleteComments = async (commentId: number) => {
     await apiTask.deleteComment(commentId, userId);
 
-    setTask(prev => {
-      if (!prev) return prev;
-      setComments(prev => prev.filter(c => c.comment_id !== commentId));
-      return {
-        ...prev,
-        comments: prev.comments.filter(
-          c => c.comment_id !== commentId
-        ),
-      };
-    });
+    setComments((prev) => prev.filter((c) => c.comment_id !== commentId));
+    setTask((prev) =>
+      prev
+        ? { ...prev, comments: (prev.comments ?? []).filter((c) => c.comment_id !== commentId) }
+        : prev
+    );
   };
-
 
   useEffect(() => {
     const decoded = decodeJWT(token);
@@ -105,7 +118,7 @@ const handleUpload = async () => {
       apiTask.getTask(taskId)
       .then((t) => {
         setTask(t);
-        setComments(t.comments ?? []);
+        setComments(dedupeComments((t.comments ?? []) as CommentDTO[]));
     }).catch(() => {
       setTask(null);
     });
@@ -123,7 +136,6 @@ const handleUpload = async () => {
         setVersionsError("Failed to load version history.");
       });
   }, [taskId]);
-
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md">

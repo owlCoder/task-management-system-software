@@ -53,6 +53,16 @@ class ProjectAPIImpl implements IProjectAPI {
         }
     }
 
+    async getAllProjects(): Promise<ProjectDTO[]> {
+        try {
+            const response = await this.client.get<ProjectDTO[]>(`/projects`);
+            return response.data;
+        } catch (error) {
+            console.error("Error fetching all projects:", error);
+            throw error;
+        }
+    }
+
     async getProjectById(projectId: number): Promise<ProjectDTO | null> {
         try {
             const response = await this.client.get<ProjectDTO>(`/projects/${projectId}`);

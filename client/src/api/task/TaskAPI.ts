@@ -74,14 +74,20 @@ export class TaskAPI implements ITaskAPI {
     }
   }
 
-  async createTask(payload: CreateTaskDTO): Promise<TaskDTO> {
-    const testSprint = "1"; 
-    const res = await fetch(`${this.baseUrl}/tasks/sprints/${testSprint}`, {
+  async createTask(sprintId: number, payload: CreateTaskDTO): Promise<TaskDTO> {
+    const res = await fetch(`${this.baseUrl}/tasks/sprints/${sprintId}`, {
       method: "POST",
       headers: this.headers,
       body: JSON.stringify(payload),
     });
-    return res.json();
+
+    const json = await res.json().catch(() => ({}));
+
+    if (!res.ok) {
+      throw new Error(json?.message ?? "Failed to create task");
+    }
+
+    return json.data ?? json;
   }
 
 
@@ -92,7 +98,9 @@ export class TaskAPI implements ITaskAPI {
         headers: this.headers,
         body: JSON.stringify(payload),
       });
-      return res.json();
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(json?.message ?? "Failed to update task");
+      return json.data ?? json;
     } catch (error) {
       console.error('Error updating task:', error);
       throw error;

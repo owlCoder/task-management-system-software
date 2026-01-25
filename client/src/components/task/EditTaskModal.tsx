@@ -54,59 +54,51 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({
   if (!open) return null;
 
   const handleSubmit = async () => {
-  if (!task) return;
+    if (!task) return;
 
-  const trimmedTitle = title.trim();
-  if (!trimmedTitle) return;
+    const trimmedTitle = title.trim();
+    if (!trimmedTitle) return;
 
-  // ✅ napravi payload samo sa validnim/promenjenim poljima
-  const payload: UpdateTaskDTO = {};
+    const payload: UpdateTaskDTO = {};
 
-  // title uvek šaljemo (ili samo ako se promenio)
-  if (trimmedTitle !== task.title) payload.title = trimmedTitle;
+    if (trimmedTitle !== task.title) payload.title = trimmedTitle;
 
-  // description šalji samo ako nije prazna i ako se promenila
-  const trimmedDesc = (description ?? "").trim();
-  if (trimmedDesc.length > 0 && trimmedDesc !== (task.task_description ?? "").trim()) {
-    payload.description = trimmedDesc;
-  }
+    const trimmedDesc = (description ?? "").trim();
+    if (trimmedDesc.length > 0 && trimmedDesc !== (task.task_description ?? "").trim()) {
+      payload.description = trimmedDesc;
+    }
 
-  // estimatedCost šalji samo ako je broj i ako se promenio
-  const currentCost = Number(task.estimated_cost ?? 0);
-  if (Number.isFinite(estimatedCost) && estimatedCost !== currentCost) {
-    payload.estimatedCost = estimatedCost;
-  }
+    const currentCost = Number(task.estimated_cost ?? 0);
+    if (Number.isFinite(estimatedCost) && estimatedCost !== currentCost) {
+      payload.estimatedCost = estimatedCost;
+    }
 
-  // status šalji samo ako se promenio
-  if ((status as any) !== (task.task_status as any)) {
-    payload.status = status;
-  }
+    if ((status as any) !== (task.task_status as any)) {
+      payload.status = status;
+    }
 
-  // assignedTo šalji samo ako je validan broj i ako se promenio
-  // (Backend validator ne dozvoljava "unassigned", samo pozitivan broj)
-  if (assignedTo !== undefined && assignedTo !== task.worker_id) {
-    payload.assignedTo = assignedTo;
-  }
+    if (assignedTo !== undefined && assignedTo !== task.worker_id) {
+      payload.assignedTo = assignedTo;
+    }
 
-  // ✅ ako nema promena, ne šalji request (backend vraća 400 za prazan payload)
-  if (Object.keys(payload).length === 0) {
-    toast("No changes to save.");
-    return;
-  }
+    if (Object.keys(payload).length === 0) {
+      toast("No changes to save.");
+      return;
+    }
 
-  try {
-    setLoading(true);
-    await api.updateTask(task.task_id, payload);
-    toast.success("Task updated successfully!");
-    onUpdated?.(); // ako si dodao
-    onClose();
-  } catch (err) {
-    console.error("Failed to update task:", err);
-    toast.error("Update failed!");
-  } finally {
-    setLoading(false);
-  }
-};
+    try {
+      setLoading(true);
+      await api.updateTask(task.task_id, payload);
+      toast.success("Task updated successfully!");
+      onUpdated?.();
+      onClose();
+    } catch (err) {
+      console.error("Failed to update task:", err);
+      toast.error("Update failed!");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md">

@@ -5,6 +5,7 @@ export interface SprintCreateDTO {
   sprint_description: string;
   start_date: string; 
   end_date: string;   
+  story_points?: number;
 }
 
 export interface ISprintAPI {

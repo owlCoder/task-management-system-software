@@ -8,7 +8,7 @@ export interface ITaskAPI {
   getTasksByProject(projectId: string): Promise<TaskDTO[]>;
   getTasksBySprint(sprintId: number): Promise<TaskDTO[]>;
   getTask(taskId: number): Promise<TaskDTO>;
-  createTask( payload: CreateTaskDTO): Promise<TaskDTO>;
+  createTask(sprintId: number, payload: CreateTaskDTO): Promise<TaskDTO>
   updateTask(taskId: number, payload: UpdateTaskDTO): Promise<TaskDTO>;
   updateTaskStatus(taskId: number, status: string,fileId : number): Promise<void>;
   deleteTask(taskId: string): Promise<void>;

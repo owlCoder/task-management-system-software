@@ -42,7 +42,10 @@ export const ProjectsPage: React.FC = () => {
         try {
             setIsLoading(true);
             setError(null);
-            const data = await projectAPI.getProjectsByUserId(user.id);
+            const data = canManageProjects(user?.role)
+                ? await projectAPI.getAllProjects()
+                : await projectAPI.getProjectsByUserId(user.id);
+
             setProjects(data);
         } catch (err) {
             console.error("Failed to fetch projects:", err);

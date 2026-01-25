@@ -1,6 +1,7 @@
 export interface SprintCreateDTO {
     sprint_title: string;
     sprint_description: string;
-    start_date: Date;
-    end_date: Date;
+    start_date: string | Date;
+    end_date: string | Date;
+    story_points?: number;
 }

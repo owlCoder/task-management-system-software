@@ -21,6 +21,7 @@ const CreateSprintModal: React.FC<Props> = ({
     sprint_description: "",
     start_date: "",
     end_date: "",
+    story_points: 0,
   });
 
   const [loading, setLoading] = useState(false);
@@ -32,6 +33,7 @@ const CreateSprintModal: React.FC<Props> = ({
         sprint_description: "",
         start_date: "",
         end_date: "",
+        story_points: 0,
       });
       setLoading(false);
     }
@@ -64,6 +66,7 @@ const CreateSprintModal: React.FC<Props> = ({
         sprint_description: formData.sprint_description.trim(),
         start_date: formData.start_date,
         end_date: formData.end_date,
+        story_points: formData.story_points ?? 0,
       });
       toast.success("Sprint created successfully!");
       onClose();

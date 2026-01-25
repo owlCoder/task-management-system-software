@@ -13,6 +13,8 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
   onClose,
   projectId,
   token,
+  sprintId,
+  onCreated,
 }) => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -81,28 +83,52 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
   };
 
   const handleSubmit = async () => {
-    if (!title.trim()){
+    const trimmedTitle = title.trim();
+    const trimmedDesc = description.trim();
+
+    if (!trimmedTitle) {
       toast.error("Please enter a task title!");
       return;
     }
 
+    if (!trimmedDesc) {
+      toast.error("Please enter a task description!");
+      return;
+    }
+
+    if (!Number.isFinite(estimatedCost) || estimatedCost < 0) {
+      toast.error("Estimated cost must be a valid number (>= 0).");
+      return;
+    }
+
+    if (!assignedTo) {
+      toast.error("Please assign the task to a worker.");
+      return;
+    }
+
     const payload: CreateTaskDTO = {
-      title,
-      description,
+      title: trimmedTitle,
+      description: trimmedDesc,
       estimatedCost,
       projectId: Number(projectId),
-      assignedTo: assignedTo,
+      assignedTo,
     };
 
     try {
       setLoading(true);
 
-      await api.createTask(payload);
+      if (!sprintId || !Number.isFinite(Number(sprintId))) {
+        toast.error("Sprint is not selected!");
+        return;
+      }
+
+      await api.createTask(Number(sprintId), payload);
       toast.success("Task created successfully!");
+      onCreated?.();
       onClose();
     } catch (err) {
       console.error("Failed to create task:", err);
-      toast.error("Failed to create task!");
+      toast.error((err as any)?.message ?? "Failed to create task!");
     } finally {
       setLoading(false);
     }

@@ -129,7 +129,7 @@ export class TaskService implements ITaskService {
             return { success: false, errorCode: ErrorCode.INVALID_INPUT, message: "Only project managers can add tasks" };
         }
 
-        //TODO: Proveriti da li sprint postoji
+        //provera da li sprint postoji
         const sprintResult = await this.projectService.getSprintById(sprint_id);
         if (!sprintResult.success) {
             return { success: false, errorCode: ErrorCode.SPRINT_NOT_FOUND, message: "Sprint not found" };
@@ -141,16 +141,27 @@ export class TaskService implements ITaskService {
         if (!usersResult.success) {
             return { success: false, errorCode: ErrorCode.INVALID_INPUT, message: "Failed to get project users" };
         }
+
+        const workerId = (createTaskDTO as any).worker_id ?? (createTaskDTO as any).assignedTo;
+        const title = (createTaskDTO as any).title;
+        const description = (createTaskDTO as any).task_description ?? (createTaskDTO as any).description;
+        const estimatedCost = (createTaskDTO as any).estimated_cost ?? (createTaskDTO as any).estimatedCost ?? 0;
+        if (!workerId) {
+        return { success: false, errorCode: ErrorCode.INVALID_INPUT, message: "Task must be assigned to a worker" };
+        }
         //provera da li se workerid nalazi u projects-user tabeli
-        const userExists = usersResult.data.some((user: any) => user.user_id === createTaskDTO.worker_id);
+        const userExists = usersResult.data.some((u: any) => (u.user_id ?? u.id) === workerId);
         if (!userExists) {
             return { success: false, errorCode: ErrorCode.INVALID_INPUT, message: "User is not assigned to this project" };
         }
-        if (!createTaskDTO.title || createTaskDTO.title.trim().length === 0) {
+        if (!title || title.trim().length === 0) {
             return { success: false, errorCode: ErrorCode.INVALID_INPUT, message: "Title is required" };
         }
-        if (!createTaskDTO.task_description || createTaskDTO.task_description.trim().length === 0) {
+        if (!description || description.trim().length === 0) {
             return { success: false, errorCode: ErrorCode.INVALID_INPUT, message: "Task description is required" };
+        }
+        if ((estimatedCost ?? 0) < 0) {
+            return { success: false, errorCode: ErrorCode.INVALID_INPUT, message: "Estimated cost cannot be negative" };
         }
         //Treba videti sa ostalima kako ovo da se izracuna,da li moj servis ili da to dodje kao parametar
         if ((createTaskDTO.estimated_cost ?? 0) < 0) {
@@ -159,13 +170,13 @@ export class TaskService implements ITaskService {
 
         const newTask = this.taskRepository.create({
             sprint_id,
-            worker_id: createTaskDTO.worker_id,
-            title: createTaskDTO.title,
-            task_description: createTaskDTO.task_description,
-            estimated_cost: createTaskDTO.estimated_cost,
+            worker_id: workerId,
+            title,
+            task_description: description,
+            estimated_cost: estimatedCost,
             task_status: TaskStatus.CREATED,
             total_hours_spent: 0,
-            project_manager_id: createTaskDTO.project_manager_id
+            project_manager_id: user_id,
         });
 
         const savedTask = await this.taskRepository.save(newTask);

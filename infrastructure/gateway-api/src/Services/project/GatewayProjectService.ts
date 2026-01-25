@@ -50,6 +50,15 @@ export class GatewayProjectService implements IGatewayProjectService {
         });
     }
 
+    async getAllProjects(): Promise<Result<ProjectDTO[]>> {
+        return await makeAPICall<ProjectDTO[]>(this.projectClient, this.errorHandlingService, {
+            serviceName: SERVICES.PROJECT,
+            method: HTTP_METHODS.GET,
+            url: PROJECT_ROUTES.GET_ALL_PROJECTS
+        });
+    }
+
+
     /**
      * Fetches the projects a specific user works on.
      * @param {number} userId - id of the user. 

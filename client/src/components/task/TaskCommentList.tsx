@@ -23,13 +23,7 @@ export const TaskCommentList: React.FC<TaskCommentListProps> = ({ comments ,onDe
           <span className="text-[10px] text-white/40">
             {new Date(c.created_at).toLocaleString()}
           </span>
-          <div>
-            <p className="text-sm text-white/90">{c.comment}</p>
-            <span className="text-[10px] text-white/40">
-              {new Date(c.created_at).toLocaleString()}
-            </span>
-          </div>
-
+          <br></br>
           <button
             onClick={() => onDelete(c.comment_id)}
             className="text-xs text-red-400 hover:text-red-300"

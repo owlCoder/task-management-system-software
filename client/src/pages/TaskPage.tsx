@@ -302,6 +302,14 @@ const TaskPage: React.FC<TaskListPageProps> = ({ projectId }) => {
         onClose={() => setOpen(false)}
         projectId={effectiveProjectId}
         token={token}
+        sprintId={sprintIdNum}
+        onCreated={async () => {
+          //refresh listu
+          const tasksData = sprintIdNum
+            ? await api.getTasksBySprint(sprintIdNum)
+            : await api.getTasksByProject(effectiveProjectId);
+          setTasks(tasksData);
+        }}
       />
 
       {editOpen && selectedTask && (

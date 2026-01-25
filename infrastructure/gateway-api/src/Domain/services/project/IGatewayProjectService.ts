@@ -11,6 +11,7 @@ import { Result } from "../../types/common/Result";
 
 export interface IGatewayProjectService {
     getProjectById(projectId: number): Promise<Result<ProjectDTO>>;
+    getAllProjects(): Promise<Result<ProjectDTO[]>>;
     getProjectsFromUser(userId: number): Promise<Result<ProjectDTO[]>>;
     createProject(req: Request): Promise<Result<ProjectDTO>>;
     updateProject(projectId: number, req: Request): Promise<Result<ProjectDTO>>;

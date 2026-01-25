@@ -32,7 +32,8 @@ export class SprintController {
             const body = req.body as Omit<SprintCreateDTO, "project_id">;
             const dto: SprintCreateDTO = {
                 project_id: projectId,
-                ...body
+                ...body,
+                story_points: (body as any).story_points ?? 0,
             };
 
             const created = await this.sprintService.createSprint(dto);

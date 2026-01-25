@@ -1,6 +1,7 @@
 export const PROJECT_ROUTES = Object.freeze({
     GET_PROJECT: (projectId: number) => `/projects/${projectId}`,
     GET_PROJECTS_FROM_USER: (userId: number) => `/users/${userId}/projects`,
+    GET_ALL_PROJECTS: "/projects",
     CREATE_PROJECT: "/projects",
     UPDATE_PROJECT: (projectId: number) => `/projects/${projectId}`,
     DELETE_PROJECT: (projectId: number) => `/projects/${projectId}`,

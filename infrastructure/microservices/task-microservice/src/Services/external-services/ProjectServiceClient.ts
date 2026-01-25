@@ -1,4 +1,3 @@
-// ProjectServiceClient.ts - implementacija
 import axios, { AxiosInstance } from 'axios';
 import { IProjectServiceClient } from '../../Domain/services/external-services/IProjectServiceClient';
 import { Result } from '../../Domain/types/Result';

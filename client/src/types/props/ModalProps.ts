@@ -7,6 +7,8 @@ export interface CreateTaskModalProps {
   onClose: () => void;
   projectId: string;
   token: string;
+  sprintId?: number | null;
+  onCreated?: () => void;
 }
 
 // EditTaskModal Props

@@ -39,6 +39,7 @@ export class GatewayProjectController {
         const projectReadonlyAccess = [authenticate, authorize(...ProjectPolicies.READONLY)];
         const projectWriteAccess = [authenticate, authorize(...ProjectPolicies.WRITE)];
 
+        this.router.get("/projects", ...projectReadonlyAccess, this.getAllProjects.bind(this));
         this.router.get("/projects/:projectId", ...projectReadonlyAccess, this.getProjectById.bind(this));
         this.router.get("/users/:userId/projects", ...projectReadonlyAccess, this.getProjectsFromUser.bind(this));
         this.router.post("/projects", ...projectWriteAccess, this.createProject.bind(this));
@@ -70,6 +71,12 @@ export class GatewayProjectController {
         const result = await this.gatewayProjectService.getProjectById(projectId);
         handleResponse(res, result);
     }
+
+    private async getAllProjects(req: Request, res: Response): Promise<void> {
+        const result = await this.gatewayProjectService.getAllProjects();
+        handleResponse(res, result);
+    }
+
 
     /**
      * GET /api/v1/users/:userId/projects
