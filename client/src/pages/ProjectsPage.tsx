@@ -12,9 +12,12 @@ import type { ProjectCreateDTO } from "../models/project/ProjectCreateDTO";
 import { toast } from 'react-hot-toast';
 import { confirmToast } from '../components/toast/toastHelper';
 
-const canManageProjects = (role?: string): boolean => {
-    return role === "Project Manager";
-};
+const isProjectManager = (role?: string) => role === "Project Manager";
+const isAnalyst = (role?: string) => role === "Analytics & Development Manager";
+
+const canManageProjects = (role?: string) => isProjectManager(role);
+const canSeeAllProjects = (role?: string) =>
+    isProjectManager(role) || isAnalyst(role);
 
 export const ProjectsPage: React.FC = () => {
     const { user } = useAuth();
@@ -42,7 +45,7 @@ export const ProjectsPage: React.FC = () => {
         try {
             setIsLoading(true);
             setError(null);
-            const data = canManageProjects(user?.role)
+            const data = canSeeAllProjects(user?.role)
                 ? await projectAPI.getAllProjects()
                 : await projectAPI.getProjectsByUserId(user.id);
 
