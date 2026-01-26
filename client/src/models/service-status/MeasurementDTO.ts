@@ -1,4 +1,4 @@
-import { EOperationalStatus } from "../enums/EOperationalStatus";
+import { EOperationalStatus } from "../../enums/EOperatinalStatus";
 
 export class MeasurementDto {
   constructor(

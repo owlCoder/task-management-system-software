@@ -3,12 +3,13 @@ import { ServiceStatusDTO } from "../../models/service-status/ServiceStatusDTO";
 import { IServiceStatusAPI } from "./IServiceStatusAPI";
 import { readValueByKey } from "../../helpers/local_storage";
 import { AverageTimeDTO } from "../../models/service-status/AverageTimeDTO";
+import { MeasurementDto } from "../../models/service-status/MeasurementDTO";
 
 
 const GATEWAY_URL = import.meta.env.VITE_GATEWAY_URL;
 
 
-export class ServiceStatusAPI implements  IServiceStatusAPI {
+export class ServiceStatusAPI implements IServiceStatusAPI {
     private readonly client: AxiosInstance;
     constructor() {
         this.client = axios.create({
@@ -41,6 +42,17 @@ export class ServiceStatusAPI implements  IServiceStatusAPI {
     }
 
 
+    async getAllDownMeasurements(): Promise<MeasurementDto[]> {
+        try {
+            const response = await this.client.get<MeasurementDto[]>(`/measurements/down`);
+            return response.data;
+        } catch (error) {
+            console.error("Error getting status of microservices:", error);
+            return [];
+        }
+    }
+
+
     async getServiceStatus(): Promise<ServiceStatusDTO[]> {
         try {
             const response = await this.client.get<ServiceStatusDTO[]>(`/measurements/service-status`);
@@ -51,7 +63,7 @@ export class ServiceStatusAPI implements  IServiceStatusAPI {
         }
     }
 
-    async getAvgResponseTime(days:number):Promise<AverageTimeDTO[]>{
+    async getAvgResponseTime(days: number): Promise<AverageTimeDTO[]> {
         try {
             const response = await this.client.get<AverageTimeDTO[]>(`measurements/average-response-time/${days}`);
             return response.data;

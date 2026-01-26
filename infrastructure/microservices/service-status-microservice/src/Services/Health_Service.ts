@@ -7,7 +7,7 @@ import { Measurement_Service } from "./Measurement_Service";
 import { Microservice_Service } from "./Microservice_Service";
 import { RuntimeMicroservice } from "../Domain/types/RuntimeMicroservices";
 
-const CHECK_INTERVAL = 5_000;
+const CHECK_INTERVAL = 60_000 *30;
 const REQUEST_TIMEOUT = 1_000;
 let running = false;
 

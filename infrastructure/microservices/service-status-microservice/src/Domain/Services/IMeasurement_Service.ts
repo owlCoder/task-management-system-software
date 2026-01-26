@@ -1,3 +1,4 @@
+import { CreateMeasurementDto } from "../DTOs/CreateMeasurement_DTO";
 import { MeasurementDto } from "../DTOs/Measurement_DTO";
 import { EOperationalStatus } from "../enums/EOperationalStatus";
 
@@ -10,9 +11,10 @@ export interface IMeasurement_Service {
   getNewMeasurements():Promise<MeasurementDto[]>;
   getAverageUptime(): Promise<{ microserviceId: number; uptime: number }[]>
   getAverageResponseTime(days: number): Promise<{ time: string; avgResponseTime: number }[]>
+  getServiceStatus(): Promise<{ microserviceName: string; uptime: number; status: EOperationalStatus; }[]>
 
 
-  setMeasurement(measurement: MeasurementDto):Promise<boolean>;
+  setMeasurement(measurement: CreateMeasurementDto): Promise<boolean>
 
   deleteOldNonDownMeasurements(olderThanMs: number): Promise<number>
   deleteOldMeasurements(status: EOperationalStatus,olderThanMs: number): Promise<number> 

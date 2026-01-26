@@ -1,4 +1,4 @@
-import { Repository } from "typeorm";
+import { In, Repository } from "typeorm";
 import { MeasurementDto } from "../Domain/DTOs/Measurement_DTO";
 import { Measurement } from "../Domain/models/Measurement";
 import { IMeasurement_Service } from "../Domain/Services/IMeasurement_Service";
@@ -55,15 +55,16 @@ export class Measurement_Service implements IMeasurement_Service {
 
         const result = await this.measurementRepository
             .createQueryBuilder("m")
-            .select(`DATE_FORMAT(m.measurement_date, '%Y-%m-%d %H:%i')`,"time")
-            .addSelect(`ROUND(AVG(m.response_time), 2)`,"avgResponseTime")
+            .select(`DATE_FORMAT(m.measurement_date, '%Y-%m-%d %H:%i')`, "time")
+            .addSelect(`ROUND(AVG(m.response_time), 2)`, "avgResponseTime")
             .where("m.measurement_date >= :fromDate")
             .setParameter("fromDate", fromDate)
             .groupBy(`DATE_FORMAT(m.measurement_date, '%Y-%m-%d %H:%i')`)
             .orderBy(`time`, "ASC")
             .getRawMany();
 
-        return result.map(r => ({time: r.time,avgResponseTime: Number(r.avgResponseTime),
+        return result.map(r => ({
+            time: r.time, avgResponseTime: Number(r.avgResponseTime),
         }));
     }
 
@@ -85,15 +86,16 @@ export class Measurement_Service implements IMeasurement_Service {
     }
 
     async getAverageUptime(): Promise<{ microserviceId: number; uptime: number }[]> {
-        const fourteenDaysAgo = new Date();
-        fourteenDaysAgo.setDate(fourteenDaysAgo.getDate() - 14);
+
+        const startOfToday = new Date();
+        startOfToday.setHours(0, 0, 0, 0);
 
         const result = await this.measurementRepository
             .createQueryBuilder("m")
             .select("m.ID_microservice", "microserviceId")
-            .addSelect(`ROUND((SUM(CASE WHEN m.status = :operational THEN 1 ELSE 0 END) * 100.0)/ COUNT(*),2)`, "uptime")
+            .addSelect(`ROUND((SUM(CASE WHEN m.status = :operational THEN 1 ELSE 0 END) * 100.0)/ COUNT(*),2)`,"uptime")
             .where("m.measurement_date >= :fromDate")
-            .setParameter("fromDate", fourteenDaysAgo)
+            .setParameter("fromDate", startOfToday)
             .setParameter("operational", EOperationalStatus.Operational)
             .groupBy("m.ID_microservice")
             .getRawMany();
@@ -105,7 +107,6 @@ export class Measurement_Service implements IMeasurement_Service {
     }
 
 
-
     async getMeasurementByID(measurementID: number): Promise<MeasurementDto> {
         const measurement = await this.measurementRepository.findOne({
             where: { measurement_id: measurementID },
@@ -113,7 +114,7 @@ export class Measurement_Service implements IMeasurement_Service {
         });
 
         if (!measurement) {
-            return new MeasurementDto(0, 0, EOperationalStatus.Down, 0, "");
+            return new MeasurementDto(0, "", EOperationalStatus.Down, 0, "");
         }
 
         return this.toDto(measurement);
@@ -133,11 +134,12 @@ export class Measurement_Service implements IMeasurement_Service {
 
     async getAllDownMeasurements(): Promise<MeasurementDto[]> {
         const measurements = await this.measurementRepository.find({
-            where: { "status": EOperationalStatus.Down },
-            relations: ['microservice']
+            where: { status: EOperationalStatus.Down },
+            relations: ['microservice'],
+            take: 20
         });
 
-        return measurements.map(m => this.toDto(m));
+        return Promise.all(measurements.map(m => this.toDto(m)));
     }
 
     async getAllMeasurements(): Promise<MeasurementDto[]> {
@@ -151,7 +153,7 @@ export class Measurement_Service implements IMeasurement_Service {
     async setMeasurement(measurement: CreateMeasurementDto): Promise<boolean> {
 
         const microservice = await this.microserviceRepository.findOne({
-            where: { ID_microservice: measurement.microserviceId },
+            where: { ID_microservice: measurement.microserviceId }
         });
 
         if (!microservice) {
@@ -161,7 +163,7 @@ export class Measurement_Service implements IMeasurement_Service {
         const entity = this.measurementRepository.create({
             microservice,
             status: measurement.status,
-            response_time: measurement.responseTime,
+            response_time: measurement.responseTime
         });
 
         await this.measurementRepository.save(entity);
@@ -176,10 +178,47 @@ export class Measurement_Service implements IMeasurement_Service {
         return (result.affected ?? 0) > 0;
     }
 
+    async getServiceStatus(): Promise<{ microserviceName: string; uptime: number; status: EOperationalStatus; }[]> {
+
+        const [latestMeasurements, uptimes] = await Promise.all([
+            this.getNewMeasurements(),
+            this.getAverageUptime()
+        ]);
+
+        if (uptimes.length === 0) {
+            return [];
+        }
+
+        const microserviceIds = uptimes.map(u => u.microserviceId);
+
+        const microservices = await this.microserviceRepository.find({
+            where: { ID_microservice: In(microserviceIds) }
+        });
+
+        const microserviceNameById = new Map<number, string>();
+        microservices.forEach(ms => {
+            microserviceNameById.set(ms.ID_microservice, ms.microservice_name);
+        });
+
+        const uptimeByName = new Map<string, number>();
+        uptimes.forEach(u => {
+            const name = microserviceNameById.get(u.microserviceId);
+            if (name) {
+                uptimeByName.set(name, u.uptime);
+            }
+        });
+
+        return latestMeasurements.map(m => ({
+            microserviceName: m.microserviceName,
+            uptime: uptimeByName.get(m.microserviceName) ?? 0,
+            status: m.status
+        }));
+    }
+
     private toDto(entity: Measurement): MeasurementDto {
         return new MeasurementDto(
             entity.measurement_id,
-            entity.microservice.ID_microservice,
+            entity.microservice.microservice_name,
             entity.status,
             entity.response_time,
             entity.measurement_date.toISOString()

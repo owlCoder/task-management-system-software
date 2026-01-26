@@ -17,7 +17,7 @@ export class Measurement_controller {
 
     private initializeRoutes(): void {
         this.router.get("/measurements", this.getAllMeasurements.bind(this));
-        this.router.get("/Down", this.getAllDownMeasurements.bind(this));
+        this.router.get("/down", this.getAllDownMeasurements.bind(this));
         this.router.get("/service-status", this.getServiceStatus.bind(this));
         this.router.get("/average-response-time/:days", this.getAvgResponseTime.bind(this))
         this.router.get("/measurement/:microserviceId", this.getMeasurementFromMicroservice.bind(this));
@@ -83,36 +83,13 @@ export class Measurement_controller {
 
     private async getServiceStatus(req: Request, res: Response): Promise<void> {
         try {
-            const [latestMeasurements, uptimes] = await Promise.all([
-                this.measurementService.getNewMeasurements(),
-                this.measurementService.getAverageUptime()
-            ]);
-
-            const uptimeMap = new Map<number, number>();
-            uptimes.forEach(u => {
-                uptimeMap.set(u.microserviceId, u.uptime);
-            });
-
-            const result = await Promise.all(
-                latestMeasurements.map(async m => {
-
-                    const microservice =
-                        await this.microserviceService.getMicroserviceByID(m.microserviceId);
-
-                    return {
-                        microserviceName: microservice?.microserviceName ?? "",
-                        uptime: uptimeMap.get(m.microserviceId) ?? 0,
-                        status: m.status
-                    };
-                })
-            );
-
+            const result = await this.measurementService.getServiceStatus();
             res.status(200).json(result);
-
         } catch (err) {
             res.status(500).json({ message: (err as Error).message });
         }
     }
+
 
 
     private async setMeasurement(req: Request, res: Response): Promise<void> {
