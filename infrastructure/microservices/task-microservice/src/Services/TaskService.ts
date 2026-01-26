@@ -1,4 +1,4 @@
-import { Repository } from "typeorm";
+import { In, Repository } from "typeorm";
 import { ITaskService } from "../Domain/services/ITaskService";
 import { Task } from "../Domain/models/Task";
 import { TaskStatus } from "../Domain/enums/TaskStatus";
@@ -127,6 +127,22 @@ export class TaskService implements ITaskService {
             return {success: true,data : filteredTasks}
         } catch (error) {
             return {success: false,errorCode:ErrorCode.NONE}
+        }
+    }
+
+    async getTasksBySprintIds(sprint_ids: number[]): Promise<Result<Task[]>> {
+        try {
+            if (sprint_ids.length === 0) {
+                return { success: true, data: [] };
+            }
+
+            const tasks = await this.taskRepository.find({
+                where: { sprint_id: In(sprint_ids) }
+            });
+
+            return { success: true, data: tasks };
+        } catch {
+            return { success: false, errorCode: ErrorCode.INTERNAL_ERROR, message: "Failed to fetch tasks" };
         }
     }
 

@@ -7,6 +7,7 @@ import { TaskStatus } from "../enums/TaskStatus";
 export interface ITaskService {
     getTaskById(task_id: number,user_id: number): Promise<Result<Task>>;
     getAllTasksForSprint(sprint_id: number,user_id: number) : Promise<Result<Task[]>>;
+    getTasksBySprintIds(sprint_ids: number[]): Promise<Result<Task[]>>;
     getAllDummyTasksForSprint() : Promise<Result<Task[]>>;
     addTaskForSprint(
         sprint_id: number,

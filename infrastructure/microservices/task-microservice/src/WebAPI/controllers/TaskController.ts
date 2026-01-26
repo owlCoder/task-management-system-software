@@ -46,6 +46,7 @@ export class TaskController {
 
         // TASKS
         this.router.get('/tasks/:taskId', this.getTaskById.bind(this));
+        this.router.post('/tasks/sprints/batch', this.getTasksForSprintIds.bind(this));
         this.router.post('/tasks/sprints/:sprintId', this.addTaskForSprint.bind(this));
         this.router.put('/tasks/:taskId', this.updateTask.bind(this));
         this.router.delete('/tasks/:taskId', this.deleteTask.bind(this));
@@ -171,6 +172,36 @@ export class TaskController {
             }
 
         } catch (error) {
+            res.status(500).json({ message: "Internal server error" });
+        }
+    }
+
+    async getTasksForSprintIds(req: Request, res: Response): Promise<void> {
+        try {
+            const sprintIds = (req.body as any)?.sprint_ids;
+
+            if (!Array.isArray(sprintIds) || sprintIds.length === 0) {
+                res.status(400).json({ message: "sprint_ids must be a non-empty array" });
+                return;
+            }
+
+            const parsed = sprintIds
+                .map((id) => Number.parseInt(id, 10))
+                .filter((id) => Number.isFinite(id) && id > 0);
+
+            if (parsed.length === 0) {
+                res.status(400).json({ message: "Invalid sprint IDs" });
+                return;
+            }
+
+            const result = await this.taskService.getTasksBySprintIds(parsed);
+
+            if (result.success) {
+                res.status(200).json(result.data.map(taskToTaskDTO));
+            } else {
+                res.status(errorCodeToHttpStatus(result.errorCode)).json({ message: result.message });
+            }
+        } catch {
             res.status(500).json({ message: "Internal server error" });
         }
     }
