@@ -19,8 +19,13 @@ import { TaskVersionDiff } from "../components/task/TaskVersionDiff";
 import { TaskVersionDTO } from "../models/task/TaskVersionDTO";
 import { TaskVersionHistoryDropdown } from "../components/task/TaskVersionHistoryDropdown";
 
-export const TaskDetailPage: React.FC<TaskDetailPageProps> = ({token,taskId,setClose,onEdit,
-  }) => {
+export const TaskDetailPage: React.FC<TaskDetailPageProps> = ({
+  token,
+  taskId,
+  setClose,
+  onEdit,
+  onStatusUpdate,
+}) => {
   const [view, setView] = useState<"upload" | "preview">("upload");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [uploadedFileName, setUploadedFileName] = useState<string | null>(null);
@@ -71,6 +76,7 @@ export const TaskDetailPage: React.FC<TaskDetailPageProps> = ({token,taskId,setC
     apiTask.updateTaskStatus(taskId, TaskStatus.COMPLETED,uploadedFileId)
       .then(() => {
         setTask(prev => prev ? {...prev, task_status: TaskStatus.COMPLETED} : null);
+        onStatusUpdate?.(taskId, TaskStatus.COMPLETED);
       })
       .catch(err => {
         console.error("Failed to update task status:", err);
@@ -149,9 +155,10 @@ export const TaskDetailPage: React.FC<TaskDetailPageProps> = ({token,taskId,setC
             task={task}
             role={role}
             token={token}
-            onStatusUpdate={(newStatus) =>
-              setTask({ ...task, task_status: newStatus })
-            }
+            onStatusUpdate={(newStatus) => {
+              setTask({ ...task, task_status: newStatus });
+              onStatusUpdate?.(task.task_id, newStatus);
+            }}
           />
         )}
 

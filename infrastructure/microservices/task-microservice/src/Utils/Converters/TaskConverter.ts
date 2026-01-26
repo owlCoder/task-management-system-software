@@ -9,6 +9,7 @@ export function taskToTaskDTO(task: Task): TaskDTO {
         title: task.title,
         task_description: task.task_description,
         task_status: task.task_status,
+        attachment_file_uuid: task.attachment_file_uuid,
         estimated_cost: task.estimated_cost,
         total_hours_spent: task.total_hours_spent,
         project_manager_id: task.project_manager_id,

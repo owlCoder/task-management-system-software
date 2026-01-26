@@ -124,16 +124,6 @@ export class TaskService implements ITaskService {
                 relations: ["comments"]
             });
             const filteredTasks = this.filterTasksForRole(tasks, user_id, roleName);
-
-            if ((roleName === UserRole.ANIMATION_WORKER || roleName === UserRole.AUDIO_MUSIC_STAGIST) &&
-                filteredTasks.length === 0) {
-                const workerTasks = await this.taskRepository.find({
-                    where: { worker_id: user_id },
-                    relations: ["comments"]
-                });
-                return { success: true, data: workerTasks };
-            }
-
             return {success: true,data : filteredTasks}
         } catch (error) {
             return {success: false,errorCode:ErrorCode.NONE}
@@ -346,7 +336,10 @@ export class TaskService implements ITaskService {
                     return { success: false, errorCode: ErrorCode.FILE_NOT_FOUND, message: "File not found" };
                 }
 
-                const file_type = fileResult.data.file_type;
+                const file_type = fileResult.data.fileType ?? fileResult.data.file_type;
+                if (!file_type || typeof file_type !== "string") {
+                    return { success: false, errorCode: ErrorCode.INVALID_INPUT, message: "Invalid file metadata" };
+                }
                 const userResult = await this.userService.getUserById(user_id);
 
                 if (!userResult.success) {
@@ -355,14 +348,16 @@ export class TaskService implements ITaskService {
 
                 const role = userResult.data.role_name;
 
-                if (role === UserRole.ANIMATION_WORKER &&
-                    !file_type.startsWith("image/") &&
-                    !file_type.startsWith("video/")) {
+                const normalizedType = file_type.toLowerCase();
+                const isImage = normalizedType === "image" || normalizedType.startsWith("image/");
+                const isVideo = normalizedType === "video" || normalizedType.startsWith("video/");
+                const isAudio = normalizedType === "audio" || normalizedType.startsWith("audio/");
+
+                if (role === UserRole.ANIMATION_WORKER && !isImage && !isVideo) {
                     return { success: false, errorCode: ErrorCode.INVALID_INPUT, message: "Only image/video allowed" };
                 }
 
-                if (role === UserRole.AUDIO_MUSIC_STAGIST &&
-                    !file_type.startsWith("audio/")) {
+                if (role === UserRole.AUDIO_MUSIC_STAGIST && !isAudio) {
                     return { success: false, errorCode: ErrorCode.INVALID_INPUT, message: "Only audio allowed" };
                 }
 

@@ -9,6 +9,7 @@ export interface TaskDTO {
     title: string;
     task_description: string;
     task_status: TaskStatus;
+    attachment_file_uuid?: number;
     estimated_cost?: number;
     total_hours_spent?: number;
     comments?: CommentDTO[];    

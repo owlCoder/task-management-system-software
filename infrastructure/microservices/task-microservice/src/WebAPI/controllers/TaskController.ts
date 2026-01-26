@@ -298,13 +298,13 @@ export class TaskController {
                 return;
             }
 
-            const { status } = req.body;
+            const { status, file_id } = req.body;
             if (status === undefined) {
                 res.status(400).json({ message: "Status is required" });
                 return;
             }
 
-            const result = await this.taskService.updateTaskStatus(taskId, status, user_id);
+            const result = await this.taskService.updateTaskStatus(taskId, status, user_id, file_id);
 
             if (result.success) {
                 res.status(200).json(taskToTaskDTO(result.data));

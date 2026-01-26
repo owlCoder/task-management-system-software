@@ -41,6 +41,13 @@ const TaskPage: React.FC<TaskListPageProps> = ({ projectId }) => {
   const api = new TaskAPI(import.meta.env.VITE_GATEWAY_URL, token);
   const selectedTask = tasks.find((t) => t.task_id === selectedtaskId);
   const [detailRefreshKey, setDetailRefreshKey] = useState(0);
+  const handleDetailStatusUpdate = (taskId: number, newStatus: TaskStatus) => {
+    setTasks((prev) =>
+      prev.map((t) =>
+        t.task_id === taskId ? { ...t, task_status: newStatus } : t
+      )
+    );
+  };
 
   const handleStatusChange = async (taskId: number, newStatus: TaskStatus) => {
   const taskToUpdate = tasks.find((t) => t.task_id === taskId);
@@ -294,6 +301,7 @@ const TaskPage: React.FC<TaskListPageProps> = ({ projectId }) => {
               onEdit={() => {
                 setEditOpen(true);
               }}
+              onStatusUpdate={handleDetailStatusUpdate}
             />
           )}
 
