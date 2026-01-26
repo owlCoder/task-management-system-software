@@ -6,6 +6,7 @@ import { Db } from "../Database/DbConnectionPool";
 import { EOperationalStatus } from "../Domain/enums/EOperationalStatus";
 import { Microservice } from "../Domain/models/Microservice";
 import { CreateMeasurementDto } from "../Domain/DTOs/CreateMeasurement_DTO";
+import { ServiceStatusTransportDto } from "../Domain/DTOs/ServiceStatusTransport_DTO";
 
 export class Measurement_Service implements IMeasurement_Service {
 
@@ -69,40 +70,43 @@ export class Measurement_Service implements IMeasurement_Service {
     }
 
 
-    async getNewMeasurements(): Promise<MeasurementDto[]> {
+    async getLatestStatuses(): Promise<{ microserviceId: number; status: EOperationalStatus }[]> {
 
         const subQuery = this.measurementRepository
             .createQueryBuilder("m2")
             .select("MAX(m2.measurement_date)")
             .where("m2.ID_microservice = m.ID_microservice");
 
-        const measurements = await this.measurementRepository
+        const rows = await this.measurementRepository
             .createQueryBuilder("m")
-            .leftJoinAndSelect("m.microservice", "microservice")
+            .select("m.ID_microservice", "microserviceId")
+            .addSelect("m.status", "status")
             .where(`m.measurement_date = (${subQuery.getQuery()})`)
-            .getMany();
+            .getRawMany();
 
-        return measurements.map(m => this.toDto(m));
+        return rows.map(r => ({
+            microserviceId: Number(r.microserviceId),
+            status: r.status
+        }));
     }
 
+
     async getAverageUptime(): Promise<{ microserviceId: number; uptime: number }[]> {
-
-        const startOfToday = new Date();
-        startOfToday.setHours(0, 0, 0, 0);
-
         const result = await this.measurementRepository
             .createQueryBuilder("m")
             .select("m.ID_microservice", "microserviceId")
-            .addSelect(`ROUND((SUM(CASE WHEN m.status = :operational THEN 1 ELSE 0 END) * 100.0)/ COUNT(*),2)`,"uptime")
-            .where("m.measurement_date >= :fromDate")
-            .setParameter("fromDate", startOfToday)
-            .setParameter("operational", EOperationalStatus.Operational)
+            .addSelect(
+                `(SUM(m.status != :down) * 100.0) / COUNT(*)`,
+                "uptime"
+            )
+            .where("m.measurement_date >= CURDATE()")
+            .setParameter("down", EOperationalStatus.Down)
             .groupBy("m.ID_microservice")
             .getRawMany();
 
         return result.map(r => ({
             microserviceId: Number(r.microserviceId),
-            uptime: Number(r.uptime),
+            uptime: Math.round(Number(r.uptime) * 100) / 100
         }));
     }
 
@@ -176,43 +180,6 @@ export class Measurement_Service implements IMeasurement_Service {
         });
 
         return (result.affected ?? 0) > 0;
-    }
-
-    async getServiceStatus(): Promise<{ microserviceName: string; uptime: number; status: EOperationalStatus; }[]> {
-
-        const [latestMeasurements, uptimes] = await Promise.all([
-            this.getNewMeasurements(),
-            this.getAverageUptime()
-        ]);
-
-        if (uptimes.length === 0) {
-            return [];
-        }
-
-        const microserviceIds = uptimes.map(u => u.microserviceId);
-
-        const microservices = await this.microserviceRepository.find({
-            where: { ID_microservice: In(microserviceIds) }
-        });
-
-        const microserviceNameById = new Map<number, string>();
-        microservices.forEach(ms => {
-            microserviceNameById.set(ms.ID_microservice, ms.microservice_name);
-        });
-
-        const uptimeByName = new Map<string, number>();
-        uptimes.forEach(u => {
-            const name = microserviceNameById.get(u.microserviceId);
-            if (name) {
-                uptimeByName.set(name, u.uptime);
-            }
-        });
-
-        return latestMeasurements.map(m => ({
-            microserviceName: m.microserviceName,
-            uptime: uptimeByName.get(m.microserviceName) ?? 0,
-            status: m.status
-        }));
     }
 
     private toDto(entity: Measurement): MeasurementDto {

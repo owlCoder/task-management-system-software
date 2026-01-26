@@ -8,11 +8,8 @@ export interface IMeasurement_Service {
   getMeasurementByID(measurementID: number): Promise<MeasurementDto>;
   getMeasurementsFromMicroservice(microserviceId: number):Promise<MeasurementDto[]>;
   getAllDownMeasurements():Promise<MeasurementDto[]>;
-  getNewMeasurements():Promise<MeasurementDto[]>;
-  getAverageUptime(): Promise<{ microserviceId: number; uptime: number }[]>
-  getAverageResponseTime(days: number): Promise<{ time: string; avgResponseTime: number }[]>
-  getServiceStatus(): Promise<{ microserviceName: string; uptime: number; status: EOperationalStatus; }[]>
-
+  getLatestStatuses(): Promise<{ microserviceId: number; status: EOperationalStatus }[]> ;getAverageUptime(): Promise<{ microserviceId: number; uptime: number }[]>;
+  getAverageResponseTime(days: number): Promise<{ time: string; avgResponseTime: number }[]>;
 
   setMeasurement(measurement: CreateMeasurementDto): Promise<boolean>
 

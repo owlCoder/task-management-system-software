@@ -5,6 +5,8 @@ import { validateMeasurementDto } from "../validators/Measurement_validator";
 import { ILoggerService } from "../../Domain/Services/ILoggerService";
 import { IMicroservice_Service } from "../../Domain/Services/IMicroservice_Service";
 import { time } from "console";
+import { EOperationalStatus } from "../../Domain/enums/EOperationalStatus";
+import { ServiceStatusTransportDto } from "../../Domain/DTOs/ServiceStatusTransport_DTO";
 
 
 export class Measurement_controller {
@@ -83,10 +85,31 @@ export class Measurement_controller {
 
     private async getServiceStatus(req: Request, res: Response): Promise<void> {
         try {
-            const result = await this.measurementService.getServiceStatus();
+            const [microservices, uptimes, statuses] = await Promise.all([
+                this.microserviceService.getAllMicroservices(),
+                this.measurementService.getAverageUptime(),
+                this.measurementService.getLatestStatuses()
+            ]);
+
+            const uptimeById = new Map<number, number>(
+                uptimes.map(u => [u.microserviceId, u.uptime])
+            );
+
+            const statusById = new Map<number, EOperationalStatus>(
+                statuses.map(s => [s.microserviceId, s.status])
+            );
+
+            const result: ServiceStatusTransportDto[] = microservices.map(ms => ({
+                microserviceName: ms.microserviceName,
+                uptime: uptimeById.get(ms.microserviceId) ?? 0,
+                status: statusById.get(ms.microserviceId) ?? EOperationalStatus.Down
+            }));
+
             res.status(200).json(result);
         } catch (err) {
-            res.status(500).json({ message: (err as Error).message });
+            res.status(500).json({
+                message: (err as Error).message
+            });
         }
     }
 
