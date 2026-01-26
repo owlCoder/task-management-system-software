@@ -20,11 +20,11 @@ export class ProjectAnalyticsService implements IProjectAnalyticsService {
         // Fetch sprint by ID - potreban nam endpoint
         const s = await this.projectServiceClient.getSprintById(sprintId);
 
-        if (!s) throw new Error("Sprint not found");
+        if (!s) return { project_id: -1, sprint_id: -1, tasks: [] };
 
         const project = await this.projectServiceClient.getProjectById(s.project_id);
 
-        if (!project) throw new Error("Project not found for sprint");
+        if (!project) return { project_id: -1, sprint_id: sprintId, tasks: [] };
 
         const startDate = new Date(s.start_date);
         const endDate = new Date(s.end_date);
@@ -60,11 +60,11 @@ export class ProjectAnalyticsService implements IProjectAnalyticsService {
     async getBurnUpChartsForSprintId(sprintId: number): Promise<BurnupDto> {
         const s = await this.projectServiceClient.getSprintById(sprintId);
 
-        if (!s) throw new Error("Sprint not found");
+        if (!s) return { project_id: -1, sprint_id: -1, sprint_duration_date: 0, work_amount: 0, points: [] };
 
         const project = await this.projectServiceClient.getProjectById(s.project_id);
 
-        if (!project) throw new Error("Project not found for sprint");
+        if (!project) return { project_id: -1, sprint_id: sprintId, sprint_duration_date: 0, work_amount: 0, points: [] };
 
         const startDate = new Date(s.start_date);
         startDate.setHours(0, 0, 0, 0);
@@ -122,7 +122,7 @@ export class ProjectAnalyticsService implements IProjectAnalyticsService {
     async getVelocityForProject(projectId: number): Promise<number> {
         const proj = await this.projectServiceClient.getProjectById(projectId);
 
-        if (!proj) throw new Error("Project not found");
+        if (!proj) return -1;
 
         // fetch sprints koje su završene do danas, po projectId
         const allSprints = await this.projectServiceClient.getSprintsByProject(projectId);
@@ -130,7 +130,7 @@ export class ProjectAnalyticsService implements IProjectAnalyticsService {
         const today = new Date();
         const sprints = allSprints.filter(s => new Date(s.end_date) < today);
 
-        if (sprints.length === 0) return 0;
+        if (sprints.length === 0) return -1;
 
         let sumMs = 0;
 
