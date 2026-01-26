@@ -8,4 +8,5 @@ export type Props = {
     onEdit?: (p: ProjectDTO) => void;
     onDelete?: (p: ProjectDTO) => void;
     canManage?: boolean;
+    userRole?: string;
 };

@@ -1,5 +1,4 @@
 import React from "react";
-import type { ProjectDTO } from "../../models/project/ProjectDTO";
 import { ProjectStatus } from "../../enums/ProjectStatus";
 import { hasProjectImage } from "../../helpers/image_url";
 import type { Props } from "../../types/props/ProjectDetailsModalProps";

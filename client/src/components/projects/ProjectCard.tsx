@@ -1,9 +1,8 @@
 import React from "react";
-import type { ProjectDTO } from "../../models/project/ProjectDTO";
 import { ProjectStatus } from "../../enums/ProjectStatus";
 import { hasProjectImage } from "../../helpers/image_url";
 import type { Props } from "../../types/props/ProjectCardProps";
-
+import { UserRole } from "../../enums/UserRole";
 
 const getStatusColor = (status: ProjectStatus): string => {
     switch (status) {
@@ -18,6 +17,10 @@ const getStatusColor = (status: ProjectStatus): string => {
         default:
             return "bg-gray-500";
     }
+};
+
+const canViewProjectDetails = (role?: string): boolean => {
+    return role !== UserRole.ANALYTICS_DEVELOPMENT_MANAGER;
 };
 
 const formatDate = (dateString: string | null): string => {
@@ -36,6 +39,7 @@ export const ProjectCard: React.FC<Props> = ({
     onSelect,
     onView,
     canManage = false,
+    userRole,
 }) => {
     const handleRootKeyDown = (e: React.KeyboardEvent) => {
         if (e.key === "Enter" || e.key === " ") {
@@ -195,28 +199,32 @@ export const ProjectCard: React.FC<Props> = ({
                 </p>
             </div>
 
-            {/* View Button */}
-            <div
-                className="
-                    h-11
-                    flex items-center justify-center
-                    text-sm font-semibold
-                    text-white
-                    bg-white/10
-                    hover:bg-gradient-to-t
-                    hover:from-[var(--palette-medium-blue)]
-                    hover:to-[var(--palette-deep-blue)]
-                    transition-all duration-300
-                    rounded-b-2xl
-                "
-                role="button"
-                tabIndex={0}
-                aria-label={`View ${project.project_name}`}
-                onClick={handleViewClick}
-                onKeyDown={handleViewKeyDown}
-            >
-                View Project
-            </div>
+            {/* View Button - Conditional Rendering based on userRole */}
+            {canViewProjectDetails(userRole) ? (
+                <div
+                    className="
+                        h-11
+                        flex items-center justify-center
+                        text-sm font-semibold
+                        text-white
+                        bg-white/10
+                        hover:bg-gradient-to-t
+                        hover:from-[var(--palette-medium-blue)]
+                        hover:to-[var(--palette-deep-blue)]
+                        transition-all duration-300
+                        rounded-b-2xl
+                    "
+                    role="button"
+                    tabIndex={0}
+                    aria-label={`View ${project.project_name}`}
+                    onClick={handleViewClick}
+                    onKeyDown={handleViewKeyDown}
+                >
+                    View Project
+                </div>
+            ) : (
+                <div className="pb-4" /> // Spacing at the bottom if button is hidden
+            )}
         </article>
     );
 };

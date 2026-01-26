@@ -391,6 +391,7 @@ export const ProjectsPage: React.FC = () => {
                                         setTimeout(handleDelete, 0);
                                     } : undefined}
                                     canManage={canManageProjects(user?.role)}
+                                    userRole={user?.role}
                                 />
                             ))}
                         </section>
