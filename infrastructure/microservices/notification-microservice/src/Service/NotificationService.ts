@@ -2,24 +2,24 @@ import { Repository, In } from 'typeorm';
 import { Notification } from '../Domain/models/Notification';
 import { INotificationMapper } from '../Utils/converters/INotificationMapper';
 import { INotificationService} from '../Domain/Services/INotificationService';
+import { ISocketService } from '../Domain/Services/ISocketService';
 import { Result } from '../Domain/types/common/Result';
 import { ErrorCode } from '../Domain/enums/ErrorCode';
 import { NotificationCreateDTO } from '../Domain/DTOs/NotificationCreateDTO';
 import { NotificationResponseDTO } from '../Domain/DTOs/NotificationDTO';
-import { SocketService } from '../WebSocket/SocketService';
 
 export class NotificationService implements INotificationService {
 
   private repository: Repository<Notification>;
   private mapper: INotificationMapper;
-  private socketService?: SocketService;
+  private socketService?: ISocketService;
 
   constructor(repository: Repository<Notification>, mapper: INotificationMapper) {
     this.repository = repository;
     this.mapper = mapper;
   }
 
-  setSocketService(socketService: SocketService): void {
+  setSocketService(socketService: ISocketService): void {
     this.socketService = socketService;
   }
 

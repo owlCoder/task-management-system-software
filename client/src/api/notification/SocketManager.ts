@@ -7,6 +7,7 @@ import { SocketEvents } from "../../constants/SocketEvents";
 export class SocketManager implements ISocketManager {
   private socket: Socket | null = null;
   private readonly config: SocketConfig;
+  private pendingUserId: number | null = null;
 
   constructor(config: SocketConfig) {
     this.config = config;
@@ -28,6 +29,11 @@ export class SocketManager implements ISocketManager {
 
     this.socket.on("connect", () => {
       console.log(" Socket connected:", this.socket?.id);
+      // Ako postoji pending userId, join-aj sobu sada
+      if (this.pendingUserId !== null) {
+        this.socket?.emit(SocketEvents.JOIN_USER_ROOM, this.pendingUserId);
+        console.log(` Joined user room: ${this.pendingUserId}`);
+      }
     });
 
     this.socket.on("disconnect", () => {
@@ -50,14 +56,18 @@ export class SocketManager implements ISocketManager {
 
   // Pridruzuje se "sobi" za odredjenog korisnika
   joinUserRoom(userId: number): void {
+    this.pendingUserId = userId;
     if (this.socket?.connected) {
       this.socket.emit(SocketEvents.JOIN_USER_ROOM, userId);
       console.log(` Joined user room: ${userId}`);
+    } else {
+      console.log(` Pending join for user room: ${userId} (waiting for connection)`);
     }
   }
 
   // Napusta "sobu" za odredjenog korisnika
   leaveUserRoom(userId: number): void {
+    this.pendingUserId = null;
     if (this.socket?.connected) {
       this.socket.emit(SocketEvents.LEAVE_USER_ROOM, userId);
       console.log(` Left user room: ${userId}`);

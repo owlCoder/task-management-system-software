@@ -1,6 +1,7 @@
 import { NotificationCreateDTO } from '../DTOs/NotificationCreateDTO';
 import { NotificationResponseDTO } from '../DTOs/NotificationDTO';
 import { Result } from '../types/common/Result';
+import { ISocketService } from './ISocketService';
 
 export interface INotificationService {
   createNotification(data: NotificationCreateDTO): Promise<Result<NotificationResponseDTO[]>>;
@@ -17,5 +18,5 @@ export interface INotificationService {
 
   getUnreadCount(userId: number): Promise<Result<number>>;
 
-  setSocketService(socketService: any): void;
+  setSocketService(socketService: ISocketService): void;
 }

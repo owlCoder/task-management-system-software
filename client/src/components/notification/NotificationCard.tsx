@@ -20,10 +20,10 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
     }
   };
 
-  // handler za klik na celu karticu
+  // handler za klik na celu karticu - toggle-uje selekciju
   const handleCardClick = () => {
-    if (onClick) {
-      onClick(notification.id);
+    if (onSelectChange) {
+      onSelectChange(notification.id);
     }
   };
 

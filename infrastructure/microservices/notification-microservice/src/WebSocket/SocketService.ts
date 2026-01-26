@@ -2,8 +2,9 @@ import { Server as SocketIOServer, Socket } from 'socket.io';
 import { Server as HTTPServer } from 'http';
 import { SocketEvents } from './SocketEvents';
 import type { NotificationResponseDTO } from '../Domain/DTOs/NotificationDTO';
+import { ISocketService } from '../Domain/Services/ISocketService';
 
-export class SocketService {
+export class SocketService implements ISocketService {
   private io: SocketIOServer;
 
   constructor(httpServer: HTTPServer) {

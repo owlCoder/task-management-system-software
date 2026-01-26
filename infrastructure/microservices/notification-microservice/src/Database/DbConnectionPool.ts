@@ -1,24 +1,20 @@
-/*import "reflect-metadata";
+import "reflect-metadata";
 import { DataSource } from "typeorm";
 import dotenv from "dotenv";
-import { User } from "../Domain/models/User";
-import { UserRole } from "../Domain/models/UserRole";
+import { Notification } from "../Domain/models/Notification";
 
 dotenv.config();
 
 export const Db = new DataSource({
   type: "mysql",
-  host: process.env.DB_HOST,
-  port: Number(process.env.DB_PORT),
-  username: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
-  ssl: { rejectUnauthorized: false },
+  host: process.env.DB_HOST || "localhost",
+  port: Number(process.env.DB_PORT) || 3306,
+  username: process.env.DB_USERNAME || "root",
+  password: process.env.DB_PASSWORD || "",
+  database: process.env.DB_DATABASE || "notification_service",
   synchronize: true, // automatsko kreiranje tabela u bazi
-  logging: false, // debug sql gresaka
-  entities: [User, UserRole],
+  logging: process.env.NODE_ENV === "development",
+  entities: [Notification],
+  migrations: [],
+  subscribers: [],
 });
-
-//TO DO KASNIJE AKO TREBA
-
->*/
