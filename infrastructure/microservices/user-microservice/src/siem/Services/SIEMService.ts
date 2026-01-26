@@ -1,16 +1,9 @@
-// Libraries
 import { AxiosInstance } from "axios";
-
-// Domain
-
-// Infrastructure Configs
 import { createAxiosClient } from "../Domen/axios/client/AxiosClientFactory";
 import { ISIEMService } from "../Domen/services/ISIEMService";
 import { SIEMEvent } from "../Domen/model/SIEMEvent";
-// Infrastructure Utils
 import { convertEventToSIEMPayload } from "../Domen/Helpers/convertes/SIEMPayloadConverter";
 import { ILogerService } from "../../Domain/services/ILogerService";
-
 
 export class SIEMService implements ISIEMService {
   private readonly siemClient: AxiosInstance;
@@ -20,10 +13,6 @@ export class SIEMService implements ISIEMService {
   }
 
   sendEvent(event: SIEMEvent): void {
-    // if (!isSIEMEvent(event.url, event.method, event.statusCode, event.code)) {
-    //   return;
-    // }
-
     this.sendToSIEM(event);
   }
 

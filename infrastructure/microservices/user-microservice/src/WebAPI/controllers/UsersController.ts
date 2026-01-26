@@ -76,7 +76,12 @@ export class UsersController {
 
       if (result.success) {
         this.siemService.sendEvent(
-          generateEvent("user-microservice", req, 200, "Request successful"),
+          generateEvent(
+            "user-microservice",
+            req,
+            200,
+            "Request successful | All users fetched",
+          ),
         );
         res.status(200).json(result.data);
       } else {
@@ -212,9 +217,6 @@ export class UsersController {
       const rezultat = UserDataValidation(userData);
 
       if (rezultat.uspesno === false) {
-        this.siemService.sendEvent(
-          generateEvent("user-microservice", req, 400, rezultat.poruka!),
-        );
         res.status(400).json({ message: rezultat.poruka });
         return;
       }
@@ -224,7 +226,12 @@ export class UsersController {
 
       if (result.success) {
         this.siemService.sendEvent(
-          generateEvent("user-microservice", req, 201, "Request successful"),
+          generateEvent(
+            "user-microservice",
+            req,
+            201,
+            "Request successful | New user created",
+          ),
         );
 
         res.status(201).json(result.data);
@@ -237,6 +244,9 @@ export class UsersController {
       }
     } catch (err) {
       this.logger.log((err as Error).message);
+      this.siemService.sendEvent(
+        generateEvent("user-microservice", req, 500, (err as Error).message),
+      );
       res.status(500).json({ message: (err as Error).message });
     }
   }
@@ -253,15 +263,6 @@ export class UsersController {
       const id = parseInt(req.params.id as string, 10);
 
       if (isNaN(id)) {
-        this.siemService.sendEvent(
-          generateEvent(
-            "user-microservice",
-            req,
-            400,
-            "The passed id is not a number.",
-          ),
-        );
-
         res.status(400).json({ message: "The passed id is not a number." });
         return;
       }
@@ -279,12 +280,20 @@ export class UsersController {
         res.status(result.code).json(result.error);
       } else {
         this.siemService.sendEvent(
-          generateEvent("user-microservice", req, 204, "Request successful"),
+          generateEvent(
+            "user-microservice",
+            req,
+            204,
+            `Request successful | Logically deleting user with ID ${id}`,
+          ),
         );
         res.status(204).send();
       }
     } catch (err) {
       this.logger.log((err as Error).message);
+      this.siemService.sendEvent(
+        generateEvent("user-microservice", req, 500, (err as Error).message),
+      );
       res.status(500).json({ message: (err as Error).message });
     }
   }
@@ -301,14 +310,6 @@ export class UsersController {
       const id = parseInt(req.params.id as string, 10);
 
       if (isNaN(id)) {
-        this.siemService.sendEvent(
-          generateEvent(
-            "user-microservice",
-            req,
-            400,
-            "The passed id is not a number.",
-          ),
-        );
         res.status(400).json({ message: "The passed id is not a number" });
         return;
       }
@@ -336,7 +337,7 @@ export class UsersController {
               "user-microservice",
               req,
               500,
-              "Failed to upload image",
+              "User update faild | Failed to upload image",
             ),
           );
           this.logger.log(
@@ -367,7 +368,12 @@ export class UsersController {
 
       if (result.success) {
         this.siemService.sendEvent(
-          generateEvent("user-microservice", req, 200, "Request successful"),
+          generateEvent(
+            "user-microservice",
+            req,
+            200,
+            "Request successful | User updated successfully",
+          ),
         );
         res.status(200).json(result.data);
       } else {
@@ -384,6 +390,9 @@ export class UsersController {
       }
     } catch (err) {
       this.logger.log((err as Error).message);
+      this.siemService.sendEvent(
+        generateEvent("user-microservice", req, 500, (err as Error).message),
+      );
       res.status(500).json({ message: (err as Error).message });
     }
   }
