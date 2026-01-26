@@ -20,6 +20,8 @@ import { TaskStatus } from "../enums/TaskStatus";
 import { TaskListPageProps } from "../types/props";
 import { useAuth } from "../hooks/useAuthHook";
 import { UserAPI } from "../api/users/UserAPI";
+import toast from "react-hot-toast";
+import { VersionControlAPI } from "../api/version/VersionControlAPI";
 
 const TaskPage: React.FC<TaskListPageProps> = ({ projectId }) => {
   const { token } = useAuth();
@@ -199,6 +201,17 @@ const TaskPage: React.FC<TaskListPageProps> = ({ projectId }) => {
     load();
 }, [effectiveProjectId, sprintIdNum, token]);
 
+  const handleSendToReview = async (taskId: number) => {
+  try {
+    await VersionControlAPI.sendTaskToReview(taskId);
+    toast.success("Task sent to review");
+  } catch (err) {
+    console.error(err);
+    toast.error("Failed to send task to review");
+  }
+};
+
+
   if (loading) {
     return <div className="text-white p-6">Loading tasks...</div>;
   }
@@ -351,6 +364,7 @@ const TaskPage: React.FC<TaskListPageProps> = ({ projectId }) => {
                         task={task}
                         onSelect={() => setSelectedTaskId(task.task_id)}
                         onStatusChange={handleStatusChange}
+                        onSendToReview={handleSendToReview}
                         users={users}
                       />
                     ))}

@@ -1,7 +1,8 @@
 import axios, { AxiosInstance } from "axios";
+import { ITaskServiceClient } from "./ITaskServiceClient";
 import { TaskDTO } from "./types";
 
-export class TaskServiceClient {
+export class TaskServiceClient implements ITaskServiceClient {
   private axiosInstance: AxiosInstance;
 
   constructor(baseURL: string = process.env.TASK_SERVICE_API || "http://localhost:12234/api/v1") {

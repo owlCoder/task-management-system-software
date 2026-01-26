@@ -27,6 +27,12 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({
 
   const api = new TaskAPI(import.meta.env.VITE_GATEWAY_URL, token);
 
+  const normalizeRole = (role?: string | null) =>
+    role ? role.trim().toUpperCase().replace(/[\s_-]+/g, "") : "";
+
+  const isProjectManager = (role?: string | null) =>
+    normalizeRole(role) === "PROJECTMANAGER";
+
   useEffect(() => {
     if (open && task) {
       setTitle(task.title);
@@ -79,6 +85,13 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({
 
     if (assignedTo !== undefined && assignedTo !== task.worker_id) {
       payload.assignedTo = assignedTo;
+    }
+
+    const selectedUser = users.find((u) => u.user_id === assignedTo);
+
+    if (isProjectManager(selectedUser?.role_name)) {
+      toast.error("Task can only be assigned to workers.");
+      return;
     }
 
     if (Object.keys(payload).length === 0) {
@@ -206,15 +219,27 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({
             </h3>
             <select
               value={assignedTo ?? ""}
-              onChange={(e) =>
-                setAssignedTo(
-                  e.target.value ? Number(e.target.value) : undefined
-                )
-              }
+              onChange={(e) => {
+                const value = e.target.value;
+                if (!value) {
+                  setAssignedTo(undefined);
+                  return;
+                }
+
+                const userId = Number(value);
+                const selected = users.find((user) => user.user_id === userId);
+                if (isProjectManager(selected?.role_name)) {
+                  toast.error("Task can only be assigned to workers.");
+                  setAssignedTo(undefined);
+                  return;
+                }
+
+                setAssignedTo(userId);
+              }}
               className="
                 w-full
-                bg-black/30
-                border border-white/10
+                bg-slate-900/50
+                border border-white/20
                 rounded-lg
                 p-3
                 text-sm text-white
@@ -222,9 +247,14 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({
                 focus:ring-2 focus:ring-blue-500/40
               "
             >
-              <option value="">Unassigned</option>
+              <option value="" className="bg-slate-900">Unassigned</option>
               {users.map((user) => (
-                <option key={user.user_id} value={user.user_id}>
+                <option
+                  key={user.user_id}
+                  value={user.user_id}
+                  disabled={isProjectManager(user.role_name)}
+                  className="bg-slate-900"
+                >
                   {user.username} 
                 </option>
               ))}

@@ -11,6 +11,7 @@ export interface TaskListItemProps {
   onSelect?: (taskId: number) => void;
   onStatusChange?: (taskId: number, newStatus: TaskStatus) => void;
   users?: ProjectUserDTO[];
+  onSendToReview?: (taskId: number) => void;
 }
 
 // TaskColumn Props

@@ -5,7 +5,7 @@ import { ReviewStatus } from "../enums/ReviewStatus";
 
 export interface IReviewService {
   getTaskForReview() : Promise<Result<TaskReviewDTO[]>>;  
-  getReviews(status?: ReviewStatus | "ALL"): Promise<Result<TaskReviewDTO[]>>;
+  getReviews(status?: ReviewStatus): Promise<Result<TaskReviewDTO[]>>;
   getCommentById(commentId: number): Promise<Result<ReviewCommenntDTO>>;
   sendToReview(taskId : number,authorId : number) : Promise<Result<TaskReviewDTO>>;
   approveReview(taskId : number,reviewedBy : number) : Promise<Result<TaskReviewDTO>>;
