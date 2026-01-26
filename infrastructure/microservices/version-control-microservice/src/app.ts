@@ -31,13 +31,6 @@ app.use(express.json());
 (async () => {
   await initialize_database();
 
-  const reviewRepository: Repository<Review> = Db.getRepository(Review);
-  const reviewCommentRepository: Repository<ReviewComment> = Db.getRepository(ReviewComment);
-
-  const reviewService = new ReviewService(reviewRepository, reviewCommentRepository);
-
-  const reviewController = new ReviewController(reviewService);
-
   const templateRepository: Repository<TaskTemplate> = Db.getRepository(TaskTemplate);
   const dependenciesRepository: Repository<TemplateDependency> = Db.getRepository(TemplateDependency);
   const taskService = new TaskServiceClient();
@@ -45,6 +38,13 @@ app.use(express.json());
   const templateService = new TemplateService(templateRepository, dependenciesRepository, taskService, userService);
 
   const templateController = new TemplateController(templateService);
+
+  const reviewRepository: Repository<Review> = Db.getRepository(Review);
+  const reviewCommentRepository: Repository<ReviewComment> = Db.getRepository(ReviewComment);
+
+  const reviewService = new ReviewService(reviewRepository, reviewCommentRepository, userService);
+
+  const reviewController = new ReviewController(reviewService);
 
 
 

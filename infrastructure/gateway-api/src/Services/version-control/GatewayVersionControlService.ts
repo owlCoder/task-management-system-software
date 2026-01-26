@@ -13,6 +13,7 @@ import { CreateTaskDTO } from "../../Domain/DTOs/version-control/CreateTaskDTO";
 import { RejectReviewDTO } from "../../Domain/DTOs/version-control/RejectReviewDTO";
 import { ReviewsQueryParams } from "../../Domain/types/version-control/ReviewsQueryParams";
 import { Result } from "../../Domain/types/common/Result";
+import { ReviewHistoryItemDTO } from "../../Domain/DTOs/version-control/ReviewHistoryItemDTO";
 
 // Constants
 import { HTTP_METHODS } from "../../Constants/common/HttpMethods";
@@ -74,6 +75,17 @@ export class GatewayVersionControlService implements IGatewayVersionControlServi
             method: HTTP_METHODS.GET,
             url: VERSION_CONTROL_ROUTES.GET_REVIEWS,
             params: params,
+            headers: {
+                "x-user-role": senderRole
+            }
+        });
+    }
+
+    async getReviewHistory(taskId: number, senderRole: string): Promise<Result<ReviewHistoryItemDTO[]>> {
+        return await makeAPICall<ReviewHistoryItemDTO[]>(this.versionClient, this.errorHandlingService, {
+            serviceName: SERVICES.VERSION_CONTROL,
+            method: HTTP_METHODS.GET,
+            url: VERSION_CONTROL_ROUTES.GET_REVIEW_HISTORY(taskId),
             headers: {
                 "x-user-role": senderRole
             }

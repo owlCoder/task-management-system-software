@@ -25,6 +25,22 @@ export class UserServiceClient implements IUserServiceClient {
         }
     }
 
+    async getUsersByIds(userIds: number[]): Promise<Result<any[]>> {
+        try {
+            if (userIds.length === 0) {
+                return { success: true, data: [] };
+            }
+
+            const ids = userIds.join(",");
+            const response = await this.axiosInstance.get(`/users/ids`, {
+                params: { ids }
+            });
+            return { success: true, data: response.data };
+        } catch (error: any) {
+            return { success: false, code: ErrorCode.INTERNAL_ERROR, error: error.message };
+        }
+    }
+
     async verifyUserExists(userId: number): Promise<boolean> {
         const result = await this.getUserById(userId);
         return result.success;

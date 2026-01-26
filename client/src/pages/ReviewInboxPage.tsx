@@ -33,6 +33,7 @@ const ReviewInboxPage: React.FC = () => {
 
   const [rejectOpen, setRejectOpen] = useState(false);
   const [rejectTaskId, setRejectTaskId] = useState<number | null>(null);
+  const [search, setSearch] = useState("");
 
   const userApi = useMemo(() => new UserAPI(), []);
   const taskApi = useMemo(() => new TaskAPI(import.meta.env.VITE_GATEWAY_URL, token), [token]);
@@ -83,6 +84,18 @@ const ReviewInboxPage: React.FC = () => {
   };
 
   const showInboxActions = tab === "REVIEW";
+  const normalizedSearch = search.trim().toLowerCase();
+
+  const filteredItems = useMemo(() => {
+    if (!normalizedSearch) return items;
+
+    return items.filter((item) => {
+      const title =
+        taskTitlesById[item.taskId] ??
+        (item.taskId ? `Task #${item.taskId}` : "");
+      return title.toLowerCase().includes(normalizedSearch);
+    });
+  }, [items, normalizedSearch, taskTitlesById]);
 
   return (
     <div className="flex h-screen overflow-hidden">
@@ -98,23 +111,35 @@ const ReviewInboxPage: React.FC = () => {
               Inbox, approvals, rejections, and full review history.
             </p>
 
-            <div className="flex flex-wrap gap-2 mt-3">
-              {tabs.map((t) => (
-                <button
-                  key={t}
-                  onClick={() => setTab(t)}
-                  className={`
-                    px-4 py-2 rounded-xl text-sm font-semibold border transition
-                    ${
-                      tab === t
-                        ? "bg-white/10 border-white/20 text-white"
-                        : "bg-transparent border-white/10 text-white/60 hover:text-white hover:bg-white/5"
-                    }
-                  `}
-                >
-                  {tabLabel(t)}
-                </button>
-              ))}
+            <div className="flex flex-col gap-3 mt-3 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex flex-wrap gap-2">
+                {tabs.map((t) => (
+                  <button
+                    key={t}
+                    onClick={() => setTab(t)}
+                    className={`
+                      px-4 py-2 rounded-xl text-sm font-semibold border transition
+                      ${
+                        tab === t
+                          ? "bg-white/10 border-white/20 text-white"
+                          : "bg-transparent border-white/10 text-white/60 hover:text-white hover:bg-white/5"
+                      }
+                    `}
+                  >
+                    {tabLabel(t)}
+                  </button>
+                ))}
+              </div>
+
+              <div className="w-full sm:w-64">
+                <input
+                  type="text"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="Search tasks..."
+                  className="w-full rounded-xl bg-white/10 border border-white/20 px-3 py-2 text-sm text-white placeholder-white/40 outline-none focus:ring-2 focus:ring-blue-500/40"
+                />
+              </div>
             </div>
           </header>
 
@@ -127,7 +152,7 @@ const ReviewInboxPage: React.FC = () => {
               <div className="text-white/60">Loading reviews...</div>
             ) : (
               <ReviewInboxList
-                items={items}
+                items={filteredItems}
                 onApprove={showInboxActions ? approve : undefined}
                 onReject={showInboxActions ? openReject : undefined}
                 rejectionComments={rejectionComments}
