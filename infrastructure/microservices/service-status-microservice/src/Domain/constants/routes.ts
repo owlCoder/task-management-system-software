@@ -3,9 +3,9 @@ export const ROUTES = {
     USER_SERVICE_API: "/users",
     FILE_SERVICE_API: "/health",
     PROJECT_SERVICE_API: "/projects",
-    TASK_SERVICE_API: "/dummy-tasks",
+    TASK_SERVICE_API: "/health",
     NOTIFICATION_SERVICE_API: "/health",
     ANALYTICS_SERVICE_API: "/health",
-    MAIL_MICROSERVICE_API: "/MailAlive",
+    MAIL_SERVICE_API: "/MailService/MailAlive",
     GATEWAY_API: "/health"
 } as const;
