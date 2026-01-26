@@ -7,7 +7,7 @@ export class Review {
   reviewId!: number;
   @Column({ type: "int", nullable: false })
   taskId!: number;
-  @Column({ type: "int", nullable: true})
+  @Column({ type: "int", nullable: false})
   authorId!: number;
   @Column({ type: "varchar", unique: false, nullable: false, length: 100 })
   time!: string;
@@ -17,7 +17,7 @@ export class Review {
   reviewedAt?: string
   @Column({ type: "varchar"})
   status!: ReviewStatus;
-  @Column({ type: "int", nullable: true, default: 0 })
+  @Column({ type: "int", nullable: true })
   commentId?: number;
   
 }

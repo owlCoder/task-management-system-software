@@ -114,25 +114,56 @@ export class  ReviewService implements IReviewService {
     }
 
     async sendToReview(taskId: number, authorId: number): Promise<Result<TaskReviewDTO>> {
-        const review = await this.createReview(taskId, authorId);
+    const existingReview = await this.reviewRepository.findOne({
+        where: { taskId },
+        order: { reviewId: "DESC" },
+    });
 
-        return { success: true, data: toReviewDTO(review) };
+    if (!existingReview) {
+        const newReview = await this.createReview(taskId, authorId);
+        return { success: true, data: toReviewDTO(newReview) };
     }
 
-    async createReview(taskId: number,authorId : number): Promise<Review> {
-        const newReview = this.reviewRepository.create({
-            taskId: taskId,
-            authorId: authorId,
-            status: ReviewStatus.REVIEW,
-            time: new Date().toISOString(),
-            reviewedBy: undefined,
-            reviewedAt: undefined,
-            commentId: undefined,
-        });
+    switch (existingReview.status) {
+        case ReviewStatus.REVIEW:
+            return {
+                success: false,
+                code: ErrorCode.CONFLICT,
+                error: "Task is already in review"
+            };
+
+        case ReviewStatus.APPROVED:
+            return {
+                success: false,
+                code: ErrorCode.CONFLICT,
+                error: "Task is already approved"
+            };
+
+        case ReviewStatus.REJECTED:
+            const newReview = await this.createReview(taskId, authorId);
+            return { success: true, data: toReviewDTO(newReview) };
+
+        default:
+            return {
+                success: false,
+                code: ErrorCode.INTERNAL_ERROR,
+                error: "Unknown review status"
+            };
+        }
+    }
+
+    async createReview(taskId: number, authorId: number): Promise<Review> {
+        const newReview = new Review();  
+        newReview.taskId = taskId;
+        newReview.authorId = authorId;
+        newReview.status = ReviewStatus.REVIEW;
+        newReview.time = new Date().toISOString();
+        newReview.reviewedBy = undefined;
+        newReview.reviewedAt = undefined;
+        newReview.commentId = undefined;
 
         return await this.reviewRepository.save(newReview);
     }
-
 
     async approveReview(taskId: number,reviewedBy : number): Promise<Result<TaskReviewDTO>> {
         const review = await this.reviewRepository.findOne({
