@@ -14,7 +14,12 @@ import { LogerService } from "./Services/LogerService";
 import { UserRole } from "./Domain/models/UserRole";
 import { UserRoleService } from "./Services/UserRoleService";
 import { IUserRoleService } from "./Domain/services/IUserRoleService";
-import { R2StorageService, IR2StorageService } from "./Storage/R2StorageService";
+import {
+  R2StorageService,
+  IR2StorageService,
+} from "./Storage/R2StorageService";
+import { ISIEMService } from "./siem/Domen/services/ISIEMService";
+import { SIEMService } from "./siem/Services/SIEMService";
 
 dotenv.config({ quiet: true });
 
@@ -23,7 +28,7 @@ const app = express();
 // Read CORS settings from environment
 const corsOrigin = process.env.CORS_ORIGIN ?? "*";
 const corsMethods = process.env.CORS_METHODS?.split(",").map((m) =>
-  m.trim()
+  m.trim(),
 ) ?? ["POST"];
 
 // Protected microservice from unauthorized access
@@ -31,7 +36,7 @@ app.use(
   cors({
     origin: corsOrigin,
     methods: corsMethods,
-  })
+  }),
 );
 
 app.use(express.json());
@@ -49,19 +54,22 @@ const storageService: IR2StorageService = new R2StorageService();
 const userService: IUsersService = new UsersService(
   userRepository,
   userRoleRepository,
-  storageService
+  storageService,
 );
 const userRoleService: IUserRoleService = new UserRoleService(
-  userRoleRepository
+  userRoleRepository,
 );
 const logerService: ILogerService = new LogerService();
+
+const siemService: ISIEMService = new SIEMService(logerService);
 
 // WebAPI routes
 const userController = new UsersController(
   userService,
   userRoleService,
   logerService,
-  storageService
+  storageService,
+  siemService,
 );
 
 // Registering routes

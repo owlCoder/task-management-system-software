@@ -164,7 +164,7 @@ export class UsersService implements IUsersService {
     }
 
     const role = existingUser.user_role.role_name.toUpperCase();
-    if(role === "ADMIN" || role === "SYSADMIN"){
+    if (role === "ADMIN" || role === "SYSADMIN") {
       return {
         success: false,
         code: ErrorCode.FORBIDDEN,
@@ -199,7 +199,7 @@ export class UsersService implements IUsersService {
    */
   async updateUserById(
     user_id: number,
-    updateUserData: UserUpdateDTO
+    updateUserData: UserUpdateDTO,
   ): Promise<Result<UserDTO>> {
     const existingUser = await this.userRepository.findOne({
       where: { user_id, is_deleted: false },
@@ -251,7 +251,7 @@ export class UsersService implements IUsersService {
     if (updateUserData.password) {
       existingUser.password_hash = await bcrypt.hash(
         updateUserData.password,
-        this.saltRounds
+        this.saltRounds,
       );
     }
 
@@ -286,7 +286,7 @@ export class UsersService implements IUsersService {
 
   async setWeeklyHours(
     user_id: number,
-    weekly_working_hour: number
+    weekly_working_hour: number,
   ): Promise<Result<UserDTO>> {
     const existingUser = await this.userRepository.findOne({
       where: { user_id },

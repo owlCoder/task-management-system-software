@@ -12,6 +12,7 @@
   "dependencies": {
     "-": "^0.0.1",
     "@aws-sdk/client-s3": "^3.971.0",
+    "axios": "^1.13.3",
     "bcryptjs": "^3.0.2",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",

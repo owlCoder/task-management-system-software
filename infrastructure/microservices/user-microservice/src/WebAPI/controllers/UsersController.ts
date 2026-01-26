@@ -9,6 +9,8 @@ import { UserDataUpdateValidation } from "../validation/UserDataUpdateValidation
 import { UsernameValidation } from "../validation/UsernameValidation";
 import { IR2StorageService } from "../../Storage/R2StorageService";
 import { UserUpdateDTO } from "../../Domain/DTOs/UserUpdateDTO";
+import { ISIEMService } from "../../siem/Domen/services/ISIEMService";
+import { generateEvent } from "../../siem/Domen/Helpers/generate/GenerateEvent";
 
 const upload = multer({
   storage: multer.memoryStorage(),
@@ -31,7 +33,8 @@ export class UsersController {
     private readonly usersService: IUsersService,
     private readonly userRoleService: IUserRoleService,
     private readonly logger: ILogerService,
-    private readonly storageService: IR2StorageService
+    private readonly storageService: IR2StorageService,
+    private readonly siemService: ISIEMService,
   ) {
     this.router = Router();
     this.initializeRoutes();
@@ -40,14 +43,24 @@ export class UsersController {
   private initializeRoutes(): void {
     this.router.get("/users", this.getAllUsers.bind(this));
     this.router.get("/users/ids", this.getUsersByIds.bind(this));
-    this.router.get("/users/by-username/:username", this.getUserByUsername.bind(this));
+    this.router.get(
+      "/users/by-username/:username",
+      this.getUserByUsername.bind(this),
+    );
     this.router.get("/users/:id", this.getUserById.bind(this));
     this.router.post("/users", this.createUser.bind(this));
     this.router.delete("/users/:id", this.logicalyDeleteUser.bind(this));
-    this.router.put("/users/:id", upload.single("image_file"), this.updateUser.bind(this));
+    this.router.put(
+      "/users/:id",
+      upload.single("image_file"),
+      this.updateUser.bind(this),
+    );
     this.router.put("/users/:id/working-hours", this.setWeeklyHours.bind(this));
     this.router.get("/user-roles", this.getAllUserRoles.bind(this));
-    this.router.get("/user-roles/:impact_level", this.getUserRoleByImpactLevel.bind(this));
+    this.router.get(
+      "/user-roles/:impact_level",
+      this.getUserRoleByImpactLevel.bind(this),
+    );
   }
 
   /**
@@ -62,9 +75,15 @@ export class UsersController {
       const result = await this.usersService.getAllUsers();
 
       if (result.success) {
+        this.siemService.sendEvent(
+          generateEvent("user-microservice", req, 200, "Request successful"),
+        );
         res.status(200).json(result.data);
       } else {
         this.logger.log(result.error);
+        this.siemService.sendEvent(
+          generateEvent("user-microservice", req, result.code, result.error),
+        );
         res.status(result.code).json(result.error);
       }
     } catch (err) {
@@ -160,9 +179,17 @@ export class UsersController {
       this.logger.log(`Fetching users with IDs ${idArray}`);
       const result = await this.usersService.getUsersByIds(idArray);
       if (result.success) {
+        this.siemService.sendEvent(
+          generateEvent("user-microservice", req, 200, "Request successful"),
+        );
         res.status(200).json(result.data);
       } else {
         this.logger.log(result.error);
+
+        this.siemService.sendEvent(
+          generateEvent("user-microservice", req, result.code, result.error),
+        );
+
         res.status(result.code).json(result.error);
       }
     } catch (err) {
@@ -185,6 +212,9 @@ export class UsersController {
       const rezultat = UserDataValidation(userData);
 
       if (rezultat.uspesno === false) {
+        this.siemService.sendEvent(
+          generateEvent("user-microservice", req, 400, rezultat.poruka!),
+        );
         res.status(400).json({ message: rezultat.poruka });
         return;
       }
@@ -193,9 +223,16 @@ export class UsersController {
       const result = await this.usersService.createUser(userData);
 
       if (result.success) {
+        this.siemService.sendEvent(
+          generateEvent("user-microservice", req, 201, "Request successful"),
+        );
+
         res.status(201).json(result.data);
       } else {
         this.logger.log(result.error);
+        this.siemService.sendEvent(
+          generateEvent("user-microservice", req, result.code, result.error),
+        );
         res.status(result.code).json(result.error);
       }
     } catch (err) {
@@ -216,6 +253,15 @@ export class UsersController {
       const id = parseInt(req.params.id as string, 10);
 
       if (isNaN(id)) {
+        this.siemService.sendEvent(
+          generateEvent(
+            "user-microservice",
+            req,
+            400,
+            "The passed id is not a number.",
+          ),
+        );
+
         res.status(400).json({ message: "The passed id is not a number." });
         return;
       }
@@ -225,8 +271,16 @@ export class UsersController {
 
       if (result.success === false) {
         this.logger.log(result.error);
+
+        this.siemService.sendEvent(
+          generateEvent("user-microservice", req, result.code, result.error),
+        );
+
         res.status(result.code).json(result.error);
       } else {
+        this.siemService.sendEvent(
+          generateEvent("user-microservice", req, 204, "Request successful"),
+        );
         res.status(204).send();
       }
     } catch (err) {
@@ -247,6 +301,14 @@ export class UsersController {
       const id = parseInt(req.params.id as string, 10);
 
       if (isNaN(id)) {
+        this.siemService.sendEvent(
+          generateEvent(
+            "user-microservice",
+            req,
+            400,
+            "The passed id is not a number.",
+          ),
+        );
         res.status(400).json({ message: "The passed id is not a number" });
         return;
       }
@@ -264,12 +326,22 @@ export class UsersController {
           const uploadResult = await this.storageService.uploadImage(
             req.file.buffer,
             req.file.originalname,
-            req.file.mimetype
+            req.file.mimetype,
           );
           updateData.image_key = uploadResult.key;
           updateData.image_url = uploadResult.url;
         } catch (uploadError) {
-          this.logger.log(`Image upload failed: ${(uploadError as Error).message}`);
+          this.siemService.sendEvent(
+            generateEvent(
+              "user-microservice",
+              req,
+              500,
+              "Failed to upload image",
+            ),
+          );
+          this.logger.log(
+            `Image upload failed: ${(uploadError as Error).message}`,
+          );
           res.status(500).json({ message: "Failed to upload image" });
           return;
         }
@@ -281,6 +353,11 @@ export class UsersController {
         if (updateData.image_key) {
           await this.storageService.deleteImage(updateData.image_key);
         }
+
+        this.siemService.sendEvent(
+          generateEvent("user-microservice", req, 400, rezultat.poruka!),
+        );
+
         res.status(400).json({ message: rezultat.poruka });
         return;
       }
@@ -289,12 +366,20 @@ export class UsersController {
       const result = await this.usersService.updateUserById(id, updateData);
 
       if (result.success) {
+        this.siemService.sendEvent(
+          generateEvent("user-microservice", req, 200, "Request successful"),
+        );
         res.status(200).json(result.data);
       } else {
         if (updateData.image_key) {
           await this.storageService.deleteImage(updateData.image_key);
         }
         this.logger.log(result.error);
+
+        this.siemService.sendEvent(
+          generateEvent("user-microservice", req, result.code, result.error),
+        );
+
         res.status(result.code).json(result.error);
       }
     } catch (err) {
@@ -331,7 +416,7 @@ export class UsersController {
       this.logger.log("Update user's weekly_working_hours_sum");
       const result = await this.usersService.setWeeklyHours(
         id,
-        weekly_working_hours
+        weekly_working_hours,
       );
       if (result.success) {
         res.status(200).json(result.data);
@@ -376,7 +461,7 @@ export class UsersController {
 
   private async getUserRoleByImpactLevel(
     req: Request,
-    res: Response
+    res: Response,
   ): Promise<void> {
     try {
       const impact_level = parseInt(req.params.impact_level as string, 10);
@@ -388,12 +473,11 @@ export class UsersController {
       }
 
       this.logger.log(
-        `Fetching all user roles with impact level ${impact_level}`
+        `Fetching all user roles with impact level ${impact_level}`,
       );
 
-      const result = await this.userRoleService.getUserRoleByImpactLevel(
-        impact_level
-      );
+      const result =
+        await this.userRoleService.getUserRoleByImpactLevel(impact_level);
       if (result.success) {
         res.status(200).json(result.data);
       } else {
