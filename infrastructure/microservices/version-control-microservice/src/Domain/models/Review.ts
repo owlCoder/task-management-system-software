@@ -12,12 +12,12 @@ export class Review {
   @Column({ type: "varchar", unique: false, nullable: false, length: 100 })
   time!: string;
   @Column({ type: "int", nullable: true })
-  reviewedBy?: number; 
+  reviewedBy: number | null = null; 
   @Column({ type: "varchar", nullable: true })
-  reviewedAt?: string
+  reviewedAt: string | null = null;
   @Column({ type: "varchar"})
   status!: ReviewStatus;
   @Column({ type: "int", nullable: true })
-  commentId?: number;
+  commentId: number | null = null;
   
 }
