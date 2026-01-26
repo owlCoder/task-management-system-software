@@ -8,6 +8,7 @@ export interface TaskDetailPageProps {
   taskId: number;
   setClose: () => void;
   onEdit?: () => void;
+  onStatusUpdate?: (taskId: number, newStatus: string) => void;
 }
 
 export interface TaskBoardPageProps {

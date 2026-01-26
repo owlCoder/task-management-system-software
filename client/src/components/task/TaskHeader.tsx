@@ -11,7 +11,8 @@ export const TaskHeader: React.FC<TaskHeaderProps> = ({
   const handleStatusChange = async (newStatus: TaskStatus) => {
     try {
       const api = new TaskAPI(import.meta.env.VITE_GATEWAY_URL, token);
-      await api.updateTaskStatus(task.task_id, newStatus);
+      const fileId = Number(task.attachment_file_uuid ?? 0);
+      await api.updateTaskStatus(task.task_id, newStatus, fileId);
       onStatusUpdate(newStatus);
     } catch (err) {
       console.error("Failed to update status", err);

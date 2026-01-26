@@ -1,25 +1,20 @@
-import { Repository } from "typeorm";
 import { IFinancialAnalyticsService } from "../Domain/services/IFinancialAnalyticsService";
-import { Project } from "../Domain/models/Project";
-import { Task } from "../Domain/models/Task";
-import { Sprint } from "../Domain/models/Sprint";
-import { ProjectUser } from "../Domain/models/ProjectUser";
 import { BudgetTrackingDto } from "../Domain/DTOs/BudgetTrackingDto";
 import { ResourceCostAllocationDto } from "../Domain/DTOs/ResourceCostAllocationDto";
 import { ResourceCostAllocationItemDto } from "../Domain/DTOs/ResourceCostAllocationItemDto";
 import { ProfitMarginDto } from "../Domain/DTOs/ProfitMarginDto";
+import { ProjectServiceClient } from "./external-services/ProjectServiceClient";
+import { TaskServiceClient } from "./external-services/TaskServiceClient";
 
 export class FinancialAnalyticsService implements IFinancialAnalyticsService {
   constructor(
-    private readonly projectRepository: Repository<Project>,
-    private readonly sprintRepository: Repository<Sprint>,
-    private readonly taskRepository: Repository<Task>,
-    private readonly projectUserRepository: Repository<ProjectUser>
+    private readonly projectServiceClient: ProjectServiceClient,
+    private readonly taskServiceClient: TaskServiceClient
   ) {}
 
   async getBudgetTrackingForProject(projectId: number): Promise<BudgetTrackingDto> {
     try {
-      const project = await this.projectRepository.findOneBy({ project_id: projectId });
+      const project = await this.projectServiceClient.getProjectById(projectId);
 
       if (!project) {
         return {
@@ -31,17 +26,11 @@ export class FinancialAnalyticsService implements IFinancialAnalyticsService {
         };
       }
 
-      const sprints = await this.sprintRepository.find({ where: { project_id: project.project_id } });
+      const sprints = await this.projectServiceClient.getSprintsByProject(project.project_id);
+      const sprintIds = sprints.map((s) => s.sprint_id);
+      const tasks = await this.taskServiceClient.getTasksBySprintIds(sprintIds);
 
-      let totalSpent = 0;
-
-      for (const sprint of sprints) {
-        const sprintTasks = await this.taskRepository.find({
-          where: { sprint_id: sprint.sprint_id }
-        });
-
-        totalSpent += sprintTasks.reduce((sum, t) => sum + (t.estimated_cost ?? 0), 0);
-      }
+      const totalSpent = tasks.reduce((sum, t) => sum + (t.estimated_cost ?? 0), 0);
 
       const remaining = project.allowed_budget - totalSpent;
       const variance = totalSpent - project.allowed_budget;
@@ -66,7 +55,7 @@ export class FinancialAnalyticsService implements IFinancialAnalyticsService {
 
   async getResourceCostAllocationForProject(projectId: number): Promise<ResourceCostAllocationDto> {
     try {
-      const project = await this.projectRepository.findOneBy({ project_id: projectId });
+      const project = await this.projectServiceClient.getProjectById(projectId);
 
       if (!project) {
         return {
@@ -75,25 +64,14 @@ export class FinancialAnalyticsService implements IFinancialAnalyticsService {
         };
       }
 
-      const sprints = await this.sprintRepository.find({
-        where: { project_id: project.project_id }
-        });
-
-
       // 1) Total project cost = sum(estimated_cost) over all tasks in all sprints
-      let totalProjectCost = 0;
-      for (const sprint of sprints) {
-        const sprintTasks = await this.taskRepository.find({
-          where: { sprint_id: sprint.sprint_id }
-        });
-
-        totalProjectCost += sprintTasks.reduce((sum, t) => sum + (t.estimated_cost ?? 0), 0);
-      }
+      const sprints = await this.projectServiceClient.getSprintsByProject(project.project_id);
+      const sprintIds = sprints.map((s) => s.sprint_id);
+      const tasks = await this.taskServiceClient.getTasksBySprintIds(sprintIds);
+      const totalProjectCost = tasks.reduce((sum, t) => sum + (t.estimated_cost ?? 0), 0);
 
       // 2) Load project members from projects_db.project_users
-      const projectMembers = await this.projectUserRepository.find({
-        where: { project_id: project.project_id }
-      });
+      const projectMembers = await this.projectServiceClient.getUsersForProject(project.project_id);
 
 
       if (projectMembers.length === 0) {
@@ -123,11 +101,6 @@ export class FinancialAnalyticsService implements IFinancialAnalyticsService {
         };
       });
 
-      console.log("RCA projectId:", project.project_id);
-      console.log("RCA sprints:", sprints.length);
-      console.log("RCA totalProjectCost:", totalProjectCost);
-      console.log("RCA members:", projectMembers.length);
-
       return {
         project_id: project.project_id,
         resources
@@ -141,7 +114,7 @@ export class FinancialAnalyticsService implements IFinancialAnalyticsService {
 
   async getProfitMarginForProject(projectId: number): Promise<ProfitMarginDto> {
     try {
-      const project = await this.projectRepository.findOneBy({ project_id: projectId });
+      const project = await this.projectServiceClient.getProjectById(projectId);
 
       if (!project) {
         return {
@@ -153,20 +126,11 @@ export class FinancialAnalyticsService implements IFinancialAnalyticsService {
         };
       }
 
-      const sprints = await this.sprintRepository.find({
-        where: { project_id: project.project_id }
-        });
+      const sprints = await this.projectServiceClient.getSprintsByProject(project.project_id);
+      const sprintIds = sprints.map((s) => s.sprint_id);
+      const tasks = await this.taskServiceClient.getTasksBySprintIds(sprintIds);
 
-
-      let totalCost = 0;
-
-      for (const sprint of sprints) {
-        const sprintTasks = await this.taskRepository.find({
-          where: { sprint_id: sprint.sprint_id }
-        });
-
-        totalCost += sprintTasks.reduce((sum, t) => sum + (t.estimated_cost ?? 0), 0);
-      }
+      const totalCost = tasks.reduce((sum, t) => sum + (t.estimated_cost ?? 0), 0);
 
       const profit = project.allowed_budget - totalCost;
       const profitMargin =
