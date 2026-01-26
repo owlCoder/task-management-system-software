@@ -53,7 +53,12 @@ app.use(express.json());
   const userServiceClient: IUserServiceClient = new UserServiceClient();
   const taskVersionService: ITaskVersionService = new TaskVersionService(taskVersionRepository);
   const taskService : ITaskService = new TaskService(taskRepository,projectServiceClient,userServiceClient,taskVersionService,fileServiceClient);
-  const commentService : ICommentService = new CommentService(taskRepository,commentRepository);
+  const commentService : ICommentService = new CommentService(
+    taskRepository,
+    commentRepository,
+    projectServiceClient,
+    userServiceClient
+  );
 
   // WebAPI routes
   const taskController = new TaskController(taskService,commentService,taskVersionService);

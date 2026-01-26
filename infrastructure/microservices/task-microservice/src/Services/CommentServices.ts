@@ -8,11 +8,14 @@ import { ErrorCode } from "../Domain/enums/ErrorCode";
 import { CreateCommentDTO } from "../Domain/DTOs/CreateCommentDTO";
 import { IProjectServiceClient } from "../Domain/services/external-services/IProjectServiceClient";
 import { IUserServiceClient } from "../Domain/services/external-services/IUserServiceClient";
+import { UserRole } from "../Domain/enums/UserRole";
    export class CommentService implements ICommentService {
    
        constructor(
            private readonly taskRepository: Repository<Task>,
            private readonly commentRepository: Repository<Comment>,
+           private readonly projectServiceClient: IProjectServiceClient,
+           private readonly userServiceClient: IUserServiceClient
        ) {} 
     async addComment(task_id: number, createCommentDTO: CreateCommentDTO,user_id: number): Promise<Result<Comment>> {
         try {
@@ -21,16 +24,42 @@ import { IUserServiceClient } from "../Domain/services/external-services/IUserSe
             if (!task) {
                 return { success: false, errorCode: ErrorCode.TASK_NOT_FOUND, message: "Task not found" };
             }
-            if(task.worker_id != user_id && task.project_manager_id != user_id)
-            {
-                return { success: false, errorCode:ErrorCode.FORBIDDEN, message: "Only those assigned to task can comment" };
-            }
             if (task.task_status === TaskStatus.COMPLETED || task.task_status === TaskStatus.NOT_COMPLETED) {
                 return { success: false, errorCode: ErrorCode.INVALID_INPUT, message: "Cannot add comment to completed/not completed task" };
             }
 
+            if (task.worker_id != user_id && task.project_manager_id != user_id) {
+                const userResult = await this.userServiceClient.getUserById(user_id);
+                if (!userResult.success) {
+                    return { success: false, errorCode: ErrorCode.FORBIDDEN, message: "Only those assigned to task can comment" };
+                }
+
+                const roleName = userResult.data.role_name as string | undefined;
+                if (roleName !== UserRole.PROJECT_MANAGER) {
+                    return { success: false, errorCode: ErrorCode.FORBIDDEN, message: "Only those assigned to task can comment" };
+                }
+
+                const sprintResult = await this.projectServiceClient.getSprintById(task.sprint_id);
+                if (!sprintResult.success) {
+                    return { success: false, errorCode: ErrorCode.FORBIDDEN, message: "Only those assigned to task can comment" };
+                }
+
+                const projectUsersResult = await this.projectServiceClient.getUsersForProject(sprintResult.data.project_id);
+                if (!projectUsersResult.success) {
+                    return { success: false, errorCode: ErrorCode.FORBIDDEN, message: "Only those assigned to task can comment" };
+                }
+
+                const isAssignedToProject = projectUsersResult.data.some(
+                    (u: any) => (u.user_id ?? u.id) === user_id
+                );
+
+                if (!isAssignedToProject) {
+                    return { success: false, errorCode: ErrorCode.FORBIDDEN, message: "Only those assigned to task can comment" };
+                }
+            }
+
             const comment : Comment = this.commentRepository.create({
-                user_id : createCommentDTO.user_id,
+                user_id: user_id,
                 comment: createCommentDTO.comment,
                 task: task
             });
