@@ -9,7 +9,7 @@ const SendNotification: React.FC<SendNotificationProps> = ({
   return (
     <button
       onClick={onClick}
-      className={`px-5 py-2 rounded-lg font-semibold text-sm bg-slate-900/50 text-slate-300 border border-white/10 hover:bg-slate-800/60 hover:border-white/20 hover:text-slate-100 transition flex items-center gap-2 cursor-pointer ${className}`}
+      className={`relative inline-flex items-center justify-center gap-2 h-10 px-5 min-w-[170px] rounded-lg font-semibold text-sm transition-all duration-200 border whitespace-nowrap bg-white/10 text-white/70 border-white/15 backdrop-blur-xl hover:bg-white/20 hover:text-white hover:-translate-y-0.5 hover:shadow-lg hover:shadow-white/10 cursor-pointer ${className}`}
     >
       <span className="text-lg">+</span>
       Send Notification

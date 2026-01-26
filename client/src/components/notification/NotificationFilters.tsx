@@ -33,6 +33,15 @@ const NotificationFilters: React.FC<NotificationFiltersProps> = ({
     return sortOptions.find(opt => opt.value === sortBy)?.label || 'Sort By';
   };
 
+  const controlButtonBase =
+    "relative inline-flex items-center justify-center gap-2 h-10 px-5 min-w-[140px] rounded-lg font-semibold text-sm transition-all duration-200 border whitespace-nowrap backdrop-blur-xl";
+  const controlButtonActive =
+    "bg-gradient-to-t from-[var(--palette-medium-blue)] to-[var(--palette-deep-blue)] text-white border-white/20 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-sky-500/20 cursor-pointer";
+  const controlButtonIdle =
+    "bg-white/10 text-white/70 border-white/15 hover:bg-white/20 hover:text-white hover:-translate-y-0.5 hover:shadow-lg hover:shadow-white/10 cursor-pointer";
+  const controlButtonDisabled =
+    "bg-white/5 text-white/30 border-white/10 cursor-not-allowed";
+
   return (
     <div className={`flex items-center justify-between ${className}`}>
       
@@ -40,10 +49,8 @@ const NotificationFilters: React.FC<NotificationFiltersProps> = ({
       <div className="flex gap-3">
         <button
           onClick={() => onFilterChange('all')}
-          className={`px-6 py-2 rounded-lg font-semibold text-sm transition cursor-pointer ${
-            activeFilter === 'all'
-              ? 'bg-sky-500 text-white border border-sky-400'
-              : 'bg-slate-900/50 text-slate-400 border border-white/10 hover:border-white/20 hover:text-slate-300'
+          className={`${controlButtonBase} ${
+            activeFilter === 'all' ? controlButtonActive : controlButtonIdle
           }`}
         >
           All
@@ -51,15 +58,13 @@ const NotificationFilters: React.FC<NotificationFiltersProps> = ({
         
         <button
           onClick={() => onFilterChange('unread')}
-          className={`px-6 py-2 rounded-lg font-semibold text-sm transition flex items-center gap-2 cursor-pointer ${
-            activeFilter === 'unread'
-              ? 'bg-sky-500 text-white border border-sky-400'
-              : 'bg-slate-900/50 text-slate-400 border border-white/10 hover:border-white/20 hover:text-slate-300'
+          className={`${controlButtonBase} ${
+            activeFilter === 'unread' ? controlButtonActive : controlButtonIdle
           }`}
         >
           Unread
           {unreadCount > 0 && (
-            <span className="bg-rose-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">
+            <span className="absolute -top-1 -right-1 min-w-[1.25rem] h-5 px-1.5 rounded-full text-xs font-bold bg-rose-500 text-white flex items-center justify-center shadow">
               {unreadCount}
             </span>
           )}
@@ -73,7 +78,7 @@ const NotificationFilters: React.FC<NotificationFiltersProps> = ({
         <div className="relative">
           <button
             onClick={() => setIsSortDropdownOpen(!isSortDropdownOpen)}
-            className="px-5 py-2 rounded-lg font-semibold text-sm bg-slate-900/50 text-slate-400 border border-white/10 hover:border-white/20 hover:text-slate-300 transition flex items-center gap-2 cursor-pointer"
+            className={`${controlButtonBase} ${controlButtonIdle}`}
           >
             <svg 
               className="w-4 h-4" 
@@ -106,15 +111,15 @@ const NotificationFilters: React.FC<NotificationFiltersProps> = ({
 
           {/* dropdown menu */}
           {isSortDropdownOpen && (
-            <div className="absolute top-full right-0 mt-2 w-48 bg-slate-800 border border-white/10 rounded-lg shadow-xl z-10">
+            <div className="absolute top-full right-0 mt-2 w-48 bg-white/10 backdrop-blur-xl border border-white/15 rounded-lg shadow-xl z-10">
               {sortOptions.map((option) => (
                 <button
                   key={option.value}
                   onClick={() => handleSortSelect(option.value)}
-                  className={`w-full px-4 py-2 text-left text-sm font-medium transition hover:bg-slate-700 first:rounded-t-lg last:rounded-b-lg cursor-pointer ${
+                  className={`w-full px-4 py-2 text-left text-sm font-medium transition hover:bg-white/20 first:rounded-t-lg last:rounded-b-lg cursor-pointer ${
                     sortBy === option.value
-                      ? 'text-blue-400 bg-slate-700/50'
-                      : 'text-slate-300'
+                      ? 'text-white bg-white/20'
+                      : 'text-white/70'
                   }`}
                 >
                   {option.label}
@@ -127,13 +132,13 @@ const NotificationFilters: React.FC<NotificationFiltersProps> = ({
         {/* select all checkbox */}
         <button
           onClick={onSelectAll}
-          className="px-5 py-2 rounded-lg font-semibold text-sm bg-slate-900/50 text-slate-400 border border-white/10 hover:border-white/20 hover:text-slate-300 transition flex items-center gap-2 cursor-pointer"
+          className={`${controlButtonBase} ${controlButtonIdle}`}
         >
           <input
             type="checkbox"
             checked={isAllSelected}
             readOnly
-            className="w-4 h-4 rounded border-white/20 bg-slate-800 text-blue-500 focus:ring-blue-500 focus:ring-offset-0 cursor-pointer pointer-events-none"
+            className="w-4 h-4 rounded border-white/30 bg-white/10 text-[var(--palette-medium-blue)] focus:ring-[var(--palette-medium-blue)] focus:ring-offset-0 cursor-pointer pointer-events-none"
           />
           Select All
         </button>
@@ -142,10 +147,8 @@ const NotificationFilters: React.FC<NotificationFiltersProps> = ({
         <button
           onClick={onMarkAsRead}
           disabled={selectedCount === 0}
-          className={`px-5 py-2 rounded-lg font-semibold text-sm transition flex items-center gap-2 ${
-            selectedCount > 0
-              ? 'bg-blue-600 text-white hover:bg-blue-700 border border-blue-500 cursor-pointer'
-              : 'bg-slate-900/50 text-slate-600 border border-white/10 cursor-not-allowed'
+          className={`${controlButtonBase} ${
+            selectedCount > 0 ? controlButtonActive : controlButtonDisabled
           }`}
         >
           <svg 
@@ -168,10 +171,8 @@ const NotificationFilters: React.FC<NotificationFiltersProps> = ({
         <button
           onClick={onMarkAsUnread}
           disabled={selectedCount === 0}
-          className={`px-5 py-2 rounded-lg font-semibold text-sm transition flex items-center gap-2 ${
-            selectedCount > 0
-              ? 'bg-amber-600 text-white hover:bg-amber-700 border border-amber-500 cursor-pointer'
-              : 'bg-slate-900/50 text-slate-600 border border-white/10 cursor-not-allowed'
+          className={`${controlButtonBase} ${
+            selectedCount > 0 ? controlButtonActive : controlButtonDisabled
           }`}
         >
           <svg 
@@ -188,16 +189,19 @@ const NotificationFilters: React.FC<NotificationFiltersProps> = ({
             />
           </svg>
           Mark as Unread
+          {selectedCount > 0 && (
+            <span className="absolute -top-1 -right-1 min-w-[1.25rem] h-5 px-1.5 rounded-full text-xs font-bold bg-rose-500 text-white flex items-center justify-center shadow">
+              {selectedCount}
+            </span>
+          )}
         </button>
 
         {/* delete */}
         <button
           onClick={onDeleteSelected}
           disabled={selectedCount === 0}
-          className={`px-5 py-2 rounded-lg font-semibold text-sm transition flex items-center gap-2 ${
-            selectedCount > 0
-              ? 'bg-rose-600 text-white hover:bg-rose-700 border border-rose-500 cursor-pointer'
-              : 'bg-slate-900/50 text-slate-600 border border-white/10 cursor-not-allowed'
+          className={`${controlButtonBase} ${
+            selectedCount > 0 ? controlButtonActive : controlButtonDisabled
           }`}
         >
           <svg 
@@ -215,7 +219,7 @@ const NotificationFilters: React.FC<NotificationFiltersProps> = ({
           </svg>
           Delete
           {selectedCount > 0 && (
-            <span className="bg-white/20 text-white text-xs font-bold px-2 py-0.5 rounded-full">
+            <span className="absolute -top-1 -right-1 min-w-[1.25rem] h-5 px-1.5 rounded-full text-xs font-bold bg-rose-500 text-white flex items-center justify-center shadow">
               {selectedCount}
             </span>
           )}

@@ -31,8 +31,8 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
     <article
       className={`rounded-xl border transition ${
         isSelected 
-          ? 'border-blue-500/50 bg-slate-800/80' 
-          : 'border-white/10 bg-slate-900/60 hover:border-white/20'
+          ? 'border-[var(--palette-medium-blue)]/40 bg-white/15' 
+          : 'border-white/10 bg-white/5 hover:border-white/25 hover:bg-white/10'
       } p-5 ${onClick ? 'cursor-pointer' : ''} ${className}`}
       onClick={handleCardClick}
     >
@@ -45,28 +45,28 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
             checked={isSelected}
             onChange={handleCheckboxChange}
             onClick={handleCheckboxClick}
-            className="w-5 h-5 rounded border-white/20 bg-slate-800 text-blue-500 focus:ring-blue-500 focus:ring-offset-0 cursor-pointer transition"
+            className="w-5 h-5 rounded border-white/30 bg-white/10 text-[var(--palette-medium-blue)] focus:ring-[var(--palette-medium-blue)] focus:ring-offset-0 cursor-pointer transition"
           />
         </div>
 
         {/* content - sredina */}
         <div className="flex-1">
           <h3 className={`font-bold text-lg transition break-words ${
-            isSelected ? 'text-slate-50' : 'text-slate-100'
+            isSelected ? 'text-white' : 'text-white/90'
           }`}
           style={{ wordBreak: 'break-word', overflowWrap: 'anywhere' }}>
             {notification.title}
           </h3>
 
           <p className={`mt-2 text-sm leading-relaxed transition break-words overflow-wrap-anywhere ${
-            isSelected ? 'text-slate-300' : 'text-slate-400'
+            isSelected ? 'text-white/70' : 'text-white/60'
           }`}
           style={{ wordBreak: 'break-word', overflowWrap: 'anywhere' }}>
             {notification.content}
           </p>
 
           <div className={`mt-3 text-xs transition ${
-            isSelected ? 'text-slate-400' : 'text-slate-500'
+            isSelected ? 'text-white/60' : 'text-white/50'
           }`}>
             {new Date(notification.createdAt).toLocaleString('en-US', {
               year: 'numeric',

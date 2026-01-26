@@ -329,7 +329,7 @@ const NotificationPage: React.FC<NotificationPageProps> = ({notificationAPI}) =>
   // LOADING STATE
   if (loading) {
     return (
-      <div className="flex h-screen bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-[#0f172a] via-[#020617] to-black">
+      <div className="flex h-screen bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-[#111827] via-[#0f172a] to-[#0b1120]">
         <Sidebar />
         <div className="flex-1 flex items-center justify-center">
           <div className="text-white text-xl">Loading notifications...</div>
@@ -341,7 +341,7 @@ const NotificationPage: React.FC<NotificationPageProps> = ({notificationAPI}) =>
   // ERROR STATE
   if (error) {
     return (
-      <div className="flex h-screen bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-[#0f172a] via-[#020617] to-black">
+      <div className="flex h-screen bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-[#111827] via-[#0f172a] to-[#0b1120]">
         <Sidebar />
         <div className="flex-1 flex flex-col items-center justify-center gap-4">
           <div className="text-red-400 text-xl">{error}</div>
@@ -357,7 +357,7 @@ const NotificationPage: React.FC<NotificationPageProps> = ({notificationAPI}) =>
   }
 
   return (
-    <div className="flex h-screen bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-[#0f172a] via-[#020617] to-black overflow-hidden">
+    <div className="flex h-screen bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-[#111827] via-[#0f172a] to-[#0b1120] overflow-hidden">
       <Sidebar />
 
       <div className="flex-1 p-6 flex flex-col h-screen overflow-hidden">
@@ -384,18 +384,18 @@ const NotificationPage: React.FC<NotificationPageProps> = ({notificationAPI}) =>
         </div>
 
         {/* Notification List*/}
-        <div className="flex-1 bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-6 shadow-lg overflow-hidden flex flex-col">
+        <div className="flex-1 bg-white/10 backdrop-blur-xl border border-white/15 rounded-2xl p-6 shadow-lg overflow-hidden flex flex-col">
           <div className="flex-1 overflow-y-auto pr-2 styled-scrollbar">
             <div className="space-y-4">
               {filteredNotifications.length === 0 ? (
                 <div className="text-center py-16">
                   <div className="mb-4">
-                    <p className="text-slate-100 text-lg font-semibold">
+                    <p className="text-white/90 text-lg font-semibold">
                       No notifications to display
                     </p>
                   </div>
                   <div>
-                    <p className="text-slate-300 text-sm">
+                    <p className="text-white/60 text-sm">
                       {activeFilter === "unread"
                         ? "You have no unread notifications"
                         : "No notifications available"}
