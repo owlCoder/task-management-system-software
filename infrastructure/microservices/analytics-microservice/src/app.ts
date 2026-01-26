@@ -3,14 +3,6 @@ import cors from "cors";
 import "reflect-metadata";
 import dotenv from "dotenv";
 import { DataSource } from "typeorm";
-
-import { Project } from "./Domain/models/Project";
-import { Sprint } from "./Domain/models/Sprint";
-import { ProjectUser } from "./Domain/models/ProjectUser";
-
-import { Task } from "./Domain/models/Task";
-import { Comment } from "./Domain/models/Comment";
-
 import { IProjectAnalyticsService } from "./Domain/services/IProjectAnalyticsService";
 import { ProjectAnalyticsService } from "./Services/ProjectAnalyticsService";
 
@@ -81,46 +73,8 @@ function buildSsl() {
   return sslOn ? { rejectUnauthorized: false } : undefined;
 }
 
-/* ===========================
-   DATA SOURCES
-=========================== */
-
-// projects_db DataSource
-const projectsDataSource = new DataSource({
-  type: "mysql",
-  host: env("PROJECTS_DB_HOST", env("DB_HOST")),
-  port: numEnv("PROJECTS_DB_PORT", numEnv("DB_PORT", 3306)),
-  username: env("PROJECTS_DB_USER", env("DB_USER")),
-  password: env("PROJECTS_DB_PASSWORD", env("DB_PASSWORD")),
-  database: env("PROJECTS_DB_NAME", "projects_db"),
-  ssl: buildSsl(),
-
-  synchronize: false, //NE PALI
-  migrationsRun: false,
-  dropSchema: false,
-  logging: ["error"],
 
 
-  entities: [Project, Sprint, ProjectUser],
-});
-
-// tasks_db DataSource
-const tasksDataSource = new DataSource({
-  type: "mysql",
-  host: env("TASKS_DB_HOST", env("DB_HOST")),
-  port: numEnv("TASKS_DB_PORT", numEnv("DB_PORT", 3306)),
-  username: env("TASKS_DB_USER", env("DB_USER")),
-  password: env("TASKS_DB_PASSWORD", env("DB_PASSWORD")),
-  database: env("TASKS_DB_NAME", "tasks_db"),
-  ssl: buildSsl(),
-
-  synchronize: false, //NE PALI
-  migrationsRun: false,
-  dropSchema: false,
-  logging: ["error"],
-
-  entities: [Task],
-});
 
 /* ===========================
    RUNTIME WRITE/DDL BLOCKER
@@ -176,33 +130,13 @@ let initialized = false;
 export async function initApp(): Promise<express.Express> {
   if (initialized) return app;
 
-  // Init DB connections
-  if (!projectsDataSource.isInitialized) {
-    await projectsDataSource.initialize();
-
-  }
-  if (!tasksDataSource.isInitialized) {
-    await tasksDataSource.initialize();
-  }
-
-  // Best-effort read-only guards
-  enforceReadOnly(projectsDataSource);
-  enforceReadOnly(tasksDataSource);
-
-
-  // Repos
-  const projectRepository = projectsDataSource.getRepository(Project);
-  const sprintRepository = projectsDataSource.getRepository(Sprint);
-  const taskRepository = tasksDataSource.getRepository(Task);
-  const projectUserRepository = projectsDataSource.getRepository(ProjectUser);
-
   // Services
-  const projectAnalyticsService: IProjectAnalyticsService =
-    new ProjectAnalyticsService(taskRepository, sprintRepository, projectRepository, projectUserRepository);
 
   const projectServiceClient: IProjectServiceClient = new ProjectServiceClient();
   const taskServiceClient: ITaskServiceClient = new TaskServiceClient();
 
+  const projectAnalyticsService: IProjectAnalyticsService =
+    new ProjectAnalyticsService(projectServiceClient, taskServiceClient);
   const financialAnalyticsService: IFinancialAnalyticsService =
     new FinancialAnalyticsService(projectServiceClient, taskServiceClient);
 

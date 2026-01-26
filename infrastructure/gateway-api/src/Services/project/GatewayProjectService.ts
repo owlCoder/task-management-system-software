@@ -30,8 +30,8 @@ import { createAxiosClient } from "../../Infrastructure/axios/client/AxiosClient
  */
 export class GatewayProjectService implements IGatewayProjectService {
     private readonly projectClient: AxiosInstance;
-    
-    constructor(private readonly errorHandlingService: IErrorHandlingService){
+
+    constructor(private readonly errorHandlingService: IErrorHandlingService) {
         this.projectClient = createAxiosClient(API_ENDPOINTS.PROJECT, { headers: {} });
     }
 
@@ -71,6 +71,14 @@ export class GatewayProjectService implements IGatewayProjectService {
             serviceName: SERVICES.PROJECT,
             method: HTTP_METHODS.GET,
             url: PROJECT_ROUTES.GET_PROJECTS_FROM_USER(userId)
+        });
+    }
+
+    async getAllProjectIds(): Promise<Result<number[]>> {
+        return await makeAPICall<number[]>(this.projectClient, this.errorHandlingService, {
+            serviceName: SERVICES.PROJECT,
+            method: HTTP_METHODS.GET,
+            url: PROJECT_ROUTES.GET_ALL_PROJECT_IDS
         });
     }
 

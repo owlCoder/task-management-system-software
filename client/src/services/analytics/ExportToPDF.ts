@@ -20,12 +20,14 @@ interface BurndownPayload {
   project: ProjectDTO;
   data: BurndownDto;
   sprintId: number;
+  sprintName?: string;
 }
 
 interface BurnupPayload {
   project: ProjectDTO;
   data: BurnupDto;
   sprintId: number;
+  sprintName?: string;
 }
 
 interface VelocityPayload {
@@ -157,15 +159,15 @@ export class AnalyticsExportService {
    * BURNDOWN
    */
   static async exportBurndown(payload: BurndownPayload) {
-    const { project, data, sprintId } = payload;
+    const { project, data, sprintId, sprintName } = payload;
     const dateStr = this.formatDate();
     const projectName = project.project_name?.replace(/[^a-zA-Z0-9]/g, '') || `PROJ${project.project_id}`;
-    const filename = `BURNDOWN_${projectName}_SPRINT${sprintId}_${dateStr}.pdf`;
+    const filename = `BURNDOWN_${projectName}_SPRINT${sprintId}_${sprintName}_${dateStr}.pdf`;
     const logoBase64 = await this.getLogoBase64();
 
     const tasksHTML = data.tasks.map(task => `
             <div class="task-item">
-                <h4>Task ${task.task_id}</h4>
+                <h4>Task #${task.task_id} - ' ${task.task_name} '</h4>
                 <div class="progress-bars">
                     <div class="progress-row">
                         <span class="progress-label">Ideal Progress:</span>
@@ -218,7 +220,7 @@ export class AnalyticsExportService {
 
             <div class="meta">
               <strong>Project:</strong> ${project.project_name || `Project ${project.project_id}`} | 
-              <strong>Sprint:</strong> ${sprintId}
+              <strong>Sprint:</strong> ID: ${sprintId} Name: ${sprintName || 'N/A'}
             </div>
 
             ${tasksHTML}
@@ -235,10 +237,10 @@ export class AnalyticsExportService {
    * BURNUP
    */
   static async exportBurnup(payload: BurnupPayload) {
-    const { project, data, sprintId } = payload;
+    const { project, data, sprintId, sprintName } = payload;
     const dateStr = this.formatDate();
     const projectName = project.project_name?.replace(/[^a-zA-Z0-9]/g, '') || `PROJ${project.project_id}`;
-    const filename = `BURNUP_${projectName}_SPRINT${sprintId}_${dateStr}.pdf`;
+    const filename = `BURNUP_${projectName}_SPRINT${sprintId}_${sprintName}_${dateStr}.pdf`;
     const logoBase64 = await this.getLogoBase64();
 
     const chart = ChartSVGGenerator.generateLineChart(
@@ -277,7 +279,7 @@ export class AnalyticsExportService {
 
             <div class="meta">
               <strong>Project:</strong> ${project.project_name || `Project ${project.project_id}`} | 
-              <strong>Sprint:</strong> ${sprintId}
+              <strong>Sprint:</strong> ID: ${sprintId} Name: ${sprintName || 'N/A'}
             </div>
 
             <div class="chart-container">${chart}</div>

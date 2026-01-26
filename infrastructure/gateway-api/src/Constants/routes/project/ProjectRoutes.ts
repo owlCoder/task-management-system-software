@@ -12,5 +12,6 @@ export const PROJECT_ROUTES = Object.freeze({
     DELETE_SPRINT: (sprintId: number) => `/sprints/${sprintId}`,
     GET_USERS_FROM_PROJECT: (projectId: number) => `/projects/${projectId}/users`,
     ASSIGN_USER_TO_PROJECT: (projectId: number) => `/projects/${projectId}/users`,
-    REMOVE_USER_FROM_PROJECT: (projectId: number, userId: number) => `/projects/${projectId}/users/${userId}`
+    REMOVE_USER_FROM_PROJECT: (projectId: number, userId: number) => `/projects/${projectId}/users/${userId}`,
+    GET_ALL_PROJECT_IDS: "/project-ids"
 } as const);

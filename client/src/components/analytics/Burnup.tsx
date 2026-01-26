@@ -124,7 +124,7 @@ export const BurnupAnalytics: React.FC<BurnupAnalyticsProps> = ({
             )}
 
             <ExportButton
-                onClick={() => data && AnalyticsExportService.exportBurnup({ project, data, sprintId: sprintId! })}
+                onClick={() => data && AnalyticsExportService.exportBurnup({ project, data, sprintId: sprintId!, sprintName: sprints.find(s => s.sprint_id === sprintId)?.sprint_title })}
                 label="Export Burnup Analytics for this project"
                 classname="ml-6 mr-6"
             />

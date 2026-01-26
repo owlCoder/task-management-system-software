@@ -19,6 +19,8 @@ export function taskToTaskDTO(task: Task): TaskDTO {
             comment: c.comment,
             created_at: c.created_at,
             task_id: task.task_id
-        }))
+        })),
+        finished_at: task.finished_at ? task.finished_at.toISOString() : null,  // ← DODAJ
+        created_at: task.created_at ? task.created_at.toISOString() : null,
     };
 }

@@ -75,6 +75,7 @@ export const BurndownAnalytics: React.FC<BurndownAnalyticsProps> = ({
                             <TaskProgress
                                 key={task.task_id}
                                 task_id={task.task_id}
+                                task_name={task.task_name}
                                 ideal={task.ideal_progress}
                                 real={task.real_progress}
                             />
@@ -82,7 +83,7 @@ export const BurndownAnalytics: React.FC<BurndownAnalyticsProps> = ({
                     </div>
                 )}
 
-                <ExportButton onClick={() => data && AnalyticsExportService.exportBurndown({ project, data, sprintId: sprintId! })} label="Export Burndown Analytics for this project" classname="mt-7 ml-4 mr-4" />
+                <ExportButton onClick={() => data && AnalyticsExportService.exportBurndown({ project, data, sprintId: sprintId!, sprintName: sprints.find(s => s.sprint_id === sprintId)?.sprint_title })} label="Export Burndown Analytics for this project" classname="mt-7 ml-4 mr-4" />
             </div>
         </div>
     );

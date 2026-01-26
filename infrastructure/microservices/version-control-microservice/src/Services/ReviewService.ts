@@ -153,14 +153,15 @@ export class  ReviewService implements IReviewService {
     }
 
     async createReview(taskId: number, authorId: number): Promise<Review> {
-        const newReview = new Review();  
-        newReview.taskId = taskId;
-        newReview.authorId = authorId;
-        newReview.status = ReviewStatus.REVIEW;
-        newReview.time = new Date().toISOString();
-        newReview.reviewedBy = undefined;
-        newReview.reviewedAt = undefined;
-        newReview.commentId = undefined;
+        const newReview = this.reviewRepository.create({
+        taskId,
+        authorId,
+        status: ReviewStatus.REVIEW,
+        time: new Date().toISOString(),
+        reviewedBy: null,
+        reviewedAt: null,
+        commentId: null,
+    });
 
         return await this.reviewRepository.save(newReview);
     }

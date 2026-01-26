@@ -2,11 +2,12 @@ import { useEffect, useState } from "react";
 
 interface TaskProgressProps {
     task_id: number;
+    task_name?: string;
     ideal: number;
     real: number;
 }
 
-export const TaskProgress: React.FC<TaskProgressProps> = ({ task_id, ideal, real }) => {
+export const TaskProgress: React.FC<TaskProgressProps> = ({ task_id, task_name, ideal, real }) => {
     const [idealWidth, setIdealWidth] = useState(0);
     const [realWidth, setRealWidth] = useState(0);
 
@@ -22,7 +23,7 @@ export const TaskProgress: React.FC<TaskProgressProps> = ({ task_id, ideal, real
 
     return (
         <div className="bg-white/5 border border-white/10 rounded-2xl p-4 shadow">
-            <h3 className="text-white font-semibold mb-4">Task #{task_id}</h3>
+            <h3 className="text-white font-semibold mb-4">Task #{task_id} - ' {task_name} '</h3>
 
             {/* IDEAL */}
             <div className="mb-3">

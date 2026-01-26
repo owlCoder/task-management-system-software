@@ -11,4 +11,5 @@ export interface IProjectService {
     updateProject(project_id: number, data: ProjectUpdateDTO): Promise<Result<ProjectDTO>>;
     deleteProject(project_id: number): Promise<Result<boolean>>;
     projectExists(project_id: number): Promise<Result<boolean>>;
+    getProjectIds(): Promise<Result<number[]>>;
 }
