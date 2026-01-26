@@ -14,18 +14,6 @@ export const createApp = (notificationService: INotificationService): Applicatio
   app.use(corsMiddleware);                          // CORS zastita
   app.use(express.json());                          // JSON parser
   
-  // DEBUG MIDDLEWARE - Loguj SVE zahteve
-  app.use((req: Request, res: Response, next) => {
-    console.log(' MIDDLEWARE DEBUG:');
-    console.log('  Method:', req.method);
-    console.log('  Path:', req.path);
-    console.log('  URL:', req.url);
-    console.log('  Body:', JSON.stringify(req.body));
-    console.log('  Headers:', JSON.stringify(req.headers));
-    console.log('---');
-    next();
-  });
-  
   app.use(express.urlencoded({ extended: true })); // URL encoded parser
   app.use(loggerMiddleware);                        // request logger
 
@@ -45,16 +33,6 @@ export const createApp = (notificationService: INotificationService): Applicatio
   // sve rute su pod /api prefiksom
   const notificationRoutes = createNotificationRoutes(notificationService);
   app.use("/api/v1", notificationRoutes);
-
-  // DEBUG - Proveri da li bilo koja ruta nije matchovana
-  app.use((req: Request, res: Response, next) => {
-    console.log('NO ROUTE MATCHED!');
-    console.log('  Method:', req.method);
-    console.log('  Path:', req.path);
-    console.log('  URL:', req.url);
-    console.log('  Body:', req.body);
-    next();
-  });
 
   // ERROR HANDLING
   app.use(notFoundHandler);  // 404 handler
