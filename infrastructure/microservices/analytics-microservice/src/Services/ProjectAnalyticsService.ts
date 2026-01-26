@@ -1,39 +1,28 @@
-import { LessThan, Repository } from "typeorm";
 import { IProjectAnalyticsService } from "../Domain/services/IProjectAnalyticsService";
-import { Task } from "../Domain/models/Task";
-import { Sprint } from "../Domain/models/Sprint";
-import { Project } from "../Domain/models/Project";
 import { BurndownDto } from "../Domain/DTOs/BurndownDto";
 import { BurndownTaskDTO } from "../Domain/DTOs/BurndownTaskDto";
 import { BurnupDto } from "../Domain/DTOs/BurnupDto";
 import { BurnupPointDto } from "../Domain/DTOs/BurnupPointDto";
-import { MoreThanOrEqual } from "typeorm";
 import { buildLast30DaysMap } from "../helpers/Last30Days";
 import { TimeSeriesPointDto } from "../Domain/DTOs/TimeSeriesPointDto";
-import { ProjectUser } from "../Domain/models/ProjectUser";
 import { roundToTwo } from "../helpers/RoundToTwo";
-
+import { IProjectServiceClient } from "./external-services/IProjectServiceClient";
+import { ITaskServiceClient } from "./external-services/ITaskServiceClient";
 
 export class ProjectAnalyticsService implements IProjectAnalyticsService {
 
     constructor(
-        private readonly taskRepository: Repository<Task>,
-        private readonly sprintRepository: Repository<Sprint>,
-        private readonly projectRepository: Repository<Project>,
-        private readonly projectUserRepository: Repository<ProjectUser>,
+        private readonly projectServiceClient: IProjectServiceClient,
+        private readonly taskServiceClient: ITaskServiceClient,
     ) { }
 
     async getBurnDownChartsForSprintId(sprintId: number): Promise<BurndownDto> {
-
-        const s = await this.sprintRepository.findOne({
-            where: { sprint_id: sprintId },
-        });
+        // Fetch sprint by ID - potreban nam endpoint
+        const s = await this.projectServiceClient.getSprintById(sprintId);
 
         if (!s) throw new Error("Sprint not found");
 
-        const project = await this.projectRepository.findOne({
-            where: { project_id: s.project_id },
-        });
+        const project = await this.projectServiceClient.getProjectById(s.project_id);
 
         if (!project) throw new Error("Project not found for sprint");
 
@@ -42,16 +31,14 @@ export class ProjectAnalyticsService implements IProjectAnalyticsService {
 
         const time = (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60);
 
-        const tasksFromSprint = await this.taskRepository.find({ where: { sprint_id: sprintId } });
-        // Ako Task ne zna za project_id, filtriraj po sprintu koji već znamo da je za dati project:
-        const tasks = tasksFromSprint.filter(t => t.sprint_id === s.sprint_id);
+        const tasks = await this.taskServiceClient.getTasksBySprintIds([sprintId]);
 
         let sum = 0;
 
         for (let i = 0; i < tasks.length; ++i)
             sum += tasks[i].estimated_cost;
 
-        if (sum === 0) sum = 1; //to avoid division by zero
+        if (sum === 0) sum = 1; // to avoid division by zero
 
         let BurndownTasks: BurndownTaskDTO[] = [];
 
@@ -70,17 +57,11 @@ export class ProjectAnalyticsService implements IProjectAnalyticsService {
     }
 
     async getBurnUpChartsForSprintId(sprintId: number): Promise<BurnupDto> {
-        const s = await this.sprintRepository.findOne({
-            where: { sprint_id: sprintId },
-        });
-
+        const s = await this.projectServiceClient.getSprintById(sprintId);
 
         if (!s) throw new Error("Sprint not found");
 
-        const project = await this.projectRepository.findOne({
-            where: { project_id: s.project_id },
-        });
-
+        const project = await this.projectServiceClient.getProjectById(s.project_id);
 
         if (!project) throw new Error("Project not found for sprint");
 
@@ -88,7 +69,7 @@ export class ProjectAnalyticsService implements IProjectAnalyticsService {
         startDate.setHours(0, 0, 0, 0);
 
         const endDate = new Date(s.end_date);
-        endDate.setHours(23, 59, 59, 999); // kraj dana
+        endDate.setHours(23, 59, 59, 999);
 
         const today = new Date();
         today.setHours(23, 59, 59, 999);
@@ -96,16 +77,20 @@ export class ProjectAnalyticsService implements IProjectAnalyticsService {
         const sprintDuration =
             (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24);
 
-        const tasksFromSprint = await this.taskRepository.find({ where: { sprint_id: sprintId } });
-
-        // Ako Task ne zna za project_id, filtriraj po sprintu koji već znamo da je za dati project:
-        const tasks = tasksFromSprint.filter(t => t.sprint_id === s.sprint_id);
+        const tasks = await this.taskServiceClient.getTasksBySprintIds([sprintId]);
 
         const finishedTasks = tasks
-            .filter(t => t.finished_at) // ima finished_at
+            .filter(t => {
+                return t.finished_at;
+            })
             .map(t => ({ ...t, finished_at_date: new Date(t.finished_at!) }))
-            .filter(t => t.finished_at_date >= startDate && t.finished_at_date <= endDate && t.finished_at_date <= today)
+            .filter(t => {
+                const inRange = t.finished_at_date >= startDate && t.finished_at_date <= endDate && t.finished_at_date <= today;
+                return inRange;
+            })
             .sort((a, b) => a.finished_at_date.getTime() - b.finished_at_date.getTime());
+
+
 
         const totalWork = tasks.reduce((sum, t) => sum + t.estimated_cost, 0);
 
@@ -122,7 +107,6 @@ export class ProjectAnalyticsService implements IProjectAnalyticsService {
                 x: Math.floor(dayFromStart),
                 y: roundToTwo(cumulativeWork),
             });
-
         }
 
         return {
@@ -134,18 +118,16 @@ export class ProjectAnalyticsService implements IProjectAnalyticsService {
         };
     }
 
-
     async getVelocityForProject(projectId: number): Promise<number> {
-        const proj = await this.projectRepository.findOne({
-            where: { project_id: projectId },
-        });
+        const proj = await this.projectServiceClient.getProjectById(projectId);
 
         if (!proj) throw new Error("Project not found");
 
         // fetch sprints koje su završene do danas, po projectId
-        const sprints = await this.sprintRepository.find({
-            where: { project_id: projectId, end_date: LessThan(new Date()) },
-        });
+        const allSprints = await this.projectServiceClient.getSprintsByProject(projectId);
+
+        const today = new Date();
+        const sprints = allSprints.filter(s => new Date(s.end_date) < today);
 
         if (sprints.length === 0) return 0;
 
@@ -164,16 +146,11 @@ export class ProjectAnalyticsService implements IProjectAnalyticsService {
     }
 
     async getProjectsStartedLast30Days(): Promise<TimeSeriesPointDto[]> {
+        const startDate = new Date();
+        startDate.setDate(startDate.getDate() - 29);
+        startDate.setHours(0, 0, 0, 0);
 
-        const startDateStr = new Date(
-            new Date().setDate(new Date().getDate() - 29)
-        ).toISOString().slice(0, 10);
-
-        const projects = await this.projectRepository.find({
-            where: {
-                start_date: MoreThanOrEqual(startDateStr),
-            },
-        });
+        const projects = await this.projectServiceClient.getProjectsStartedAfter(startDate);
 
         const map = buildLast30DaysMap();
 
@@ -193,22 +170,17 @@ export class ProjectAnalyticsService implements IProjectAnalyticsService {
         }));
     }
 
-
     async getWorkersAddedLast30Days(): Promise<TimeSeriesPointDto[]> {
         const startDate = new Date();
         startDate.setDate(startDate.getDate() - 29);
         startDate.setHours(0, 0, 0, 0);
 
-        const projectUsers = await this.projectUserRepository.find({
-            where: {
-                added_at: MoreThanOrEqual(startDate),
-            },
-        });
+        const projectUsers = await this.projectServiceClient.getProjectUsersAddedAfter(startDate);
 
         const map = buildLast30DaysMap();
 
         for (const pu of projectUsers) {
-            const key = pu.added_at.toISOString().slice(0, 10);
+            const key = new Date(pu.added_at).toISOString().slice(0, 10);
 
             if (map.has(key)) {
                 map.set(key, map.get(key)! + 1);
@@ -220,7 +192,4 @@ export class ProjectAnalyticsService implements IProjectAnalyticsService {
             count,
         }));
     }
-
-
-
-}       
+}

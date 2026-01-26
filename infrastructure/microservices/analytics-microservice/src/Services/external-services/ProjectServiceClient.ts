@@ -38,4 +38,37 @@ export class ProjectServiceClient implements IProjectServiceClient {
       return [];
     }
   }
+
+  // ProjectServiceClient.ts - dodaj ove metode
+  async getSprintById(sprintId: number): Promise<SprintDTO | null> {
+    try {
+      const response = await this.axiosInstance.get(`/sprints/${sprintId}`);
+      return response.data as SprintDTO;
+    } catch {
+      return null;
+    }
+  }
+
+  async getProjectsStartedAfter(startDate: Date): Promise<ProjectDTO[]> {
+    try {
+      const startDateStr = startDate.toISOString().slice(0, 10);
+      const response = await this.axiosInstance.get(`/projects`, {
+        params: { start_date_from: startDateStr }
+      });
+      return (response.data ?? []) as ProjectDTO[];
+    } catch {
+      return [];
+    }
+  }
+
+  async getProjectUsersAddedAfter(startDate: Date): Promise<ProjectUserDTO[]> {
+    try {
+      const response = await this.axiosInstance.get(`/project-users`, {
+        params: { added_after: startDate.toISOString() }
+      });
+      return (response.data ?? []) as ProjectUserDTO[];
+    } catch {
+      return [];
+    }
+  }
 }

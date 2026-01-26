@@ -191,18 +191,18 @@ export async function initApp(): Promise<express.Express> {
 
 
   // Repos
-  const projectRepository = projectsDataSource.getRepository(Project);
-  const sprintRepository = projectsDataSource.getRepository(Sprint);
-  const taskRepository = tasksDataSource.getRepository(Task);
-  const projectUserRepository = projectsDataSource.getRepository(ProjectUser);
+  // const projectRepository = projectsDataSource.getRepository(Project);
+  // const sprintRepository = projectsDataSource.getRepository(Sprint);
+  // const taskRepository = tasksDataSource.getRepository(Task);
+  // const projectUserRepository = projectsDataSource.getRepository(ProjectUser);
 
   // Services
-  const projectAnalyticsService: IProjectAnalyticsService =
-    new ProjectAnalyticsService(taskRepository, sprintRepository, projectRepository, projectUserRepository);
 
   const projectServiceClient: IProjectServiceClient = new ProjectServiceClient();
   const taskServiceClient: ITaskServiceClient = new TaskServiceClient();
 
+  const projectAnalyticsService: IProjectAnalyticsService =
+    new ProjectAnalyticsService(projectServiceClient, taskServiceClient);
   const financialAnalyticsService: IFinancialAnalyticsService =
     new FinancialAnalyticsService(projectServiceClient, taskServiceClient);
 

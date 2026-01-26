@@ -12,5 +12,7 @@ export interface TaskDTO {
     attachment_file_uuid?: number;
     estimated_cost?: number;
     total_hours_spent?: number;
-    comments?: CommentDTO[];    
+    comments?: CommentDTO[];
+    finished_at: string | null;   // ← DODAJ
+    created_at: string | null;    // ← DODAJ
 }
