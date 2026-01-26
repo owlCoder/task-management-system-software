@@ -81,6 +81,13 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({
       payload.assignedTo = assignedTo;
     }
 
+    const selectedUser = users.find(u => u.user_id === assignedTo);
+    
+    if (selectedUser?.role_name === "PROJECT_MANAGER") {
+      toast.error("Project Manager cannot be assigned to a task.");
+      return;
+    }
+
     if (Object.keys(payload).length === 0) {
       toast("No changes to save.");
       return;
@@ -224,7 +231,8 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({
             >
               <option value="">Unassigned</option>
               {users.map((user) => (
-                <option key={user.user_id} value={user.user_id}>
+                <option key={user.user_id} value={user.user_id}
+                  disabled={user.role_name === "PROJECT_MANAGER"}>
                   {user.username} 
                 </option>
               ))}

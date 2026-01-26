@@ -106,6 +106,13 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
       return;
     }
 
+    const selectedUser = users.find(u => u.user_id === assignedTo);
+    
+    if (selectedUser?.role_name === "PROJECT_MANAGER") {
+      toast.error("Project Manager cannot be assigned to a task.");
+      return;
+    }
+    
     const payload: CreateTaskDTO = {
       title: trimmedTitle,
       description: trimmedDesc,
@@ -232,7 +239,11 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
           >
             <option value="" className="bg-slate-900">Unassigned</option>
             {users.map((user) => (
-              <option key={user.user_id} value={user.user_id} className="bg-slate-900">
+              <option 
+                key={user.user_id} 
+                value={user.user_id} 
+                className="bg-slate-900">
+                disabled={user.role_name === "PROJECT_MANAGER"}
                 {user.username} ({user.role_name})
               </option>
             ))}

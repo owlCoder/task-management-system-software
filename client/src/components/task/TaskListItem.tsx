@@ -3,36 +3,18 @@ import { TaskListItemProps } from "../../types/props";
 import { TaskStatus } from "../../enums/TaskStatus";
 import StatusDropdown from "./StatusDropdown";
 import { StatusBadge } from "./StatusBadge";
-import { useNavigate } from "react-router-dom";
-import { useAuth } from "../../hooks/useAuthHook";
-import { VersionControlAPI } from "../../api/version/VersionControlAPI";
 
 const TaskListItem: React.FC<TaskListItemProps> = ({
   task,
   onSelect,
   onStatusChange,
   users = [],
+  onSendToReview
 }) => {
-  const navigate = useNavigate();
-  const { token } = useAuth();
-  //const api = new VersionControlAPI(import.meta.env.VITE_GATEWAY_URL, token!);
-
   const getWorkerName = () => {
     if (!task.worker_id) return "Unassigned";
     const worker = users.find((u) => u.user_id === task.worker_id);
     return worker ? worker.username : `User #${task.worker_id}`;
-  };
-
-  const handleSendToReview = async (e: React.MouseEvent) => {
-    e.stopPropagation();
-
-    try {
-      await VersionControlAPI.sendTaskToReview(task.task_id);
-      navigate(`/reviews/${task.task_id}`);
-    } catch (err) {
-      console.error("Send to review failed", err);
-      alert("Failed to send task to review");
-    }
   };
 
   return (
@@ -91,20 +73,16 @@ const TaskListItem: React.FC<TaskListItemProps> = ({
         <div className="flex gap-2">
           {task.task_status === TaskStatus.COMPLETED && (
             <button
-              onClick={handleSendToReview}
-              className="
-                px-3 py-1
-                rounded-lg
-                bg-purple-500/20
-                text-purple-300
-                hover:bg-purple-500/40
-                transition
-                text-xs
-              "
+              onClick={(e) => {
+              e.stopPropagation();
+              onSendToReview?.(task.task_id);
+            }}
+            className="px-3 py-1 rounded-lg bg-purple-500/20
+              text-purple-300 hover:bg-purple-500/40 transition text-xs"
             >
-              Send to review
-            </button>
-          )}
+            Send to review
+          </button>
+        )}
         </div>
       </div>
     </div>
