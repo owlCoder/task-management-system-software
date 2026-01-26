@@ -10,8 +10,10 @@ export interface IProjectAPI {
     createProject(data: ProjectCreateDTO): Promise<ProjectDTO | null>;
     updateProject(projectId: number, data: ProjectUpdateDTO): Promise<ProjectDTO | null>;
     deleteProject(projectId: number): Promise<boolean>;
-    
+
     getProjectUsers(projectId: number): Promise<ProjectUserDTO[]>;
     assignUserToProject(projectId: number, username: string, weeklyHours: number): Promise<ProjectUserDTO>;
     removeUserFromProject(projectId: number, userId: number): Promise<boolean>;
+
+    getAllProjectIds(): Promise<number[]>;
 }

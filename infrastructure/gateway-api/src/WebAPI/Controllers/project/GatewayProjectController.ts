@@ -27,7 +27,7 @@ import { ReqParams } from "../../../Infrastructure/express/types/ReqParams";
 export class GatewayProjectController {
     private readonly router: Router;
 
-    constructor(private readonly gatewayProjectService : IGatewayProjectService) {
+    constructor(private readonly gatewayProjectService: IGatewayProjectService) {
         this.router = Router();
         this.initializeRoutes();
     }
@@ -40,6 +40,7 @@ export class GatewayProjectController {
         const projectWriteAccess = [authenticate, authorize(...ProjectPolicies.WRITE)];
 
         this.router.get("/projects", ...projectReadonlyAccess, this.getAllProjects.bind(this));
+        this.router.get("/project-ids", ...projectReadonlyAccess, this.getAllProjectIds.bind(this));
         this.router.get("/projects/:projectId", ...projectReadonlyAccess, this.getProjectById.bind(this));
         this.router.get("/users/:userId/projects", ...projectReadonlyAccess, this.getProjectsFromUser.bind(this));
         this.router.post("/projects", ...projectWriteAccess, this.createProject.bind(this));
@@ -77,6 +78,11 @@ export class GatewayProjectController {
         handleResponse(res, result);
     }
 
+    private async getAllProjectIds(req: Request, res: Response): Promise<void> {
+        const result = await this.gatewayProjectService.getAllProjectIds();
+        handleResponse(res, result);
+    }
+
 
     /**
      * GET /api/v1/users/:userId/projects
@@ -102,7 +108,7 @@ export class GatewayProjectController {
      * - On failure: response status code indicating the failure, response data: message describing the error.
      */
     private async createProject(req: Request, res: Response): Promise<void> {
-        if(!req.headers['content-type']?.includes('multipart/form-data')){
+        if (!req.headers['content-type']?.includes('multipart/form-data')) {
             res.status(400).json({ message: "Bad request" });
             return;
         }
@@ -120,7 +126,7 @@ export class GatewayProjectController {
      * - On failure: response status code indicating the failure, response data: message describing the error.
      */
     private async updateProject(req: Request<ReqParams<'projectId'>>, res: Response): Promise<void> {
-        if(!req.headers['content-type']?.includes('multipart/form-data')){
+        if (!req.headers['content-type']?.includes('multipart/form-data')) {
             res.status(400).json({ message: "Bad request" });
             return;
         }
@@ -170,7 +176,7 @@ export class GatewayProjectController {
      */
     private async getSprintById(req: Request<ReqParams<'sprintId'>>, res: Response): Promise<void> {
         const sprintId = parseInt(req.params.sprintId, 10);
-        
+
         const result = await this.gatewayProjectService.getSprintById(sprintId);
         handleResponse(res, result);
     }

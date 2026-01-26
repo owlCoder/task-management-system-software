@@ -26,4 +26,5 @@ export interface IGatewayProjectService {
     getUsersFromProject(projectId: number): Promise<Result<ProjectUserDTO[]>>;
     assignUserToProject(projectId: number, data: ProjectUserAssignDTO): Promise<Result<ProjectUserDTO>>;
     removeUserFromProject(projectId: number, userId: number): Promise<Result<void>>;
+    getAllProjectIds(): Promise<Result<number[]>>;
 }

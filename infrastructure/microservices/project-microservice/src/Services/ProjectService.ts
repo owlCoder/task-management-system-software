@@ -16,7 +16,7 @@ export class ProjectService implements IProjectService {
         private readonly projectRepository: Repository<Project>,
         private readonly storageService: IR2StorageService,
         private readonly projectUserService: IProjectUserService
-    ) {}
+    ) { }
 
     async CreateProject(data: ProjectCreateDTO): Promise<Result<ProjectDTO>> {
         const project = this.projectRepository.create({
@@ -94,7 +94,7 @@ export class ProjectService implements IProjectService {
         if (data.status !== undefined) project.status = data.status;
 
         const saved = await this.projectRepository.save(project);
-        if (data.total_weekly_hours_required !== undefined && 
+        if (data.total_weekly_hours_required !== undefined &&
             oldWeeklyHours !== data.total_weekly_hours_required) {
             await this.projectUserService.updateWeeklyHoursForAllUsers(
                 project_id,
@@ -107,7 +107,7 @@ export class ProjectService implements IProjectService {
 
     async deleteProject(project_id: number): Promise<Result<boolean>> {
         const project = await this.projectRepository.findOne({ where: { project_id } });
-        
+
         if (project && project.image_key) {
             await this.storageService.deleteImage(project.image_key);
         }
@@ -127,4 +127,11 @@ export class ProjectService implements IProjectService {
         const count = await this.projectRepository.count({ where: { project_id } });
         return { success: true, data: count > 0 };
     }
+
+    async getProjectIds(): Promise<Result<number[]>> {
+        const projects = await this.projectRepository.find({ select: ["project_id"] });
+        const projectIds = projects.map((p) => p.project_id);
+        return { success: true, data: projectIds };
+    }
+
 }

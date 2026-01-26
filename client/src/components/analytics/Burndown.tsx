@@ -75,6 +75,7 @@ export const BurndownAnalytics: React.FC<BurndownAnalyticsProps> = ({
                             <TaskProgress
                                 key={task.task_id}
                                 task_id={task.task_id}
+                                task_name={task.task_name}
                                 ideal={task.ideal_progress}
                                 real={task.real_progress}
                             />

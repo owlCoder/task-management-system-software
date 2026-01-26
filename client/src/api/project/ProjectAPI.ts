@@ -189,6 +189,16 @@ class ProjectAPIImpl implements IProjectAPI {
             return false;
         }
     }
+
+    async getAllProjectIds(): Promise<number[]> {
+        try {
+            const response = await this.client.get<number[]>(`/project-ids`);
+            return response.data;
+        } catch (error) {
+            console.error("Error fetching all project IDs:", error);
+            throw error;
+        }
+    }
 }
 
 export const projectAPI: IProjectAPI = new ProjectAPIImpl();

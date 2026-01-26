@@ -37,6 +37,7 @@ export class ProjectController {
 
     private initializeRoutes(): void {
         this.router.get("/projects", this.getProjects.bind(this));
+        this.router.get("/project-ids", this.getProjectIds.bind(this));
         this.router.get("/users/:userId/projects", this.getProjectsByUserId.bind(this));
         this.router.get("/projects/:id", this.getProjectById.bind(this));
         this.router.post("/projects", upload.single("image_file"), this.createProject.bind(this));
@@ -52,6 +53,19 @@ export class ProjectController {
                 res.status(200).json(projects.data);
             } else {
                 res.status(projects.code).json({ message: projects.error });
+            }
+        } catch (err) {
+            res.status(500).json({ message: (err as Error).message });
+        }
+    }
+
+    private async getProjectIds(req: Request, res: Response): Promise<void> {
+        try {
+            const projectIds = await this.projectService.getProjectIds();
+            if (projectIds.success) {
+                res.status(200).json(projectIds.data);
+            } else {
+                res.status(projectIds.code).json({ message: projectIds.error });
             }
         } catch (err) {
             res.status(500).json({ message: (err as Error).message });

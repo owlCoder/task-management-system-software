@@ -167,7 +167,7 @@ export class AnalyticsExportService {
 
     const tasksHTML = data.tasks.map(task => `
             <div class="task-item">
-                <h4>Task ${task.task_id}</h4>
+                <h4>Task #${task.task_id} - ' ${task.task_name} '</h4>
                 <div class="progress-bars">
                     <div class="progress-row">
                         <span class="progress-label">Ideal Progress:</span>

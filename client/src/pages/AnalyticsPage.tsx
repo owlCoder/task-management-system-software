@@ -102,7 +102,7 @@ export const AnalyticsPage: React.FC = () => {
             try {
                 setLoadingProjects(true);
 
-                const ids = [1, 2];
+                const ids = (await projectAPI.getAllProjectIds()).sort((a, b) => a - b); //dobavljanje svih projectId za ocitavanje, sortirano radi konzistentnosti
                 const loadedProjects: ProjectDTO[] = [];
 
                 for (const id of ids) {
@@ -154,19 +154,19 @@ export const AnalyticsPage: React.FC = () => {
 
         const loadSprints = async () => {
             try {
-            setLoadingSprints(true);
-            const s = await sprintAPI.getSprintsByProject(projectId);
-            setProjectSprints(s);
+                setLoadingSprints(true);
+                const s = await sprintAPI.getSprintsByProject(projectId);
+                setProjectSprints(s);
 
-            // auto-select first sprint for burndown/burnup
-            if (s.length > 0) setSelectedSprintId(s[0].sprint_id);
-            else setSelectedSprintId(null);
+                // auto-select first sprint for burndown/burnup
+                if (s.length > 0) setSelectedSprintId(s[0].sprint_id);
+                else setSelectedSprintId(null);
             } catch (e) {
-            console.error("Failed to load sprints for project", e);
-            setProjectSprints([]);
-            setSelectedSprintId(null);
+                console.error("Failed to load sprints for project", e);
+                setProjectSprints([]);
+                setSelectedSprintId(null);
             } finally {
-            setLoadingSprints(false);
+                setLoadingSprints(false);
             }
         };
 

@@ -48,6 +48,7 @@ export class ProjectAnalyticsService implements IProjectAnalyticsService {
 
             BurndownTasks.push({
                 task_id: tasks[i].task_id,
+                task_name: tasks[i].title,
                 ideal_progress: roundToTwo(ideal),
                 real_progress: roundToTwo(real),
             });

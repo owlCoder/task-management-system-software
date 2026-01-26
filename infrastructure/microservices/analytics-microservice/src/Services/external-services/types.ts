@@ -19,6 +19,7 @@ export interface ProjectUserDTO {
 
 export interface TaskDTO {
   task_id: number;
+  title: string;
   sprint_id: number;
   estimated_cost: number;
   total_hours_spent: number;
