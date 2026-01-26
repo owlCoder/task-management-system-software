@@ -1,7 +1,7 @@
 import { IReviewService } from "../../Domain/services/IReview";
 import { Router, Request, Response } from "express";
-import { toReviewDTO } from "../../Helpers/Converter/toReviewDTO";
 import { errorCodeToHttpStatus } from "../../Utils/Converters/ErrorCodeConverter";
+import { ReviewStatus } from "../../Domain/enums/ReviewStatus";
 
 export class ReviewController {
   private readonly router: Router;
@@ -160,10 +160,11 @@ export class ReviewController {
 
       const statusRaw = (req.query.status as string | undefined)?.toUpperCase();
       const status =
-        !statusRaw ? "REVIEW" :
-        (["REVIEW","APPROVED","REJECTED","ALL"].includes(statusRaw) ? statusRaw : "REVIEW");
+        statusRaw && (Object.values(ReviewStatus) as string[]).includes(statusRaw)
+          ? (statusRaw as ReviewStatus)
+          : undefined;
 
-      const result = await this.reviewService.getReviews(status as any);
+      const result = await this.reviewService.getReviews(status);
 
       if (result.success) res.status(200).json(result.data);
       else res.status(errorCodeToHttpStatus(result.code)).json({ message: result.error });

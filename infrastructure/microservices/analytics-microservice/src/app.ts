@@ -18,6 +18,8 @@ import { IFinancialAnalyticsService } from "./Domain/services/IFinancialAnalytic
 import { FinancialAnalyticsService } from "./Services/FinancialAnalyticsService";
 import { ProjectServiceClient } from "./Services/external-services/ProjectServiceClient";
 import { TaskServiceClient } from "./Services/external-services/TaskServiceClient";
+import { IProjectServiceClient } from "./Services/external-services/IProjectServiceClient";
+import { ITaskServiceClient } from "./Services/external-services/ITaskServiceClient";
 
 import { AnalyticsController } from "./WebAPI/controllers/AnalyticsController";
 
@@ -198,8 +200,8 @@ export async function initApp(): Promise<express.Express> {
   const projectAnalyticsService: IProjectAnalyticsService =
     new ProjectAnalyticsService(taskRepository, sprintRepository, projectRepository, projectUserRepository);
 
-  const projectServiceClient = new ProjectServiceClient();
-  const taskServiceClient = new TaskServiceClient();
+  const projectServiceClient: IProjectServiceClient = new ProjectServiceClient();
+  const taskServiceClient: ITaskServiceClient = new TaskServiceClient();
 
   const financialAnalyticsService: IFinancialAnalyticsService =
     new FinancialAnalyticsService(projectServiceClient, taskServiceClient);

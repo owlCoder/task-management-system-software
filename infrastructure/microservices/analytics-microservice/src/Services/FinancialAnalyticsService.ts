@@ -3,13 +3,13 @@ import { BudgetTrackingDto } from "../Domain/DTOs/BudgetTrackingDto";
 import { ResourceCostAllocationDto } from "../Domain/DTOs/ResourceCostAllocationDto";
 import { ResourceCostAllocationItemDto } from "../Domain/DTOs/ResourceCostAllocationItemDto";
 import { ProfitMarginDto } from "../Domain/DTOs/ProfitMarginDto";
-import { ProjectServiceClient } from "./external-services/ProjectServiceClient";
-import { TaskServiceClient } from "./external-services/TaskServiceClient";
+import { IProjectServiceClient } from "./external-services/IProjectServiceClient";
+import { ITaskServiceClient } from "./external-services/ITaskServiceClient";
 
 export class FinancialAnalyticsService implements IFinancialAnalyticsService {
   constructor(
-    private readonly projectServiceClient: ProjectServiceClient,
-    private readonly taskServiceClient: TaskServiceClient
+    private readonly projectServiceClient: IProjectServiceClient,
+    private readonly taskServiceClient: ITaskServiceClient
   ) {}
 
   async getBudgetTrackingForProject(projectId: number): Promise<BudgetTrackingDto> {

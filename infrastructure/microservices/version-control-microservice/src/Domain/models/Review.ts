@@ -18,6 +18,6 @@ export class Review {
   @Column({ type: "varchar"})
   status!: ReviewStatus;
   @Column({ type: "int", nullable: true, default: 0 })
-  commentId!: number;
+  commentId?: number;
   
 }

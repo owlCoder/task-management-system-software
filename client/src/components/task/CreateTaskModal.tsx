@@ -28,6 +28,11 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
   const api = new TaskAPI(import.meta.env.VITE_GATEWAY_URL, token);
   const templateApi = new TaskTemplateAPI(import.meta.env.VITE_GATEWAY_URL, token);
 
+  const normalizeRole = (role?: string | null) =>
+    role ? role.trim().toUpperCase().replace(/[\s_-]+/g, "") : "";
+
+  const isProjectManager = (role?: string | null) =>
+    normalizeRole(role) === "PROJECTMANAGER";
 
   useEffect(() => {
     if (open) {
@@ -106,10 +111,10 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
       return;
     }
 
-    const selectedUser = users.find(u => u.user_id === assignedTo);
-    
-    if (selectedUser?.role_name === "PROJECT_MANAGER") {
-      toast.error("Project Manager cannot be assigned to a task.");
+    const selectedUser = users.find((u) => u.user_id === assignedTo);
+
+    if (isProjectManager(selectedUser?.role_name)) {
+      toast.error("Task can only be assigned to workers.");
       return;
     }
     
@@ -235,15 +240,32 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
           <select
             className="w-full p-2 bg-slate-900/50 border border-white/20 rounded-lg text-white outline-none"
             value={assignedTo ?? ""}
-            onChange={(e) => setAssignedTo(e.target.value ? Number(e.target.value) : undefined)}
+            onChange={(e) => {
+              const value = e.target.value;
+              if (!value) {
+                setAssignedTo(undefined);
+                return;
+              }
+
+              const userId = Number(value);
+              const selected = users.find((user) => user.user_id === userId);
+              if (isProjectManager(selected?.role_name)) {
+                toast.error("Task can only be assigned to workers.");
+                setAssignedTo(undefined);
+                return;
+              }
+
+              setAssignedTo(userId);
+            }}
           >
             <option value="" className="bg-slate-900">Unassigned</option>
             {users.map((user) => (
-              <option 
-                key={user.user_id} 
-                value={user.user_id} 
-                className="bg-slate-900">
-                disabled={user.role_name === "PROJECT_MANAGER"}
+              <option
+                key={user.user_id}
+                value={user.user_id}
+                className="bg-slate-900"
+                disabled={isProjectManager(user.role_name)}
+              >
                 {user.username} ({user.role_name})
               </option>
             ))}

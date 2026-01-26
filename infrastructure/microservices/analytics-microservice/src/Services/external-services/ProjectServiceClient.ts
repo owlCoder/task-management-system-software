@@ -1,7 +1,8 @@
 import axios, { AxiosInstance } from "axios";
+import { IProjectServiceClient } from "./IProjectServiceClient";
 import { ProjectDTO, ProjectUserDTO, SprintDTO } from "./types";
 
-export class ProjectServiceClient {
+export class ProjectServiceClient implements IProjectServiceClient {
   private axiosInstance: AxiosInstance;
 
   constructor(baseURL: string = process.env.PROJECT_SERVICE_API || "http://localhost:5000/api/v1") {
