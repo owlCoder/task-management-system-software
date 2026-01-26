@@ -12,6 +12,9 @@ export class Task {
   @Column({ type: "varchar", length: 100, nullable: false })
   title!: string;
 
+  @Column({ type: "int", nullable: true })
+  worker_id!: number;
+
   @Column({ type: "varchar", length: 100, nullable: false })
   task_description!: string;
 
