@@ -2,6 +2,7 @@ export const VERSION_CONTROL_ROUTES = Object.freeze({
     SEND_REVIEW : (taskId : number) => `/reviews/${taskId}/send`,
     ACCEPT_REVIEW : (taskId : number) => `/reviews/${taskId}/accept`,
     REJECT_REVIEW : (taskId : number) => `/reviews/${taskId}/reject`,
+    GET_REVIEW_HISTORY: (taskId: number) => `/reviews/${taskId}/history`,
     GET_REVIEWS: `/reviews`,
     GET_TEMPLATE: (templateId: number) => `/templates/${templateId}`,
     GET_ALL_TEMPLATES: `/templates`,

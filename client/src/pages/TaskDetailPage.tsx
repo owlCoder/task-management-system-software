@@ -18,6 +18,9 @@ import { TaskCommentInput } from "../components/task/TaskCommentInput";
 import { TaskVersionDiff } from "../components/task/TaskVersionDiff";
 import { TaskVersionDTO } from "../models/task/TaskVersionDTO";
 import { TaskVersionHistoryDropdown } from "../components/task/TaskVersionHistoryDropdown";
+import { TaskReviewHistoryDropdown } from "../components/task/TaskReviewHistoryDropdown";
+import { VersionControlAPI } from "../api/version/VersionControlAPI";
+import { ReviewHistoryItemDTO } from "../models/version/ReviewHistoryItemDTO";
 
 export const TaskDetailPage: React.FC<TaskDetailPageProps> = ({
   token,
@@ -37,10 +40,18 @@ export const TaskDetailPage: React.FC<TaskDetailPageProps> = ({
   const [versions, setVersions] = useState<TaskVersionDTO[]>([]);
   const [versionsError, setVersionsError] = useState<string | null>(null);
   const [uploadedFileId, setUploadedFileId] = useState<number>(0);
+  const [reviewHistory, setReviewHistory] = useState<ReviewHistoryItemDTO[]>([]);
+  const [reviewHistoryLoading, setReviewHistoryLoading] = useState(false);
+  const [reviewHistoryError, setReviewHistoryError] = useState<string | null>(null);
   //const [historyOpen, setHistoryOpen] = useState(false);
 
   const apiTask = new TaskAPI(import.meta.env.VITE_GATEWAY_URL, token);
   const fileApi = new FileAPI();
+
+  const canViewReviewHistory =
+    role === UserRole.PROJECT_MANAGER ||
+    role === UserRole.ANIMATION_WORKER ||
+    role === UserRole.AUDIO_MUSIC_STAGIST;
 
   const dedupeComments = (arr: CommentDTO[]) => {
     const map = new Map<number, CommentDTO>();
@@ -143,6 +154,45 @@ export const TaskDetailPage: React.FC<TaskDetailPageProps> = ({
       });
   }, [taskId]);
 
+  useEffect(() => {
+    let active = true;
+
+    const loadHistory = async () => {
+      if (!canViewReviewHistory) {
+        if (active) {
+          setReviewHistory([]);
+          setReviewHistoryLoading(false);
+          setReviewHistoryError(null);
+        }
+        return;
+      }
+
+      setReviewHistoryLoading(true);
+      setReviewHistoryError(null);
+      try {
+        const data = await VersionControlAPI.getReviewHistoryByTaskId(taskId);
+        if (active) {
+          setReviewHistory(data ?? []);
+        }
+      } catch {
+        if (active) {
+          setReviewHistory([]);
+          setReviewHistoryError("Failed to load review history.");
+        }
+      } finally {
+        if (active) {
+          setReviewHistoryLoading(false);
+        }
+      }
+    };
+
+    loadHistory();
+
+    return () => {
+      active = false;
+    };
+  }, [taskId, role, canViewReviewHistory]);
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md">
       <div
@@ -180,6 +230,14 @@ export const TaskDetailPage: React.FC<TaskDetailPageProps> = ({
                 role={role}
                 task={task}
               />
+
+              {canViewReviewHistory && (
+                <TaskReviewHistoryDropdown
+                  items={reviewHistory}
+                  loading={reviewHistoryLoading}
+                  error={reviewHistoryError}
+                />
+              )}
 
               <TaskVersionHistoryDropdown
                 versions={versions}

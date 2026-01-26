@@ -59,5 +59,7 @@ app.use(express.json());
   const taskController = new TaskController(taskService,commentService,taskVersionService);
   // Registering routes
   app.use('/api/v1', taskController.getRouter());
+  //health
+  app.get("/health", (req, res) => {res.status(200).send("OK");});
 })();
 export default app;

@@ -11,7 +11,6 @@ export const createNotificationRoutes = (notificationService: INotificationServi
   const router = Router();
   const controller = new NotificationController(notificationService);
 
-  console.log(' Routes created! Registering all notification routes...');
 
   // BULK ROUTES - MORAJU BITI PRE :id RUTA!
   /**
@@ -19,8 +18,6 @@ export const createNotificationRoutes = (notificationService: INotificationServi
    * Oznaci vise notifikacija kao procitane
    */
   router.patch('/notifications/bulk/read', (req, res) => {
-    console.log(' ROUTE HANDLER - bulk/read called!');
-    console.log(' ROUTE - req.body:', req.body);
     controller.markMultipleAsRead(req, res);
   });
 
@@ -29,11 +26,6 @@ export const createNotificationRoutes = (notificationService: INotificationServi
    * Oznaci vise notifikacija kao neprocitane
    */
   router.patch('/notifications/bulk/unread', (req, res) => {
-    console.log(' ROUTE HANDLER CALLED - bulk/unread');
-    console.log(' ROUTE - req.body:', req.body);
-    console.log(' ROUTE - req.body.ids:', req.body.ids);
-    console.log(' ROUTE - typeof req.body.ids:', typeof req.body.ids);
-    console.log(' ROUTE - Array.isArray(req.body.ids):', Array.isArray(req.body.ids));
     controller.markMultipleAsUnread(req, res);
   });
 
@@ -42,8 +34,6 @@ export const createNotificationRoutes = (notificationService: INotificationServi
    * Brise vise notifikacija odjednom
    */
   router.delete('/notifications/bulk', (req, res) => {
-    console.log(' ROUTE HANDLER - bulk/delete called!');
-    console.log(' ROUTE - req.body:', req.body);
     controller.deleteMultipleNotifications(req, res);
   });
 
@@ -107,8 +97,6 @@ export const createNotificationRoutes = (notificationService: INotificationServi
   router.delete('/notifications/:id', (req, res) => 
     controller.deleteNotification(req, res)
   );
-
-  console.log(' All routes registered successfully!');
   
   return router;
 };

@@ -2,6 +2,7 @@ import axios, { AxiosError, AxiosInstance } from "axios";
 import { IVersionControlAPI } from "./IVersionControlAPI";
 import { TaskReviewDTO } from "../../models/version/TaskReviewDTO";
 import { ReviewCommentDTO } from "../../models/version/ReviewCommentDTO";
+import { ReviewHistoryItemDTO } from "../../models/version/ReviewHistoryItemDTO";
 import { readValueByKey } from "../../helpers/local_storage";
 
 const GATEWAY_URL = import.meta.env.VITE_GATEWAY_URL;
@@ -86,11 +87,9 @@ class VersionControlAPIImpl implements IVersionControlAPI {
     }
   }
 
-  async getReviewHistoryByTaskId(taskId: number): Promise<(TaskReviewDTO | ReviewCommentDTO)[]> {
+  async getReviewHistoryByTaskId(taskId: number): Promise<ReviewHistoryItemDTO[]> {
     try {
-      const response = await this.client.get<(TaskReviewDTO | ReviewCommentDTO)[]>(
-        `/reviews/${taskId}/history`
-      );
+      const response = await this.client.get<ReviewHistoryItemDTO[]>(`/reviews/${taskId}/history`);
       return response.data;
     } catch (error) {
       console.error("Error fetching review history by task ID:", error);

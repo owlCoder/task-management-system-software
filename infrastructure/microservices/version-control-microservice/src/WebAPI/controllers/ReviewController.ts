@@ -29,6 +29,7 @@ export class ReviewController {
     this.router.post("/reviews/:taskId/send", this.sendReview.bind(this));
     this.router.post("/reviews/:taskId/accept", this.approveReview.bind(this));
     this.router.post("/reviews/:taskId/reject", this.rejectReview.bind(this));
+    this.router.get("/reviews/:taskId/history", this.getReviewHistory.bind(this));
     this.router.get("/reviews", this.getReviews.bind(this));
     this.router.get("/reviewComments/:commentId", this.getCommentById.bind(this));
   }
@@ -189,6 +190,24 @@ export class ReviewController {
       }
 
       const result = await this.reviewService.getCommentById(commentId);
+
+      if (result.success) res.status(200).json(result.data);
+      else res.status(errorCodeToHttpStatus(result.code)).json({ message: result.error });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  }
+
+  async getReviewHistory(req: Request, res: Response): Promise<void> {
+    try {
+      const taskId = Number(req.params.taskId);
+      if (isNaN(taskId)) {
+        res.status(400).json({ message: "Invalid task ID" });
+        return;
+      }
+
+      const result = await this.reviewService.getReviewHistory(taskId);
 
       if (result.success) res.status(200).json(result.data);
       else res.status(errorCodeToHttpStatus(result.code)).json({ message: result.error });
