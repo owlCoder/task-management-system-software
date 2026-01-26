@@ -3,9 +3,9 @@ import { EOperationalStatus } from "../Domain/enums/EOperationalStatus";
 import { IGC_Service } from "../Domain/Services/IGC_Service";
 import { Measurement_Service } from "./Measurement_Service";
 
-const GC_INTERVAL = 60_000;
-const RETENTION_OK = 20_000;
-const RETENTION_DOWN = 50_000;
+const GC_INTERVAL = 60_000 * 60;
+const RETENTION_OK = 60_000 * 60 * 24 * 14;
+const RETENTION_DOWN = 60_000 * 60 * 24 * 28;
 
 
 export class GarbageCollector_Service implements IGC_Service {

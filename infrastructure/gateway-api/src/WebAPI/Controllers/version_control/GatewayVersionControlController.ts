@@ -35,6 +35,7 @@ export class GatewayVersionControlController {
         const templateWriteAccess = [authenticate, authorize(...TemplatePolicies.WRITE)];
 
         this.router.get("/reviews", ...reviewReadAccess, this.getReviews.bind(this));
+        this.router.get("/reviews/:taskId/history", ...reviewReadAccess, this.getReviewHistory.bind(this));
         this.router.post("/reviews/:taskId/accept", ...reviewWriteAccess, this.acceptReview.bind(this));
         this.router.post("/reviews/:taskId/reject", ...reviewWriteAccess, this.rejectReview.bind(this));
         this.router.post("/reviews/:taskId/send", authenticate, this.sendToReview.bind(this));
@@ -53,6 +54,14 @@ export class GatewayVersionControlController {
         const status = typeof req.query.status === "string" ? req.query.status : undefined;
 
         const result = await this.gatewayVersionSevice.getReviews(senderRole, { status });
+        handleResponse(res, result);
+    }
+
+    private async getReviewHistory(req: Request<ReqParams<'taskId'>>, res: Response): Promise<void> {
+        const taskId = parseInt(req.params.taskId, 10);
+        const senderRole = req.user!.role;
+
+        const result = await this.gatewayVersionSevice.getReviewHistory(taskId, senderRole);
         handleResponse(res, result);
     }
 

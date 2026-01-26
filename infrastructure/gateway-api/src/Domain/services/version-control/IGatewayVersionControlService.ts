@@ -7,12 +7,14 @@ import { TaskResponseDTO } from "../../DTOs/version-control/TaskResponseDTO";
 import { RejectReviewDTO } from "../../DTOs/version-control/RejectReviewDTO";
 import { CreateTaskDTO } from "../../DTOs/version-control/CreateTaskDTO";
 import { ReviewsQueryParams } from "../../types/version-control/ReviewsQueryParams";
+import { ReviewHistoryItemDTO } from "../../DTOs/version-control/ReviewHistoryItemDTO";
 
 export interface IGatewayVersionControlService {
     sendToReview(taskId: number, senderId: number, senderRole: string): Promise<Result<ReviewDTO>>;
     acceptReview(taskId: number, senderId: number, senderRole: string): Promise<Result<ReviewDTO>>;
     rejectReview(taskId: number, data: RejectReviewDTO, senderId: number, senderRole: string): Promise<Result<ReviewCommentDTO>>;
     getReviews(senderRole: string, params: ReviewsQueryParams): Promise<Result<ReviewDTO[]>>;
+    getReviewHistory(taskId: number, senderRole: string): Promise<Result<ReviewHistoryItemDTO[]>>;
     getReviewComment(commentId: number, senderRole: string): Promise<Result<ReviewCommentDTO>>;
     getTemplateById(templateId: number): Promise<Result<TaskTemplateDTO>>;
     getAllTemplates(): Promise<Result<TaskTemplateDTO[]>>;

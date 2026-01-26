@@ -1,20 +1,23 @@
 import { ReviewCommenntDTO } from "../Domain/DTOs/ReviewCommentDTO";
 import { TaskReviewDTO } from "../Domain/DTOs/TaskReviewDTO";
 import { Review } from "../Domain/models/Review";
-import { FindOptionsWhere, Repository } from "typeorm";
+import { FindOptionsWhere, In, Repository } from "typeorm";
 import { IReviewService } from "../Domain/services/IReview";
 import { ReviewComment } from "../Domain/models/ReviewComment";
 import { ErrorCode } from "../Domain/enums/ErrorCode";
 import { Result } from "../Domain/types/Result";
 import { ReviewStatus } from "../Domain/enums/ReviewStatus";
 import { toReviewDTO } from "../Helpers/Converter/toReviewDTO";
+import { ReviewHistoryItemDTO } from "../Domain/DTOs/ReviewHistoryItemDTO";
+import { IUserServiceClient } from "../Domain/services/external-services/IUserServiceClient";
 
 
 export class  ReviewService implements IReviewService {
 
     constructor(
         private reviewRepository: Repository<Review>,
-        private reviewCommentRepository: Repository<ReviewComment>
+        private reviewCommentRepository: Repository<ReviewComment>,
+        private userServiceClient: IUserServiceClient
     ) {}
 
     async getTaskForReview(): Promise<Result<TaskReviewDTO[]>> {
@@ -54,6 +57,60 @@ export class  ReviewService implements IReviewService {
             time: c.time,
         },
         };
+    }
+
+    async getReviewHistory(taskId: number): Promise<Result<ReviewHistoryItemDTO[]>> {
+        const reviews = await this.reviewRepository.find({
+            where: { taskId },
+            order: { reviewId: "DESC" },
+        });
+
+        if (!reviews.length) {
+            return { success: true, data: [] };
+        }
+
+        const commentIds = reviews
+            .map((r) => Number(r.commentId ?? 0))
+            .filter((id) => Number.isFinite(id) && id > 0);
+
+        const uniqueCommentIds = Array.from(new Set(commentIds));
+
+        const comments = uniqueCommentIds.length
+            ? await this.reviewCommentRepository.find({ where: { commentId: In(uniqueCommentIds) } })
+            : [];
+
+        const commentMap = new Map<number, string>();
+        for (const c of comments) {
+            commentMap.set(c.commentId, c.commentText);
+        }
+
+        const authorIds = Array.from(
+            new Set(
+                reviews
+                    .map((r) => Number(r.authorId))
+                    .filter((id) => Number.isFinite(id) && id > 0)
+            )
+        );
+
+        const authorResult = await this.userServiceClient.getUsersByIds(authorIds);
+        const authorMap = new Map<number, string>();
+        if (authorResult.success) {
+            for (const u of authorResult.data) {
+                const id = Number(u.user_id ?? u.id);
+                const name = u.username ?? u.user_name;
+                if (Number.isFinite(id) && name) {
+                    authorMap.set(id, name);
+                }
+            }
+        }
+
+        const data: ReviewHistoryItemDTO[] = reviews.map((r) => ({
+            review: toReviewDTO(r),
+            commentText: r.commentId ? commentMap.get(r.commentId) : undefined,
+            authorName: authorMap.get(r.authorId),
+        }));
+
+        return { success: true, data };
     }
 
     async sendToReview(taskId: number, authorId: number): Promise<Result<TaskReviewDTO>> {

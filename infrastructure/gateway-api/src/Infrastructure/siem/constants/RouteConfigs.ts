@@ -74,6 +74,7 @@ export const ROUTE_CONFIG: Record<string, SIEMRouteConfig> = {
     'GET /user-roles/:impactLevel': { level: SIEMLogLevel.ERROR },
 
     'GET /reviews': { level: SIEMLogLevel.ERROR },
+    'GET /reviews/:taskId/history': { level: SIEMLogLevel.ERROR },
     'POST /reviews/:taskId/accept': { level: SIEMLogLevel.CRITICAL },
     'POST /reviews/:taskId/reject': { level: SIEMLogLevel.CRITICAL },
     'POST /reviews/:taskId/send': { level: SIEMLogLevel.CRITICAL },
