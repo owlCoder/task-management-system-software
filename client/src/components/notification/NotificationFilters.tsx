@@ -34,7 +34,7 @@ const NotificationFilters: React.FC<NotificationFiltersProps> = ({
   };
 
   const controlButtonBase =
-    "relative inline-flex items-center justify-center gap-2 h-10 px-5 min-w-[140px] rounded-lg font-semibold text-sm transition-all duration-200 border whitespace-nowrap backdrop-blur-xl";
+    "relative inline-flex items-center justify-center gap-2 h-9 px-4 min-w-[120px] rounded-lg font-semibold text-xs transition-all duration-200 border whitespace-nowrap backdrop-blur-xl";
   const controlButtonActive =
     "bg-gradient-to-t from-[var(--palette-medium-blue)] to-[var(--palette-deep-blue)] text-white border-white/20 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-sky-500/20 cursor-pointer";
   const controlButtonIdle =
@@ -46,7 +46,7 @@ const NotificationFilters: React.FC<NotificationFiltersProps> = ({
     <div className={`flex items-center justify-between ${className}`}>
       
       {/* filter all and unread */}
-      <div className="flex gap-3">
+      <div className="flex gap-2">
         <button
           onClick={() => onFilterChange('all')}
           className={`${controlButtonBase} ${
@@ -72,7 +72,7 @@ const NotificationFilters: React.FC<NotificationFiltersProps> = ({
       </div>
 
       {/* right side - sort, select all, mark as read/unread, delete */}
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2">
         
         {/* sort dropdown */}
         <div className="relative">
@@ -111,7 +111,7 @@ const NotificationFilters: React.FC<NotificationFiltersProps> = ({
 
           {/* dropdown menu */}
           {isSortDropdownOpen && (
-            <div className="absolute top-full right-0 mt-2 w-48 bg-white/10 backdrop-blur-xl border border-white/15 rounded-lg shadow-xl z-10">
+            <div className="absolute top-full right-0 mt-2 w-44 bg-white/10 backdrop-blur-xl border border-white/15 rounded-lg shadow-xl z-10">
               {sortOptions.map((option) => (
                 <button
                   key={option.value}
@@ -138,7 +138,7 @@ const NotificationFilters: React.FC<NotificationFiltersProps> = ({
             type="checkbox"
             checked={isAllSelected}
             readOnly
-            className="w-4 h-4 rounded border-white/30 bg-white/10 text-[var(--palette-medium-blue)] focus:ring-[var(--palette-medium-blue)] focus:ring-offset-0 cursor-pointer pointer-events-none"
+            className="w-3.5 h-3.5 rounded border-white/30 bg-white/10 text-[var(--palette-medium-blue)] focus:ring-[var(--palette-medium-blue)] focus:ring-offset-0 cursor-pointer pointer-events-none"
           />
           Select All
         </button>
