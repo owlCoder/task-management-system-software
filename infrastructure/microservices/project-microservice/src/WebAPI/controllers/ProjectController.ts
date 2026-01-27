@@ -9,6 +9,8 @@ import { validateCreateProject, validateUpdateProject } from "../validators/Proj
 import { IR2StorageService } from "../../Storage/R2StorageService";
 import { ReqParams } from "../../Domain/types/ReqParams";
 import { ILogerService } from "../../Domain/services/ILogerService";
+import { ISIEMService } from "../../Siem/Domain/Services/ISIEMService";
+import { generateEvent } from "../../Siem/Domain/Helpers/Generate/GenerateEvent";
 
 const upload = multer({
     storage: multer.memoryStorage(),
@@ -32,6 +34,7 @@ export class ProjectController {
         private readonly storageService: IR2StorageService,
         private readonly projectUserService: IProjectUserService,
         private readonly logger: ILogerService,
+        private readonly siemService: ISIEMService,
     ) {
         this.router = Router();
         this.initializeRoutes();
@@ -54,13 +57,22 @@ export class ProjectController {
 
             const projects = await this.projectService.getProjects();
             if (projects.success) {
+                this.siemService.sendEvent(
+                    generateEvent("project-microservice", req, 200, "Request successful | All projects fetched")
+                );
                 res.status(200).json(projects.data);
             } else {
                 this.logger.log(projects.error);
+                this.siemService.sendEvent(
+                    generateEvent("project-microservice", req, projects.code, projects.error) // SIEM
+                );
                 res.status(projects.code).json({ message: projects.error });
             }
         } catch (err) {
             this.logger.log((err as Error).message);
+            this.siemService.sendEvent(
+                generateEvent("project-microservice", req, 500, (err as Error).message)
+            );
             res.status(500).json({ message: (err as Error).message });
         }
     }
@@ -71,13 +83,22 @@ export class ProjectController {
 
             const projectIds = await this.projectService.getProjectIds();
             if (projectIds.success) {
+                this.siemService.sendEvent(
+                    generateEvent("project-microservice", req, 200, "Request successful | Project IDs fetched")
+                );
                 res.status(200).json(projectIds.data);
             } else {
                 this.logger.log(projectIds.error);
+                this.siemService.sendEvent(
+                    generateEvent("project-microservice", req, projectIds.code, projectIds.error)
+                );
                 res.status(projectIds.code).json({ message: projectIds.error });
             }
         } catch (err) {
             this.logger.log((err as Error).message);
+            this.siemService.sendEvent(
+                generateEvent("project-microservice", req, 500, (err as Error).message)
+            );
             res.status(500).json({ message: (err as Error).message });
         }
     }
@@ -86,6 +107,9 @@ export class ProjectController {
         try {
             const userId = parseInt(req.params.userId, 10);
             if (isNaN(userId)) {
+                this.siemService.sendEvent(
+                    generateEvent("project-microservice", req, 400, "Invalid user ID")
+                );
                 res.status(400).json({ message: "Invalid user ID" });
                 return;
             }
@@ -93,14 +117,23 @@ export class ProjectController {
             this.logger.log(`Fetching projects for user ID ${userId}`);
             const projects = await this.projectService.getProjectsByUserId(userId);
             if (projects.success) {
+                this.siemService.sendEvent(
+                    generateEvent("project-microservice", req, 200, `Projects fetched for user ID ${userId}`)
+                );
                 res.status(200).json(projects.data);
             } else {
                 this.logger.log(projects.error);
+                this.siemService.sendEvent(
+                    generateEvent("project-microservice", req, projects.code, projects.error)
+                );
                 res.status(projects.code).json({ message: projects.error });
             }
 
         } catch (err) {
             this.logger.log((err as Error).message);
+            this.siemService.sendEvent(
+                generateEvent("project-microservice", req, 500, (err as Error).message)
+            );
             res.status(500).json({ message: (err as Error).message });
         }
     }
@@ -109,6 +142,9 @@ export class ProjectController {
         try {
             const id = parseInt(req.params.id, 10);
             if (isNaN(id)) {
+                this.siemService.sendEvent(
+                    generateEvent("project-microservice", req, 400, "Invalid project ID")
+                );
                 res.status(400).json({ message: "Invalid project ID" });
                 return;
             }
@@ -116,13 +152,22 @@ export class ProjectController {
             this.logger.log(`Fetching project with ID ${id}`);
             const project = await this.projectService.getProjectById(id);
             if (project.success) {
+                this.siemService.sendEvent(
+                    generateEvent("project-microservice", req, 200, `Project fetched with ID ${id}`)
+                );
                 res.status(200).json(project.data);
             } else {
                 this.logger.log(project.error);
+                this.siemService.sendEvent(
+                    generateEvent("project-microservice", req, project.code, project.error)
+                );
                 res.status(project.code).json({ message: project.error });
             }
         } catch (err) {
             this.logger.log((err as Error).message);
+            this.siemService.sendEvent(
+                generateEvent("project-microservice", req, 500, (err as Error).message)
+            );
             res.status(500).json({ message: (err as Error).message });
         }
     }
@@ -175,6 +220,9 @@ export class ProjectController {
                     await this.storageService.deleteImage(data.image_key);
                 }
                 this.logger.log(validation.message!);
+                this.siemService.sendEvent(
+                    generateEvent("project-microservice", req, 400, validation.message!)
+                );
                 res.status(400).json({ message: validation.message });
                 return;
             }
@@ -186,9 +234,18 @@ export class ProjectController {
                     await this.storageService.deleteImage(data.image_key);
                 }
                 this.logger.log(createdResult.error);
+                this.siemService.sendEvent(
+                    generateEvent("project-microservice", req, createdResult.code, createdResult.error)
+                );
                 res.status(createdResult.code).json({ message: createdResult.error });
                 return;
             }
+
+            this.logger.log(`Project created: ${createdResult.data.project_id}`);
+
+            this.siemService.sendEvent(
+                generateEvent("project-microservice", req, 201, "Request successful | New project created")
+            );
 
             const created = createdResult.data;
 
@@ -212,6 +269,9 @@ export class ProjectController {
             res.status(201).json(created);
         } catch (err) {
             this.logger.log((err as Error).message);
+            this.siemService.sendEvent(
+                generateEvent("project-microservice", req, 500, (err as Error).message)
+            );
             res.status(500).json({ message: (err as Error).message });
         }
     }
@@ -221,6 +281,9 @@ export class ProjectController {
             const id = parseInt(req.params.id, 10);
             if (isNaN(id)) {
                 res.status(400).json({ message: "Invalid project ID" });
+                this.siemService.sendEvent(
+                    generateEvent("project-microservice", req, 400, "Invalid project ID")
+                );
                 return;
             }
 
@@ -269,22 +332,35 @@ export class ProjectController {
                     await this.storageService.deleteImage(data.image_key);
                 }
                 this.logger.log(validation.message!);
+                this.siemService.sendEvent(
+                    generateEvent("project-microservice", req, 400, validation.message!)
+                );
+
                 res.status(400).json({ message: validation.message });
                 return;
             }
 
             const updated = await this.projectService.updateProject(id, data);
             if (updated.success) {
+                this.siemService.sendEvent(
+                    generateEvent("project-microservice", req, 200, `Request successful | Project updated with ID ${id}`)
+                );
                 res.status(200).json(updated.data);
             } else {
                 if (data.image_key) {
                     await this.storageService.deleteImage(data.image_key);
                 }
                 this.logger.log(updated.error);
+                this.siemService.sendEvent(
+                    generateEvent("project-microservice", req, updated.code, updated.error)
+                );
                 res.status(updated.code).json({ message: updated.error });
             }
         } catch (err) {
             this.logger.log((err as Error).message);
+            this.siemService.sendEvent(
+                generateEvent("project-microservice", req, 500, (err as Error).message)
+            );
             res.status(500).json({ message: (err as Error).message });
         }
     }
@@ -293,6 +369,9 @@ export class ProjectController {
         try {
             const id = parseInt(req.params.id, 10);
             if (isNaN(id)) {
+                this.siemService.sendEvent(
+                    generateEvent("project-microservice", req, 400, "Invalid project ID")
+                );
                 res.status(400).json({ message: "Invalid project ID" });
                 return;
             }
@@ -301,13 +380,22 @@ export class ProjectController {
 
             const ok = await this.projectService.deleteProject(id);
             if (ok.success) {
+                this.siemService.sendEvent(
+                    generateEvent("project-microservice", req, 204, `Request successful | Project deleted with ID ${id}`)
+                );
                 res.status(204).send();
             } else {
                 this.logger.log(ok.error);
+                this.siemService.sendEvent(
+                    generateEvent("project-microservice", req, ok.code, ok.error)
+                );
                 res.status(ok.code).json({ message: ok.error });
             }
         } catch (err) {
             this.logger.log((err as Error).message);
+            this.siemService.sendEvent(
+                generateEvent("project-microservice", req, 500, (err as Error).message)
+            );
             res.status(500).json({ message: (err as Error).message });
         }
     }
@@ -316,6 +404,9 @@ export class ProjectController {
         try {
             const id = parseInt(req.params.id, 10);
             if (isNaN(id)) {
+                this.siemService.sendEvent(
+                    generateEvent("project-microservice", req, 400, "Invalid project ID")
+                );
                 res.status(400).json({ message: "Invalid project ID" });
                 return;
             }
@@ -324,13 +415,22 @@ export class ProjectController {
 
             const exists = await this.projectService.projectExists(id);
             if (exists.success) {
+                this.siemService.sendEvent(
+                    generateEvent("project-microservice", req, 200, `Project existence check successful for ID ${id}`)
+                );
                 res.status(200).json({ exists: exists.data });
             } else {
                 this.logger.log(exists.error);
+                this.siemService.sendEvent(
+                    generateEvent("project-microservice", req, exists.code, exists.error)
+                );
                 res.status(exists.code).json({ message: exists.error });
             }
         } catch (err) {
             this.logger.log((err as Error).message);
+            this.siemService.sendEvent(
+                generateEvent("project-microservice", req, 500, (err as Error).message)
+            );
             res.status(500).json({ message: (err as Error).message });
         }
     }
