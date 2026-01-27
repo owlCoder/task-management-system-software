@@ -37,11 +37,11 @@ export const authorize = (...permittedRoles: UserRole[]) => {
 				ip: req.ip
 			}, message);
 
+			res.status(403).json({ message: message });
+
 			getSIEMService().sendEvent(
 				generateEvent(SERVICES.SELF, req, 403, message, ERROR_CODE.AUTHORIZATION)
 			);
-
-			res.status(403).json({ message: message });
 			return;
     	}
 

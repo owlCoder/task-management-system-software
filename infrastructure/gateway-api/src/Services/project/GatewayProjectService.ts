@@ -50,6 +50,12 @@ export class GatewayProjectService implements IGatewayProjectService {
         });
     }
 
+    /**
+     * Fetches all projects.
+     * @returns {Promise<Result<ProjectDTO[]>>} - A promise that resolves to a Result object containing the data of the projects.
+     * - On success returns data as {@link ProjectDTO[]}.
+     * - On failure returns status code and error message.
+     */
     async getAllProjects(): Promise<Result<ProjectDTO[]>> {
         return await makeAPICall<ProjectDTO[]>(this.projectClient, this.errorHandlingService, {
             serviceName: SERVICES.PROJECT,

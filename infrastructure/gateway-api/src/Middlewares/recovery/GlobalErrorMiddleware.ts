@@ -34,9 +34,9 @@ export function globalErrorHandler(err: unknown, req: Request, res: Response, _n
         ? "An unexpected gateway error occurred"
         : error.message || "Bad request";
 
+    res.status(statusCode).json({ message: message });
+
     getSIEMService().sendEvent(
         generateEvent(SERVICES.SELF, req, statusCode, message, ERROR_CODE.CRITICAL)
     );
-
-    res.status(statusCode).json({ message: message });
 }

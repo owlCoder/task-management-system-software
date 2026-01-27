@@ -46,12 +46,12 @@ export function bodyParserErrorHandler(err: unknown, req: Request, res: Response
                 url: req.url,
                 ip: req.ip
             }, message);
+            
+            res.status(status).json({ message: message });
 
             getSIEMService().sendEvent(
                 generateEvent(SERVICES.SELF, req, status, message, ERROR_CODE.JSON_PARSER)
             );
-            
-            res.status(status).json({ message: message });
             return; 
         }
     }

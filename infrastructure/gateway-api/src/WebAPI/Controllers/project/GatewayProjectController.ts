@@ -73,16 +73,31 @@ export class GatewayProjectController {
         handleResponse(res, result);
     }
 
-    private async getAllProjects(req: Request, res: Response): Promise<void> {
+    /**
+     * GET /api/v1/projects
+     * @param {Request} _req - the request object.
+     * @param {Response} res - the response object for the client.
+     * @returns {Promise<void>}
+     * - On success: response status 200, response data: {@link ProjectDTO[]}. 
+     * - On failure: response status code indicating the failure, response data: message describing the error.
+     */
+    private async getAllProjects(_req: Request, res: Response): Promise<void> {
         const result = await this.gatewayProjectService.getAllProjects();
         handleResponse(res, result);
     }
 
-    private async getAllProjectIds(req: Request, res: Response): Promise<void> {
+    /**
+     * GET /api/v1/project-ids
+     * @param {Request} _req - the request object.
+     * @param {Response} res - the response object for the client.
+     * @returns {Promise<void>}
+     * - On success: response status 200, response data: {@link number[]}. 
+     * - On failure: response status code indicating the failure, response data: message describing the error.
+     */
+    private async getAllProjectIds(_req: Request, res: Response): Promise<void> {
         const result = await this.gatewayProjectService.getAllProjectIds();
         handleResponse(res, result);
     }
-
 
     /**
      * GET /api/v1/users/:userId/projects

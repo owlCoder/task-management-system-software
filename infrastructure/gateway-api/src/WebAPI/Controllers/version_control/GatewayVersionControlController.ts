@@ -5,8 +5,13 @@ import { Request, Response, Router } from "express";
 import { IGatewayVersionControlService } from "../../../Domain/services/version-control/IGatewayVersionControlService";
 import { TemplatePolicies } from "../../../Domain/access-policies/version-control/TemplatePolicies";
 import { RejectReviewDTO } from "../../../Domain/DTOs/version-control/RejectReviewDTO";
+import { ReviewDTO } from "../../../Domain/DTOs/version-control/ReviewDTO";
+import { ReviewHistoryItemDTO } from "../../../Domain/DTOs/version-control/ReviewHistoryItemDTO";
+import { ReviewCommentDTO } from "../../../Domain/DTOs/version-control/ReviewCommentDTO";
 import { CreateTaskDTO } from "../../../Domain/DTOs/version-control/CreateTaskDTO";
 import { CreateTemplateDTO } from "../../../Domain/DTOs/version-control/CreateTemplateDTO";
+import { TaskTemplateDTO } from "../../../Domain/DTOs/version-control/TaskTemplateDTO";
+import { TaskResponseDTO } from "../../../Domain/DTOs/version-control/TaskResponseDTO";
 import { ReviewPolicies } from "../../../Domain/access-policies/version-control/ReviewPolicies";
 
 // Middlewares
@@ -18,7 +23,11 @@ import { ReqParams } from "../../../Infrastructure/express/types/ReqParams";
 
 // Utils
 import { handleEmptyResponse, handleResponse } from "../../Utils/Http/ResponseHandler";
+import { parseOptionalString } from "../../Utils/Query/QueryUtils";
 
+/**
+ * Routes client requests towards the Version-Control Microservice.
+ */
 export class GatewayVersionControlController {
     private readonly router: Router;
 
@@ -27,6 +36,9 @@ export class GatewayVersionControlController {
         this.initializeRoutes();
     }
 
+    /**
+     * Registering routes for Version-Control Microservice.
+     */
     private initializeRoutes() {
         const reviewReadAccess = [authenticate, authorize(...ReviewPolicies.READ)];
         const reviewWriteAccess = [authenticate, authorize(...ReviewPolicies.WRITE)];
@@ -49,14 +61,30 @@ export class GatewayVersionControlController {
 
     }
 
+    /**
+     * GET /api/v1/reviews
+     * @param {Request} req - the request object, containing the status in query.
+     * @param {Response} res - the response object for the client.
+     * @returns {Promise<void>}
+     * - On success: response status 200, response data: {@link ReviewDTO[]}. 
+     * - On failure: response status code indicating the failure, response data: message describing the error.
+     */
     private async getReviews(req: Request, res: Response): Promise<void> {
         const senderRole = req.user!.role;
-        const status = typeof req.query.status === "string" ? req.query.status : undefined;
+        const status = parseOptionalString(req.query.status)
 
         const result = await this.gatewayVersionSevice.getReviews(senderRole, { status });
         handleResponse(res, result);
     }
 
+    /**
+     * GET /api/v1/reviews/:taskId/history
+     * @param {Request} req - the request object, containing the task id in params.
+     * @param {Response} res - the response object for the client.
+     * @returns {Promise<void>}
+     * - On success: response status 200, response data: {@link ReviewHistoryItemDTO[]}. 
+     * - On failure: response status code indicating the failure, response data: message describing the error.
+     */
     private async getReviewHistory(req: Request<ReqParams<'taskId'>>, res: Response): Promise<void> {
         const taskId = parseInt(req.params.taskId, 10);
         const senderRole = req.user!.role;
@@ -65,6 +93,14 @@ export class GatewayVersionControlController {
         handleResponse(res, result);
     }
 
+    /**
+     * GET /api/v1/reviewComments/:commentId
+     * @param {Request} req - the request object, containing the comment id in params.
+     * @param {Response} res - the response object for the client.
+     * @returns {Promise<void>}
+     * - On success: response status 200, response data: {@link ReviewCommentDTO[]}. 
+     * - On failure: response status code indicating the failure, response data: message describing the error.
+     */
     private async getReviewComment(req: Request<ReqParams<'commentId'>>, res: Response): Promise<void> {
         const commentId = parseInt(req.params.commentId, 10);
         const senderRole = req.user!.role;
@@ -73,6 +109,14 @@ export class GatewayVersionControlController {
         handleResponse(res, result);
     }
 
+    /**
+     * POST /api/v1/reviews/:taskId/send
+     * @param {Request} req - the request object, containing the task id in params.
+     * @param {Response} res - the response object for the client.
+     * @returns {Promise<void>}
+     * - On success: response status 201, response data: {@link ReviewDTO}. 
+     * - On failure: response status code indicating the failure, response data: message describing the error.
+     */
     private async sendToReview(req: Request<ReqParams<'taskId'>>, res: Response): Promise<void> {
         const taskId = parseInt(req.params.taskId, 10);
         const senderId = req.user!.id;
@@ -82,6 +126,14 @@ export class GatewayVersionControlController {
         handleResponse(res, result, 201);
     }
 
+    /**
+     * POST /api/v1/reviews/:taskId/accept
+     * @param {Request} req - the request object, containing the task id in params.
+     * @param {Response} res - the response object for the client.
+     * @returns {Promise<void>}
+     * - On success: response status 201, response data: {@link ReviewDTO}. 
+     * - On failure: response status code indicating the failure, response data: message describing the error.
+     */
     private async acceptReview(req: Request<ReqParams<'taskId'>>, res: Response): Promise<void> {
         const taskId = parseInt(req.params.taskId, 10);
         const senderId = req.user!.id;
@@ -91,6 +143,14 @@ export class GatewayVersionControlController {
         handleResponse(res, result, 201);
     }
 
+    /**
+     * POST /api/v1/reviews/:taskId/reject
+     * @param {Request} req - the request object, containing the task id in params and reject review data in body as {@link RejectReviewDTO}.
+     * @param {Response} res - the response object for the client.
+     * @returns {Promise<void>}
+     * - On success: response status 201, response data: {@link ReviewCommentDTO}. 
+     * - On failure: response status code indicating the failure, response data: message describing the error.
+     */
     private async rejectReview(req: Request<ReqParams<'taskId'>>, res: Response): Promise<void> {
         const taskId = parseInt(req.params.taskId, 10);
         const data = req.body as RejectReviewDTO;
@@ -101,18 +161,42 @@ export class GatewayVersionControlController {
         handleResponse(res, result, 201);
     }
 
+    /**
+     * GET /api/v1/templates/:templateId
+     * @param {Request} req - the request object, containing the template id in params.
+     * @param {Response} res - the response object for the client.
+     * @returns {Promise<void>}
+     * - On success: response status 200, response data: {@link TaskTemplateDTO}. 
+     * - On failure: response status code indicating the failure, response data: message describing the error.
+     */
     private async getTemplate(req: Request<ReqParams<'templateId'>>, res: Response): Promise<void> {
         const templateId = parseInt(req.params.templateId, 10);
 
         const result = await this.gatewayVersionSevice.getTemplateById(templateId);
-        handleResponse(res,result);
+        handleResponse(res, result);
     }
 
+    /**
+     * GET /api/v1/templates
+     * @param {Request} _req - the request object.
+     * @param {Response} res - the response object for the client.
+     * @returns {Promise<void>}
+     * - On success: response status 200, response data: {@link TaskTemplateDTO[]}. 
+     * - On failure: response status code indicating the failure, response data: message describing the error.
+     */
     private async getAllTemplates(_req: Request, res: Response): Promise<void> {
         const result = await this.gatewayVersionSevice.getAllTemplates();
         handleResponse(res, result);
     }
 
+    /**
+     * POST /api/v1/templates
+     * @param {Request} req - the request object, containing the template data in body as {@link CreateTemplateDTO}.
+     * @param {Response} res - the response object for the client.
+     * @returns {Promise<void>}
+     * - On success: response status 201, response data: {@link TaskTemplateDTO}. 
+     * - On failure: response status code indicating the failure, response data: message describing the error.
+     */
     private async createTemplate(req: Request, res: Response): Promise<void> {
         const data = req.body as CreateTemplateDTO;
         const senderId = req.user!.id;
@@ -121,6 +205,14 @@ export class GatewayVersionControlController {
         handleResponse(res, result, 201);
     }
 
+    /**
+     * POST /api/v1/templates/:templateId/create
+     * @param {Request} req - the request object, containing the template id in params.
+     * @param {Response} res - the response object for the client.
+     * @returns {Promise<void>}
+     * - On success: response status 201, response data: {@link TaskResponseDTO}. 
+     * - On failure: response status code indicating the failure, response data: message describing the error.
+     */
     private async createTask(req: Request<ReqParams<'templateId'>>, res: Response): Promise<void> {
         const templateId = parseInt(req.params.templateId, 10);
         const data = req.body as CreateTaskDTO;
@@ -130,6 +222,14 @@ export class GatewayVersionControlController {
         handleResponse(res, result, 201);
     }
 
+    /**
+     * POST /api/v1/templates/:templateId/dependencies/:dependsOnId
+     * @param {Request} req - the request object, containing the template id and dependency id in params.
+     * @param {Response} res - the response object for the client.
+     * @returns {Promise<void>}
+     * - On success: response status 204, no data. 
+     * - On failure: response status code indicating the failure, response data: message describing the error.
+     */
     private async addDependency(req: Request<ReqParams<'templateId' | 'dependsOnId'>>, res: Response): Promise<void> {
         const templateId = parseInt(req.params.templateId, 10);
         const dependsOnId = parseInt(req.params.dependsOnId, 10);

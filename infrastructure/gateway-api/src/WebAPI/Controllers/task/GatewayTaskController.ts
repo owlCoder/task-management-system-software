@@ -9,6 +9,7 @@ import { TaskDTO } from "../../../Domain/DTOs/task/TaskDTO";
 import { UpdateTaskDTO } from "../../../Domain/DTOs/task/UpdateTaskDTO";
 import { CommentDTO } from "../../../Domain/DTOs/task/CommentDTO";
 import { UpdateTaskStatusDTO } from "../../../Domain/DTOs/task/UpdateTaskStatusDTO";
+import { TaskVersionDTO } from "../../../Domain/DTOs/task/TaskVersionDTO";
 import { TaskPolicies } from "../../../Domain/access-policies/task/TaskPolicies";
 
 // Middlewares

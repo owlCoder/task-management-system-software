@@ -193,6 +193,14 @@ export class GatewayTaskService implements IGatewayTaskService {
         });
     }
 
+    /**
+     * Fetches the versions of the specific task.
+     * @param {number} taskId - id of the task. 
+     * @param {number} senderId - id of the user who sent request.
+     * @returns {Promise<Result<TaskVersionDTO[]>>} - A promise that resolves to a Result object containing the data of the task versions.
+     * - On success returns data as {@link TaskVersionDTO[]}.
+     * - On failure returns status code and error message.
+     */
     async getTaskVersions(taskId: number, senderId: number): Promise<Result<TaskVersionDTO[]>> {
         return await makeAPICall<TaskVersionDTO[]>(this.taskClient, this.errorHandlingService, {
             serviceName: SERVICES.TASK,
@@ -204,6 +212,15 @@ export class GatewayTaskService implements IGatewayTaskService {
         });
     }
 
+    /**
+     * Fetches the specific version of the specific task.
+     * @param {number} taskId - id of the task.
+     * @param {number} versionId - id of the version. 
+     * @param {number} senderId - id of the user who sent request.
+     * @returns {Promise<Result<TaskVersionDTO>>} - A promise that resolves to a Result object containing the data of the task version.
+     * - On success returns data as {@link TaskVersionDTO}.
+     * - On failure returns status code and error message.
+     */
     async getTaskVersion(taskId: number, versionId: number, senderId: number): Promise<Result<TaskVersionDTO>> {
         return await makeAPICall<TaskVersionDTO>(this.taskClient, this.errorHandlingService, {
             serviceName: SERVICES.TASK,
