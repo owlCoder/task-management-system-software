@@ -51,6 +51,12 @@ export class ProjectController {
         this.router.get("/projects/:id/exists", this.projectExists.bind(this));
     }
 
+    /**
+     * GET /api/v1/projects
+     * Get all projects
+     * @returns {ProjectDTO[]} - JSON array of all projects
+     * @see {@link ProjectDTO}
+     */
     private async getProjects(req: Request, res: Response): Promise<void> {
         try {
             this.logger.log("Fetching all projects");
@@ -77,6 +83,11 @@ export class ProjectController {
         }
     }
 
+    /**
+     * GET /api/v1/project-ids
+     * Get all project IDs
+     * @returns {number[]} - Array of project IDs
+     */
     private async getProjectIds(req: Request, res: Response): Promise<void> {
         try {
             this.logger.log("Fetching all project IDs");
@@ -103,6 +114,13 @@ export class ProjectController {
         }
     }
 
+    /**
+     * GET /api/v1/users/:userId/projects
+     * Get all projects assigned to a specific user
+     * @param {userId} req.params - ID of the user
+     * @returns {ProjectDTO[]} - JSON array of projects
+     * @see {@link ProjectDTO}
+     */
     private async getProjectsByUserId(req: Request<ReqParams<'userId'>>, res: Response): Promise<void> {
         try {
             const userId = parseInt(req.params.userId, 10);
@@ -138,6 +156,13 @@ export class ProjectController {
         }
     }
 
+    /**
+     * GET /api/v1/projects/:id
+     * Get project by ID
+     * @param {id} req.params - Project ID
+     * @returns {ProjectDTO} - Project data
+     * @see {@link ProjectDTO}
+     */
     private async getProjectById(req: Request<ReqParams<'id'>>, res: Response): Promise<void> {
         try {
             const id = parseInt(req.params.id, 10);
@@ -185,6 +210,14 @@ export class ProjectController {
         return statusMap[statusStr] || ProjectStatus.NOT_STARTED;
     }
 
+    /**
+     * POST /api/v1/projects
+     * Create new project
+     * @param {ProjectCreateDTO} req.body - Project creation data
+     * @returns {ProjectDTO} - Created project
+     * @see {@link ProjectCreateDTO}
+     * @see {@link ProjectDTO}
+     */
     private async createProject(req: Request, res: Response): Promise<void> {
         try {
             this.logger.log("Creating new project");
@@ -276,6 +309,14 @@ export class ProjectController {
         }
     }
 
+    /**
+     * PUT /api/v1/projects/:id
+     * Update existing project
+     * @param {id and ProjectUpdateDTO} req.params & req.body - Project ID and updated data
+     * @returns {ProjectDTO} - Updated project
+     * @see {@link ProjectUpdateDTO}
+     * @see {@link ProjectDTO}
+     */
     private async updateProject(req: Request<ReqParams<'id'>>, res: Response): Promise<void> {
         try {
             const id = parseInt(req.params.id, 10);
@@ -365,6 +406,12 @@ export class ProjectController {
         }
     }
 
+    /**
+     * DELETE /api/v1/projects/:id
+     * Delete project by ID
+     * @param {id} req.params - Project ID
+     * @returns {void}
+     */
     private async deleteProject(req: Request<ReqParams<'id'>>, res: Response): Promise<void> {
         try {
             const id = parseInt(req.params.id, 10);
@@ -400,6 +447,12 @@ export class ProjectController {
         }
     }
 
+    /**
+     * GET /api/v1/projects/:id/exists
+     * Check if project exists
+     * @param {id} req.params - Project ID
+     * @returns {{ exists: boolean }} - Existence flag
+     */
     private async projectExists(req: Request<ReqParams<'id'>>, res: Response): Promise<void> {
         try {
             const id = parseInt(req.params.id, 10);

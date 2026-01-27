@@ -27,6 +27,12 @@ export class SprintController {
         this.router.delete("/sprints/:id", this.deleteSprint.bind(this));
     }
 
+    /**
+     * POST /projects/:projectId/sprints
+     * @param {projectId and SprintCreateDTO} req.params & req.body - Project ID and sprint data
+     * @returns {SprintDTO} - JSON format return
+     * @see {@link SprintCreateDTO} for input structure
+     */
     private async createSprint(req: Request<ReqParams<'projectId'>>, res: Response): Promise<void> {
         try {
             const projectId = parseInt(req.params.projectId, 10);
@@ -75,6 +81,11 @@ export class SprintController {
         }
     }
 
+    /**
+     * GET /projects/:projectId/sprints
+     * @param {projectId} req.params - ID of the project
+     * @returns {SprintDTO[]} - JSON array of sprints
+     */
     private async getSprintsByProject(req: Request<ReqParams<'projectId'>>, res: Response): Promise<void> {
         try {
             const projectId = parseInt(req.params.projectId, 10);
@@ -116,6 +127,11 @@ export class SprintController {
         }
     }
 
+    /**
+     * GET /sprints/:id
+     * @param {id} req.params - Sprint ID
+     * @returns {SprintDTO} - JSON format return
+     */
     private async getSprintById(req: Request<ReqParams<'id'>>, res: Response): Promise<void> {
         try {
             const sprintId = parseInt(req.params.id, 10);
@@ -157,6 +173,12 @@ export class SprintController {
         }
     }
 
+    /**
+     * PUT /sprints/:id
+     * @param {id and SprintUpdateDTO} req.params & req.body - Sprint ID and update data
+     * @returns {SprintDTO} - JSON format return
+     * @see {@link SprintUpdateDTO} for input structure
+     */
     private async updateSprint(req: Request<ReqParams<'id'>>, res: Response): Promise<void> {
         try {
             const sprintId = parseInt(req.params.id, 10);
@@ -200,6 +222,11 @@ export class SprintController {
         }
     }
 
+    /**
+     * DELETE /sprints/:id
+     * @param {id} req.params - Sprint ID
+     * @returns {void} - No content
+     */
     private async deleteSprint(req: Request<ReqParams<'id'>>, res: Response): Promise<void> {
         try {
             const sprintId = parseInt(req.params.id, 10);

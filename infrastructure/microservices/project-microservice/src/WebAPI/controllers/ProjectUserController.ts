@@ -25,6 +25,14 @@ export class ProjectUserController {
         this.router.delete("/projects/:id/users/:userId", this.removeUser.bind(this));
     }
 
+    /**
+     * POST /api/v1/projects/:id/users
+     * Assign user to a project
+     * @param {id and ProjectUserAssignDTO} req.params & req.body - Project ID and user assignment data
+     * @returns {ProjectUserDTO} - Assigned user data
+     * @see {@link ProjectUserAssignDTO}
+     * @see {@link ProjectUserDTO}
+     */
     private async assignUser(req: Request<ReqParams<'id'>>, res: Response): Promise<void> {
         try {
             const project_id = parseInt(req.params.id, 10);
@@ -81,6 +89,13 @@ export class ProjectUserController {
         }
     }
 
+    /**
+     * GET /api/v1/projects/:id/users
+     * Get all users assigned to a project
+     * @param {id} req.params - Project ID
+     * @returns {ProjectUserDTO[]} - List of users assigned to the project
+     * @see {@link ProjectUserDTO}
+     */
     private async getUsersForProject(req: Request<ReqParams<'id'>>, res: Response): Promise<void> {
         try {
             const project_id = parseInt(req.params.id, 10);
@@ -122,6 +137,12 @@ export class ProjectUserController {
         }
     }
 
+    /**
+     * DELETE /api/v1/projects/:id/users/:userId
+     * Remove user from project
+     * @param {id and userId} req.params - Project ID and User ID
+     * @returns {void}
+     */
     private async removeUser(req: Request<ReqParams<'id' | 'userId'>>, res: Response): Promise<void> {
         try {
             const project_id = parseInt(req.params.id, 10);
