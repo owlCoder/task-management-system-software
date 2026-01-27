@@ -7,9 +7,9 @@ import { EOperationalStatus } from "../Domain/enums/EOperationalStatus";
 import { Microservice } from "../Domain/models/Microservice";
 import { CreateMeasurementDto } from "../Domain/DTOs/CreateMeasurement_DTO";
 import { ServiceStatusTransportDto } from "../Domain/DTOs/ServiceStatusTransport_DTO";
+import { ILoggerService } from "../Domain/Services/ILoggerService";
 
 export class Measurement_Service implements IMeasurement_Service {
-
 
     async deleteOldNonDownMeasurements(olderThanMs: number): Promise<number> {
         const cutoffDate = new Date(Date.now() - olderThanMs);

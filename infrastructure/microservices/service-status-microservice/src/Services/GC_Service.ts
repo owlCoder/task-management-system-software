@@ -1,6 +1,7 @@
 import { Db } from "../Database/DbConnectionPool";
 import { EOperationalStatus } from "../Domain/enums/EOperationalStatus";
 import { IGC_Service } from "../Domain/Services/IGC_Service";
+import { ILoggerService } from "../Domain/Services/ILoggerService";
 import { Measurement_Service } from "./Measurement_Service";
 
 const GC_INTERVAL = 60_000 * 60;
@@ -9,19 +10,17 @@ const RETENTION_DOWN = 60_000 * 60 * 24 * 28;
 
 
 export class GarbageCollector_Service implements IGC_Service {
-
     private intervalId?: NodeJS.Timeout;
 
     constructor(
-        private readonly measurementService: Measurement_Service
+        private readonly measurementService: Measurement_Service,
+        private readonly LoggerService: ILoggerService
     ) { }
-
 
     async start(): Promise<void> {
         this.intervalId = setInterval(() => {
             this.collect().catch(err =>
-                console.error("[GarbageCollector]", err)
-            );
+                this.LoggerService.warn("GC_SERVICE", (err as Error).stack ?? (err as Error).message));
         }, GC_INTERVAL);
     }
 
@@ -31,23 +30,15 @@ export class GarbageCollector_Service implements IGC_Service {
         }
     }
 
-
     async collect(): Promise<void> {
-        const deletedDown =
-            await this.measurementService.deleteOldMeasurements(
-                EOperationalStatus.Down,
-                RETENTION_DOWN
-            );
+        const deletedDown = await this.measurementService.deleteOldMeasurements(EOperationalStatus.Down, RETENTION_DOWN);
 
-        const deletedOk =
-            await this.measurementService.deleteOldNonDownMeasurements(
-                RETENTION_OK
-            );
+        const deletedOk = await this.measurementService.deleteOldNonDownMeasurements(RETENTION_OK);
 
         const totalDeleted = deletedDown + deletedOk;
 
         if (totalDeleted > 0) {
-            console.log(`[GarbageCollector] Deleted ${totalDeleted} measurements`);
+            this.LoggerService.info("GC_SERVICE", `GC Deleted ${totalDeleted} measurements`)
         }
     }
 }

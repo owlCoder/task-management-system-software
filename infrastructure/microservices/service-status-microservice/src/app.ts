@@ -9,6 +9,8 @@ import { Health_Service } from './Services/Health_Service';
 import { GarbageCollector_Service } from './Services/GC_Service';
 import { LoggerService } from './Services/LoggerService';
 import { logger } from './infrastructure/Logger';
+import { SIEMService } from './SIEM/Services/SIEMService';
+import { LogerService } from './SIEM/Services/LogerService';
 
 
 
@@ -24,16 +26,16 @@ async function bootstrap() {
     const microserviceService = new Microservice_Service();
     const loggerService = new LoggerService(logger);
 
+    //SIEM
+    const siemLoger = new LogerService();
+    const SIEMservice = new SIEMService(siemLoger);
 
-    const healthService = new Health_Service(
-        measurementService,
-        microserviceService
-    );
+    const healthService = new Health_Service(measurementService,microserviceService,loggerService);
 
-    const measurementController = new Measurement_controller(measurementService,loggerService,microserviceService);
-    const microserviceController = new Microservice_controller(microserviceService,loggerService);
+    const measurementController = new Measurement_controller(measurementService,loggerService,microserviceService,SIEMservice);
+    const microserviceController = new Microservice_controller(microserviceService,loggerService,SIEMservice);
 
-    const gc = new GarbageCollector_Service(measurementService);
+    const gc = new GarbageCollector_Service(measurementService,loggerService);
     
     await gc.start();
     await healthService.start();

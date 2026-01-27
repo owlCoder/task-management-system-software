@@ -3,11 +3,12 @@ import { IHealth_Service } from "../Domain/Services/IHealth_Service";
 import { loadMicroservices } from "../Helpers/loadMicroservices";
 import { CreateMeasurementDto } from "../Domain/DTOs/CreateMeasurement_DTO";
 import { EOperationalStatus } from "../Domain/enums/EOperationalStatus";
-import { Measurement_Service } from "./Measurement_Service";
-import { Microservice_Service } from "./Microservice_Service";
 import { RuntimeMicroservice } from "../Domain/types/RuntimeMicroservices";
+import { ILoggerService } from "../Domain/Services/ILoggerService";
+import { IMicroservice_Service } from "../Domain/Services/IMicroservice_Service";
+import { IMeasurement_Service } from "../Domain/Services/IMeasurement_Service";
 
-const CHECK_INTERVAL = 1_000 *60*5;
+const CHECK_INTERVAL = 1_000 * 60 * 5;
 const REQUEST_TIMEOUT = 1_000;
 let running = false;
 
@@ -17,8 +18,9 @@ export class Health_Service implements IHealth_Service {
     private microservices: RuntimeMicroservice[] = [];
 
     constructor(
-        private readonly measurementService: Measurement_Service,
-        private readonly microserviceService: Microservice_Service
+        private readonly measurementService: IMeasurement_Service,
+        private readonly microserviceService: IMicroservice_Service,
+        private readonly LoggerService: ILoggerService
     ) { }
 
     async start(): Promise<void> {
@@ -43,12 +45,10 @@ export class Health_Service implements IHealth_Service {
             }));
 
         if (this.microservices.length !== envServices.length) {
-            console.warn("\x1b[33m[HealthService]\x1b[0m Some microservices from .env are missing in DB");
+            this.LoggerService.warn("HEALTH_SERVICE", `\x1b[33m[HealthService]\x1b[0m Some microservices from .env are missing in DB`);
         }
 
-        console.log(`\x1b[33m[HealthService]\x1b[0m Monitoring ${this.microservices.length} services...`);
-
-
+        this.LoggerService.info("HEALTH_SERVICE", `\x1b[33m[HealthService]\x1b[0m Monitoring ${this.microservices.length} services...`);
 
         this.intervalId = setInterval(async () => {
             if (running) return;
@@ -85,7 +85,6 @@ export class Health_Service implements IHealth_Service {
 
         } catch {
             const responseTime = Date.now() - startTime;
-
             await this.measurementService.setMeasurement(new CreateMeasurementDto(ms.id, EOperationalStatus.Down, responseTime));
         }
     }
@@ -93,7 +92,7 @@ export class Health_Service implements IHealth_Service {
     async stop(): Promise<void> {
         if (this.intervalId) {
             clearInterval(this.intervalId);
-            console.log(`\x1b[33m[HealthService]\x1b[0m Stopped monitoring`);
+            this.LoggerService.warn("HEALTH_SERVICE", `\x1b[33m[HealthService]\x1b[0m Stopped monitoring`);
         }
     }
 }
