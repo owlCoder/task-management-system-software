@@ -34,7 +34,7 @@ const NotificationFilters: React.FC<NotificationFiltersProps> = ({
   };
 
   const controlButtonBase =
-    "relative inline-flex items-center justify-center gap-2 h-9 px-4 min-w-[120px] rounded-lg font-semibold text-xs transition-all duration-200 border whitespace-nowrap backdrop-blur-xl";
+    "relative inline-flex items-center justify-center gap-1.5 h-10 px-3 min-w-[110px] rounded-lg font-semibold text-[11px] transition-all duration-200 border whitespace-nowrap backdrop-blur-xl";
   const controlButtonActive =
     "bg-gradient-to-t from-[var(--palette-medium-blue)] to-[var(--palette-deep-blue)] text-white border-white/20 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-sky-500/20 cursor-pointer";
   const controlButtonIdle =
@@ -43,10 +43,10 @@ const NotificationFilters: React.FC<NotificationFiltersProps> = ({
     "bg-white/5 text-white/30 border-white/10 cursor-not-allowed";
 
   return (
-    <div className={`flex items-center justify-between ${className}`}>
+    <div className={`flex items-center justify-between gap-4 ${className}`}>
       
       {/* filter all and unread */}
-      <div className="flex gap-2">
+      <div className="flex items-center gap-2 flex-nowrap">
         <button
           onClick={() => onFilterChange('all')}
           className={`${controlButtonBase} ${
@@ -72,7 +72,7 @@ const NotificationFilters: React.FC<NotificationFiltersProps> = ({
       </div>
 
       {/* right side - sort, select all, mark as read/unread, delete */}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 flex-nowrap">
         
         {/* sort dropdown */}
         <div className="relative">
