@@ -6,7 +6,7 @@ import { ErrorCode } from '../../Domain/enums/ErrorCode';
 export class FileServiceClient implements IFileServiceClient {
     private axiosInstance : AxiosInstance;
 
-    constructor(baseURL: string = process.env.FILE_SERVICE_API || 'http://localhost:5000/api/v1') {
+    constructor(baseURL: string = process.env.FILE_SERVICE_API || 'http://localhost:3303/api/v1') {
         this.axiosInstance = axios.create({
             baseURL,
             timeout: 5000

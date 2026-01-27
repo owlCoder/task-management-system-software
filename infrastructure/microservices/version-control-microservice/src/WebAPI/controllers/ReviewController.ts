@@ -2,11 +2,17 @@ import { IReviewService } from "../../Domain/services/IReview";
 import { Router, Request, Response } from "express";
 import { errorCodeToHttpStatus } from "../../Utils/Converters/ErrorCodeConverter";
 import { ReviewStatus } from "../../Domain/enums/ReviewStatus";
+import { ISIEMService } from "../../siem/Domen/services/ISIEMService";
+import { generateEvent } from "../../siem/Domen/Helpers/generate/GenerateEvent";
+
 
 export class ReviewController {
   private readonly router: Router;
 
-  constructor(private reviewService: IReviewService) {
+  constructor(
+    private readonly reviewService: IReviewService,    
+    private readonly siemService: ISIEMService,
+  ) {
     this.router = Router();
     this.initializeRoutes();
   }
@@ -57,8 +63,18 @@ export class ReviewController {
       const result = await this.reviewService.sendToReview(taskId, user_id);
 
       if (result.success) {
+        this.siemService.sendEvent(generateEvent(
+          "version-control-microservice",
+          req,
+          200,
+          "Request successful | Task sent for review",
+        ),
+      );
         res.status(200).json(result.data);
       } else {
+        this.siemService.sendEvent(generateEvent(
+          "version-control-microservice",req,result.code,result.error), 
+        );
         res.status(errorCodeToHttpStatus(result.code)).json({ message: result.error });
       }
     } catch (error) {
@@ -96,8 +112,18 @@ export class ReviewController {
       const result = await this.reviewService.approveReview(taskId, user_id);
 
       if (result.success) {
+        this.siemService.sendEvent(generateEvent(
+          "version-control-microservice",
+          req,
+          200,
+          "Request successful | Review succefully approved",
+        ),
+      );
         res.status(200).json(result.data);
       } else {
+        this.siemService.sendEvent(generateEvent(
+          "version-control-microservice",req,result.code,result.error), 
+        );
         res.status(errorCodeToHttpStatus(result.code)).json({ message: result.error });
       }
     } catch (error) {
@@ -141,8 +167,18 @@ export class ReviewController {
       const result = await this.reviewService.rejectReview(taskId, user_id, commentText);
 
       if (result.success) {
+        this.siemService.sendEvent(generateEvent(
+          "version-control-microservice",
+          req,
+          200,
+          "Request successful | Review succesfully rejected",
+        ),
+      );
         res.status(200).json(result.data);
       } else {
+        this.siemService.sendEvent(generateEvent(
+          "version-control-microservice",req,result.code,result.error), 
+        );
         res.status(errorCodeToHttpStatus(result.code)).json({ message: result.error });
       }
     } catch (error) {
@@ -167,8 +203,22 @@ export class ReviewController {
 
       const result = await this.reviewService.getReviews(status);
 
-      if (result.success) res.status(200).json(result.data);
-      else res.status(errorCodeToHttpStatus(result.code)).json({ message: result.error });
+      if (result.success) 
+      {
+        this.siemService.sendEvent(generateEvent(
+        "version-control-microservice",
+        req,
+        200,
+        "Request successful | All reviews fetched",
+        ),
+      );
+        res.status(200).json(result.data);
+      }else {
+        this.siemService.sendEvent(generateEvent(
+          "version-control-microservice",req,result.code,result.error), 
+        );
+          res.status(errorCodeToHttpStatus(result.code)).json({ message: result.error });
+      }
     } catch (error) {
       console.error(error);
       res.status(500).json({ message: "Internal server error" });
@@ -191,8 +241,22 @@ export class ReviewController {
 
       const result = await this.reviewService.getCommentById(commentId);
 
-      if (result.success) res.status(200).json(result.data);
-      else res.status(errorCodeToHttpStatus(result.code)).json({ message: result.error });
+      if (result.success) 
+      {
+        this.siemService.sendEvent(generateEvent(
+        "version-control-microservice",
+        req,
+        200,
+        "Request successful | All comments fetched",
+        ),
+      );
+        res.status(200).json(result.data);
+      } else {
+        this.siemService.sendEvent(generateEvent(
+          "version-control-microservice",req,result.code,result.error), 
+        );
+        res.status(errorCodeToHttpStatus(result.code)).json({ message: result.error });
+      }
     } catch (error) {
       console.error(error);
       res.status(500).json({ message: "Internal server error" });
@@ -209,8 +273,22 @@ export class ReviewController {
 
       const result = await this.reviewService.getReviewHistory(taskId);
 
-      if (result.success) res.status(200).json(result.data);
-      else res.status(errorCodeToHttpStatus(result.code)).json({ message: result.error });
+      if (result.success) 
+      {
+        this.siemService.sendEvent(generateEvent(
+        "version-control-microservice",
+        req,
+        200,
+        "Request successful | All reviews for task",
+        ),
+      );
+        res.status(200).json(result.data);
+      } else {
+        this.siemService.sendEvent(generateEvent(
+          "version-control-microservice",req,result.code,result.error), 
+        );
+          res.status(errorCodeToHttpStatus(result.code)).json({ message: result.error });
+      }
     } catch (error) {
       console.error(error);
       res.status(500).json({ message: "Internal server error" });
