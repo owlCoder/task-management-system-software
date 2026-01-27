@@ -5,7 +5,6 @@ import { ReviewStatus } from "../../Domain/enums/ReviewStatus";
 import { ISIEMService } from "../../siem/Domen/services/ISIEMService";
 import { generateEvent } from "../../siem/Domen/Helpers/generate/GenerateEvent";
 import { ILogerService } from "../../Domain/services/ILogerService";
-import { stat } from "fs";
 
 export class ReviewController {
   private readonly router: Router;

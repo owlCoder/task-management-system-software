@@ -1,8 +1,9 @@
 import { ITemplateService } from "../../Domain/services/ITemplateService";
 import { Router, Request, Response } from "express";
-import { toTemplateDTO } from "../../Helpers/Converter/toTemplateDTO";
 import { errorCodeToHttpStatus } from "../../Utils/Converters/ErrorCodeConverter";
 import { ILogerService } from "../../Domain/services/ILogerService";
+import { ISIEMService } from "../../siem/Domen/services/ISIEMService";
+import { generateEvent } from "../../siem/Domen/Helpers/generate/GenerateEvent";
 
 export class TemplateController {
     private readonly router: Router;
@@ -10,6 +11,7 @@ export class TemplateController {
     constructor(
         private templateService: ITemplateService,
         private readonly logger: ILogerService,
+        private readonly siemService: ISIEMService,
     ) {
         this.router = Router();
         this.initializeRoutes();
@@ -57,9 +59,15 @@ export class TemplateController {
             const result = await this.templateService.getAllTemplates();
 
             if(result.success) {
+                this.siemService.sendEvent(
+                    generateEvent("version-control-microservice", req, 200, "Request successful | All templates fetched"),
+                );
                 res.status(200).json(result.data);
             } else {
                 this.logger.log(result.error);
+                this.siemService.sendEvent(
+                    generateEvent("version-control-microservice", req, result.code, result.error),
+                );
                 res.status(errorCodeToHttpStatus(result.code)).json(result.error);
             }
         } catch (err) {
@@ -85,13 +93,22 @@ export class TemplateController {
             const result = await this.templateService.createTemplate(templateData, pm_id);
 
             if(result.success) {
+                this.siemService.sendEvent(
+                    generateEvent("version-control-microservice", req, 201, "Request successful | New template created"),
+                );
                 res.status(201).json(result.data);
             } else {
                 this.logger.log(result.error);
+                this.siemService.sendEvent(
+                    generateEvent("version-control-microservice", req, result.code, result.error)
+                );
                 res.status(errorCodeToHttpStatus(result.code)).json(result.error);
             }
         } catch (err) {
             this.logger.log((err as Error).message);
+            this.siemService.sendEvent(
+                generateEvent("version-control-microservice", req, 500, (err as Error).message)
+            );
             res.status(500).json({message: (err as Error).message});
         }
     }
@@ -115,13 +132,22 @@ export class TemplateController {
             const result = await this.templateService.createTaskFromTemplate(template_id, sprint_id, worker_id, pm_id);
 
             if(result.success){
+                this.siemService.sendEvent(
+                    generateEvent("version-control-microservice", req, 201, "Request successful | Task created from template")
+                );
                 res.status(201).json(result.data);
             } else {
                 this.logger.log(result.error);
+                this.siemService.sendEvent(
+                    generateEvent("version-control-microservice", req, result.code, result.error)
+                );
                 res.status(errorCodeToHttpStatus(result.code)).json({message: result.error});
             }
         } catch (err) {
             this.logger.log((err as Error).message);
+            this.siemService.sendEvent(
+                generateEvent("version-control-microservice", req, 500, (err as Error).message)
+            );
             res.status(500).json({message: (err as Error).message});
         }
     }
@@ -149,9 +175,15 @@ export class TemplateController {
         const result = await this.templateService.addDependency(templateId, dependsOnId, pm_id);
 
         if (result.success) {
+            this.siemService.sendEvent(
+                generateEvent("version-control-microservices", req, 204, "Request successful | Dependency added")
+            );
             res.status(204).send(); 
         } else {
             this.logger.log(result.error);
+            this.siemService.sendEvent(
+                generateEvent("version-control-microservice", req, result.code, result.error)
+            );
             res.status(errorCodeToHttpStatus(result.code)).json({ error: result.error });
         }
     } catch (err) {

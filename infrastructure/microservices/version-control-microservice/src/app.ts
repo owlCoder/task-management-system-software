@@ -41,7 +41,7 @@ app.use(express.json());
   const logger = new LogerService();
   const siemService = new SIEMService(logger);
 
-  const templateController = new TemplateController(templateService, logger);
+  const templateController = new TemplateController(templateService, logger, siemService);
 
   const reviewRepository: Repository<Review> = Db.getRepository(Review);
   const reviewCommentRepository: Repository<ReviewComment> = Db.getRepository(ReviewComment);
