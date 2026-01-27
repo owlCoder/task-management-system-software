@@ -14,6 +14,10 @@ import { IProjectServiceClient } from "./Services/external-services/IProjectServ
 import { ITaskServiceClient } from "./Services/external-services/ITaskServiceClient";
 
 import { AnalyticsController } from "./WebAPI/controllers/AnalyticsController";
+import { ILogerService } from "./Domain/services/ILogerService";
+import { LogerService } from "./Services/LogerService";
+import { ISIEMService } from "./siem/Domen/services/ISIEMService";
+import { SIEMService } from "./siem/Services/SIEMService";
 
 dotenv.config({ quiet: true });
 
@@ -139,11 +143,15 @@ export async function initApp(): Promise<express.Express> {
     new ProjectAnalyticsService(projectServiceClient, taskServiceClient);
   const financialAnalyticsService: IFinancialAnalyticsService =
     new FinancialAnalyticsService(projectServiceClient, taskServiceClient);
+  const loggerService: ILogerService = new LogerService();
+  const siemService: ISIEMService = new SIEMService(loggerService);
 
   // Controller
   const analyticsController = new AnalyticsController(
     projectAnalyticsService,
-    financialAnalyticsService
+    financialAnalyticsService,
+    loggerService,
+    siemService
   );
 
   // Routes

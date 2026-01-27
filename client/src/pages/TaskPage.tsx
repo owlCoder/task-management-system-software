@@ -21,6 +21,7 @@ import { TaskListPageProps } from "../types/props";
 import { useAuth } from "../hooks/useAuthHook";
 import { UserAPI } from "../api/users/UserAPI";
 import toast from "react-hot-toast";
+import type { AxiosError } from "axios";
 import { VersionControlAPI } from "../api/version/VersionControlAPI";
 
 const TaskPage: React.FC<TaskListPageProps> = ({ projectId }) => {
@@ -201,15 +202,33 @@ const TaskPage: React.FC<TaskListPageProps> = ({ projectId }) => {
     load();
 }, [effectiveProjectId, sprintIdNum, token]);
 
+  const getSendToReviewErrorMessage = (err: unknown) => {
+    const axiosError = err as AxiosError<{ message?: string }>;
+    const message = axiosError?.response?.data?.message;
+
+    if (typeof message === "string") {
+      const normalized = message.trim().toLowerCase();
+      if (normalized.includes("already approved")) {
+        return "Task is already approved.";
+      }
+      if (normalized.includes("already in review")) {
+        return "Task is already in review.";
+      }
+      return message;
+    }
+
+    return "Failed to send task to review";
+  };
+
   const handleSendToReview = async (taskId: number) => {
-  try {
-    await VersionControlAPI.sendTaskToReview(taskId);
-    toast.success("Task sent to review");
-  } catch (err) {
-    console.error(err);
-    toast.error("Failed to send task to review");
-  }
-};
+    try {
+      await VersionControlAPI.sendTaskToReview(taskId);
+      toast.success("Task sent to review");
+    } catch (err) {
+      console.error(err);
+      toast.error(getSendToReviewErrorMessage(err));
+    }
+  };
 
 
   if (loading) {

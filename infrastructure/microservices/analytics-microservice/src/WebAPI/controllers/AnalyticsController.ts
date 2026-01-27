@@ -1,12 +1,18 @@
 import { Router, Request, Response } from "express";
 import { IProjectAnalyticsService } from "../../Domain/services/IProjectAnalyticsService";
 import { IFinancialAnalyticsService } from "../../Domain/services/IFinancialAnalyticsService";
+import { ILogerService } from "../../Domain/services/ILogerService";
+import { ISIEMService } from "../../siem/Domen/services/ISIEMService";
+import { generateEvent } from "../../siem/Domen/Helpers/generate/GenerateEvent";
 
 export class AnalyticsController {
     private readonly router: Router;
 
-    constructor(private projectAnalyticsService: IProjectAnalyticsService,
-        private financialAnalyticsService: IFinancialAnalyticsService
+    constructor(
+        private projectAnalyticsService: IProjectAnalyticsService,
+        private financialAnalyticsService: IFinancialAnalyticsService,
+        private readonly logger: ILogerService,
+        private readonly siemService: ISIEMService
     ) {
         this.router = Router();
         this.initializeRoutes();
@@ -46,27 +52,55 @@ export class AnalyticsController {
             const sprintId = this.parseId((req.params as any).sprintId);
 
             if (sprintId === null) {
-                res.status(400).json({ error: "Invalid sprintId" });
+                const message = "Invalid sprint ID for Burndown";
+                this.logger.log(message);
+                this.siemService.sendEvent(
+                    generateEvent("analytics-microservice", req, 400, message)
+                );
+                res.status(400).json({ error: message });
                 return;
             }
 
 
             if (isNaN(sprintId)) {
-                res.status(400).json({ message: "Invalid sprint ID for Burndown" });
+                const message = "Invalid sprint ID for Burndown";
+                this.logger.log(message);
+                this.siemService.sendEvent(
+                    generateEvent("analytics-microservice", req, 400, message)
+                );
+                res.status(400).json({ message: message });
                 return;
             }
 
+            this.logger.log(`Fetching burndown analytics for sprint ${sprintId}`);
             const result = await this.projectAnalyticsService.getBurnDownChartsForSprintId(sprintId);
 
             if (!result) {
-                res.status(404).json({ message: "Burndown data not found" });
+                const message = `Burndown data not found for sprint ${sprintId}`;
+                this.logger.log(message);
+                this.siemService.sendEvent(
+                    generateEvent("analytics-microservice", req, 404, message)
+                );
+                res.status(404).json({ message: message });
                 return;
             }
 
+            this.siemService.sendEvent(
+                generateEvent(
+                    "analytics-microservice",
+                    req,
+                    200,
+                    "Request successful | Burndown data fetched"
+                )
+            );
             res.status(200).json(result);
 
         } catch (error) {
-            res.status(500).json({ message: "Internal server error" });
+            this.logger.log((error as Error).message);
+            this.siemService.sendEvent(
+                generateEvent("analytics-microservice", req, 500, (error as Error).message)
+            );
+            res.status(500).json({ message: (error as Error).message });
         }
     }
 
@@ -74,27 +108,55 @@ export class AnalyticsController {
         try {
             const sprintId = this.parseId((req.params as any).sprintId);
             if (sprintId === null) {
-                res.status(400).json({ error: "Invalid sprintId" });
+                const message = "Invalid sprint ID for Burnup";
+                this.logger.log(message);
+                this.siemService.sendEvent(
+                    generateEvent("analytics-microservice", req, 400, message)
+                );
+                res.status(400).json({ error: message });
                 return;
             }
 
             if (isNaN(sprintId)) {
-                res.status(400).json({ message: "Invalid sprint ID for Burnup" });
+                const message = "Invalid sprint ID for Burnup";
+                this.logger.log(message);
+                this.siemService.sendEvent(
+                    generateEvent("analytics-microservice", req, 400, message)
+                );
+                res.status(400).json({ message: message });
                 return;
             }
 
+            this.logger.log(`Fetching burnup analytics for sprint ${sprintId}`);
             const result = await this.projectAnalyticsService.getBurnUpChartsForSprintId(sprintId);
 
             if (!result) {
-                res.status(404).json({ message: "Burnup data not found" });
+                const message = `Burnup data not found for sprint ${sprintId}`;
+                this.logger.log(message);
+                this.siemService.sendEvent(
+                    generateEvent("analytics-microservice", req, 404, message)
+                );
+                res.status(404).json({ message: message });
                 return;
             }
 
+            this.siemService.sendEvent(
+                generateEvent(
+                    "analytics-microservice",
+                    req,
+                    200,
+                    "Request successful | Burnup data fetched"
+                )
+            );
 
             res.status(200).json(result);
 
         } catch (error) {
-            res.status(500).json({ message: "Internal server error" });
+            this.logger.log((error as Error).message);
+            this.siemService.sendEvent(
+                generateEvent("analytics-microservice", req, 500, (error as Error).message)
+            );
+            res.status(500).json({ message: (error as Error).message });
         }
     }
 
@@ -102,25 +164,53 @@ export class AnalyticsController {
         try {
             const projectId = this.parseId((req.params as any).projectId);
             if (projectId === null) {
-                res.status(400).json({ error: "Invalid projectId" });
+                const message = "Invalid project ID for Velocity";
+                this.logger.log(message);
+                this.siemService.sendEvent(
+                    generateEvent("analytics-microservice", req, 400, message)
+                );
+                res.status(400).json({ error: message });
                 return;
             }
             if (isNaN(projectId)) {
-                res.status(400).json({ message: "Invalid project ID for Velocity" });
+                const message = "Invalid project ID for Velocity";
+                this.logger.log(message);
+                this.siemService.sendEvent(
+                    generateEvent("analytics-microservice", req, 400, message)
+                );
+                res.status(400).json({ message: message });
                 return;
             }
 
+            this.logger.log(`Fetching velocity analytics for project ${projectId}`);
             const result = await this.projectAnalyticsService.getVelocityForProject(projectId);
 
             if (!result) {
-                res.status(404).json({ message: "Velocity data not found" });
+                const message = `Velocity data not found for project ${projectId}`;
+                this.logger.log(message);
+                this.siemService.sendEvent(
+                    generateEvent("analytics-microservice", req, 404, message)
+                );
+                res.status(404).json({ message: message });
                 return;
             }
 
+            this.siemService.sendEvent(
+                generateEvent(
+                    "analytics-microservice",
+                    req,
+                    200,
+                    "Request successful | Velocity data fetched"
+                )
+            );
             res.status(200).json(result);
 
         } catch (error) {
-            res.status(500).json({ message: "Internal server error" });
+            this.logger.log((error as Error).message);
+            this.siemService.sendEvent(
+                generateEvent("analytics-microservice", req, 500, (error as Error).message)
+            );
+            res.status(500).json({ message: (error as Error).message });
         }
     }
 
@@ -128,25 +218,53 @@ export class AnalyticsController {
         try {
             const projectId = this.parseId((req.params as any).projectId);
             if (projectId === null) {
-                res.status(400).json({ error: "Invalid projectId" });
+                const message = "Invalid project ID for Budget Tracking";
+                this.logger.log(message);
+                this.siemService.sendEvent(
+                    generateEvent("analytics-microservice", req, 400, message)
+                );
+                res.status(400).json({ error: message });
                 return;
             }
             if (isNaN(projectId)) {
-                res.status(400).json({ message: "Invalid project ID for Budget Tracking" });
+                const message = "Invalid project ID for Budget Tracking";
+                this.logger.log(message);
+                this.siemService.sendEvent(
+                    generateEvent("analytics-microservice", req, 400, message)
+                );
+                res.status(400).json({ message: message });
                 return;
             }
 
+            this.logger.log(`Fetching budget tracking analytics for project ${projectId}`);
             const result = await this.financialAnalyticsService.getBudgetTrackingForProject(projectId);
 
             if (!result) {
-                res.status(404).json({ message: "Budget tracking data not found" });
+                const message = `Budget tracking data not found for project ${projectId}`;
+                this.logger.log(message);
+                this.siemService.sendEvent(
+                    generateEvent("analytics-microservice", req, 404, message)
+                );
+                res.status(404).json({ message: message });
                 return;
             }
 
+            this.siemService.sendEvent(
+                generateEvent(
+                    "analytics-microservice",
+                    req,
+                    200,
+                    "Request successful | Budget tracking data fetched"
+                )
+            );
             res.status(200).json(result);
 
-        } catch {
-            res.status(500).json({ message: "Internal server error" });
+        } catch (error) {
+            this.logger.log((error as Error).message);
+            this.siemService.sendEvent(
+                generateEvent("analytics-microservice", req, 500, (error as Error).message)
+            );
+            res.status(500).json({ message: (error as Error).message });
         }
     }
 
@@ -154,25 +272,53 @@ export class AnalyticsController {
         try {
             const projectId = this.parseId((req.params as any).projectId);
             if (projectId === null) {
-                res.status(400).json({ error: "Invalid projectId" });
+                const message = "Invalid project ID for Resource Cost Allocation";
+                this.logger.log(message);
+                this.siemService.sendEvent(
+                    generateEvent("analytics-microservice", req, 400, message)
+                );
+                res.status(400).json({ error: message });
                 return;
             }
             if (isNaN(projectId)) {
-                res.status(400).json({ message: "Invalid project ID for Resource Cost Allocation" });
+                const message = "Invalid project ID for Resource Cost Allocation";
+                this.logger.log(message);
+                this.siemService.sendEvent(
+                    generateEvent("analytics-microservice", req, 400, message)
+                );
+                res.status(400).json({ message: message });
                 return;
             }
 
+            this.logger.log(`Fetching resource cost allocation for project ${projectId}`);
             const result = await this.financialAnalyticsService.getResourceCostAllocationForProject(projectId);
 
             if (!result) {
-                res.status(404).json({ message: "Resource cost allocation data not found" });
+                const message = `Resource cost allocation data not found for project ${projectId}`;
+                this.logger.log(message);
+                this.siemService.sendEvent(
+                    generateEvent("analytics-microservice", req, 404, message)
+                );
+                res.status(404).json({ message: message });
                 return;
             }
 
+            this.siemService.sendEvent(
+                generateEvent(
+                    "analytics-microservice",
+                    req,
+                    200,
+                    "Request successful | Resource cost allocation data fetched"
+                )
+            );
             res.status(200).json(result);
 
-        } catch {
-            res.status(500).json({ message: "Internal server error" });
+        } catch (error) {
+            this.logger.log((error as Error).message);
+            this.siemService.sendEvent(
+                generateEvent("analytics-microservice", req, 500, (error as Error).message)
+            );
+            res.status(500).json({ message: (error as Error).message });
         }
     }
 
@@ -180,36 +326,77 @@ export class AnalyticsController {
         try {
             const projectId = this.parseId((req.params as any).projectId);
             if (projectId === null) {
-                res.status(400).json({ error: "Invalid projectId" });
+                const message = "Invalid project ID for Profit Margin";
+                this.logger.log(message);
+                this.siemService.sendEvent(
+                    generateEvent("analytics-microservice", req, 400, message)
+                );
+                res.status(400).json({ error: message });
                 return;
             }
             if (isNaN(projectId)) {
-                res.status(400).json({ message: "Invalid project ID for Profit Margin" });
+                const message = "Invalid project ID for Profit Margin";
+                this.logger.log(message);
+                this.siemService.sendEvent(
+                    generateEvent("analytics-microservice", req, 400, message)
+                );
+                res.status(400).json({ message: message });
                 return;
             }
 
+            this.logger.log(`Fetching profit margin analytics for project ${projectId}`);
             const result = await this.financialAnalyticsService.getProfitMarginForProject(projectId);
 
             if (!result) {
-                res.status(404).json({ message: "Profit margin data not found" });
+                const message = `Profit margin data not found for project ${projectId}`;
+                this.logger.log(message);
+                this.siemService.sendEvent(
+                    generateEvent("analytics-microservice", req, 404, message)
+                );
+                res.status(404).json({ message: message });
                 return;
             }
 
+            this.siemService.sendEvent(
+                generateEvent(
+                    "analytics-microservice",
+                    req,
+                    200,
+                    "Request successful | Profit margin data fetched"
+                )
+            );
             res.status(200).json(result);
 
-        } catch {
-            res.status(500).json({ message: "Internal server error" });
+        } catch (error) {
+            this.logger.log((error as Error).message);
+            this.siemService.sendEvent(
+                generateEvent("analytics-microservice", req, 500, (error as Error).message)
+            );
+            res.status(500).json({ message: (error as Error).message });
         }
     }
 
     async getProjectsLast30Days(req: Request, res: Response): Promise<void> {
         try {
+            this.logger.log("Fetching projects started in last 30 days");
             const result =
                 await this.projectAnalyticsService.getProjectsStartedLast30Days();
 
+            this.siemService.sendEvent(
+                generateEvent(
+                    "analytics-microservice",
+                    req,
+                    200,
+                    "Request successful | Projects started last 30 days fetched"
+                )
+            );
             res.status(200).json(result);
         } catch (error) {
-            res.status(500).json({ message: "Internal server error" });
+            this.logger.log((error as Error).message);
+            this.siemService.sendEvent(
+                generateEvent("analytics-microservice", req, 500, (error as Error).message)
+            );
+            res.status(500).json({ message: (error as Error).message });
         }
     }
 
@@ -219,9 +406,21 @@ export class AnalyticsController {
             const result =
                 await this.projectAnalyticsService.getWorkersAddedLast30Days();
             console.log("Returning result:", result);
+            this.siemService.sendEvent(
+                generateEvent(
+                    "analytics-microservice",
+                    req,
+                    200,
+                    "Request successful | Workers added last 30 days fetched"
+                )
+            );
             res.status(200).json(result);
         } catch (error) {
-            res.status(500).json({ message: "Internal server error" });
+            this.logger.log((error as Error).message);
+            this.siemService.sendEvent(
+                generateEvent("analytics-microservice", req, 500, (error as Error).message)
+            );
+            res.status(500).json({ message: (error as Error).message });
         }
     }
 
