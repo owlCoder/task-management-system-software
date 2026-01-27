@@ -1,6 +1,13 @@
 import { SIEMEvent } from "../../configs/events/SIEMEvent";
 import { SIEMPayload } from "../../configs/events/SIEMPayload";
 
+/**
+ * Converts a siem event to a siem payload
+ * 
+ * Message format: message [| method url] [| Status: statusCode] [| UserID: userId (userRole)]
+ * @param event - event being sent to siem
+ * @returns siem payload
+ */
 export function convertEventToSIEMPayload(event: SIEMEvent): SIEMPayload {
     const messageParts = [
         event.message

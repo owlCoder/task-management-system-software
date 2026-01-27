@@ -3,7 +3,7 @@ import { BurndownDTO } from "../../DTOs/analytics/BurndownDTO";
 import { BurnupDTO } from "../../DTOs/analytics/BurnupDTO";
 import { ProfitMarginDTO } from "../../DTOs/analytics/ProfitMarginDTO";
 import { ResourceCostAllocationDTO } from "../../DTOs/analytics/ResourceCostAllocationDTO";
-import { TimeSeriesPointDto } from "../../DTOs/analytics/TimeSeriesPointDTO";
+import { TimeSeriesPointDTO } from "../../DTOs/analytics/TimeSeriesPointDTO";
 import { Result } from "../../types/common/Result";
 
 export interface IGatewayAnalyticsService {
@@ -13,7 +13,7 @@ export interface IGatewayAnalyticsService {
     getBudgetTrackingByProjectId(projectId: number): Promise<Result<BudgetTrackingDTO>>;
     getResourceCostAllocationByProjectId(projectId: number): Promise<Result<ResourceCostAllocationDTO>>;
     getProfitMarginByProjectId(projectId: number): Promise<Result<ProfitMarginDTO>>;
-    getProjectsLast30Days(): Promise<Result<TimeSeriesPointDto[]>>;
-    getWorkersLast30Days(): Promise<Result<TimeSeriesPointDto[]>>;
+    getProjectsLast30Days(): Promise<Result<TimeSeriesPointDTO[]>>;
+    getWorkersLast30Days(): Promise<Result<TimeSeriesPointDTO[]>>;
 
 }

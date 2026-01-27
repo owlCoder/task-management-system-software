@@ -9,6 +9,7 @@ import { BurnupDTO } from "../../Domain/DTOs/analytics/BurnupDTO";
 import { BudgetTrackingDTO } from "../../Domain/DTOs/analytics/BudgetTrackingDTO";
 import { ResourceCostAllocationDTO } from "../../Domain/DTOs/analytics/ResourceCostAllocationDTO";
 import { ProfitMarginDTO } from "../../Domain/DTOs/analytics/ProfitMarginDTO";
+import { TimeSeriesPointDTO } from "../../Domain/DTOs/analytics/TimeSeriesPointDTO";
 import { Result } from "../../Domain/types/common/Result";
 
 // Constants
@@ -20,7 +21,6 @@ import { API_ENDPOINTS } from "../../Constants/services/APIEndpoints";
 // Infrastructure
 import { makeAPICall } from "../../Infrastructure/axios/APIHelpers";
 import { createAxiosClient } from "../../Infrastructure/axios/client/AxiosClientFactory";
-import { TimeSeriesPointDto } from "../../Domain/DTOs/analytics/TimeSeriesPointDTO";
 
 /**
  * Makes API requests to the Analytics Microservice.
@@ -122,16 +122,28 @@ export class GatewayAnalyticsService implements IGatewayAnalyticsService {
         });
     }
 
-    async getProjectsLast30Days(): Promise<Result<TimeSeriesPointDto[]>> {
-        return await makeAPICall<TimeSeriesPointDto[]>(this.analyticsClient, this.errorHandlingService, {
+    /**
+     * Fetches the number of projects that were created in the last 30 days (per date)
+     * @returns {Promise<Result<TimeSeriesPointDTO[]>>} - A promise that resolves to a Result object containing the last 30 days project data.
+     * - On success returns data as {@link TimeSeriesPointDTO[]}.
+     * - On failure returns status code and error message.
+     */
+    async getProjectsLast30Days(): Promise<Result<TimeSeriesPointDTO[]>> {
+        return await makeAPICall<TimeSeriesPointDTO[]>(this.analyticsClient, this.errorHandlingService, {
             serviceName: SERVICES.ANALYTICS,
             method: HTTP_METHODS.GET,
             url: ANALYTICS_ROUTES.PROJECTS_LAST_30_DAYS,
         });
     }
 
-    async getWorkersLast30Days(): Promise<Result<TimeSeriesPointDto[]>> {
-        return await makeAPICall<TimeSeriesPointDto[]>(this.analyticsClient, this.errorHandlingService, {
+    /**
+     * Fetches the number of users that were assigned in the last 30 days (per date)
+     * @returns {Promise<Result<TimeSeriesPointDTO[]>>} - A promise that resolves to a Result object containing the last 30 days assignments data.
+     * - On success returns data as {@link TimeSeriesPointDTO[]}.
+     * - On failure returns status code and error message.
+     */
+    async getWorkersLast30Days(): Promise<Result<TimeSeriesPointDTO[]>> {
+        return await makeAPICall<TimeSeriesPointDTO[]>(this.analyticsClient, this.errorHandlingService, {
             serviceName: SERVICES.ANALYTICS,
             method: HTTP_METHODS.GET,
             url: ANALYTICS_ROUTES.WORKERS_LAST_30_DAYS,

@@ -27,9 +27,9 @@ export function invalidRouteHandler(req: Request, res: Response, _next: NextFunc
         ip: req.ip,
     }, message);
 
+    res.status(404).json({ message: `Failed to ${req.method} ${req.originalUrl} - ${message}` });
+
     getSIEMService().sendEvent(
         generateEvent(SERVICES.SELF, req, 404, message, ERROR_CODE.ROUTING)
     );
-
-    res.status(404).json({ message: `Failed to ${req.method} ${req.originalUrl} - ${message}` });
 }

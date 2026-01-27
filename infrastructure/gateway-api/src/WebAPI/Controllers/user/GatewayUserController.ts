@@ -15,6 +15,7 @@ import { authorize } from "../../../Middlewares/authorization/AuthorizeMiddlewar
 
 // Utils
 import { handleEmptyResponse, handleResponse } from "../../Utils/Http/ResponseHandler";
+import { parseOptionalIntArray } from "../../Utils/Query/QueryUtils";
 
 // Infrastructure
 import { ReqParams } from "../../../Infrastructure/express/types/ReqParams";
@@ -90,17 +91,21 @@ export class GatewayUserController {
         handleResponse(res, result);
     }
 
+    /**
+     * GET /api/v1/users/ids
+     * @param {Request} req - the request object, containing the ids in query.
+     * @param {Response} res - the response object for the client.
+     * @returns {Promise<void>}
+     * - On success: response status 200, response data: {@link UserDTO[]}. 
+     * - On failure: response status code indicating the failure, response data: message describing the error.
+     */
     private async getUsersByIds(req: Request, res: Response): Promise<void> {
-        const idsParam = req.query.ids as string | undefined;
-
-        const ids = (idsParam ?? "")
-            .split(",")
-            .map((x) => parseInt(x.trim(), 10))
-            .filter((n) => Number.isFinite(n) && n > 0);
+        const ids = parseOptionalIntArray(req.query.ids);
 
         const result = await this.gatewayUserService.getUsersByIds(ids);
         handleResponse(res, result);
     }
+
     /**
      * PUT /api/v1/users/:userId
      * @param {Request} req - the request object, containing the user data in the body as a {@link UpdateUserDTO} and user id in params.

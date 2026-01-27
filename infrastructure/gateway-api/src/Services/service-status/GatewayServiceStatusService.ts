@@ -6,6 +6,7 @@ import { IErrorHandlingService } from "../../Domain/services/common/IErrorHandli
 import { IGatewayServiceStatusService } from "../../Domain/services/service-status/IGatewayServiceStatusService";
 import { MeasurementDTO } from "../../Domain/DTOs/service-status/measurementDTO";
 import { ServiceStatusDTO } from "../../Domain/DTOs/service-status/serviceStatusDTO";
+import { AverageTimeDTO } from "../../Domain/DTOs/service-status/AverageTimeDTO";
 import { Result } from "../../Domain/types/common/Result";
 
 // Constants
@@ -17,8 +18,10 @@ import { SERVICE_STATUS_ROUTES } from "../../Constants/routes/service-status/Ser
 // Infrastructure
 import { createAxiosClient } from "../../Infrastructure/axios/client/AxiosClientFactory";
 import { makeAPICall } from "../../Infrastructure/axios/APIHelpers";
-import { AverageTimeDTO } from "../../Domain/DTOs/service-status/AverageTimeDTO";
 
+/**
+ * Makes API requests to the Service-Status Microservice.
+ */
 export class GatewayServiceStatusService implements IGatewayServiceStatusService {
     private readonly serviceStatusClient: AxiosInstance;
 
@@ -26,6 +29,12 @@ export class GatewayServiceStatusService implements IGatewayServiceStatusService
         this.serviceStatusClient = createAxiosClient(API_ENDPOINTS.SERVICE_STATUS);
     }
 
+    /**
+     * Fetches all measurements.
+     * @returns {Promise<Result<MeasurementDTO[]>>} - A promise that resolves to a Result object containing the data of the measurements.
+     * - On success returns data as {@link MeasurementDTO[]}.
+     * - On failure returns status code and error message.
+     */
     async getAllMeasurements(): Promise<Result<MeasurementDTO[]>> {
         return await makeAPICall<MeasurementDTO[]>(this.serviceStatusClient, this.errorHandlingService, {
             serviceName: SERVICES.SERVICE_STATUS,
@@ -34,6 +43,12 @@ export class GatewayServiceStatusService implements IGatewayServiceStatusService
         });
     }
     
+    /**
+     * Fetches all down measurements.
+     * @returns {Promise<Result<MeasurementDTO[]>>} - A promise that resolves to a Result object containing the data of the down measurements.
+     * - On success returns data as {@link MeasurementDTO[]}.
+     * - On failure returns status code and error message.
+     */
     async getAllDownMeasurements(): Promise<Result<MeasurementDTO[]>> {
         return await makeAPICall<MeasurementDTO[]>(this.serviceStatusClient, this.errorHandlingService, {
             serviceName: SERVICES.SERVICE_STATUS,
@@ -42,6 +57,12 @@ export class GatewayServiceStatusService implements IGatewayServiceStatusService
         });
     }
 
+    /**
+     * Fetches the statuses of all services.
+     * @returns {Promise<Result<ServiceStatusDTO[]>>} - A promise that resolves to a Result object containing the data of the statuses.
+     * - On success returns data as {@link ServiceStatusDTO[]}.
+     * - On failure returns status code and error message.
+     */
     async getServiceStauts(): Promise<Result<ServiceStatusDTO[]>> {
         return await makeAPICall<ServiceStatusDTO[]>(this.serviceStatusClient, this.errorHandlingService, {
             serviceName: SERVICES.SERVICE_STATUS,
@@ -50,7 +71,13 @@ export class GatewayServiceStatusService implements IGatewayServiceStatusService
         });
     }
 
-    async getAvgResponseTime(days:number):Promise<Result<AverageTimeDTO[]>>{
+    /**
+     * Fetches the average response time for all services.
+     * @returns {Promise<Result<ProjectDTO[]>>} - A promise that resolves to a Result object containing the data of the statuses.
+     * - On success returns data as {@link ServiceStatusDTO[]}.
+     * - On failure returns status code and error message.
+     */
+    async getAvgResponseTime(days: number):Promise<Result<AverageTimeDTO[]>>{
         return await makeAPICall<AverageTimeDTO[]>(this.serviceStatusClient, this.errorHandlingService, {
             serviceName: SERVICES.SERVICE_STATUS,
             method: HTTP_METHODS.GET,

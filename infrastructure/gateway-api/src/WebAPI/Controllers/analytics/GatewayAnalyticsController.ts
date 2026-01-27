@@ -9,6 +9,7 @@ import { BudgetTrackingDTO } from "../../../Domain/DTOs/analytics/BudgetTracking
 import { ResourceCostAllocationDTO } from "../../../Domain/DTOs/analytics/ResourceCostAllocationDTO";
 import { ProfitMarginDTO } from "../../../Domain/DTOs/analytics/ProfitMarginDTO";
 import { AnalyticsPolicies } from "../../../Domain/access-policies/analytics/AnalyticsPolicies";
+import { TimeSeriesPointDTO } from "../../../Domain/DTOs/analytics/TimeSeriesPointDTO";
 
 // Middlewares
 import { authenticate } from "../../../Middlewares/authentication/AuthMiddleware";
@@ -138,16 +139,31 @@ export class GatewayAnalyticsController {
         handleResponse(res, result)
     }
 
-    private async getProjectsLast30Days(req: Request, res: Response): Promise<void> {
+    /**
+     * GET /api/v1/analytics/projects-last-30-days
+     * @param {Request} _req - the request object.
+     * @param {Response} res - the response object for the client.
+     * @returns {Promise<void>}
+     * - On success: response status 200, response data: {@link TimeSeriesPointDTO[]}. 
+     * - On failure: response status code indicating the failure, response data: message describing the error.
+     */
+    private async getProjectsLast30Days(_req: Request, res: Response): Promise<void> {
         const result = await this.gatewayAnalyticsService.getProjectsLast30Days();
         handleResponse(res, result);
     }
 
-    private async getWorkersLast30Days(req: Request, res: Response): Promise<void> {
+    /**
+     * GET /api/v1/analytics/workers-last-30-days
+     * @param {Request} _req - the request object.
+     * @param {Response} res - the response object for the client.
+     * @returns {Promise<void>}
+     * - On success: response status 200, response data: {@link TimeSeriesPointDTO[]}. 
+     * - On failure: response status code indicating the failure, response data: message describing the error.
+     */
+    private async getWorkersLast30Days(_req: Request, res: Response): Promise<void> {
         const result = await this.gatewayAnalyticsService.getWorkersLast30Days();
         handleResponse(res, result);
     }
-
 
     public getRouter(): Router {
         return this.router;

@@ -18,6 +18,9 @@ import { createAxiosClient } from "../../axios/client/AxiosClientFactory";
 import { isSIEMEvent } from "../utils/events/IsSIEMEvent";
 import { convertEventToSIEMPayload } from "../utils/converters/SIEMPayloadConverter";
 
+/**
+ * Implementation of the SIEM service
+ */
 export class SIEMService implements ISIEMService {
     private readonly siemClient: AxiosInstance;
 
@@ -25,6 +28,10 @@ export class SIEMService implements ISIEMService {
         this.siemClient = createAxiosClient(API_ENDPOINTS.SIEM);
     }
 
+    /**
+     * Sends an event to siem if event's logging level allows it
+     * @param {SIEMEvent} event - event being sent to siem
+     */
     sendEvent(event: SIEMEvent): void {
         if(!isSIEMEvent(event.url, event.method, event.statusCode, event.code)){
             return;
@@ -33,7 +40,12 @@ export class SIEMService implements ISIEMService {
         this.sendToSIEM(event)
     }
 
+    /**
+     * Sends an event to siem (fire-and-forget)
+     * @param {SIEMEvent} event - event being sent to siem
+     */
     private sendToSIEM(event: SIEMEvent): void {
+        // extracting siem payload from event
         const payload = convertEventToSIEMPayload(event);
         this.siemClient.post(SIEM_ROUTES.LOG_EVENT, payload).catch((err) => {
             this.loggerService.err(

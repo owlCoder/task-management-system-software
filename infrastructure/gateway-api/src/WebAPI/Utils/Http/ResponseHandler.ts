@@ -26,19 +26,19 @@ import { generateEvent } from "../../../Infrastructure/siem/utils/events/Generat
  */
 export function handleResponse<T>(res: Response, result: Result<T>, successStatus: number = 200): void {
     if(result.success){
+        res.status(successStatus).json(result.data);
+
         getSIEMService().sendEvent(
             generateEvent(SERVICES.SELF, res.req, successStatus, "Request successful")
         );
-
-        res.status(successStatus).json(result.data);
         return;
     }
+
+    res.status(result.status).json({ message: result.message });
 
     getSIEMService().sendEvent(
         generateEvent(SERVICES.SELF, res.req, result.status, result.message)
     );
-
-    res.status(result.status).json({ message: result.message });
 }
 
 /**
@@ -51,19 +51,19 @@ export function handleResponse<T>(res: Response, result: Result<T>, successStatu
  */
 export function handleEmptyResponse(res: Response, result: Result<void>): void {
     if(result.success){
+        res.status(204).send();
+
         getSIEMService().sendEvent(
             generateEvent(SERVICES.SELF, res.req, 204, "Request successful")
         );
-
-        res.status(204).send();
         return;
     }
+
+    res.status(result.status).json({ message: result.message });
 
     getSIEMService().sendEvent(
         generateEvent(SERVICES.SELF, res.req, result.status, result.message)
     );
-
-    res.status(result.status).json({ message: result.message });
 }
 
 /**
@@ -81,10 +81,6 @@ export function handleDownloadResponse(res: Response, result: Result<StreamRespo
         const contentType = headers["content-type"]?.toString() ?? "application/octet-stream";
         const contentDisposition = headers["content-disposition"]?.toString() ?? "attachment; filename=file";
 
-        getSIEMService().sendEvent(
-            generateEvent(SERVICES.SELF, res.req, 200, "Download successful")
-        );
-
         res.status(200).setHeader("Content-Type", contentType).setHeader('Content-Disposition', contentDisposition);
 
         if (headers["content-length"]) {
@@ -93,12 +89,17 @@ export function handleDownloadResponse(res: Response, result: Result<StreamRespo
         
         setupStreamCleanup(stream, res);
         stream.pipe(res);
+
+        getSIEMService().sendEvent(
+            generateEvent(SERVICES.SELF, res.req, 200, "Download successful")
+        );
+
         return;
     }
+
+    res.status(result.status).json({ message: result.message });
 
     getSIEMService().sendEvent(
         generateEvent(SERVICES.SELF, res.req, result.status, result.message)
     );
-
-    res.status(result.status).json({ message: result.message });
 }

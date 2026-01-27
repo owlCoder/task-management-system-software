@@ -47,11 +47,11 @@ export const authenticate = (req: Request, res: Response, next: NextFunction): v
 			ip: req.ip
     	}, message);
 
+    	res.status(401).json({ message: message });
+		
 		getSIEMService().sendEvent(
             generateEvent(SERVICES.SELF, req, 401, message, ERROR_CODE.AUTHENTICATION)
         );
-
-    	res.status(401).json({ message: message });
     	return;
   	}
 
@@ -77,10 +77,10 @@ export const authenticate = (req: Request, res: Response, next: NextFunction): v
 			ip: req.ip
     	}, message);
 
+    	res.status(401).json({ message: message });
+
 		getSIEMService().sendEvent(
             generateEvent(SERVICES.SELF, req, 401, message, ERROR_CODE.AUTHENTICATION)
         );
-
-    	res.status(401).json({ message: message });
   	}
 };
