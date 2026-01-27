@@ -15,6 +15,8 @@ import { TemplateService } from "./Services/TemplateService";
 import { TemplateController } from "./WebAPI/controllers/TemplateConroller";
 import { TaskServiceClient } from "./Services/external-services/TaskServiceClient";
 import { UserServiceClient } from "./Services/external-services/UserServiceClient";
+import { LogerService } from "./Services/LogerService";
+import { SIEMService } from "./siem/Services/SIEMService";
 
 dotenv.config({ quiet: true });
 
@@ -36,15 +38,17 @@ app.use(express.json());
   const taskService = new TaskServiceClient();
   const userService = new UserServiceClient();
   const templateService = new TemplateService(templateRepository, dependenciesRepository, taskService, userService);
+  const logger = new LogerService();
+  const siemService = new SIEMService(logger);
 
-  const templateController = new TemplateController(templateService);
+  const templateController = new TemplateController(templateService, logger);
 
   const reviewRepository: Repository<Review> = Db.getRepository(Review);
   const reviewCommentRepository: Repository<ReviewComment> = Db.getRepository(ReviewComment);
 
   const reviewService = new ReviewService(reviewRepository, reviewCommentRepository, userService);
 
-  const reviewController = new ReviewController(reviewService);
+  const reviewController = new ReviewController(reviewService, siemService,logger);
 
 
 

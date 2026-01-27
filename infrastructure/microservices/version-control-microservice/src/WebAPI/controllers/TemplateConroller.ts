@@ -2,11 +2,15 @@ import { ITemplateService } from "../../Domain/services/ITemplateService";
 import { Router, Request, Response } from "express";
 import { toTemplateDTO } from "../../Helpers/Converter/toTemplateDTO";
 import { errorCodeToHttpStatus } from "../../Utils/Converters/ErrorCodeConverter";
+import { ILogerService } from "../../Domain/services/ILogerService";
 
 export class TemplateController {
     private readonly router: Router;
 
-    constructor(private templateService: ITemplateService) {
+    constructor(
+        private templateService: ITemplateService,
+        private readonly logger: ILogerService,
+    ) {
         this.router = Router();
         this.initializeRoutes();
     }
@@ -32,28 +36,34 @@ export class TemplateController {
                 return;
             }
 
+            this.logger.log(`Fething template with ID ${id}`);
             const result = await this.templateService.getTemplateById(id);
 
             if(result.success) {
                 res.status(200).json(result.data);
             } else {
+                this.logger.log(result.error);
                 res.status(errorCodeToHttpStatus(result.code)).json(result.error);
             }
         } catch (err) {
+            this.logger.log((err as Error).message);
             res.status(500).json({ message: (err as Error).message});
         }
     }
 
     async getAllTemplates(req: Request, res: Response): Promise<void>{
         try {
+            this.logger.log("Fetching all templates");
             const result = await this.templateService.getAllTemplates();
 
             if(result.success) {
                 res.status(200).json(result.data);
             } else {
+                this.logger.log(result.error);
                 res.status(errorCodeToHttpStatus(result.code)).json(result.error);
             }
         } catch (err) {
+            this.logger.log((err as Error).message);
             res.status(500).json({message: (err as Error).message});
         }
     } 
@@ -71,14 +81,17 @@ export class TemplateController {
 
             const pm_id = parseInt(pmIdHeader, 10);
 
+            this.logger.log("Creating new template");
             const result = await this.templateService.createTemplate(templateData, pm_id);
 
             if(result.success) {
                 res.status(201).json(result.data);
             } else {
+                this.logger.log(result.error);
                 res.status(errorCodeToHttpStatus(result.code)).json(result.error);
             }
         } catch (err) {
+            this.logger.log((err as Error).message);
             res.status(500).json({message: (err as Error).message});
         }
     }
@@ -98,14 +111,17 @@ export class TemplateController {
 
             const pm_id = parseInt(pmIdHeader, 10);
 
+            this.logger.log("Creating new task from template");
             const result = await this.templateService.createTaskFromTemplate(template_id, sprint_id, worker_id, pm_id);
 
             if(result.success){
                 res.status(201).json(result.data);
             } else {
+                this.logger.log(result.error);
                 res.status(errorCodeToHttpStatus(result.code)).json({message: result.error});
             }
         } catch (err) {
+            this.logger.log((err as Error).message);
             res.status(500).json({message: (err as Error).message});
         }
     }
@@ -129,14 +145,17 @@ export class TemplateController {
             return;
         }
 
+        this.logger.log("Adding new dependency");
         const result = await this.templateService.addDependency(templateId, dependsOnId, pm_id);
 
         if (result.success) {
             res.status(204).send(); 
         } else {
+            this.logger.log(result.error);
             res.status(errorCodeToHttpStatus(result.code)).json({ error: result.error });
         }
     } catch (err) {
+        this.logger.log((err as Error).message);
         res.status(500).json({ message: (err as Error).message });
     }
     }
