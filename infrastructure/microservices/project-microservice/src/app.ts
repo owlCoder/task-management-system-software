@@ -17,6 +17,8 @@ import { ProjectController } from "./WebAPI/controllers/ProjectController";
 import { ProjectUserController } from "./WebAPI/controllers/ProjectUserController";
 import { SprintController } from "./WebAPI/controllers/SprintController";
 import { R2StorageService, IR2StorageService } from "./Storage/R2StorageService";
+import { LogerService } from "./Services/LogerService";
+import { SIEMService } from "./Siem/Services/SIEMService";
 
 dotenv.config({ quiet: true });
 
@@ -62,9 +64,11 @@ app.use(express.json());
     const sprintService: ISprintService = new SprintService(sprintRepository, projectRepository);
 
     // Controllers
-    const projectController = new ProjectController(projectService, storageService, projectUserService);
-    const projectUserController = new ProjectUserController(projectUserService);
-    const sprintController = new SprintController(sprintService);
+    const logerService = new LogerService();
+    const siemService = new SIEMService(logerService);
+    const projectController = new ProjectController(projectService, storageService, projectUserService, logerService, siemService);
+    const projectUserController = new ProjectUserController(projectUserService, logerService, siemService);
+    const sprintController = new SprintController(sprintService, logerService, siemService);
 
     // Routes
     app.use("/api/v1", projectController.getRouter());
