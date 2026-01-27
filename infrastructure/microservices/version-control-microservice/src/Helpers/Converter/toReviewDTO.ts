@@ -8,8 +8,8 @@ export function toReviewDTO(review: Review): TaskReviewDTO {
     authorId : review.authorId,
     status : review.status, 
     time : review.time,
-    reviewedBy: review.reviewedBy,      
-    reviewedAt: review.reviewedAt,      
-    commentId: review.commentId 
+    reviewedBy: review.reviewedBy ?? undefined,
+    reviewedAt: review.reviewedAt ?? undefined,
+    commentId: review.commentId ?? undefined
     };
 }
