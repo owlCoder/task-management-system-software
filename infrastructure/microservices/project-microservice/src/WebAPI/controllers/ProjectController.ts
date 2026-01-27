@@ -8,6 +8,7 @@ import { ProjectStatus } from "../../Domain/enums/ProjectStatus";
 import { validateCreateProject, validateUpdateProject } from "../validators/ProjectValidator";
 import { IR2StorageService } from "../../Storage/R2StorageService";
 import { ReqParams } from "../../Domain/types/ReqParams";
+import { ILogerService } from "../../Domain/services/ILogerService";
 
 const upload = multer({
     storage: multer.memoryStorage(),
@@ -29,7 +30,8 @@ export class ProjectController {
     constructor(
         private readonly projectService: IProjectService,
         private readonly storageService: IR2StorageService,
-        private readonly projectUserService: IProjectUserService
+        private readonly projectUserService: IProjectUserService,
+        private readonly logger: ILogerService,
     ) {
         this.router = Router();
         this.initializeRoutes();
@@ -48,26 +50,34 @@ export class ProjectController {
 
     private async getProjects(req: Request, res: Response): Promise<void> {
         try {
+            this.logger.log("Fetching all projects");
+
             const projects = await this.projectService.getProjects();
             if (projects.success) {
                 res.status(200).json(projects.data);
             } else {
+                this.logger.log(projects.error);
                 res.status(projects.code).json({ message: projects.error });
             }
         } catch (err) {
+            this.logger.log((err as Error).message);
             res.status(500).json({ message: (err as Error).message });
         }
     }
 
     private async getProjectIds(req: Request, res: Response): Promise<void> {
         try {
+            this.logger.log("Fetching all project IDs");
+
             const projectIds = await this.projectService.getProjectIds();
             if (projectIds.success) {
                 res.status(200).json(projectIds.data);
             } else {
+                this.logger.log(projectIds.error);
                 res.status(projectIds.code).json({ message: projectIds.error });
             }
         } catch (err) {
+            this.logger.log((err as Error).message);
             res.status(500).json({ message: (err as Error).message });
         }
     }
@@ -80,14 +90,17 @@ export class ProjectController {
                 return;
             }
 
+            this.logger.log(`Fetching projects for user ID ${userId}`);
             const projects = await this.projectService.getProjectsByUserId(userId);
             if (projects.success) {
                 res.status(200).json(projects.data);
             } else {
+                this.logger.log(projects.error);
                 res.status(projects.code).json({ message: projects.error });
             }
 
         } catch (err) {
+            this.logger.log((err as Error).message);
             res.status(500).json({ message: (err as Error).message });
         }
     }
@@ -100,13 +113,16 @@ export class ProjectController {
                 return;
             }
 
+            this.logger.log(`Fetching project with ID ${id}`);
             const project = await this.projectService.getProjectById(id);
             if (project.success) {
                 res.status(200).json(project.data);
             } else {
+                this.logger.log(project.error);
                 res.status(project.code).json({ message: project.error });
             }
         } catch (err) {
+            this.logger.log((err as Error).message);
             res.status(500).json({ message: (err as Error).message });
         }
     }
@@ -126,6 +142,8 @@ export class ProjectController {
 
     private async createProject(req: Request, res: Response): Promise<void> {
         try {
+            this.logger.log("Creating new project");
+
             const creatorUsername = req.body.creator_username?.trim();
             const totalWeeklyHours = parseInt(req.body.total_weekly_hours_required, 10);
 
@@ -156,6 +174,7 @@ export class ProjectController {
                 if (data.image_key) {
                     await this.storageService.deleteImage(data.image_key);
                 }
+                this.logger.log(validation.message!);
                 res.status(400).json({ message: validation.message });
                 return;
             }
@@ -166,6 +185,7 @@ export class ProjectController {
                 if (data.image_key) {
                     await this.storageService.deleteImage(data.image_key);
                 }
+                this.logger.log(createdResult.error);
                 res.status(createdResult.code).json({ message: createdResult.error });
                 return;
             }
@@ -179,20 +199,19 @@ export class ProjectController {
                         username: creatorUsername,
                         weekly_hours: 0,
                     });
-                    console.log(
-                        `Project Manager "${creatorUsername}" automatically assigned to project ${created.project_id} with 0 weekly hours`
+                    this.logger.log(
+                        `Project Manager "${creatorUsername}" auto-assigned to project ${created.project_id}`
                     );
                 } catch (assignError) {
-                    console.error(
-                        "Failed to auto-assign Project Manager to project:",
-                        assignError
+                    this.logger.log(
+                        `Failed to auto-assign Project Manager: ${(assignError as Error).message}`
                     );
                 }
             }
 
             res.status(201).json(created);
         } catch (err) {
-            console.error("Create project error:", err);
+            this.logger.log((err as Error).message);
             res.status(500).json({ message: (err as Error).message });
         }
     }
@@ -204,6 +223,8 @@ export class ProjectController {
                 res.status(400).json({ message: "Invalid project ID" });
                 return;
             }
+
+            this.logger.log(`Updating project with ID ${id}`);
 
             const data: ProjectUpdateDTO = {};
 
@@ -247,6 +268,7 @@ export class ProjectController {
                 if (data.image_key) {
                     await this.storageService.deleteImage(data.image_key);
                 }
+                this.logger.log(validation.message!);
                 res.status(400).json({ message: validation.message });
                 return;
             }
@@ -258,10 +280,11 @@ export class ProjectController {
                 if (data.image_key) {
                     await this.storageService.deleteImage(data.image_key);
                 }
+                this.logger.log(updated.error);
                 res.status(updated.code).json({ message: updated.error });
             }
         } catch (err) {
-            console.error("Update project error:", err);
+            this.logger.log((err as Error).message);
             res.status(500).json({ message: (err as Error).message });
         }
     }
@@ -274,13 +297,17 @@ export class ProjectController {
                 return;
             }
 
+            this.logger.log(`Deleting project with ID ${id}`);
+
             const ok = await this.projectService.deleteProject(id);
             if (ok.success) {
                 res.status(204).send();
             } else {
+                this.logger.log(ok.error);
                 res.status(ok.code).json({ message: ok.error });
             }
         } catch (err) {
+            this.logger.log((err as Error).message);
             res.status(500).json({ message: (err as Error).message });
         }
     }
@@ -293,13 +320,17 @@ export class ProjectController {
                 return;
             }
 
+            this.logger.log(`Checking if project exists with ID ${id}`);
+
             const exists = await this.projectService.projectExists(id);
             if (exists.success) {
                 res.status(200).json({ exists: exists.data });
             } else {
+                this.logger.log(exists.error);
                 res.status(exists.code).json({ message: exists.error });
             }
         } catch (err) {
+            this.logger.log((err as Error).message);
             res.status(500).json({ message: (err as Error).message });
         }
     }

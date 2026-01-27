@@ -3,13 +3,17 @@ import { IProjectUserService } from "../../Domain/services/IProjectUserService";
 import { ProjectUserAssignDTO } from "../../Domain/DTOs/ProjectUserAssignDTO";
 import { validateAssignUser } from "../validators/ProjectUserValidator";
 import { ReqParams } from "../../Domain/types/ReqParams";
+import { ILogerService } from "../../Domain/services/ILogerService";
 
 export class ProjectUserController {
     private readonly router: Router;
 
-    constructor(private readonly projectUserService: IProjectUserService) {
-        this.router = Router();
-        this.initializeRoutes();
+    constructor(
+        private readonly projectUserService: IProjectUserService, 
+        private readonly logger: ILogerService) {
+
+            this.router = Router();
+            this.initializeRoutes();
     }
 
     private initializeRoutes(): void {
@@ -31,19 +35,25 @@ export class ProjectUserController {
 
             const dto: ProjectUserAssignDTO = { project_id, username, weekly_hours };
 
+            this.logger.log(`Assigning user "${username}" to project ID ${project_id} with ${weekly_hours} weekly hours`);
+
             const validation = validateAssignUser(dto);
             if (!validation.success) {
+                this.logger.log(`Validation failed: ${validation.message}`);
                 res.status(400).json({ message: validation.message });
                 return;
             }
 
             const result = await this.projectUserService.assignUserToProject(dto);
             if (result.success) {
+                this.logger.log(`User "${username}" assigned successfully to project ID ${project_id}`);
                 res.status(201).json(result.data);
             } else {
+                this.logger.log(`Failed to assign user: ${result.error}`);
                 res.status(result.code).json({ message: result.error });
             }
         } catch (err) {
+            this.logger.log((err as Error).message);
             res.status(500).json({ message: (err as Error).message });
         }
     }
@@ -56,13 +66,18 @@ export class ProjectUserController {
                 return;
             }
 
+            this.logger.log(`Fetching users for project ID ${project_id}`);
+
             const list = await this.projectUserService.getUsersForProject(project_id);
             if (list.success) {
+                this.logger.log(`Fetched ${list.data.length} users for project ID ${project_id}`);
                 res.status(200).json(list.data);
             } else {
+                this.logger.log(`Failed to fetch users: ${list.error}`);
                 res.status(list.code).json({ message: list.error });
             }
         } catch (err) {
+            this.logger.log((err as Error).message);
             res.status(500).json({ message: (err as Error).message });
         }
     }
@@ -77,13 +92,18 @@ export class ProjectUserController {
                 return;
             }
 
+            this.logger.log(`Removing user ID ${user_id} from project ID ${project_id}`);
+
             const ok = await this.projectUserService.removeUserFromProject(project_id, user_id);
             if (ok.success) {
+                this.logger.log(`User ID ${user_id} removed from project ID ${project_id} successfully`);
                 res.status(204).send();
             } else {
+                this.logger.log(`Failed to remove user: ${ok.error}`);
                 res.status(ok.code).json({ message: ok.error });
             }
         } catch (err) {
+            this.logger.log((err as Error).message);
             res.status(500).json({ message: (err as Error).message });
         }
     }
