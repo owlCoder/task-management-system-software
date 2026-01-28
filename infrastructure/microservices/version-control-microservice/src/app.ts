@@ -54,6 +54,8 @@ app.use(express.json());
 
   app.use("/api/v1", reviewController.getRouter());
   app.use("/api/v1", templateController.getRouter());
+  //health
+  app.get("/health", (req, res) => {res.status(200).send("OK");});
 })();
 
 export default app;

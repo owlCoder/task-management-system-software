@@ -7,5 +7,6 @@ export const ROUTES = {
     NOTIFICATION_SERVICE_API: "/health",
     ANALYTICS_SERVICE_API: "/health",
     MAIL_SERVICE_API: "/MailService/MailAlive",
-    GATEWAY_API: "/health"
+    GATEWAY_API: "/health",
+    VERSION_CONTROL_SERVICE_API:"/health"
 } as const;

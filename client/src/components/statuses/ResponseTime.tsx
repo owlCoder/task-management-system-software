@@ -26,14 +26,10 @@ export const ResponseTime: React.FC = () => {
 
         loadData();
 
-        const intervalId = setInterval(() => {
-            loadData();
-        }, 60_000);
+        const intervalId = setInterval(loadData, 60_000);
 
-        return () => {
-            clearInterval(intervalId);
-        };
-    }, []);
+        return () => clearInterval(intervalId);
+    }, [days]);
 
     return (
         <div className="w-full  ">
