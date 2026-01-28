@@ -17,6 +17,8 @@ import { TaskServiceClient } from "./Services/external-services/TaskServiceClien
 import { UserServiceClient } from "./Services/external-services/UserServiceClient";
 import { LogerService } from "./Services/LogerService";
 import { SIEMService } from "./siem/Services/SIEMService";
+import { INotifyService } from "./Domain/services/INotifyService";
+import { NotifyService } from "./Services/NotifyService";
 
 dotenv.config({ quiet: true });
 
@@ -37,7 +39,8 @@ app.use(express.json());
   const dependenciesRepository: Repository<TemplateDependency> = Db.getRepository(TemplateDependency);
   const taskService = new TaskServiceClient();
   const userService = new UserServiceClient();
-  const templateService = new TemplateService(templateRepository, dependenciesRepository, taskService, userService);
+  const notifyService: INotifyService = new NotifyService();
+  const templateService = new TemplateService(templateRepository, dependenciesRepository, taskService, userService, notifyService);
   const logger = new LogerService();
   const siemService = new SIEMService(logger);
 
@@ -46,7 +49,7 @@ app.use(express.json());
   const reviewRepository: Repository<Review> = Db.getRepository(Review);
   const reviewCommentRepository: Repository<ReviewComment> = Db.getRepository(ReviewComment);
 
-  const reviewService = new ReviewService(reviewRepository, reviewCommentRepository, userService);
+  const reviewService = new ReviewService(reviewRepository, reviewCommentRepository, userService, notifyService);
 
   const reviewController = new ReviewController(reviewService, siemService,logger);
 

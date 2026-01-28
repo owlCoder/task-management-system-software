@@ -10,6 +10,8 @@ import { ReviewStatus } from "../Domain/enums/ReviewStatus";
 import { toReviewDTO } from "../Helpers/Converter/toReviewDTO";
 import { ReviewHistoryItemDTO } from "../Domain/DTOs/ReviewHistoryItemDTO";
 import { IUserServiceClient } from "../Domain/services/external-services/IUserServiceClient";
+import { INotifyService } from "../Domain/services/INotifyService";
+import { NotificationType } from "../Domain/enums/NotificationType";
 
 
 export class  ReviewService implements IReviewService {
@@ -17,7 +19,8 @@ export class  ReviewService implements IReviewService {
     constructor(
         private reviewRepository: Repository<Review>,
         private reviewCommentRepository: Repository<ReviewComment>,
-        private userServiceClient: IUserServiceClient
+        private userServiceClient: IUserServiceClient,
+        private readonly notifyService: INotifyService
     ) {}
 
     async getTaskForReview(): Promise<Result<TaskReviewDTO[]>> {
@@ -193,6 +196,15 @@ export class  ReviewService implements IReviewService {
         review.reviewedAt = new Date().toISOString();
         await this.reviewRepository.save(review);
 
+        if (review.authorId) {
+            this.notifyService.sendNotification(
+                [review.authorId],
+                "Review approved",
+                `Your task review for task #${taskId} has been approved.`,
+                NotificationType.INFO
+            );
+        }
+
         return { success: true, data: toReviewDTO(review) };
     }
 
@@ -241,6 +253,15 @@ export class  ReviewService implements IReviewService {
         review.reviewedAt = new Date().toISOString();
 
         await this.reviewRepository.save(review);
+
+        if (review.authorId) {
+            this.notifyService.sendNotification(
+                [review.authorId],
+                "Review rejected",
+                `Your task review for task #${taskId} has been rejected.`,
+                NotificationType.WARNING
+            );
+        }
 
         return {success: true,data: 
             { 

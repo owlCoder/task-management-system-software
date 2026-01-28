@@ -25,6 +25,8 @@ import { LogerService } from './Services/LogerServices/LogerService';
 import { SIEMService } from './siem/Services/SIEMService';
 import { ILogerService } from './Domain/services/ILogerService';
 import { ISIEMService } from './siem/Domen/services/ISIEMService';
+import { INotifyService } from './Domain/services/INotifyService';
+import { NotifyService } from './Services/NotifyService';
 
 
 dotenv.config({ quiet: true });
@@ -56,7 +58,8 @@ app.use(express.json());
   const projectServiceClient : IProjectServiceClient = new ProjectServiceClient();
   const userServiceClient: IUserServiceClient = new UserServiceClient();
   const taskVersionService: ITaskVersionService = new TaskVersionService(taskVersionRepository);
-  const taskService : ITaskService = new TaskService(taskRepository,projectServiceClient,userServiceClient,taskVersionService,fileServiceClient);
+  const notifyService: INotifyService = new NotifyService();
+  const taskService : ITaskService = new TaskService(taskRepository,projectServiceClient,userServiceClient,taskVersionService,fileServiceClient,notifyService);
   const commentService : ICommentService = new CommentService(
     taskRepository,
     commentRepository,

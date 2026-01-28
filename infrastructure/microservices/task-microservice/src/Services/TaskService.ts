@@ -11,6 +11,8 @@ import { IUserServiceClient } from "../Domain/services/external-services/IUserSe
 import { UserRole } from "../Domain/enums/UserRole";
 import { ITaskVersionService } from "../Domain/services/ITaskVersionService";
 import { IFileServiceClient } from "../Domain/services/external-services/IFileServiceClient";
+import { INotifyService } from "../Domain/services/INotifyService";
+import { NotificationType } from "../Domain/enums/NotificationType";
 export class TaskService implements ITaskService {
 
     constructor(
@@ -18,7 +20,8 @@ export class TaskService implements ITaskService {
         private readonly projectService: IProjectServiceClient,
         private readonly userService: IUserServiceClient,
         private readonly taskVersionService: ITaskVersionService,
-        private readonly fileServiceClient : IFileServiceClient
+        private readonly fileServiceClient : IFileServiceClient,
+        private readonly notifyService: INotifyService
     ) {
        
     }
@@ -214,6 +217,12 @@ export class TaskService implements ITaskService {
         });
 
         const savedTask = await this.taskRepository.save(newTask);
+        this.notifyService.sendNotification(
+            [workerId],
+            "New task assigned",
+            `A new task "${savedTask.title}" has been assigned to you.`,
+            NotificationType.INFO
+        );
         return { success: true, data: savedTask };
     }
 
@@ -307,6 +316,7 @@ export class TaskService implements ITaskService {
         if (updateTaskDTO.description !== undefined) task.task_description = updateTaskDTO.description;
         if (updateTaskDTO.estimatedCost !== undefined) task.estimated_cost = updateTaskDTO.estimatedCost;
 
+        const previousWorkerId = task.worker_id;
         if (updateTaskDTO.assignedTo !== undefined) {
             const assigneeOnProject = usersResult.data.some((u: any) => u.user_id === updateTaskDTO.assignedTo);
             if (!assigneeOnProject) {
@@ -318,6 +328,23 @@ export class TaskService implements ITaskService {
         const updatedTask = await this.taskRepository.save(task);
 
         await this.taskVersionService.createVersionSnapshot(updatedTask);
+
+        if (updateTaskDTO.assignedTo !== undefined && updateTaskDTO.assignedTo > 0 && updateTaskDTO.assignedTo !== previousWorkerId) {
+            this.notifyService.sendNotification(
+                [updateTaskDTO.assignedTo],
+                "Task reassigned",
+                `Task "${updatedTask.title}" has been assigned to you.`,
+                NotificationType.INFO
+            );
+        }
+        if (updateTaskDTO.assignedTo !== undefined && updateTaskDTO.assignedTo !== previousWorkerId && previousWorkerId) {
+            this.notifyService.sendNotification(
+                [previousWorkerId],
+                "Task reassigned",
+                `Task "${updatedTask.title}" has been reassigned to another user.`,
+                NotificationType.INFO
+            );
+        }
 
         return { success: true, data: updatedTask };
     } catch {

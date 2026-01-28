@@ -11,6 +11,8 @@ import { TaskResponseDTO } from "../Domain/DTOs/TaskResponseDTO";
 import { CreateTaskFromTemplateDTO } from "../Domain/DTOs/TaskCreateDTO";
 import { TaskServiceClient } from "./external-services/TaskServiceClient";
 import { UserServiceClient } from "./external-services/UserServiceClient";
+import { INotifyService } from "../Domain/services/INotifyService";
+import { NotificationType } from "../Domain/enums/NotificationType";
 
 
 export class TemplateService implements ITemplateService{
@@ -18,7 +20,8 @@ export class TemplateService implements ITemplateService{
         private readonly templateRepository: Repository<TaskTemplate>,
         private readonly dependenciesRepository: Repository<TemplateDependency>,
         private readonly taskService: TaskServiceClient,
-        private readonly userService: UserServiceClient
+        private readonly userService: UserServiceClient,
+        private readonly notifyService: INotifyService
     ) {
 
     }
@@ -137,6 +140,15 @@ export class TemplateService implements ITemplateService{
             estimated_cost: result.data.estimated_cost,
             project_manager_id: result.data.project_manager_id
         };
+
+        if (worker_id && worker_id > 0) {
+            this.notifyService.sendNotification(
+                [worker_id],
+                "New task assigned",
+                `A new task "${taskResponse.title}" has been assigned to you.`,
+                NotificationType.INFO
+            );
+        }
 
         return { success: true, data: taskResponse };
 
