@@ -330,7 +330,9 @@ export const AnalyticsPage: React.FC = () => {
                 </section>
 
                 {/* CONTENT CARD */}
-                <section className="bg-white/5 backdrop-blur-xl rounded-2xl p-6 shadow-lg border border-white/10 min-h-[200px] max-h-[575px]">
+                <section
+                    className={` bg-white/5 backdrop-blur-xl rounded-2xl p-6 shadow-lg border border-white/10 ${activeTab === "LAST_30_DAYS" ? "min-h-[200px]" : "min-h-[200px] max-h-[575px] overflow-auto"}`}>
+
                     {analyticsError && <div className="text-red-400 mb-4">{analyticsError}</div>}
 
                     {activeTab === "BURNDOWN" && (
