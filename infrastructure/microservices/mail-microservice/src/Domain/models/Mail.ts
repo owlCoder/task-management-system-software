@@ -3,4 +3,5 @@ export interface Mail{
     header:string;
     message:string;
     type?:number;
+    userId?: number;
 }
