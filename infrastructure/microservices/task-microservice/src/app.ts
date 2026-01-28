@@ -21,6 +21,10 @@ import { TaskVersionService } from './Services/TaskVersionService';
 import { ITaskVersionService } from './Domain/services/ITaskVersionService';
 import { IFileServiceClient } from './Domain/services/external-services/IFileServiceClient';
 import { FileServiceClient } from './Services/external-services/FileServiceClient';
+import { LogerService } from './Services/LogerServices/LogerService';
+import { SIEMService } from './siem/Services/SIEMService';
+import { ILogerService } from './Domain/services/ILogerService';
+import { ISIEMService } from './siem/Domen/services/ISIEMService';
 
 
 dotenv.config({ quiet: true });
@@ -59,9 +63,13 @@ app.use(express.json());
     projectServiceClient,
     userServiceClient
   );
+  const logerService: ILogerService = new LogerService();
+
+  const siemService: ISIEMService = new SIEMService(logerService);
 
   // WebAPI routes
-  const taskController = new TaskController(taskService,commentService,taskVersionService);
+
+  const taskController = new TaskController(taskService,commentService,taskVersionService,siemService);
   // Registering routes
   app.use('/api/v1', taskController.getRouter());
   //health

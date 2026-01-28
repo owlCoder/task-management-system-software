@@ -12,13 +12,16 @@ import { UpdateTaskValidator } from "../validators/UpdateTaskValidator";
 import { DeleteTaskValidator } from "../validators/DeleteTaskValidator";
 import { DeleteCommentValidator } from "../validators/DeleteCommentValidator";
 import { ITaskVersionService } from "../../Domain/services/ITaskVersionService";
+import { ISIEMService } from "../../siem/Domen/services/ISIEMService";
+import { generateEvent } from "../../siem/Domen/Helpers/generate/GenerateEvent";
 
 export class TaskController {
     private readonly router: Router;
 
     constructor(private taskService: ITaskService,
         private commentService: ICommentService,
-        private taskVersionService: ITaskVersionService
+        private taskVersionService: ITaskVersionService,
+        private readonly siemService: ISIEMService,
     ) {
         this.router = Router();
         this.initializeRoutes();
@@ -73,18 +76,42 @@ export class TaskController {
             const sprintId = Number(req.params.sprintId);
             if (isNaN(sprintId)) {
                 res.status(400).json({ message: "Invalid sprint ID" });
+                this.siemService.sendEvent(
+                generateEvent(
+                    "task-microservice",
+                    req,
+                    400,
+                    "Invalid sprint ID",
+                ),
+                );
                 return;
             }
             const userIdHeader = req.headers['x-user-id'];
 
             if (typeof userIdHeader !== 'string') {
                 res.status(400).json({ message: "Missing or invalid x-user-id header" });
+                this.siemService.sendEvent(
+                generateEvent(
+                    "task-microservice",
+                    req,
+                    400,
+                    "Missing or invalid x-user-id header",
+                ),
+                );
                 return;
             }
 
             const user_id = parseInt(userIdHeader, 10);
             if (isNaN(user_id)) {
                 res.status(400).json({ message: "Invalid user id" });
+                this.siemService.sendEvent(
+                generateEvent(
+                    "task-microservice",
+                    req,
+                    400,
+                    "Invalid user id",
+                ),
+                );
                 return;
             }
             const createTask: CreateTaskDTO = req.body;
@@ -94,12 +121,28 @@ export class TaskController {
             if (result.success) {
                 res.status(200).json(taskToTaskDTO(result.data));
             } else {
-                res.status(errorCodeToHttpStatus(result.errorCode)).json({ message: result.message });
+                res.status(404).json({ message: "Task not found" });
+                this.siemService.sendEvent(
+                generateEvent(
+                    "task-microservice",
+                    req,
+                    400,
+                    "Task not found",
+                ),
+                );
             }
 
         } catch (error) {
             console.log(error);
             res.status(500).json({ message: "Internal server error" });
+            this.siemService.sendEvent(
+            generateEvent(
+                "task-microservice",
+                req,
+                500,
+                "Internal server error",
+            ),
+            );
         }
     }
 
@@ -109,22 +152,54 @@ export class TaskController {
             const taskId = this.parseId((req.params as any).taskId);
             if (taskId === null) {
                 res.status(400).json({ error: "Invalid taskId" });
+                this.siemService.sendEvent(
+                generateEvent(
+                    "task-microservice",
+                    req,
+                    400,
+                    "Invalid taskId",
+                ),
+                );
                 return;
             }
             if (isNaN(taskId)) {
                 res.status(400).json({ message: "Invalid task ID" });
+                this.siemService.sendEvent(
+                generateEvent(
+                    "task-microservice",
+                    req,
+                    400,
+                    "Invalid taskId",
+                ),
+                );
                 return;
             }
             const userIdHeader = req.headers['x-user-id'];
 
             if (typeof userIdHeader !== 'string') {
                 res.status(400).json({ message: "Missing or invalid x-user-id header" });
+                this.siemService.sendEvent(
+                generateEvent(
+                    "task-microservice",
+                    req,
+                    400,
+                    "Missing or invalid x-user-id header",
+                ),
+                );
                 return;
             }
 
             const user_id = parseInt(userIdHeader, 10);
             if (isNaN(user_id)) {
                 res.status(400).json({ message: "Invalid user id" });
+                this.siemService.sendEvent(
+                generateEvent(
+                    "task-microservice",
+                    req,
+                    400,
+                    "Invalid user id" ,
+                ),
+                );
                 return;
             }
             const result = await this.taskService.getTaskById(taskId, user_id);
@@ -132,11 +207,27 @@ export class TaskController {
             if (result.success) {
                 res.status(200).json(taskToTaskDTO(result.data));
             } else {
-                res.status(errorCodeToHttpStatus(result.errorCode)).json({ message: result.message });
+                res.status(404).json({ message: "Task not found" });
+                this.siemService.sendEvent(
+                generateEvent(
+                    "task-microservice",
+                    req,
+                    404,
+                    "Task not found",
+                ),
+                );
             }
 
         } catch (error) {
             res.status(500).json({ message: "Internal server error" });
+            this.siemService.sendEvent(
+                generateEvent(
+                    "task-microservice",
+                    req,
+                    500,
+                    "Internal server error",
+                ),
+                );
         }
     }
 
@@ -145,34 +236,90 @@ export class TaskController {
             const sprintId = this.parseId((req.params as any).sprintId);
             if (sprintId === null) {
                 res.status(400).json({ error: "Invalid sprint_id" });
+                this.siemService.sendEvent(
+                generateEvent(
+                    "task-microservice",
+                    req,
+                    400,
+                    "Invalid sprint_id",
+                ),
+                );
                 return;
             }
             if (isNaN(sprintId)) {
                 res.status(400).json({ message: "Invalid sprint ID" });
+                this.siemService.sendEvent(
+                generateEvent(
+                    "task-microservice",
+                    req,
+                    400,
+                    "Invalid sprint ID",
+                ),
+                );
                 return;
             }
             const userIdHeader = req.headers['x-user-id'];
 
             if (typeof userIdHeader !== 'string') {
                 res.status(400).json({ message: "Missing or invalid x-user-id header" });
+                this.siemService.sendEvent(
+                generateEvent(
+                    "task-microservice",
+                    req,
+                    400,
+                    "Missing or invalid x-user-id header",
+                ),
+                );
                 return;
             }
 
             const user_id = parseInt(userIdHeader, 10);
             if (isNaN(user_id)) {
                 res.status(400).json({ message: "Invalid user id" });
+                this.siemService.sendEvent(
+                generateEvent(
+                    "task-microservice",
+                    req,
+                    400,
+                    "Invalid user id",
+                ),
+                );
                 return;
             }
             const result = await this.taskService.getAllTasksForSprint(sprintId, user_id);
 
             if (result.success) {
                 res.status(200).json(result.data.map(taskToTaskDTO));
+                this.siemService.sendEvent(
+                generateEvent(
+                    "task-microservice",
+                    req,
+                    200,
+                    "Task deleted",
+                ),
+                );
             } else {
-                res.status(errorCodeToHttpStatus(result.errorCode)).json({ message: result.message });
+                res.status(404).json({ message: "Sprint not found" });
+                this.siemService.sendEvent(
+                generateEvent(
+                    "task-microservice",
+                    req,
+                    404,
+                    "Sprint not found",
+                ),
+                );
             }
 
         } catch (error) {
             res.status(500).json({ message: "Internal server error" });
+            this.siemService.sendEvent(
+                generateEvent(
+                    "task-microservice",
+                    req,
+                    500,
+                   "Internal server error",
+                ),
+                );
         }
     }
 
@@ -182,6 +329,14 @@ export class TaskController {
 
             if (!Array.isArray(sprintIds) || sprintIds.length === 0) {
                 res.status(400).json({ message: "sprint_ids must be a non-empty array" });
+                this.siemService.sendEvent(
+                generateEvent(
+                    "task-microservice",
+                    req,
+                    400,
+                   "sprint_ids must be a non-empty array",
+                ),
+                );
                 return;
             }
 
@@ -191,6 +346,14 @@ export class TaskController {
 
             if (parsed.length === 0) {
                 res.status(400).json({ message: "Invalid sprint IDs" });
+                this.siemService.sendEvent(
+                generateEvent(
+                    "task-microservice",
+                    req,
+                    400,
+                    "Invalid sprint IDs",
+                ),
+                );
                 return;
             }
 
@@ -199,10 +362,26 @@ export class TaskController {
             if (result.success) {
                 res.status(200).json(result.data.map(taskToTaskDTO));
             } else {
-                res.status(errorCodeToHttpStatus(result.errorCode)).json({ message: result.message });
+                res.status(404).json({ message: "Sprint id not found" });
+                this.siemService.sendEvent(
+                generateEvent(
+                    "task-microservice",
+                    req,
+                    404,
+                    "Sprint id not found",
+                ),
+                );
             }
         } catch {
             res.status(500).json({ message: "Internal server error" });
+            this.siemService.sendEvent(
+                generateEvent(
+                    "task-microservice",
+                    req,
+                    500,
+                    "Internal server error",
+                ),
+                );
         }
     }
 
@@ -211,22 +390,54 @@ export class TaskController {
             const taskId = this.parseId((req.params as any).taskId);
             if (taskId === null) {
                 res.status(400).json({ error: "Invalid taskId" });
+                this.siemService.sendEvent(
+                generateEvent(
+                    "task-microservice",
+                    req,
+                    400,
+                    "Invalid taskId",
+                ),
+                );
                 return;
             }
             if (isNaN(taskId)) {
                 res.status(400).json({ message: "Invalid task ID" });
+                this.siemService.sendEvent(
+                generateEvent(
+                    "task-microservice",
+                    req,
+                    400,
+                    "Invalid task ID" ,
+                ),
+                );
                 return;
             }
             const userIdHeader = req.headers['x-user-id'];
 
             if (typeof userIdHeader !== 'string') {
                 res.status(400).json({ message: "Missing or invalid x-user-id header" });
+                this.siemService.sendEvent(
+                generateEvent(
+                    "task-microservice",
+                    req,
+                    400,
+                    "Missing or invalid x-user-id header",
+                ),
+                );
                 return;
             }
 
             const user_id = parseInt(userIdHeader, 10);
             if (isNaN(user_id)) {
                 res.status(400).json({ message: "Invalid user id" });
+                this.siemService.sendEvent(
+                generateEvent(
+                    "task-microservice",
+                    req,
+                    400,
+                    "Invalid user id",
+                ),
+                );
                 return;
             }
             const createComment: CreateCommentDTO = req.body;
@@ -236,11 +447,27 @@ export class TaskController {
             if (result.success) {
                 res.status(200).json(commentToCommentDTO(result.data, taskId));
             } else {
-                res.status(errorCodeToHttpStatus(result.errorCode)).json({ message: result.message });
+                res.status(404).json({ message: "Task not found" });
+                this.siemService.sendEvent(
+                generateEvent(
+                    "task-microservice",
+                    req,
+                    404,
+                    "Task not found",
+                ),
+                );
             }
 
         } catch (error) {
             res.status(500).json({ message: "Internal server error" });
+            this.siemService.sendEvent(
+                generateEvent(
+                    "task-microservice",
+                    req,
+                    500,
+                    "Internal server error",
+                ),
+                );
         }
     }
 
@@ -264,23 +491,55 @@ export class TaskController {
             const taskId = this.parseId((req.params as any).taskId);
             if (taskId === null) {
                 res.status(400).json({ error: "Invalid taskId" });
+                this.siemService.sendEvent(
+                generateEvent(
+                    "task-microservice",
+                    req,
+                    400,
+                    "Invalid taskId",
+                ),
+                );
                 return;
             }
             const taskIdValidation = DeleteTaskValidator.validateTaskId(taskId);
             if (!taskIdValidation.isValid) {
                 res.status(400).json({ message: taskIdValidation.message });
+                this.siemService.sendEvent(
+                generateEvent(
+                    "task-microservice",
+                    req,
+                    400,
+                    taskIdValidation.message ?? "TaskId Validation Error",
+                ),
+                );
                 return;
             }
             const userIdHeader = req.headers['x-user-id'];
 
             if (typeof userIdHeader !== 'string') {
                 res.status(400).json({ message: "Missing or invalid x-user-id header" });
+                this.siemService.sendEvent(
+                generateEvent(
+                    "task-microservice",
+                    req,
+                    400,
+                    "Missing or invalid x-user-id header",
+                ),
+                );
                 return;
             }
 
             const user_id = parseInt(userIdHeader, 10);
             if (isNaN(user_id)) {
                 res.status(400).json({ message: "Invalid user id" });
+                this.siemService.sendEvent(
+                generateEvent(
+                    "task-microservice",
+                    req,
+                    400,
+                    "Invalid user id",
+                ),
+                );
                 return;
             }
             const updateTaskDTO: UpdateTaskDTO = req.body;
@@ -288,6 +547,14 @@ export class TaskController {
             const dtoValidation = UpdateTaskValidator.validateUpdateTaskDTO(updateTaskDTO);
             if (!dtoValidation.isValid) {
                 res.status(400).json({ message: dtoValidation.message });
+                this.siemService.sendEvent(
+                generateEvent(
+                    "task-microservice",
+                    req,
+                    400,
+                    dtoValidation.message ?? "DTO validation",
+                ),
+                );
                 return;
             }
 
@@ -296,12 +563,28 @@ export class TaskController {
             if (result.success) {
                 res.status(200).json(taskToTaskDTO(result.data));
             } else {
-                res.status(errorCodeToHttpStatus(result.errorCode)).json({ message: result.message });
+                res.status(404).json({ message: "Task not found" });
+                this.siemService.sendEvent(
+                generateEvent(
+                    "task-microservice",
+                    req,
+                    400,
+                    "Task not found",
+                ),
+                );
             }
 
         } catch (error) {
             console.log(error);
             res.status(500).json({ message: "Internal server error" });
+            this.siemService.sendEvent(
+                generateEvent(
+                    "task-microservice",
+                    req,
+                    500,
+                    "Internal server error",
+                ),
+                );
         }
     }
 
@@ -310,28 +593,68 @@ export class TaskController {
             const taskId = this.parseId((req.params as any).taskId);
             if (taskId === null) {
                 res.status(400).json({ error: "Invalid taskId" });
+                this.siemService.sendEvent(
+                generateEvent(
+                    "task-microservice",
+                    req,
+                    400,
+                   "Invalid taskId",
+                ),
+                );
                 return;
             }
             if (isNaN(taskId)) {
                 res.status(400).json({ message: "Invalid task ID" });
+                this.siemService.sendEvent(
+                generateEvent(
+                    "task-microservice",
+                    req,
+                    400,
+                    "Invalid task ID",
+                ),
+                );
                 return;
             }
 
             const userIdHeader = req.headers['x-user-id'];
             if (typeof userIdHeader !== 'string') {
                 res.status(400).json({ message: "Missing or invalid x-user-id header" });
+                this.siemService.sendEvent(
+                generateEvent(
+                    "task-microservice",
+                    req,
+                    400,
+                    "Missing or invalid x-user-id header",
+                ),
+                );
                 return;
             }
 
             const user_id = parseInt(userIdHeader, 10);
             if (isNaN(user_id)) {
                 res.status(400).json({ message: "Invalid user id" });
+                this.siemService.sendEvent(
+                generateEvent(
+                    "task-microservice",
+                    req,
+                    400,
+                    "Invalid user id" ,
+                ),
+                );
                 return;
             }
 
             const { status, file_id } = req.body;
             if (status === undefined) {
                 res.status(400).json({ message: "Status is required" });
+                this.siemService.sendEvent(
+                generateEvent(
+                    "task-microservice",
+                    req,
+                    400,
+                    "Status is required",
+                ),
+                );
                 return;
             }
 
@@ -340,12 +663,28 @@ export class TaskController {
             if (result.success) {
                 res.status(200).json(taskToTaskDTO(result.data));
             } else {
-                res.status(errorCodeToHttpStatus(result.errorCode)).json({ message: result.message });
+                res.status(404).json({ message: "Task not found"});
+                this.siemService.sendEvent(
+                generateEvent(
+                    "task-microservice",
+                    req,
+                    404,
+                    "Task not found",
+                ),
+                );
             }
 
         } catch (error) {
             console.error(error);
             res.status(500).json({ message: "Internal server error" });
+            this.siemService.sendEvent(
+                generateEvent(
+                    "task-microservice",
+                    req,
+                    500,
+                    "Internal server error" ,
+                ),
+                );
         }
     }
 
@@ -355,23 +694,55 @@ export class TaskController {
             const taskId = this.parseId((req.params as any).taskId);
             if (taskId === null) {
                 res.status(400).json({ error: "Invalid taskId" });
+                this.siemService.sendEvent(
+                generateEvent(
+                    "task-microservice",
+                    req,
+                    400,
+                    "Invalid taskId",
+                ),
+                );
                 return;
             }
             const taskIdValidation = DeleteTaskValidator.validateTaskId(taskId);
             if (!taskIdValidation.isValid) {
                 res.status(400).json({ message: taskIdValidation.message });
+                this.siemService.sendEvent(
+                generateEvent(
+                    "task-microservice",
+                    req,
+                    400,
+                    "Task id validation error",
+                ),
+                );
                 return;
             }
             const userIdHeader = req.headers['x-user-id'];
 
             if (typeof userIdHeader !== 'string') {
                 res.status(400).json({ message: "Missing or invalid x-user-id header" });
+                this.siemService.sendEvent(
+                generateEvent(
+                    "task-microservice",
+                    req,
+                    400,
+                    "Missing or invalid x-user-id header",
+                ),
+                );
                 return;
             }
 
             const user_id = parseInt(userIdHeader, 10);
             if (isNaN(user_id)) {
                 res.status(400).json({ message: "Invalid user id" });
+                this.siemService.sendEvent(
+                generateEvent(
+                    "task-microservice",
+                    req,
+                    400,
+                    "Invalid user id",
+                ),
+                );
                 return;
             }
             const result = await this.taskService.deleteTask(taskId, user_id);
@@ -379,12 +750,28 @@ export class TaskController {
             if (result.success) {
                 res.status(204).json();
             } else {
-                res.status(errorCodeToHttpStatus(result.errorCode)).json({ message: result.message });
+                res.status(404).json({ message: "Task not found" });
+                this.siemService.sendEvent(
+                generateEvent(
+                    "task-microservice",
+                    req,
+                    404,
+                    "Task not found",
+                ),
+                );
             }
 
         } catch (error) {
             console.log(error);
             res.status(500).json({ message: "Internal server error" });
+             this.siemService.sendEvent(
+                generateEvent(
+                    "task-microservice",
+                    req,
+                    500,
+                    "Internal server error" 
+                ),
+                );
         }
     }
 
@@ -393,23 +780,55 @@ export class TaskController {
             const commentId = this.parseId((req.params as any).commentId);
             if (commentId === null) {
                 res.status(400).json({ error: "Invalid commentId" });
+                this.siemService.sendEvent(
+                generateEvent(
+                    "task-microservice",
+                    req,
+                    400,
+                    "Invalid commentId",
+                ),
+                );
                 return;
             }
             const commentIdValidation = DeleteCommentValidator.validateCommentId(commentId);
             if (!commentIdValidation.isValid) {
                 res.status(400).json({ message: commentIdValidation.message });
+                this.siemService.sendEvent(
+                generateEvent(
+                    "task-microservice",
+                    req,
+                    400,
+                   "Comment id Validation error"
+                ),
+                );
                 return;
             }
             const userIdHeader = req.headers['x-user-id'];
 
             if (typeof userIdHeader !== 'string') {
                 res.status(400).json({ message: "Missing or invalid x-user-id header" });
+                this.siemService.sendEvent(
+                generateEvent(
+                    "task-microservice",
+                    req,
+                    400,
+                    "Missing or invalid x-user-id header" ,
+                ),
+                );
                 return;
             }
 
             const user_id = parseInt(userIdHeader, 10);
             if (isNaN(user_id)) {
                 res.status(400).json({ message: "Invalid user id" });
+                this.siemService.sendEvent(
+                generateEvent(
+                    "task-microservice",
+                    req,
+                    400,
+                    "Invalid user id",
+                ),
+                );
                 return;
             }
             const result = await this.commentService.deleteComment(commentId, user_id);
@@ -417,12 +836,28 @@ export class TaskController {
             if (result.success) {
                 res.status(204).json();
             } else {
-                res.status(errorCodeToHttpStatus(result.errorCode)).json({ message: result.message });
+                res.status(404).json({ message: "Comment not found" });
+                this.siemService.sendEvent(
+                generateEvent(
+                    "task-microservice",
+                    req,
+                    404,
+                    "Comment not found",
+                ),
+                );
             }
 
         } catch (error) {
             console.log(error);
             res.status(500).json({ message: "Internal server error" });
+            this.siemService.sendEvent(
+                generateEvent(
+                    "task-microservice",
+                    req,
+                    500,
+                    "Internal server error" ,
+                ),
+                );
         }
     }
 
@@ -431,6 +866,14 @@ export class TaskController {
             const taskId = this.parseId((req.params as any).taskId);
             if (taskId === null) {
                 res.status(400).json({ error: "Invalid taskId" });
+                this.siemService.sendEvent(
+                generateEvent(
+                    "task-microservice",
+                    req,
+                    400,
+                    "Invalid taskId" ,
+                ),
+                );
                 return;
             }
 
@@ -438,6 +881,14 @@ export class TaskController {
             res.status(200).json(versions);
         } catch (error) {
             res.status(500).json({ message: "Internal server error" });
+            this.siemService.sendEvent(
+                generateEvent(
+                    "task-microservice",
+                    req,
+                    500,
+                   "Internal server error" ,
+                ),
+                );
         }
     }
 
@@ -446,10 +897,26 @@ export class TaskController {
             const versionId = this.parseId((req.params as any).versionId);
             if (versionId === null) {
                 res.status(400).json({ error: "Invalid versionId" });
+                this.siemService.sendEvent(
+                generateEvent(
+                    "task-microservice",
+                    req,
+                    400,
+                    "Invalid versionId",
+                ),
+                );
                 return;
             }
             if (isNaN(versionId)) {
                 res.status(400).json({ message: "Invalid version ID" });
+                this.siemService.sendEvent(
+                generateEvent(
+                    "task-microservice",
+                    req,
+                    400,
+                    "Invalid version ID",
+                ),
+                );
                 return;
             }
 
@@ -457,6 +924,14 @@ export class TaskController {
             res.status(200).json(version);
         } catch (error) {
             res.status(500).json({ message: "Internal server error" });
+            this.siemService.sendEvent(
+                generateEvent(
+                    "task-microservice",
+                    req,
+                    500,
+                    "Internal server error",
+                ),
+                );
         }
     }
 }
