@@ -8,6 +8,8 @@ import { ProjectMapper } from "../Utils/Mappers/ProjectMapper";
 import { IR2StorageService } from "../Storage/R2StorageService";
 import { ProjectStatus } from "../Domain/enums/ProjectStatus";
 import { IProjectUserService } from "../Domain/services/IProjectUserService";
+import { INotifyService } from "../Domain/services/INotifyService";
+import { NotificationType } from "../Domain/enums/NotificationType";
 import { Result } from "../Domain/types/Result";
 import { ErrorCode } from "../Domain/enums/ErrorCode";
 
@@ -15,7 +17,8 @@ export class ProjectService implements IProjectService {
     constructor(
         private readonly projectRepository: Repository<Project>,
         private readonly storageService: IR2StorageService,
-        private readonly projectUserService: IProjectUserService
+        private readonly projectUserService: IProjectUserService,
+        private readonly notifyService: INotifyService
     ) { }
 
     async CreateProject(data: ProjectCreateDTO): Promise<Result<ProjectDTO>> {
@@ -72,6 +75,7 @@ export class ProjectService implements IProjectService {
             };
         }
 
+        const previousStatus = project.status;
         if (data.image_key !== undefined && project.image_key) {
             await this.storageService.deleteImage(project.image_key);
         }
@@ -94,6 +98,17 @@ export class ProjectService implements IProjectService {
         if (data.status !== undefined) project.status = data.status;
 
         const saved = await this.projectRepository.save(project);
+        if (data.status === ProjectStatus.COMPLETED && previousStatus !== ProjectStatus.COMPLETED) {
+            const usersResult = await this.projectUserService.getUserIdsForProject(project_id);
+            if (usersResult.success && usersResult.data.length > 0) {
+                this.notifyService.sendNotification(
+                    usersResult.data,
+                    "Project completed",
+                    `Project "${saved.project_name}" has been completed.`,
+                    NotificationType.INFO
+                );
+            }
+        }
         if (data.total_weekly_hours_required !== undefined &&
             oldWeeklyHours !== data.total_weekly_hours_required) {
             await this.projectUserService.updateWeeklyHoursForAllUsers(

@@ -3,6 +3,8 @@ import axios, { AxiosInstance } from "axios";
 import { ProjectUserAssignDTO } from "../Domain/DTOs/ProjectUserAssignDTO";
 import { ProjectUserDTO } from "../Domain/DTOs/ProjectUserDTO";
 import { IProjectUserService } from "../Domain/services/IProjectUserService";
+import { INotifyService } from "../Domain/services/INotifyService";
+import { NotificationType } from "../Domain/enums/NotificationType";
 import { Project } from "../Domain/models/Project";
 import { ProjectUser } from "../Domain/models/ProjectUser";
 import { ProjectUserMapper } from "../Utils/Mappers/ProjectUserMapper";
@@ -17,7 +19,8 @@ export class ProjectUserService implements IProjectUserService {
 
     constructor(
         private readonly projectUserRepository: Repository<ProjectUser>,
-        private readonly projectRepository: Repository<Project>
+        private readonly projectRepository: Repository<Project>,
+        private readonly notifyService: INotifyService
     ) {
         const userServiceUrl = process.env.USER_SERVICE_API || "http://localhost:6754/api/v1";
         this.userClient = axios.create({
@@ -120,6 +123,7 @@ export class ProjectUserService implements IProjectUserService {
             project: project,
             user_id: userId,
             weekly_hours: data.weekly_hours,
+            added_at: new Date(),
         });
 
         const saved = await this.projectUserRepository.save(pu);
@@ -129,6 +133,13 @@ export class ProjectUserService implements IProjectUserService {
         dto.role_name = user.role_name;
         dto.image_url = user.image_url;
 
+        this.notifyService.sendNotification(
+            [userId],
+            "Added to project",
+            `You have been added to project "${project.project_name}".`,
+            NotificationType.INFO
+        );
+
         return { success: true, data: dto };
     }
 
@@ -137,6 +148,19 @@ export class ProjectUserService implements IProjectUserService {
             user_id,
             project: { project_id },
         } as any);
+        if (result.affected && result.affected > 0) {
+            const project = await this.projectRepository.findOne({
+                where: { project_id },
+            });
+            const projectName = project?.project_name ?? `project ${project_id}`;
+
+            this.notifyService.sendNotification(
+                [user_id],
+                "Removed from project",
+                `You have been removed from project "${projectName}".`,
+                NotificationType.INFO
+            );
+        }
         return { success: true, data: !!result.affected && result.affected > 0 };
     }
 
@@ -182,6 +206,16 @@ export class ProjectUserService implements IProjectUserService {
                 error: "Failed to fetch users for project",
             };
         }
+    }
+
+    async getUserIdsForProject(project_id: number): Promise<Result<number[]>> {
+        const list = await this.projectUserRepository.find({
+            where: { project: { project_id } },
+            select: ["user_id"],
+        });
+
+        const ids = list.map((pu) => pu.user_id);
+        return { success: true, data: ids };
     }
 
     async updateWeeklyHoursForAllUsers(project_id: number, oldHours: number, newHours: number): Promise<Result<void>> {

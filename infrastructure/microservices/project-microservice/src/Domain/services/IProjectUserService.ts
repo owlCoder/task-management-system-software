@@ -6,5 +6,6 @@ export interface IProjectUserService {
     assignUserToProject(data: ProjectUserAssignDTO): Promise<Result<ProjectUserDTO>>;
     removeUserFromProject(project_id: number, user_id: number): Promise<Result<boolean>>;
     getUsersForProject(project_id: number): Promise<Result<ProjectUserDTO[]>>;
+    getUserIdsForProject(project_id: number): Promise<Result<number[]>>;
     updateWeeklyHoursForAllUsers(project_id: number, oldHours: number, newHours: number): Promise<Result<void>>;
 }

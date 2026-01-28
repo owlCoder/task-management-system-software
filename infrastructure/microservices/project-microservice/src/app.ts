@@ -19,6 +19,8 @@ import { SprintController } from "./WebAPI/controllers/SprintController";
 import { R2StorageService, IR2StorageService } from "./Storage/R2StorageService";
 import { LogerService } from "./Services/LogerService";
 import { SIEMService } from "./Siem/Services/SIEMService";
+import { INotifyService } from "./Domain/services/INotifyService";
+import { NotifyService } from "./Services/NotifyService";
 
 dotenv.config({ quiet: true });
 
@@ -52,14 +54,17 @@ app.use(express.json());
     const projectUserRepository: Repository<ProjectUser> = Db.getRepository(ProjectUser);
     const sprintRepository: Repository<Sprint> = Db.getRepository(Sprint);
 
+    const notifyService: INotifyService = new NotifyService();
     const projectUserService: IProjectUserService = new ProjectUserService(
         projectUserRepository,
-        projectRepository
+        projectRepository,
+        notifyService
     );
     const projectService: IProjectService = new ProjectService(
         projectRepository, 
         storageService, 
-        projectUserService
+        projectUserService,
+        notifyService
     );
     const sprintService: ISprintService = new SprintService(sprintRepository, projectRepository);
 
