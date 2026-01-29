@@ -27,6 +27,16 @@ export class LogerService implements ILogerService {
         return true;
     }
 
+    async err(
+    service: string,
+    code: string,
+    url: string,
+    method: string,
+    msg: string,
+    ): Promise<void> {
+        console.log(`\x1b[35m[Logger@1.45.4]\x1b[0m ${msg}`);
+    }
+
     // Static method to set the global log level
     static setLogLevel(level: SeverityEnum): void {
         LogerService.logLevel = level;

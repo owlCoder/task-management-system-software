@@ -7,4 +7,5 @@ export enum LoggingServiceEnum {
     EMAIL_SERVICE =                 'EMAIL',
     OTP_VERIFICATION_SERVICE =      'OTP_VERIFICATION',
     EMAIL_HEALTH_CHECKER_SERVICE =  'EMAIL_HLTH_CHCKR',
+    SIEM =                          'SIEM'
 }
