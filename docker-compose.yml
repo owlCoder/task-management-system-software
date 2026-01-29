@@ -4,6 +4,18 @@ include:
   - path: ./database/docker-compose.yml
 
 services:
+  gateway-api:
+    container_name: gateway-api
+    build:
+      context: ./infrastructure/gateway-api
+    ports:
+      - "4000:4000"
+    env_file:
+      - ./infrastructure/gateway-api/.env
+      - .env.docker
+    networks:
+      - mysql_network
+
   auth-microservice:
     container_name: auth-microservice
     build:
@@ -43,7 +55,7 @@ services:
     build:
       context: ./infrastructure/microservices/file-microservice
     ports:
-      - "5004:3003"
+      - "5003:3003"
     env_file:
       - ./infrastructure/microservices/file-microservice/.env
       - ./docker-env-overrides/file.env
@@ -60,27 +72,10 @@ services:
     build:
       context: ./infrastructure/microservices/mail-microservice
     ports:
-      - "5005:5000"
+      - "5004:5000"
     env_file:
       - ./infrastructure/microservices/mail-microservice/.env
       - ./docker-env-overrides/mail.env
-    depends_on:
-      mysql:
-        condition: service_healthy
-      gateway-api:
-        condition: service_started
-    networks:
-      - mysql_network
-
-  notification-microservice:
-    container_name: notification-microservice
-    build:
-      context: ./infrastructure/microservices/notification-microservice
-    ports:
-      - "6432:6432"
-    env_file:
-      - ./infrastructure/microservices/notification-microservice/.env
-      - ./docker-env-overrides/notification.env
     depends_on:
       mysql:
         condition: service_healthy
@@ -94,7 +89,7 @@ services:
     build:
       context: ./infrastructure/microservices/project-microservice
     ports:
-      - "5006:5000"
+      - "5005:5000"
     env_file:
       - ./infrastructure/microservices/project-microservice/.env
       - ./docker-env-overrides/project.env
@@ -111,7 +106,7 @@ services:
     build:
       context: ./infrastructure/microservices/task-microservice
     ports:
-      - "5007:5000"
+      - "5006:5000"
     env_file:
       - ./infrastructure/microservices/task-microservice/.env
       - ./docker-env-overrides/task.env
@@ -128,7 +123,7 @@ services:
     build:
       context: ./infrastructure/microservices/user-microservice
     ports:
-      - "5008:5000"
+      - "5007:5000"
     env_file:
       - ./infrastructure/microservices/user-microservice/.env
       - ./docker-env-overrides/user.env
@@ -140,14 +135,53 @@ services:
     networks:
       - mysql_network
 
-  gateway-api:
-    container_name: gateway-api
+  service-status-microservice:
+    container_name: service-status-microservice
     build:
-      context: ./infrastructure/gateway-api
+      context: ./infrastructure/microservices/service-status-microservice
     ports:
-      - "4000:4000"
+      - "5008:5000"
     env_file:
-      - ./infrastructure/gateway-api/.env
-      - .env.docker
+      - ./infrastructure/microservices/service-status-microservice/.env
+      - ./docker-env-overrides/service-status.env
+    depends_on:
+      mysql:
+        condition: service_healthy
+      gateway-api:
+        condition: service_started
+    networks:
+      - mysql_network
+
+  version-control-microservice:
+    container_name: version-control-microservice
+    build:
+      context: ./infrastructure/microservices/version-control-microservice
+    ports:
+      - "5009:5000"
+    env_file:
+      - ./infrastructure/microservices/version-control-microservice/.env
+      - ./docker-env-overrides/version-control.env
+    depends_on:
+      mysql:
+        condition: service_healthy
+      gateway-api:
+        condition: service_started
+    networks:
+      - mysql_network
+
+  notification-microservice:
+    container_name: notification-microservice
+    build:
+      context: ./infrastructure/microservices/notification-microservice
+    ports:
+      - "5010:5000"
+    env_file:
+      - ./infrastructure/microservices/notification-microservice/.env
+      - ./docker-env-overrides/notification.env
+    depends_on:
+      mysql:
+        condition: service_healthy
+      gateway-api:
+        condition: service_started
     networks:
       - mysql_network
