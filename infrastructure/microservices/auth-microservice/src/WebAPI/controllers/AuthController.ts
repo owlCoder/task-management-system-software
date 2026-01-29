@@ -18,6 +18,8 @@ import { IJWTTokenService } from '../../Domain/services/IJWTTokenService';
 import { validateGoogleLoginData } from '../validators/GoogleLoginValidator';
 import { GoogleIdTokenVerifier } from '../../Services/Google/GoogleTokenVerifier';
 import { IGoogleIdTokenVerifier } from '../../Domain/services/IGoogleIdTokenVerifier';
+import { ISIEMService } from '../../siem/Domen/services/ISIEMService';
+import { generateEvent } from '../../siem/Domen/Helpers/generate/GenerateEvent';
 
 export class AuthController {
   private router: Router;
@@ -27,13 +29,15 @@ export class AuthController {
   private readonly tokenHelper: TokenHelper;
   private readonly errorHelper: ErrorHelper;
   private readonly googleTokenVerifier: IGoogleIdTokenVerifier | null;
+  private readonly siemService : ISIEMService
 
   constructor(
     authService: IAuthService,
     otpVerificationService: IOTPVerificationService,
     logerService: ILogerService,
     tokenNamingStrategy: ITokenNamingStrategy,
-    jwtTokenService: IJWTTokenService
+    jwtTokenService: IJWTTokenService,
+    siemService : ISIEMService
   ) {
     this.router = Router();
     this.authService = authService;
@@ -41,6 +45,7 @@ export class AuthController {
     this.logerService = logerService;
     this.tokenHelper = new TokenHelper(tokenNamingStrategy, jwtTokenService);
     this.errorHelper = new ErrorHelper(logerService);
+    this.siemService = siemService;
     this.initializeRoutes();
 
     const googleClientId = process.env.GOOGLE_CLIENT_ID;
@@ -76,6 +81,14 @@ export class AuthController {
     // Validate login input
     const validation = validateLoginData(data);
     if (!validation.success) {
+      this.siemService.sendEvent(
+          generateEvent(
+            "auth-microservice",
+            req,
+            400,
+            "Invalid login data",
+          ),
+      );
       this.errorHelper.handleValidationError(res, validation.message!, "login");
       return;
     }
@@ -86,26 +99,66 @@ export class AuthController {
     try {
       result = await this.authService.login(data);
     } catch (error) {
+      this.siemService.sendEvent(
+          generateEvent(
+            "auth-microservice",
+            req,
+            500,
+            "Login server error",
+          ),
+      );
       this.errorHelper.handleServerError(res, error, "login");
       return;
     }
 
     if (result.authenticated) {
       if (result.userData && result.userData.otp_required === true) {
+        this.siemService.sendEvent(
+          generateEvent(
+            "auth-microservice",
+            req,
+            200,
+            "Login successful, OTP required"
+          ),
+      );
         this.logerService.log(SeverityEnum.INFO, "OTP required for user login");
         const response = this.tokenHelper.createOTPRequiredResponse(result.userData);
         res.status(200).json(response);
       }
       else if (result.userData && result.userData.otp_required === false) {
         try {
+          this.siemService.sendEvent(
+          generateEvent(
+            "auth-microservice",
+            req,
+            200,
+            "Login successfull without OTP",
+          ),
+      );
           const response = this.tokenHelper.createLoginSuccessResponseWithCustomTokenName(result.userData, "token", "Login successful");
           this.logerService.log(SeverityEnum.INFO, "Login successful with password");
           res.status(200).json(response);
         } catch (error) {
+          this.siemService.sendEvent(
+          generateEvent(
+            "auth-microservice",
+            req,
+            500,
+            "JWT generation failed",
+          ),
+      );
           this.errorHelper.handleJWTError(res, error);
         }
       }
     } else {
+      this.siemService.sendEvent(
+          generateEvent(
+            "auth-microservice",
+            req,
+            401,
+            "Invalid credentials for login",
+          ),
+      );
       this.errorHelper.handleAuthFailure(res, "Invalid credentials", "login");
     }
   }
@@ -126,6 +179,14 @@ export class AuthController {
     // Validate SIEM login input
     const validation = validateSiemLoginData(data);
     if (!validation.success) {
+      this.siemService.sendEvent(
+          generateEvent(
+            "auth-microservice",
+            req,
+            400,
+            "Invalid siem login data",
+          ),
+      );
       this.errorHelper.handleValidationError(res, validation.message!, "SIEM login");
       return;
     }
@@ -136,6 +197,14 @@ export class AuthController {
     try {
       result = await this.authService.siemLogin(data);
     } catch (error) {
+      this.siemService.sendEvent(
+          generateEvent(
+            "auth-microservice",
+            req,
+            500,
+            "Siem login server error",
+          ),
+      );
       this.errorHelper.handleServerError(res, error, "SIEM login");
       return;
     }
@@ -152,10 +221,26 @@ export class AuthController {
           this.logerService.log(SeverityEnum.INFO, "SIEM login successful");
           res.status(200).json(response);
         } catch (error) {
+          this.siemService.sendEvent(
+          generateEvent(
+            "auth-microservice",
+            req,
+            500,
+            "JWT generation failed for Siem login",
+          ),
+      );
           this.errorHelper.handleJWTError(res, error, "SIEM login");
         }
       }
     } else {
+      this.siemService.sendEvent(
+          generateEvent(
+            "auth-microservice",
+            req,
+            401,
+            "Invalid credentials for login",
+          ),
+      );
       this.errorHelper.handleAuthFailure(res, "Invalid credentials or insufficient permissions", "SIEM");
     }
   }
@@ -168,7 +253,7 @@ export class AuthController {
    * @param {string} otp - The OTP code entered by the user
    * @returns {Object} JSON response with success status, message, and dynamic token field if OTP is valid
    * @see {@link BrowserData} for session data structure
-   */
+   */     
   private async verifyOTP(req: Request, res: Response): Promise<void> {
     this.logerService.log(SeverityEnum.INFO, "OTP verification request received");
 
@@ -179,6 +264,14 @@ export class AuthController {
     const validation = validateOTPVerificationData(data, otp);
 
     if (!validation.success) {
+      this.siemService.sendEvent(
+          generateEvent(
+            "auth-microservice",
+            req,
+            400,
+            "Invalid OTP Verify Data",
+          ),
+      );
       this.errorHelper.handleValidationError(res, validation.message!, "OTP verification");
       return;
     }
@@ -190,6 +283,14 @@ export class AuthController {
     try {
       result = await this.otpVerificationService.verifyOTP(data, otp);
     } catch (error) {
+      this.siemService.sendEvent(
+          generateEvent(
+            "auth-microservice",
+            req,
+            500,
+            "OTP server error",
+          ),
+      );
       this.errorHelper.handleServerError(res, error, "OTP verification");
       return;
     }
@@ -200,6 +301,14 @@ export class AuthController {
         this.logerService.log(SeverityEnum.INFO, "OTP verification and login successful");
         res.status(200).json(response);
       } catch (error) {
+        this.siemService.sendEvent(
+          generateEvent(
+            "auth-microservice",
+            req,
+            500,
+            "JWT generation failed for OTP verification",
+          ),
+      );
         this.errorHelper.handleJWTError(res, error);
       }
     } else {
@@ -223,6 +332,14 @@ export class AuthController {
 
     const validation = validateOTPResendData(data);
     if (!validation.success) {
+      this.siemService.sendEvent(
+          generateEvent(
+            "auth-microservice",
+            req,
+            400,
+            "Invalid OTP resend Data",
+          ),
+      );
       this.errorHelper.handleValidationError(res, validation.message!, "OTP resend");
       return;
     }
@@ -233,6 +350,14 @@ export class AuthController {
     try {
       result = await this.otpVerificationService.resendOTP(data);
     } catch (error) {
+      this.siemService.sendEvent(
+          generateEvent(
+            "auth-microservice",
+            req,
+            500,
+            "OTP server error",
+          ),
+      );
       this.errorHelper.handleServerError(res, error, "OTP resend");
       return;
     }
@@ -249,6 +374,14 @@ export class AuthController {
           this.logerService.log(SeverityEnum.INFO, "OTP resend successful, login completed (email offline)");
           res.status(200).json(response);
         } catch (error) {
+          this.siemService.sendEvent(
+          generateEvent(
+            "auth-microservice",
+            req,
+            500,
+            "JWT generation failed for Siem login",
+          ),
+      );
           this.errorHelper.handleJWTError(res, error);
         }
       }
@@ -263,11 +396,27 @@ export class AuthController {
 
     const validation = validateGoogleLoginData(req.body);
     if (!validation.success) {
+      this.siemService.sendEvent(
+          generateEvent(
+            "auth-microservice",
+            req,
+            400,
+            "Invalid Google login data",
+          ),
+      );
       this.errorHelper.handleValidationError(res, validation.message!, "Google login");
       return;
     }
 
     if(!this.googleTokenVerifier) {
+      this.siemService.sendEvent(
+          generateEvent(
+            "auth-microservice",
+            req,
+            500,
+            "Google login server error",
+          ),
+      );
       this.errorHelper.handleServerError(res, new Error("Google Token Verifier not configured"), "Google login");
       return;
     }
@@ -278,6 +427,14 @@ export class AuthController {
     try {
       googleUser = await this.googleTokenVerifier.verify(idToken);      
     } catch (error) {
+      this.siemService.sendEvent(
+          generateEvent(
+            "auth-microservice",
+            req,
+            500,
+            "Google login server error",
+          ),
+      );
       this.errorHelper.handleServerError(res, error, "Google login");
       return;
     }
