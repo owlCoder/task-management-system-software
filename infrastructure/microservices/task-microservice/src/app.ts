@@ -59,13 +59,8 @@ app.use(express.json());
   const userServiceClient: IUserServiceClient = new UserServiceClient();
   const taskVersionService: ITaskVersionService = new TaskVersionService(taskVersionRepository);
   const notifyService: INotifyService = new NotifyService();
-  const taskService : ITaskService = new TaskService(taskRepository,projectServiceClient,userServiceClient,taskVersionService,fileServiceClient,notifyService);
-  const commentService : ICommentService = new CommentService(
-    taskRepository,
-    commentRepository,
-    projectServiceClient,
-    userServiceClient
-  );
+  const taskService : ITaskService = new TaskService(taskRepository, projectServiceClient, userServiceClient, taskVersionService, fileServiceClient, notifyService);
+  const commentService : ICommentService = new CommentService(taskRepository, commentRepository, projectServiceClient);
   const logerService: ILogerService = new LogerService();
 
   const siemService: ISIEMService = new SIEMService(logerService);

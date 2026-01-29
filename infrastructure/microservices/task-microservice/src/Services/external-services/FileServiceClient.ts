@@ -1,7 +1,8 @@
 import { IFileServiceClient } from "../../Domain/services/external-services/IFileServiceClient";
-import axios, { AxiosInstance } from 'axios';
+import axios, { AxiosError, AxiosInstance } from 'axios';
 import { Result } from "../../Domain/types/Result";
 import { ErrorCode } from '../../Domain/enums/ErrorCode';
+import { UploadedFileDTO } from "../../Domain/external-dtos/UploadedFileDTO";
 
 export class FileServiceClient implements IFileServiceClient {
     private axiosInstance : AxiosInstance;
@@ -13,16 +14,15 @@ export class FileServiceClient implements IFileServiceClient {
         });
     }
 
-    async getFileMetaData(file_id: number): Promise<Result<any>> {
+    async getFileMetaData(file_id: number): Promise<Result<UploadedFileDTO>> {
         try {
-            const response = await this.axiosInstance.get(`/files/metadata/${file_id}`);
-            return { success: true, data: response.data.data };
-        } catch (error: any) {
-            console.log(error);
-            if (error.response?.status === 404) {
+            const response = await this.axiosInstance.get<UploadedFileDTO>(`/files/metadata/${file_id}`);
+            return { success: true, data: response.data };
+        } catch (error) {
+            if (error instanceof AxiosError && error.response?.status === 404) {
                 return { success: false, errorCode: ErrorCode.FILE_NOT_FOUND, message: "File not found" };
             }
-            return { success: false, errorCode: ErrorCode.INTERNAL_ERROR, message: "Failed to fetch sprint" };
+            return { success: false, errorCode: ErrorCode.INTERNAL_ERROR, message: "Failed to fetch file" };
         }
     }
 }

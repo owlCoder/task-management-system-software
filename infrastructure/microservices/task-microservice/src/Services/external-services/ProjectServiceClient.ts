@@ -1,7 +1,10 @@
-import axios, { AxiosInstance } from 'axios';
+import axios, { AxiosError, AxiosInstance } from 'axios';
 import { IProjectServiceClient } from '../../Domain/services/external-services/IProjectServiceClient';
 import { Result } from '../../Domain/types/Result';
 import { ErrorCode } from '../../Domain/enums/ErrorCode';
+import { SprintDTO } from '../../Domain/external-dtos/SprintDTO';
+import { ProjectUserDTO } from '../../Domain/external-dtos/ProjectUserDTO';
+import { ProjectDTO } from '../../Domain/external-dtos/ProjectDTO';
 
 
 export class ProjectServiceClient implements IProjectServiceClient {
@@ -14,37 +17,36 @@ export class ProjectServiceClient implements IProjectServiceClient {
         });
     }
 
-    async getSprintById(sprintId: number): Promise<Result<any>> {
+    async getSprintById(sprintId: number): Promise<Result<SprintDTO>> {
         try {
-            const response = await this.axiosInstance.get(`/sprints/${sprintId}`);
+            const response = await this.axiosInstance.get<SprintDTO>(`/sprints/${sprintId}`);
             return { success: true, data: response.data };
-        } catch (error: any) {
-            console.log(error);
-            if (error.response?.status === 404) {
+        } catch (error) {
+            if (error instanceof AxiosError && error.response?.status === 404) {
                 return { success: false, errorCode: ErrorCode.SPRINT_NOT_FOUND, message: "Sprint not found" };
             }
             return { success: false, errorCode: ErrorCode.INTERNAL_ERROR, message: "Failed to fetch sprint" };
         }
     }
 
-    async getUsersForProject(projectId: number): Promise<Result<any>> {
+    async getUsersForProject(projectId: number): Promise<Result<ProjectUserDTO[]>> {
         try {
-            const response = await this.axiosInstance.get(`/projects/${projectId}/users`);
+            const response = await this.axiosInstance.get<ProjectUserDTO[]>(`/projects/${projectId}/users`);
             return { success: true, data: response.data };
-        } catch (error: any) {
-            if (error.response?.status === 404) {
+        } catch (error) {
+            if (error instanceof AxiosError && error.response?.status === 404) {
                 return { success: false, errorCode: ErrorCode.PROJECT_NOT_FOUND, message: "Project not found" };
             }
             return { success: false, errorCode: ErrorCode.INTERNAL_ERROR, message: "Failed to fetch project users" };
         }
     }
 
-    async getProjectById(projectId: number): Promise<Result<any>> {
+    async getProjectById(projectId: number): Promise<Result<ProjectDTO>> {
         try {
-            const response = await this.axiosInstance.get(`/projects/${projectId}`);
+            const response = await this.axiosInstance.get<ProjectDTO>(`/projects/${projectId}`);
             return { success: true, data: response.data };
-        } catch (error: any) {
-            if (error.response?.status === 404) {
+        } catch (error) {
+            if (error instanceof AxiosError && error.response?.status === 404) {
                 return { success: false, errorCode: ErrorCode.PROJECT_NOT_FOUND, message: "Project not found" };
             }
             return { success: false, errorCode: ErrorCode.INTERNAL_ERROR, message: "Failed to fetch project" };
