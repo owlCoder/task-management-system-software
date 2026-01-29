@@ -1,4 +1,4 @@
-import { Repository } from "typeorm";
+import { FindOptionsWhere, Repository } from "typeorm";
 import axios, { AxiosInstance } from "axios";
 import { ProjectUserAssignDTO } from "../Domain/DTOs/ProjectUserAssignDTO";
 import { ProjectUserDTO } from "../Domain/DTOs/ProjectUserDTO";
@@ -35,12 +35,16 @@ export class ProjectUserService implements IProjectUserService {
                 `/users/by-username/${encodeURIComponent(username)}`
             );
             return response.data;
-        } catch (error: any) {
-            if (error.response?.status === 404) {
-                return null;
+        } catch (error: unknown) {
+            if (axios.isAxiosError(error)) {
+                if (error.response?.status === 404) {
+                    return null;
+                }
+                console.error("Error fetching user by username:", error.message);
+                throw new Error(`Failed to fetch user: ${error.message}`);
             }
-            console.error("Error fetching user by username:", error.message);
-            throw new Error(`Failed to fetch user: ${error.message}`);
+            console.error("Unexpected error fetching user by username:", error);
+            throw new Error("Failed to fetch user: Unknown error");
         }
     }
 
@@ -48,8 +52,12 @@ export class ProjectUserService implements IProjectUserService {
         try {
             const response = await this.userClient.get<UserDTO>(`/users/${userId}`);
             return response.data;
-        } catch (error: any) {
-            console.error(`Error fetching user by ID ${userId}:`, error.message);
+        } catch (error: unknown) {
+            if (axios.isAxiosError(error)) {
+                console.error(`Error fetching user by ID ${userId}:`, error.message);
+            } else {
+                console.error(`Unknown error fetching user by ID ${userId}:`, error);
+            }
             return null;
         }
     }
@@ -144,10 +152,12 @@ export class ProjectUserService implements IProjectUserService {
     }
 
     async removeUserFromProject(project_id: number, user_id: number): Promise<Result<boolean>> {
-        const result = await this.projectUserRepository.delete({
+        const where: FindOptionsWhere<ProjectUser> = {
             user_id,
             project: { project_id },
-        } as any);
+        };
+
+        const result = await this.projectUserRepository.delete(where);
         if (result.affected && result.affected > 0) {
             const project = await this.projectRepository.findOne({
                 where: { project_id },
@@ -198,8 +208,12 @@ export class ProjectUserService implements IProjectUserService {
             });
 
             return { success: true, data: dtos };
-        } catch (error: any) {
-            console.error("Error fetching users for project:", error.message);
+        } catch (error: unknown) {
+            if (axios.isAxiosError(error)) {
+                console.error("Axios error fetching users for project:", error.message);
+            } else {
+                console.error("Unexpected error fetching users for project:", error);
+            }
             return {
                 success: false,
                 code: ErrorCode.INTERNAL_ERROR,
