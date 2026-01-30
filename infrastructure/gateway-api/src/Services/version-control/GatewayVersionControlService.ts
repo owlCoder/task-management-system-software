@@ -44,14 +44,13 @@ export class GatewayVersionControlService implements IGatewayVersionControlServi
      * - On success returns data as {@link ReviewDTO}.
      * - On failure returns status code and error message.
      */
-    async sendToReview(taskId: number, senderId: number, senderRole: string): Promise<Result<ReviewDTO>> {
+    async sendToReview(taskId: number, senderId: number): Promise<Result<ReviewDTO>> {
         return await makeAPICall<ReviewDTO>(this.versionClient, this.errorHandlingService, {
             serviceName: SERVICES.VERSION_CONTROL,
             method: HTTP_METHODS.POST,
             url: VERSION_CONTROL_ROUTES.SEND_REVIEW(taskId),
             headers: {
-                "x-user-id": senderId.toString(),
-                "x-user-role": senderRole
+                "x-user-id": senderId.toString()
             }
         });
     }
@@ -65,14 +64,13 @@ export class GatewayVersionControlService implements IGatewayVersionControlServi
      * - On success returns data as {@link ReviewDTO}.
      * - On failure returns status code and error message.
      */
-    async acceptReview(taskId: number, senderId: number, senderRole: string): Promise<Result<ReviewDTO>> {
+    async acceptReview(taskId: number, senderId: number): Promise<Result<ReviewDTO>> {
         return await makeAPICall<ReviewDTO>(this.versionClient, this.errorHandlingService, {
             serviceName: SERVICES.VERSION_CONTROL,
             method: HTTP_METHODS.POST,
             url: VERSION_CONTROL_ROUTES.ACCEPT_REVIEW(taskId),
             headers: {
-                "x-user-id": senderId.toString(),
-                "x-user-role": senderRole
+                "x-user-id": senderId.toString()
             }
         });
     }
@@ -87,14 +85,13 @@ export class GatewayVersionControlService implements IGatewayVersionControlServi
      * - On success returns data as {@link ReviewDTO}.
      * - On failure returns status code and error message.
      */
-    async rejectReview(taskId: number, data: RejectReviewDTO, senderId: number, senderRole: string): Promise<Result<ReviewCommentDTO>> {
+    async rejectReview(taskId: number, data: RejectReviewDTO, senderId: number): Promise<Result<ReviewCommentDTO>> {
         return await makeAPICall<ReviewCommentDTO, RejectReviewDTO>(this.versionClient, this.errorHandlingService, {
             serviceName: SERVICES.VERSION_CONTROL,
             method: HTTP_METHODS.POST,
             url: VERSION_CONTROL_ROUTES.REJECT_REVIEW(taskId),
             headers: {
-                "x-user-id": senderId.toString(),
-                "x-user-role": senderRole
+                "x-user-id": senderId.toString()
             },
             data: data
         });
@@ -108,15 +105,12 @@ export class GatewayVersionControlService implements IGatewayVersionControlServi
      * - On success returns data as {@link ReviewDTO[]}.
      * - On failure returns status code and error message.
      */
-    async getReviews(senderRole: string, params: ReviewsQueryParams): Promise<Result<ReviewDTO[]>> {
+    async getReviews(params: ReviewsQueryParams): Promise<Result<ReviewDTO[]>> {
         return await makeAPICall<ReviewDTO[], undefined, ReviewsQueryParams>(this.versionClient, this.errorHandlingService, {
             serviceName: SERVICES.VERSION_CONTROL,
             method: HTTP_METHODS.GET,
             url: VERSION_CONTROL_ROUTES.GET_REVIEWS,
-            params: params,
-            headers: {
-                "x-user-role": senderRole
-            }
+            params: params
         });
     }
 
@@ -128,14 +122,11 @@ export class GatewayVersionControlService implements IGatewayVersionControlServi
      * - On success returns data as {@link ReviewHistoryItemDTO[]}.
      * - On failure returns status code and error message.
      */
-    async getReviewHistory(taskId: number, senderRole: string): Promise<Result<ReviewHistoryItemDTO[]>> {
+    async getReviewHistory(taskId: number): Promise<Result<ReviewHistoryItemDTO[]>> {
         return await makeAPICall<ReviewHistoryItemDTO[]>(this.versionClient, this.errorHandlingService, {
             serviceName: SERVICES.VERSION_CONTROL,
             method: HTTP_METHODS.GET,
-            url: VERSION_CONTROL_ROUTES.GET_REVIEW_HISTORY(taskId),
-            headers: {
-                "x-user-role": senderRole
-            }
+            url: VERSION_CONTROL_ROUTES.GET_REVIEW_HISTORY(taskId)
         });
     }
 
@@ -147,14 +138,11 @@ export class GatewayVersionControlService implements IGatewayVersionControlServi
      * - On success returns data as {@link ReviewCommentDTO}.
      * - On failure returns status code and error message.
      */
-    async getReviewComment(commentId: number, senderRole: string): Promise<Result<ReviewCommentDTO>> {
+    async getReviewComment(commentId: number): Promise<Result<ReviewCommentDTO>> {
         return await makeAPICall<ReviewCommentDTO>(this.versionClient, this.errorHandlingService, {
             serviceName: SERVICES.VERSION_CONTROL,
             method: HTTP_METHODS.GET,
-            url: VERSION_CONTROL_ROUTES.GET_REVIEW_COMMENT(commentId),
-            headers: {
-                "x-user-role": senderRole
-            }
+            url: VERSION_CONTROL_ROUTES.GET_REVIEW_COMMENT(commentId)
         });
     }
 

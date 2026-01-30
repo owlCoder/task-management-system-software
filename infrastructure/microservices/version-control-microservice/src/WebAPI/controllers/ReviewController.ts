@@ -22,22 +22,12 @@ export class ReviewController {
     return this.router;
   }
 
-  private normalizeRole(role: unknown): string {
-    if (typeof role !== "string") return "";
-    return role.trim().toUpperCase().replace(/[\s_-]+/g, "");
-  }
-
-  private isProjectManager(role: unknown): boolean {
-    return this.normalizeRole(role) === "PROJECTMANAGER";
-  }
-
   private initializeRoutes() {
     this.router.get("/reviews", this.getReviews.bind(this));
     this.router.post("/reviews/:taskId/send", this.sendReview.bind(this));
     this.router.post("/reviews/:taskId/accept", this.approveReview.bind(this));
     this.router.post("/reviews/:taskId/reject", this.rejectReview.bind(this));
     this.router.get("/reviews/:taskId/history", this.getReviewHistory.bind(this));
-    this.router.get("/reviews", this.getReviews.bind(this));
     this.router.get("/reviewComments/:commentId", this.getCommentById.bind(this));
   }
 
@@ -92,13 +82,7 @@ export class ReviewController {
       if (isNaN(taskId)) {
         res.status(400).json({ message: "Invalid task ID" });
         return;
-      }
-
-      const userRole = req.headers["x-user-role"];
-      if (!this.isProjectManager(userRole)) {
-        res.status(403).json({ message: "Only Project Manager can approve review" });
-        return;
-      }
+      }      
 
       const userIdHeader = req.headers["x-user-id"];
       if (typeof userIdHeader !== "string") {
@@ -144,13 +128,7 @@ export class ReviewController {
       if (isNaN(taskId)) {
         res.status(400).json({ message: "Invalid task ID" });
         return;
-      }
-
-      const userRole = req.headers["x-user-role"];
-      if (!this.isProjectManager(userRole)) {
-        res.status(403).json({ message: "Only Project Manager can reject review" });
-        return;
-      }
+      }      
 
       const userIdHeader = req.headers["x-user-id"];
       if (typeof userIdHeader !== "string") {
@@ -196,13 +174,7 @@ export class ReviewController {
   }
 
   async getReviews(req: Request, res: Response): Promise<void> {
-    try {
-      const userRole = req.headers["x-user-role"];
-      if (!this.isProjectManager(userRole)) {
-        res.status(403).json({ message: "Only Project Manager can view reviews" });
-        return;
-      }
-
+    try {     
       const statusRaw = (req.query.status as string | undefined)?.toUpperCase();
       const status =
         statusRaw && (Object.values(ReviewStatus) as string[]).includes(statusRaw)
@@ -237,12 +209,6 @@ export class ReviewController {
 
   async getCommentById(req: Request, res: Response): Promise<void> {
     try {
-      const userRole = req.headers["x-user-role"];
-      if (!this.isProjectManager(userRole)) {
-        res.status(403).json({ message: "Only Project Manager can view review comments" });
-        return;
-      }
-
       const commentId = Number(req.params.commentId);
       if (isNaN(commentId)) {
         res.status(400).json({ message: "Invalid comment ID" });
