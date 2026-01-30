@@ -11,6 +11,14 @@ import { ILoggerService } from "../Domain/Services/ILoggerService";
 
 export class Measurement_Service implements IMeasurement_Service {
 
+    private get measurementRepository(): Repository<Measurement> {
+        return Db.getRepository(Measurement);
+    }
+
+    private get microserviceRepository(): Repository<Microservice> {
+        return Db.getRepository(Microservice);
+    }
+
     async deleteOldNonDownMeasurements(olderThanMs: number): Promise<number> {
         const cutoffDate = new Date(Date.now() - olderThanMs);
 
@@ -39,15 +47,6 @@ export class Measurement_Service implements IMeasurement_Service {
 
         return result.affected ?? 0;
     }
-
-    private get measurementRepository(): Repository<Measurement> {
-        return Db.getRepository(Measurement);
-    }
-
-    private get microserviceRepository(): Repository<Microservice> {
-        return Db.getRepository(Microservice);
-    }
-
 
     async getAverageResponseTime(days: number): Promise<{ time: string; avgResponseTime: number }[]> {
 
@@ -91,7 +90,7 @@ export class Measurement_Service implements IMeasurement_Service {
     }
 
 
-    async getAverageUptime(): Promise<{ microserviceId: number; uptime: number }[]> {
+    async getUptime(): Promise<{ microserviceId: number; uptime: number }[]> {
         const result = await this.measurementRepository
             .createQueryBuilder("m")
             .select("m.ID_microservice", "microserviceId")
@@ -155,7 +154,6 @@ export class Measurement_Service implements IMeasurement_Service {
     }
 
     async setMeasurement(measurement: CreateMeasurementDto): Promise<boolean> {
-
         const microservice = await this.microserviceRepository.findOne({
             where: { ID_microservice: measurement.microserviceId }
         });

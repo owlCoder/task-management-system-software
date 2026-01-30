@@ -1,12 +1,12 @@
 import express from 'express';
 import { corsPolicy } from './Middlewares/cors/corsPolicy';
-import { Microservice_controller } from './WebAPI/controllers/Microservice_controller';
-import { Measurement_controller } from './WebAPI/controllers/Measurement_controller';
-import { Measurement_Service } from './Services/Measurement_Service';
-import { Microservice_Service } from './Services/Microservice_Service';
+import { Microservice_controller } from './WebAPI/controllers/microserviceController';
+import { Measurement_controller } from './WebAPI/controllers/measurementController';
+import { Measurement_Service } from './Services/measurementService';
+import { Microservice_Service } from './Services/microserviceService';
 import { Db } from './Database/DbConnectionPool';
-import { Health_Service } from './Services/Health_Service';
-import { GarbageCollector_Service } from './Services/GC_Service';
+import { Health_Service } from './Services/healthService';
+import { GarbageCollector_Service } from './Services/GCService';
 import { LoggerService } from './Services/LoggerService';
 import { logger } from './infrastructure/Logger';
 import { SIEMService } from './SIEM/Services/SIEMService';

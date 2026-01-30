@@ -1,7 +1,7 @@
 import { Router, Request, Response } from "express";
 import { IMeasurement_Service } from "../../Domain/Services/IMeasurement_Service";
 import { CreateMeasurementDto } from "../../Domain/DTOs/CreateMeasurement_DTO";
-import { validateMeasurementDto } from "../validators/Measurement_validator";
+import { validateMeasurementDto } from "../validators/measurementValidator";
 import { ILoggerService } from "../../Domain/Services/ILoggerService";
 import { IMicroservice_Service } from "../../Domain/Services/IMicroservice_Service";
 import { EOperationalStatus } from "../../Domain/enums/EOperationalStatus";
@@ -34,8 +34,6 @@ export class Measurement_controller {
 
         if (isNaN(days) || days <= 0) {
             res.status(400).json({ message: "days must be a positive number" });
-
-            this.siemService.sendEvent(generateEvent("service-status-microservice", req, 400, `Service blocked request with negative number of days`,),);
             
             this.LoggerService.warn("MEASUREMENT_CONTROLLER", `Invalid number of days received: ${req.params.microserviceId}`);
             return;
@@ -81,8 +79,6 @@ export class Measurement_controller {
 
             this.LoggerService.warn("MEASUREMENT_CONTROLLER", `Invalid microserviceId received: ${req.params.microserviceId}`);
 
-            this.siemService.sendEvent(generateEvent("service-status-microservice", req, 400, `Invalid microserviceId received: ${req.params.microserviceId}`,),);
-
             res.status(400).json({ message: "Invalid microserviceId. It must be a positive number." });
             return;
         }
@@ -124,7 +120,7 @@ export class Measurement_controller {
         try {
             const [microservices, uptimes, statuses] = await Promise.all([
                 this.microserviceService.getAllMicroservices(),
-                this.measurementService.getAverageUptime(),
+                this.measurementService.getUptime(),
                 this.measurementService.getLatestStatuses()
             ]);
 
@@ -168,8 +164,6 @@ export class Measurement_controller {
             const validationError = validateMeasurementDto(dto);
             if (validationError) {
                 res.status(400).json({ message: validationError });
-
-                this.siemService.sendEvent(generateEvent("service-status-microservice", req, 400, `Service blocked given request with negative microserviceId`,),);
                 
                 this.LoggerService.warn("MEASUREMENT_CONTROLLER", `Validation failed: ${validationError}`);
                 return;
@@ -205,8 +199,6 @@ export class Measurement_controller {
 
             if (isNaN(measurementID) || measurementID <= 0) {
                 res.status(400).json({ message: "measurementID must be a positive number" });
-
-                this.siemService.sendEvent(generateEvent("service-status-microservice", req, 400, `Service blocked given request with negative microserviceId`,),);
                 
                 this.LoggerService.warn("MEASUREMENT_CONTROLLER", `Invalid measurementID: ${req.params.measurementID}`);
                 return;

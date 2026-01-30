@@ -44,8 +44,6 @@ export class Microservice_controller {
             if (!microserviceName || microserviceName.trim() === "") {
                 this.LoggerService.warn("MICROSERVICE_CONTROLLER", "microserviceName is missing or empty");
 
-                this.siemService.sendEvent(generateEvent("service-status-microservice", req, 400, "Service error while validating data for creating microservice",),);
-
                 res.status(400).json({ message: "microserviceName is required" });
                 return;
             }
@@ -58,8 +56,6 @@ export class Microservice_controller {
                 res.status(201).json({ message: "Microservice created successfully" });
             } else {
                 this.LoggerService.warn("MICROSERVICE_CONTROLLER", `Microservice could not be created (maybe duplicate): ${microserviceName}`);
-
-                this.siemService.sendEvent(generateEvent("service-status-microservice", req, 400, "Service error while creating microservice 99% sure its duplicate name",),);
 
                 res.status(400).json({ message: "Microservice could not be created (maybe duplicate)" });
             }
@@ -79,8 +75,6 @@ export class Microservice_controller {
             const microserviceId = Number(req.params.microserviceId);
             if (isNaN(microserviceId) || microserviceId <= 0) {
                 this.LoggerService.warn("MICROSERVICE_CONTROLLER", `Invalid microserviceId: ${req.params.microserviceId}`);
-
-                this.siemService.sendEvent(generateEvent("service-status-microservice", req, 400, "Service blocked given request with negative microserviceId",),);
 
                 res.status(400).json({ message: "microserviceId must be a positive number" });
                 return;

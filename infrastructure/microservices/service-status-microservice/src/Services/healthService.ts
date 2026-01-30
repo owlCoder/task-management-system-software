@@ -1,5 +1,5 @@
 import axios from "axios";
-import { IHealth_Service } from "../Domain/Services/IHealth_Service";
+import { IHealth_Service } from "../Domain/Services/IHealthService";
 import { loadMicroservices } from "../Helpers/loadMicroservices";
 import { CreateMeasurementDto } from "../Domain/DTOs/CreateMeasurement_DTO";
 import { EOperationalStatus } from "../Domain/enums/EOperationalStatus";
@@ -8,8 +8,8 @@ import { ILoggerService } from "../Domain/Services/ILoggerService";
 import { IMicroservice_Service } from "../Domain/Services/IMicroservice_Service";
 import { IMeasurement_Service } from "../Domain/Services/IMeasurement_Service";
 
-const CHECK_INTERVAL = 1_000 * 60 * 5;
-const REQUEST_TIMEOUT = 1_000;
+const checkInterval = 1_000 * 60 * 5;
+const requestTimeout = 1_000;
 let running = false;
 
 
@@ -59,7 +59,7 @@ export class Health_Service implements IHealth_Service {
             } finally {
                 running = false;
             }
-        }, CHECK_INTERVAL);
+        }, checkInterval);
     }
 
     async ping(ms: RuntimeMicroservice): Promise<void> {
@@ -67,7 +67,7 @@ export class Health_Service implements IHealth_Service {
 
         try {
             const response = await axios.get(ms.url, {
-                timeout: REQUEST_TIMEOUT,
+                timeout: requestTimeout,
                 validateStatus: () => true
             });
 
