@@ -57,9 +57,12 @@ export class GatewayUserController {
      * - On failure: response status code indicating the failure, response data: message describing the error.
      */
     private async createUser(req: Request, res: Response): Promise<void> {
-        const data = req.body as RegistrationUserDTO;
+        if (!req.headers['content-type']?.includes('multipart/form-data')) {
+            res.status(400).json({ message: "Bad request - multipart/form-data required" });
+            return;
+        }
 
-        const result = await this.gatewayUserService.createUser(data);
+        const result = await this.gatewayUserService.createUser(req);
         handleResponse(res, result, 201);
     }
 

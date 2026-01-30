@@ -29,12 +29,22 @@ export const AddUserForm: React.FC<AddUserFormProps> = ({
   const [availableRoles, setAvailableRoles] = useState<UserRoleDTO[]>([]);
   const [loadingRoles, setLoadingRoles] = useState(true);
 
-  const [formData, setFormData] = useState<UserCreationDTO>({
+  /*const [formData, setFormData] = useState<Omit<UserCreationDTO, 'image_file'>>({
+    username: "",
+    email: "",
+    password: "",
+    role_name: "", 
+  });*/
+
+    const [formData, setFormData] = useState<UserCreationDTO>({
     username: "",
     email: "",
     password: "",
     role_name: "", 
   });
+
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string>("");
 
   useEffect(() => {
     const fetchRoles = async () => {
@@ -64,12 +74,35 @@ export const AddUserForm: React.FC<AddUserFormProps> = ({
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      setImageFile(file);
+
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleRemoveImage = () => {
+    setImageFile(null);
+    setImagePreview("");
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!token) return;
 
     try {
-      const created = await userAPI.createUser(token, formData);
+      const createData: UserCreationDTO = {
+        ...formData,
+        image_file: imageFile || undefined,
+      };
+
+      const created = await userAPI.createUser(token, createData);
       toast.success("User created successfully!");
       onUserAdded(created);
       onClose();
@@ -84,6 +117,40 @@ export const AddUserForm: React.FC<AddUserFormProps> = ({
       <h3 className="text-2xl font-bold mb-6 text-white text-center tracking-tight">Add New User</h3>
 
       <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
+        <div className="flex flex-col items-center gap-3 mb-2">
+          <div className="w-24 h-24 rounded-full border-2 border-white/40 shadow-xl flex items-center justify-center bg-white/10 overflow-hidden">
+            {imagePreview ? (
+              <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
+            ) : (
+              <span className="text-4xl font-bold text-white/80 uppercase">
+                {formData.username ? formData.username.charAt(0) : "?"}
+              </span>
+            )}
+          </div>
+          <div className="flex gap-2">
+            <label className="cursor-pointer px-4 py-1 rounded-full bg-white/10 border border-white/20 hover:bg-white/20 transition">
+              <span className="text-white text-xs font-medium">
+                {imagePreview ? "Change Photo" : "Add Photo"}
+              </span>
+              <input 
+                type="file" 
+                className="hidden" 
+                accept="image/*"
+                onChange={handleImageChange} 
+              />
+            </label>
+            {imagePreview && (
+              <button
+                type="button"
+                onClick={handleRemoveImage}
+                className="px-4 py-1 rounded-full bg-red-500/20 border border-red-500/30 hover:bg-red-500/30 transition"
+              >
+                <span className="text-red-200 text-xs font-medium">Remove</span>
+              </button>
+            )}
+          </div>
+        </div>
+
         <input type="text" name="username" value={formData.username} onChange={handleChange} placeholder="Username" className={inputClasses} required />
         <input type="email" name="email" value={formData.email} onChange={handleChange} placeholder="Email" className={inputClasses} required />
         <input type="password" name="password" value={formData.password} onChange={handleChange} placeholder="Password" className={inputClasses} required />
