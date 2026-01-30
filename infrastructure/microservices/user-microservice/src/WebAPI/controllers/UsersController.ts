@@ -11,6 +11,7 @@ import { IR2StorageService } from "../../Storage/R2StorageService";
 import { UserUpdateDTO } from "../../Domain/DTOs/UserUpdateDTO";
 import { ISIEMService } from "../../siem/Domen/services/ISIEMService";
 import { generateEvent } from "../../siem/Domen/Helpers/generate/GenerateEvent";
+import { UserCreationDTO } from "../../Domain/DTOs/UserCreationDTO";
 
 const upload = multer({
   storage: multer.memoryStorage(),
@@ -48,7 +49,7 @@ export class UsersController {
       this.getUserByUsername.bind(this),
     );
     this.router.get("/users/:id", this.getUserById.bind(this));
-    this.router.post("/users", this.createUser.bind(this));
+    this.router.post("/users", upload.single("image_file"), this.createUser.bind(this));
     this.router.delete("/users/:id", this.logicalyDeleteUser.bind(this));
     this.router.put(
       "/users/:id",
@@ -212,11 +213,43 @@ export class UsersController {
 
   private async createUser(req: Request, res: Response): Promise<void> {
     try {
-      const userData = req.body;
+      const userData: UserCreationDTO = {
+        username: req.body.username,
+        email: req.body.email,
+        password: req.body.password,
+        role_name: req.body.role_name,
+      };
+
+      if (req.file) {
+        try {
+          const uploadResult = await this.storageService.uploadImage(
+            req.file.buffer,
+            req.file.originalname,
+            req.file.mimetype,
+          );
+          userData.image_key = uploadResult.key;
+          userData.image_url = uploadResult.url;
+        } catch (uploadError) {
+          this.siemService.sendEvent(
+            generateEvent(
+              "user-microservice",
+              req,
+              500,
+              "User creation failed | Failed to upload image",
+            ),
+          );
+          this.logger.log(`Image upload failed: ${(uploadError as Error).message}`);
+          res.status(500).json({ message: "Failed to upload image" });
+          return;
+        }
+      }
 
       const rezultat = UserDataValidation(userData);
 
       if (rezultat.uspesno === false) {
+        if (userData.image_key) {
+          await this.storageService.deleteImage(userData.image_key);
+        }
         res.status(400).json({ message: rezultat.poruka });
         return;
       }
@@ -236,6 +269,10 @@ export class UsersController {
 
         res.status(201).json(result.data);
       } else {
+        if (userData.image_key) {
+          await this.storageService.deleteImage(userData.image_key);
+        }
+        
         this.logger.log(result.error);
         this.siemService.sendEvent(
           generateEvent("user-microservice", req, result.code, result.error),

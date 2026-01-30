@@ -49,11 +49,21 @@ export class UserAPI implements IUserAPI {
 
   async createUser(token: string, user: UserCreationDTO): Promise<UserDTO> {
     try {
+      const formData = new FormData();
+      formData.append("username", user.username);
+      formData.append("email", user.email);
+      formData.append("password", user.password);
+      formData.append("role_name", user.role_name);
+      
+      if (user.image_file) {
+        formData.append("image_file", user.image_file);
+      }
+
       return (
-        await this.axiosInstance.post<UserDTO>("/users", user, {
+        await this.axiosInstance.post<UserDTO>("/users", formData, {
           headers: { 
             Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
+            //"Content-Type": "application/json",
           },
         })
       ).data;

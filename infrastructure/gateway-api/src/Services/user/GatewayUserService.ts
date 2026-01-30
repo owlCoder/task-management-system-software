@@ -40,12 +40,17 @@ export class GatewayUserService implements IGatewayUserService {
      * - On success returns data as {@link UserDTO}.
      * - On failure returns status code and error message.
      */
-    async createUser(data: RegistrationUserDTO): Promise<Result<UserDTO>> {
-        return await makeAPICall<UserDTO, RegistrationUserDTO>(this.userClient, this.errorHandlingService, {
+    async createUser(req: Request): Promise<Result<UserDTO>> {
+        return await makeAPIUploadStreamCall<UserDTO, Request>(this.userClient, this.errorHandlingService, {
             serviceName: SERVICES.USER,
             method: HTTP_METHODS.POST,
             url: USER_ROUTES.REGISTER_USER,
-            data: data
+            data: req,
+            headers: {
+                "Content-Type": req.headers["content-type"]!,
+                ...(req.headers["content-length"] && { 'Content-Length': req.headers["content-length"] })
+            },
+            timeout: 20000
         });
     }
 
