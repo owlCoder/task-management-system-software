@@ -4,6 +4,7 @@ import { IFinancialAnalyticsService } from "../../Domain/services/IFinancialAnal
 import { ILogerService } from "../../Domain/services/ILogerService";
 import { ISIEMService } from "../../siem/Domen/services/ISIEMService";
 import { generateEvent } from "../../siem/Domen/Helpers/generate/GenerateEvent";
+import { parseId } from "../../helpers/RequestParams";
 
 export class AnalyticsController {
     private readonly router: Router;
@@ -16,19 +17,6 @@ export class AnalyticsController {
     ) {
         this.router = Router();
         this.initializeRoutes();
-    }
-
-    private getParamAsString(param: string | string[] | undefined): string | null {
-        if (!param) return null;
-        return Array.isArray(param) ? param[0] : param;
-    }
-
-    private parseId(param: string | string[] | undefined): number | null {
-        const s = this.getParamAsString(param);
-        if (!s) return null;
-
-        const n = Number.parseInt(s, 10);
-        return Number.isFinite(n) ? n : null;
     }
 
     private initializeRoutes() {
@@ -49,7 +37,7 @@ export class AnalyticsController {
 
     async getBurndownAnalytics(req: Request, res: Response): Promise<void> {
         try {
-            const sprintId = this.parseId((req.params as any).sprintId);
+            const sprintId = parseId((req.params as any).sprintId);
 
             if (sprintId === null) {
                 const message = "Invalid sprint ID for Burndown";
@@ -106,7 +94,7 @@ export class AnalyticsController {
 
     async getBurnupAnalytics(req: Request, res: Response): Promise<void> {
         try {
-            const sprintId = this.parseId((req.params as any).sprintId);
+            const sprintId = parseId((req.params as any).sprintId);
             if (sprintId === null) {
                 const message = "Invalid sprint ID for Burnup";
                 this.logger.log(message);
@@ -162,7 +150,7 @@ export class AnalyticsController {
 
     async getVelocityAnalytics(req: Request, res: Response): Promise<void> {
         try {
-            const projectId = this.parseId((req.params as any).projectId);
+            const projectId = parseId((req.params as any).projectId);
             if (projectId === null) {
                 const message = "Invalid project ID for Velocity";
                 this.logger.log(message);
@@ -216,7 +204,7 @@ export class AnalyticsController {
 
     async getBudgetTracking(req: Request, res: Response): Promise<void> {
         try {
-            const projectId = this.parseId((req.params as any).projectId);
+            const projectId = parseId((req.params as any).projectId);
             if (projectId === null) {
                 const message = "Invalid project ID for Budget Tracking";
                 this.logger.log(message);
@@ -270,7 +258,7 @@ export class AnalyticsController {
 
     async getResourceCostAllocation(req: Request, res: Response): Promise<void> {
         try {
-            const projectId = this.parseId((req.params as any).projectId);
+            const projectId = parseId((req.params as any).projectId);
             if (projectId === null) {
                 const message = "Invalid project ID for Resource Cost Allocation";
                 this.logger.log(message);
@@ -324,7 +312,7 @@ export class AnalyticsController {
 
     async getProfitMargin(req: Request, res: Response): Promise<void> {
         try {
-            const projectId = this.parseId((req.params as any).projectId);
+            const projectId = parseId((req.params as any).projectId);
             if (projectId === null) {
                 const message = "Invalid project ID for Profit Margin";
                 this.logger.log(message);
