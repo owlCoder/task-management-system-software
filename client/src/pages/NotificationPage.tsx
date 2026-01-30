@@ -3,9 +3,7 @@ import Sidebar from "../components/dashboard/sidebar/Sidebar";
 import NotificationHeader from "../components/notification/NotificationHeader";
 import NotificationFilters from "../components/notification/NotificationFilters";
 import NotificationCard from "../components/notification/NotificationCard";
-import NotificationSendPopUp from "../components/notification/NotificationSendPopUp";
 import type { Notification } from "../models/notification/NotificationCardDTO";
-import { NotificationType } from "../enums/NotificationType";
 import { socketEventService } from "../api/notification/socketInstance";
 import toast from "react-hot-toast";
 import { useAuth } from "../hooks/useAuthHook";
@@ -28,7 +26,6 @@ const NotificationPage: React.FC<NotificationPageProps> = ({notificationAPI}) =>
     []
   );
   const [isAllSelected, setIsAllSelected] = useState(false);
-  const [isPopUpOpen, setIsPopUpOpen] = useState(false);
 
   // STATE ZA NOTIFIKACIJE IZ BACKEND-A
   const [allNotifications, setAllNotifications] = useState<Notification[]>([]);
@@ -291,40 +288,6 @@ const NotificationPage: React.FC<NotificationPageProps> = ({notificationAPI}) =>
     }
   };
 
-  // funkcija za klik za slanje notifikacije '+ Send Notification' dugme
-  const handleSendNotificationClick = () => {
-    console.log("Send notification button was clicked");
-    setIsPopUpOpen(true);
-  };
-
-  // funkcija za slanje notifikacije iz popup-a
-  const handleSendNotification = async (
-    title: string,
-    content: string,
-    type: NotificationType
-  ) => {
-    try {
-      console.log("Sending notification:", { title, content, type });
-
-      await notificationAPI.createNotification(token!,{
-        title,
-        content,
-        type,
-        userIds: [currentUserId],
-      });
-
-      // Ne dodajemo ovde - notifikacija ce stici preko Socket.IO!
-      // Socket listener (setupWebSocket) ce automatski dodati u listu
-
-      setIsPopUpOpen(false);
-
-      // Toast success poruka
-      toast.success("Notification created successfully!");
-    } catch (err) {
-      console.error("Error sending notification:", err);
-      toast.error("Failed to create notification");
-    }
-  };
 
   // LOADING STATE
   if (loading) {
@@ -363,7 +326,7 @@ const NotificationPage: React.FC<NotificationPageProps> = ({notificationAPI}) =>
       <div className="flex-1 p-6 flex flex-col h-screen overflow-hidden">
         {/* Header */}
         <div className="flex-shrink-0">
-          <NotificationHeader onSendClick={handleSendNotificationClick} />
+          <NotificationHeader />
         </div>
 
         {/* Filters */}
@@ -419,11 +382,6 @@ const NotificationPage: React.FC<NotificationPageProps> = ({notificationAPI}) =>
           </div>
         </div>
 
-        <NotificationSendPopUp
-          isOpen={isPopUpOpen}
-          onClose={() => setIsPopUpOpen(false)}
-          onSend={handleSendNotification}
-        />
       </div>
     </div>
   );
