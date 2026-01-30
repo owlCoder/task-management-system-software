@@ -131,7 +131,7 @@ export class FileController {
             const result = await this.fileService.createFile(createFileDTO);
 
             if (result.success) {
-                res.status(201).json({ data: result.data });
+                res.status(201).json( result.data );
             } else {
                 res.status(500).json({ message: result.error });
             }
@@ -201,7 +201,7 @@ export class FileController {
             const result = await this.fileService.deleteFile(fileId);
 
             if (result.success) {
-                res.status(200).json({ data: result.data });
+                res.status(200).json(result.data);
             } else {
                 res.status(500).json({ message: result.error });
             }
@@ -257,7 +257,7 @@ export class FileController {
             const result = await this.fileService.getFilesByAuthor(authorId, offset, limit);
 
             if (result.success) {
-                res.status(200).json({ data: result.data });
+                res.status(200).json(result.data );
             } else {
                 res.status(500).json({ message: result.error });
             }
@@ -290,7 +290,7 @@ export class FileController {
 
             if (result.success && result.data) {
                 const metadata = this.fileMapper.toMetadata(result.data);
-                res.status(200).json({ data: metadata });
+                res.status(200).json( metadata);
             } else {
                 res.status(404).json({
                     message: result.error || "File not found",

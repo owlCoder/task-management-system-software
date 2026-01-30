@@ -44,7 +44,7 @@ export class FileAPI  implements IFileAPI{
               {
                   headers: { Authorization: `Bearer ${token}` },
               });
-          return response.data.data;
+          return response.data;
         } catch (error) {
           console.error('Error fetching file list:', error);
           throw error;
@@ -81,7 +81,7 @@ export class FileAPI  implements IFileAPI{
         }
       );
 
-      return response.data.data.fileId;
+      return response.data.fileId;
     } catch (error) {
       console.error('Error uploading file:', error);
       throw error;
