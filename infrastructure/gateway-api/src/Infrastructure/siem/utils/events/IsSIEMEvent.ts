@@ -26,7 +26,7 @@ export function isSIEMEvent(path: string, method: string, statusCode: number, co
 
     switch (config.level) {
         case SIEMLogLevel.ERROR:
-            return statusCode >= 400;
+            return statusCode > 400;
 
         case SIEMLogLevel.CRITICAL:
             return true;

@@ -41,16 +41,18 @@ export class GatewayVersionControlController {
      */
     private initializeRoutes() {
         const reviewReadAccess = [authenticate, authorize(...ReviewPolicies.READ)];
+        const reviewRestrictedReadAccess = [authenticate, authorize(...ReviewPolicies.RESTRICTED_READ)];
+        const reviewSendAccess = [authenticate, authorize(...ReviewPolicies.SEND_REVIEW)];
         const reviewWriteAccess = [authenticate, authorize(...ReviewPolicies.WRITE)];
 
         const templateReadAccess = [authenticate, authorize(...TemplatePolicies.READ)];
         const templateWriteAccess = [authenticate, authorize(...TemplatePolicies.WRITE)];
 
-        this.router.get("/reviews", ...reviewReadAccess, this.getReviews.bind(this));
+        this.router.get("/reviews", ...reviewRestrictedReadAccess, this.getReviews.bind(this));
         this.router.get("/reviews/:taskId/history", ...reviewReadAccess, this.getReviewHistory.bind(this));
         this.router.post("/reviews/:taskId/accept", ...reviewWriteAccess, this.acceptReview.bind(this));
         this.router.post("/reviews/:taskId/reject", ...reviewWriteAccess, this.rejectReview.bind(this));
-        this.router.post("/reviews/:taskId/send", authenticate, this.sendToReview.bind(this));
+        this.router.post("/reviews/:taskId/send", ...reviewSendAccess, this.sendToReview.bind(this));
         this.router.get("/reviewComments/:commentId", ...reviewReadAccess, this.getReviewComment.bind(this));
 
         this.router.get("/templates/:templateId", ...templateReadAccess, this.getTemplate.bind(this));
@@ -58,7 +60,6 @@ export class GatewayVersionControlController {
         this.router.post("/templates", ...templateWriteAccess, this.createTemplate.bind(this));
         this.router.post("/templates/:templateId/create", ...templateWriteAccess, this.createTask.bind(this));
         this.router.post("/templates/:templateId/dependencies/:dependsOnId", ...templateWriteAccess, this.addDependency.bind(this));
-       
 
     }
 
