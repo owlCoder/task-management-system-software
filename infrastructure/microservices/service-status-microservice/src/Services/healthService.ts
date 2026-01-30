@@ -12,7 +12,6 @@ const checkInterval = 1_000 * 60 * 5;
 const requestTimeout = 1_000;
 let running = false;
 
-
 export class Health_Service implements IHealth_Service {
     private intervalId?: NodeJS.Timeout;
     private microservices: RuntimeMicroservice[] = [];
@@ -26,9 +25,7 @@ export class Health_Service implements IHealth_Service {
     async start(): Promise<void> {
 
         const envServices = loadMicroservices();
-
         const dbServices = await this.microserviceService.getAllMicroservices();
-
         const dbMap = new Map<string, number>(
             dbServices.map(ms => [
                 ms.microserviceName,
@@ -54,11 +51,8 @@ export class Health_Service implements IHealth_Service {
             if (running) return;
             running = true;
 
-            try {
-                await Promise.all(this.microservices.map(ms => this.ping(ms)));
-            } finally {
-                running = false;
-            }
+            try {await Promise.all(this.microservices.map(ms => this.ping(ms)));}
+            finally {running = false;}
         }, checkInterval);
     }
 

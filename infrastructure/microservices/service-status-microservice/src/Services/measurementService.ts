@@ -49,7 +49,6 @@ export class Measurement_Service implements IMeasurement_Service {
     }
 
     async getAverageResponseTime(days: number): Promise<{ time: string; avgResponseTime: number }[]> {
-
         const fromDate = new Date();
         fromDate.setDate(fromDate.getDate() - days);
 
@@ -70,7 +69,6 @@ export class Measurement_Service implements IMeasurement_Service {
 
 
     async getLatestStatuses(): Promise<{ microserviceId: number; status: EOperationalStatus }[]> {
-
         const subQuery = this.measurementRepository
             .createQueryBuilder("m2")
             .select("MAX(m2.measurement_date)")

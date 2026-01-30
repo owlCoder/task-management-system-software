@@ -73,7 +73,6 @@ export class Measurement_controller {
     }
 
     private async getMeasurementsFromMicroservice(req: Request, res: Response): Promise<void> {
-
         const microserviceId = Number(req.params.microserviceId);
         if (!Number.isInteger(microserviceId) || microserviceId <= 0) {
 
@@ -151,8 +150,6 @@ export class Measurement_controller {
         }
     }
 
-
-
     private async setMeasurement(req: Request, res: Response): Promise<void> {
         try {
             const dto = new CreateMeasurementDto(
@@ -169,7 +166,7 @@ export class Measurement_controller {
                 return;
             }
 
-            const success = await this.measurementService.setMeasurement(dto as any);
+            const success = await this.measurementService.setMeasurement(dto as CreateMeasurementDto);
 
             if (success) {
                 this.siemService.sendEvent(generateEvent("service-status-microservice", req, 200, "Changes on measurement set successfully!",),);

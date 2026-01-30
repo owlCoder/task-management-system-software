@@ -12,8 +12,6 @@ import { logger } from './infrastructure/Logger';
 import { SIEMService } from './SIEM/Services/SIEMService';
 import { LogerService } from './SIEM/Services/LogerService';
 
-
-
 async function bootstrap() {
     const app = express();
 
