@@ -147,6 +147,13 @@ const NotificationPage: React.FC<NotificationPageProps> = ({notificationAPI}) =>
     }
   });
 
+  // auto-toggle "select all" when all visible notifications are selected
+  useEffect(() => {
+    const total = filteredNotifications.length;
+    const selected = selectedNotifications.length;
+    setIsAllSelected(total > 0 && selected === total);
+  }, [filteredNotifications.length, selectedNotifications.length]);
+
   // prebroj totalni broj neprocitanih notifikacija
   const unreadCount = allNotifications.filter(
     (notification) => !notification.isRead
