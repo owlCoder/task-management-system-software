@@ -3,4 +3,5 @@ export interface UserCreationDTO {
   email: string;
   password: string;
   role_name: string;
+  image_file?: File;
 }

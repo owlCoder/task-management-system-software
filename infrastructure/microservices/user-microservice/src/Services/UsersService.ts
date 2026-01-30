@@ -125,8 +125,8 @@ export class UsersService implements IUsersService {
       password_hash: hashedPassword,
       user_role: userRole,
       email: user.email,
-      image_key: "",
-      image_url: "",
+      image_key: user.image_key || "",
+      image_url: user.image_url || "",
     });
 
     const newUser = {
@@ -136,8 +136,8 @@ export class UsersService implements IUsersService {
       google_id: "",
       user_role: userRole,
       email: user.email,
-      image_key: "",
-      image_url: "",
+      image_key: user.image_key || "",
+      image_url: user.image_url || "",
       is_deleted: result.generatedMaps[0].is_deleted,
       weekly_working_hour_sum: result.generatedMaps[0].weekly_working_hour_sum,
     };
