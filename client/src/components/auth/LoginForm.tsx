@@ -16,6 +16,11 @@ type GoogleResponse = {
   credential: string;
 };
 
+type SysErr = {
+  code?: string;
+  message?: string;
+};
+
 export const LoginForm: React.FC<LoginFormProps> = ({
   authAPI,
 }) => {
@@ -85,8 +90,12 @@ export const LoginForm: React.FC<LoginFormProps> = ({
       setError("No token/session received.");
     }  catch (err) {
       console.error("Failed to login:", err);
-      setError("There was an error during login. Please try again.");
-    } finally {
+      const e = err as { response?: { status?: number; data?: SysErr } };
+      if (e.response?.status === 403 && e.response.data?.code === "ROLE_NOT_ALLOWED") {
+        setError("SysAdmin cannot login through TMSS endpoint");
+        return;
+      }
+      setError(e.response?.data?.message || "There was an error during login. Please try again.");
       setIsLoading(false);
     }
   };
@@ -95,18 +104,21 @@ export const LoginForm: React.FC<LoginFormProps> = ({
   useEffect(() => {
     const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
     if (!clientId) return;
+
+    let resizeHandler: (() => void) | null = null;
+
     const t = setInterval(() => {
       const googleWin = (window as WindowWithGoogle).google;
-
 
       if (googleInitializedRef.current) {
         clearInterval(t);
         return;
       }
 
-      if (!googleWin?.accounts?.id) return;
+      const id = googleWin?.accounts?.id;
+      if (!id) return;
 
-      googleWin.accounts.id.initialize({
+      id.initialize({
         client_id: clientId,
         ux_mode: "popup",
         auto_select: false,
@@ -117,7 +129,6 @@ export const LoginForm: React.FC<LoginFormProps> = ({
             const data = await authAPI.googleLogin({ idToken: response.credential });
 
             if (data.success) {
-
               if (data.token) {
                 login(data.token);
                 navigate("/mainwindow");
@@ -132,27 +143,42 @@ export const LoginForm: React.FC<LoginFormProps> = ({
             setError("Network error during Google login");
           }
         },
-      }
-    );
-
-    if (googleBtnDivRef.current) {
-      const parentWidth = googleBtnDivRef.current.parentElement?.clientWidth ?? 390;
-      googleWin.accounts.id.renderButton(googleBtnDivRef.current, {
-        theme: "outline",
-        size: "large",
-        text: "continue_with",
-        shape: "rectangular",
-        width: parentWidth,
-        locale: "en",
       });
-    }
 
-    googleInitializedRef.current = true;
-    clearInterval(t);
-  }, 100);
+      const renderGoogleButton = () => {
+        const el = googleBtnDivRef.current;
+        const id2 = googleWin?.accounts?.id;
+        if (!el || !id2) return;
 
-  return () => clearInterval(t);
-}, [login, navigate]);
+        const parentWidth = el.parentElement?.clientWidth ?? 390;
+        el.innerHTML = "";
+        id2.renderButton(el, {
+          theme: "outline",
+          size: "large",
+          text: "continue_with",
+          shape: "rectangular",
+          width: parentWidth,
+          locale: "en",
+        });
+      };
+
+      renderGoogleButton();
+
+      resizeHandler = renderGoogleButton;
+      window.addEventListener("resize", resizeHandler);
+
+      googleInitializedRef.current = true;
+      clearInterval(t);
+    }, 100);
+
+    return () => {
+      clearInterval(t);
+      if (resizeHandler) {
+        window.removeEventListener("resize", resizeHandler);
+      }
+    };
+  }, [authAPI, login, navigate]);
+
 
   const canSubmit =
   !isLoading &&
@@ -202,7 +228,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
         type="submit"
         disabled={!canSubmit}
         className="
-          mt-6 w-[95%] mx-auto py-2 rounded-md
+          mt-6 w-[95%] max-w-[400px] mx-auto py-2 rounded-md
           bg-white/90 text-black font-semibold
           hover:bg-white
           disabled:opacity-50 disabled:cursor-not-allowed
@@ -212,7 +238,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
       </button>
 
 
-      <div className="mt-4 w-[95%] mx-auto mr-5">
+      <div className="mt-4 w-[95%] max-w-[400px] mx-auto mr-5" >
         <div ref={googleBtnDivRef} className="w-full"></div>
       </div>
 

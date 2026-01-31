@@ -52,7 +52,7 @@ export class AuthService implements IAuthService {
     // Prevent SysAdmin from logging in through TMSS login (they must use SIEM login)
     if (user.user_role.role_name === "SysAdmin") {
       this.logger.log(SeverityEnum.WARN, `TMSS login attempt failed: SysAdmin cannot login through TMSS endpoint for username ${data.username}`);
-      return { authenticated: false };
+      return { authenticated: false, reason: "ROLE_NOT_ALLOWED", message: "SysAdmin cannot login through TMSS endpoint.", };
     }
     if (user.password_hash != null) {
       const passwordMatches = await bcrypt.compare(data.password, user.password_hash);

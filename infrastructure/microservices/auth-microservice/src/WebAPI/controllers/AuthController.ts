@@ -167,13 +167,31 @@ export class AuthController {
         }
       }
     } else {
-      this.siemService.sendEvent(
+      if (result?.reason === "ROLE_NOT_ALLOWED") {
+        this.siemService.sendEvent(
           generateEvent(
             "auth-microservice",
             req,
-            401,
-            "Invalid credentials for login",
+            403,
+            "Role not allowed for TMSS login",
           ),
+        );
+
+        res.status(403).json({
+          success: false,
+          code: "ROLE_NOT_ALLOWED",
+          message: result.message ?? "SysAdmin cannot login through TMSS endpoint.",
+        });
+        return;
+      }
+
+      this.siemService.sendEvent(
+        generateEvent(
+          "auth-microservice",
+          req,
+          401,
+          "Invalid credentials for login",
+        ),
       );
       this.errorHelper.handleAuthFailure(res, "Invalid credentials", "login");
     }
