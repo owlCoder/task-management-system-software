@@ -25,8 +25,6 @@ export const ProjectMapper = {
             total_weekly_hours_required: project.total_weekly_hours_required,
             allowed_budget: project.allowed_budget,
             start_date: startDateStr,
-            sprint_count: project.sprint_count || 1,
-            sprint_duration: project.sprint_duration || 14,
             status: project.status,
         };
     },

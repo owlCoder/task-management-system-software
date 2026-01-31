@@ -14,8 +14,4 @@ export interface IUsersService {
     user_id: number,
     updateUserData: UserUpdateDTO
   ): Promise<Result<UserDTO>>;
-  setWeeklyHours(
-    user_id: number,
-    weekly_working_hour_sum: number
-  ): Promise<Result<UserDTO>>;
 }

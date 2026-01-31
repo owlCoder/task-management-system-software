@@ -22,12 +22,6 @@ export function validateCreateProject(data: ProjectCreateDTO): ValidationResult 
     if (isNaN(data.allowed_budget) || data.allowed_budget <= 0) {
         return { success: false, message: "Allowed budget must be a positive number" };
     }
-    if (isNaN(data.sprint_count) || data.sprint_count <= 0) {
-        return { success: false, message: "Sprint count must be a positive number" };
-    }
-    if (isNaN(data.sprint_duration) || data.sprint_duration <= 0) {
-        return { success: false, message: "Sprint duration must be a positive number" };
-    }
     if (data.status && !validStatuses.includes(data.status)) {
         return { success: false, message: `Invalid status. Must be one of: ${validStatuses.join(", ")}` };
     }
@@ -63,16 +57,7 @@ export function validateUpdateProject(data: ProjectUpdateDTO): ValidationResult 
             return { success: false, message: "Allowed budget must be a positive number" };
         }
     }
-    if (data.sprint_count !== undefined) {
-        if (isNaN(data.sprint_count) || data.sprint_count <= 0) {
-            return { success: false, message: "Sprint count must be a positive number" };
-        }
-    }
-    if (data.sprint_duration !== undefined) {
-        if (isNaN(data.sprint_duration) || data.sprint_duration <= 0) {
-            return { success: false, message: "Sprint duration must be a positive number" };
-        }
-    }
+   
     if (data.status !== undefined && !validStatuses.includes(data.status)) {
         return { success: false, message: `Invalid status. Must be one of: ${validStatuses.join(", ")}` };
     }

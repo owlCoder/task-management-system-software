@@ -28,8 +28,6 @@ export const EditUserForm: React.FC<EditUserFormProps> = ({
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string>(existingUser.image_url || "");
 
- // const [weeklyHours, setWeeklyHours] = useState(0);
-
   useEffect(() => {
     const fetchRoles = async () => {
       try {
@@ -139,7 +137,7 @@ export const EditUserForm: React.FC<EditUserFormProps> = ({
 
           <div className="space-y-1">
              <label className="text-[10px] ml-4 font-bold text-blue-300/60 uppercase tracking-widest">Password</label>
-             <input type="password" name="password" className={inputClasses} value={formData.password} onChange={handleChange} placeholder="••••••••" />
+             <input type="password" name="password" className={inputClasses} value={formData.password} onChange={handleChange} placeholder="Password" />
              <p className="text-[9px] ml-4 text-white/20 italic">Leave blank to keep current password</p>
           </div>
           

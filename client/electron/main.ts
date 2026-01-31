@@ -89,8 +89,8 @@ ipcMain.handle("export-pdf", async (_event, payload: {
     pdfWin.destroy();
 
     return { success: true, path: pdfPath };
-  } catch (err: any) {
+  } catch (err) {
     console.error("PDF export failed:", err);
-    return { success: false, error: err.message };
+    return { success: false, error: (err as Error).message };
   }
 });

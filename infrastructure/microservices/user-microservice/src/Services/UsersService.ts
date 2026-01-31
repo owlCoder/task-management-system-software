@@ -280,44 +280,4 @@ export class UsersService implements IUsersService {
     return { success: true, data: toUserDTO(updatedUser) };
   }
 
-  /**
-   * Set user's weekly_working_hour_sum by userId
-   */
-
-  async setWeeklyHours(
-    user_id: number,
-    weekly_working_hour: number,
-  ): Promise<Result<UserDTO>> {
-    const existingUser = await this.userRepository.findOne({
-      where: { user_id },
-      relations: ["user_role"],
-    });
-
-    if (!existingUser) {
-      return {
-        success: false,
-        code: ErrorCode.NOT_FOUND,
-        error: `User with ID ${user_id} not found`,
-      };
-    }
-
-    const weekly_working_hour_sum =
-      existingUser.weekly_working_hour_sum + weekly_working_hour;
-
-    const result = await this.userRepository.update(user_id, {
-      weekly_working_hour_sum,
-    });
-
-    if (result.affected === undefined || result.affected === 0) {
-      return {
-        success: false,
-        code: ErrorCode.CONFLICT,
-        error: `User with ID ${user_id} could not be updated`,
-      };
-    }
-
-    existingUser.weekly_working_hour_sum = weekly_working_hour_sum;
-
-    return { success: true, data: toUserDTO(existingUser) };
-  }
 }
