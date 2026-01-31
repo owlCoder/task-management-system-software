@@ -1,21 +1,16 @@
 import React, { useEffect, useState } from "react";
 import toast from "react-hot-toast";
-import { sprintAPI } from "../../api/sprint/SprintAPI";
 import type { SprintCreateDTO } from "../../api/sprint/ISprintAPI";
+import type { CreateSprintModalProps } from "../../types/props/CreateSprintModalProps";
 
-type Props = {
-  isOpen: boolean;
-  onClose: () => void;
-  projectId: number;
-  onCreated?: () => void; 
-};
-
-const CreateSprintModal: React.FC<Props> = ({
+const CreateSprintModal: React.FC<CreateSprintModalProps> = ({
   isOpen,
   onClose,
   projectId,
   onCreated,
+  sprintAPI,
 }) => {
+
   const [formData, setFormData] = useState<SprintCreateDTO>({
     sprint_title: "",
     sprint_description: "",
