@@ -153,7 +153,6 @@ export const ProjectCard: React.FC<Props> = ({
                     >
                         <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
                     </svg>
-                    {project.sprint_count} sprints × {project.sprint_duration} days
                 </p>
 
                 {/* Weekly Hours */}
