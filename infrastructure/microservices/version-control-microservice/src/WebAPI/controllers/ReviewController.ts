@@ -65,13 +65,13 @@ export class ReviewController {
         res.status(200).json(result.data);
       } else {
         this.logger.log(result.error);
-        this.siemService.sendEvent(generateEvent(
-          "version-control-microservice",req,result.code,result.error), 
-        );
         res.status(errorCodeToHttpStatus(result.code)).json({ message: result.error });
       }
     } catch (error) {
       this.logger.log((error as Error).message);
+      this.siemService.sendEvent(generateEvent(
+          "version-control-microservice",req,500,"Internal server error"), 
+      );
       res.status(500).json({ message: "Internal server error" });
     }
   }
@@ -111,13 +111,13 @@ export class ReviewController {
         res.status(200).json(result.data);
       } else {
         this.logger.log(result.error);
-        this.siemService.sendEvent(generateEvent(
-          "version-control-microservice",req,result.code,result.error), 
-        );
         res.status(errorCodeToHttpStatus(result.code)).json({ message: result.error });
       }
     } catch (error) {
       this.logger.log((error as Error).message);
+      this.siemService.sendEvent(generateEvent(
+          "version-control-microservice",req,500,"Internal server error"), 
+      );
       res.status(500).json({ message: "Internal server error" });
     }
   }
@@ -162,13 +162,13 @@ export class ReviewController {
         res.status(200).json(result.data);
       } else {
         this.logger.log(result.error);
-        this.siemService.sendEvent(generateEvent(
-          "version-control-microservice",req,result.code,result.error), 
-        );
         res.status(errorCodeToHttpStatus(result.code)).json({ message: result.error });
       }
     } catch (error) {
       this.logger.log((error as Error).message);
+      this.siemService.sendEvent(generateEvent(
+          "version-control-microservice",req,500,"Internal server error"), 
+      );
       res.status(500).json({ message: "Internal server error" });
     }
   }
@@ -186,23 +186,16 @@ export class ReviewController {
 
       if (result.success) 
       {
-        this.siemService.sendEvent(generateEvent(
-        "version-control-microservice",
-        req,
-        200,
-        "Request successful | All reviews fetched",
-        ),
-      );
         res.status(200).json(result.data);
       }else {
         this.logger.log(result.error);
-        this.siemService.sendEvent(generateEvent(
-          "version-control-microservice",req,result.code,result.error), 
-        );
-          res.status(errorCodeToHttpStatus(result.code)).json({ message: result.error });
+        res.status(errorCodeToHttpStatus(result.code)).json({ message: result.error });
       }
     } catch (error) {
       this.logger.log((error as Error).message);
+      this.siemService.sendEvent(generateEvent(
+          "version-control-microservice",req,500,"Internal server error"), 
+      );
       res.status(500).json({ message: "Internal server error" });
     }
   }
@@ -220,23 +213,16 @@ export class ReviewController {
 
       if (result.success) 
       {
-        this.siemService.sendEvent(generateEvent(
-        "version-control-microservice",
-        req,
-        200,
-        "Request successful | All comments fetched",
-        ),
-      );
         res.status(200).json(result.data);
       } else {
         this.logger.log(result.error);
-        this.siemService.sendEvent(generateEvent(
-          "version-control-microservice",req,result.code,result.error), 
-        );
         res.status(errorCodeToHttpStatus(result.code)).json({ message: result.error });
       }
     } catch (error) {
       this.logger.log((error as Error).message);
+      this.siemService.sendEvent(generateEvent(
+          "version-control-microservice",req,500,"Internal server error"), 
+      );
       res.status(500).json({ message: "Internal server error" });
     }
   }
@@ -254,23 +240,16 @@ export class ReviewController {
 
       if (result.success) 
       {
-        this.siemService.sendEvent(generateEvent(
-        "version-control-microservice",
-        req,
-        200,
-        "Request successful | All reviews for task",
-        ),
-      );
         res.status(200).json(result.data);
       } else {
         this.logger.log(result.error);
-        this.siemService.sendEvent(generateEvent(
-          "version-control-microservice",req,result.code,result.error), 
-        );
-          res.status(errorCodeToHttpStatus(result.code)).json({ message: result.error });
+        res.status(errorCodeToHttpStatus(result.code)).json({ message: result.error });
       }
     } catch (error) {
       this.logger.log((error as Error).message);
+      this.siemService.sendEvent(generateEvent(
+          "version-control-microservice",req,500,"Internal server error"), 
+      );
       res.status(500).json({ message: "Internal server error" });
     }
   }
