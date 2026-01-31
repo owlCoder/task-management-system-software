@@ -45,10 +45,13 @@ export const ProjectsPage: React.FC = () => {
         try {
             setIsLoading(true);
             setError(null);
-            const data = canSeeAllProjects(user?.role)
-                ? await projectAPI.getAllProjects()
-                : await projectAPI.getProjectsByUserId(user.id);
-
+            let data : ProjectDTO[];
+            if(isAnalyst(user.role)) {
+               data = await projectAPI.getAllProjects()
+            } else {
+               data = await projectAPI.getProjectsByUserId(user.id);
+            }
+            
             setProjects(data);
         } catch (err) {
             console.error("Failed to fetch projects:", err);
@@ -56,7 +59,7 @@ export const ProjectsPage: React.FC = () => {
         } finally {
             setIsLoading(false);
         }
-    }, [user?.id]);
+    }, [user?.id,user?.role]);
 
     useEffect(() => {
         fetchProjects();
@@ -170,8 +173,6 @@ export const ProjectsPage: React.FC = () => {
                 total_weekly_hours_required: updatedProject.total_weekly_hours_required,
                 allowed_budget: updatedProject.allowed_budget,
                 start_date: updatedProject.start_date,
-                sprint_count: updatedProject.sprint_count,
-                sprint_duration: updatedProject.sprint_duration,
                 status: updatedProject.status,
                 image_file: imageFile,
             });

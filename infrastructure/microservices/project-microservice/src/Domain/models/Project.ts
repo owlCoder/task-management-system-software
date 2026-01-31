@@ -29,12 +29,6 @@ export class Project {
     @Column({ type: "date", nullable: true })
     start_date!: Date | null;
 
-    @Column({ type: "int", nullable: false, default: 1 })
-    sprint_count!: number;
-
-    @Column({ type: "int", nullable: false, default: 14 })
-    sprint_duration!: number;
-
     @Column({ 
         type: "enum", 
         enum: ProjectStatus, 

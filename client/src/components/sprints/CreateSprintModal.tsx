@@ -53,6 +53,16 @@ const CreateSprintModal: React.FC<CreateSprintModalProps> = ({
       toast.error("End date must be after start date.");
       return;
     }
+    if(formData.start_date) {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const start = new Date(formData.start_date);
+      const end = new Date(formData.end_date);
+
+      if (start < today || end < today) {
+        toast.error("Sprint dates cannot be in the past.");
+      }
+    }
 
     try {
       setLoading(true);
@@ -136,6 +146,7 @@ const CreateSprintModal: React.FC<CreateSprintModalProps> = ({
               </h3>
               <input
                 type="date"
+                min={new Date().toISOString().split("T")[0]}
                 value={formData.start_date}
                 onChange={(e) =>
                   setFormData((p) => ({ ...p, start_date: e.target.value }))

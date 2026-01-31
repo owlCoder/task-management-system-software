@@ -17,8 +17,6 @@ export const EditProjectModal: React.FC<Props> = ({
         project_name: "",
         total_weekly_hours_required: "",
         allowed_budget: "",
-        sprint_count: "",
-        sprint_duration: "",
     });
 
     useEffect(() => {
@@ -30,8 +28,6 @@ export const EditProjectModal: React.FC<Props> = ({
                 project_name: "",
                 total_weekly_hours_required: "",
                 allowed_budget: "",
-                sprint_count: "",
-                sprint_duration: "",
             });
         }
     }, [project]);
@@ -55,8 +51,7 @@ export const EditProjectModal: React.FC<Props> = ({
             project_name: "",
             total_weekly_hours_required: "",
             allowed_budget: "",
-            sprint_count: "",
-            sprint_duration: "",
+            start_date : ""
         };
 
         if (!formData.project_name.trim()) {
@@ -68,11 +63,14 @@ export const EditProjectModal: React.FC<Props> = ({
         if (!formData.allowed_budget || formData.allowed_budget <= 0) {
             newErrors.allowed_budget = "Budget must be a positive number";
         }
-        if (!formData.sprint_count || formData.sprint_count <= 0) {
-            newErrors.sprint_count = "Sprint count must be a positive number";
-        }
-        if (!formData.sprint_duration || formData.sprint_duration <= 0) {
-            newErrors.sprint_duration = "Sprint duration must be a positive number";
+        if(formData.start_date) {
+            const selected = new Date(formData.start_date);
+            const today = new Date();
+            today.setHours(0,0,0,0);
+
+            if(selected < today) {
+                newErrors.start_date = "Start date cannot be in the past";
+            }
         }
 
         setErrors(newErrors);
@@ -223,6 +221,7 @@ export const EditProjectModal: React.FC<Props> = ({
                         </h3>
                         <input
                             type="date"
+                            min={new Date().toISOString().split("T")[0]}
                             value={formatDateForInput(formData.start_date)}
                             onChange={(e) => updateField("start_date", e.target.value || null)}
                             className="
@@ -268,58 +267,8 @@ export const EditProjectModal: React.FC<Props> = ({
                         </div>
                     </div>
 
-                    {/* Sprint Count */}
-                    <div>
-                        <h3 className="text-xs uppercase tracking-wider text-white/60 mb-1">
-                            Number of Sprints *
-                        </h3>
-                        <input
-                            type="number"
-                            value={formData.sprint_count}
-                            onChange={(e) => updateField("sprint_count", Number(e.target.value))}
-                            onKeyDown={(e) => {
-                                if (e.key === "+" || e.key === "-" || e.key === ".") {
-                                    e.preventDefault();
-                                }
-                            }}
-                            className={`
-                                w-full px-4 py-2 rounded-lg bg-white/10 border focus:outline-none
-                                [&::-webkit-inner-spin-button]:appearance-none
-                                [&::-webkit-outer-spin-button]:appearance-none
-                                ${errors.sprint_count ? "border-red-400" : "border-white/20"}
-                            `}
-                        />
-                        {errors.sprint_count && (
-                            <p className="text-red-400 text-sm mt-1">{errors.sprint_count}</p>
-                        )}
-                    </div>
-
-                    {/* Sprint Duration */}
-                    <div>
-                        <h3 className="text-xs uppercase tracking-wider text-white/60 mb-1">
-                            Sprint Duration (days) *
-                        </h3>
-                        <input
-                            type="number"
-                            value={formData.sprint_duration}
-                            onChange={(e) => updateField("sprint_duration", Number(e.target.value))}
-                            onKeyDown={(e) => {
-                                if (e.key === "+" || e.key === "-" || e.key === ".") {
-                                    e.preventDefault();
-                                }
-                            }}
-                            className={`
-                                w-full px-4 py-2 rounded-lg bg-white/10 border focus:outline-none
-                                [&::-webkit-inner-spin-button]:appearance-none
-                                [&::-webkit-outer-spin-button]:appearance-none
-                                ${errors.sprint_duration ? "border-red-400" : "border-white/20"}
-                            `}
-                        />
-                        {errors.sprint_duration && (
-                            <p className="text-red-400 text-sm mt-1">{errors.sprint_duration}</p>
-                        )}
-                    </div>
-
+                   
+                  
                     {/* Total Weekly Hours */}
                     <div>
                         <h3 className="text-xs uppercase tracking-wider text-white/60 mb-1">

@@ -232,8 +232,6 @@ export class ProjectController {
                 allowed_budget: parseFloat(req.body.allowed_budget),
                 creator_username: creatorUsername,
                 start_date: req.body.start_date || null,
-                sprint_count: parseInt(req.body.sprint_count, 10),
-                sprint_duration: parseInt(req.body.sprint_duration, 10),
                 status: this.parseStatus(req.body.status),
             };
 
@@ -347,12 +345,7 @@ export class ProjectController {
             if (req.body.start_date !== undefined) {
                 data.start_date = req.body.start_date || null;
             }
-            if (req.body.sprint_count !== undefined) {
-                data.sprint_count = parseInt(req.body.sprint_count, 10);
-            }
-            if (req.body.sprint_duration !== undefined) {
-                data.sprint_duration = parseInt(req.body.sprint_duration, 10);
-            }
+            
             if (req.body.status !== undefined) {
                 data.status = this.parseStatus(req.body.status);
             }

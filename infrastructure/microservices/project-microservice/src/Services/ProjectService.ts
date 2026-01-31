@@ -30,8 +30,6 @@ export class ProjectService implements IProjectService {
             total_weekly_hours_required: data.total_weekly_hours_required,
             allowed_budget: data.allowed_budget,
             start_date: data.start_date ? new Date(data.start_date) : null,
-            sprint_count: data.sprint_count,
-            sprint_duration: data.sprint_duration,
             status: data.status || ProjectStatus.NOT_STARTED,
         });
 
@@ -93,8 +91,6 @@ export class ProjectService implements IProjectService {
         if (data.start_date !== undefined) {
             project.start_date = data.start_date ? new Date(data.start_date) : null;
         }
-        if (data.sprint_count !== undefined) project.sprint_count = data.sprint_count;
-        if (data.sprint_duration !== undefined) project.sprint_duration = data.sprint_duration;
         if (data.status !== undefined) project.status = data.status;
 
         const saved = await this.projectRepository.save(project);

@@ -30,6 +30,14 @@ const ProjectSprintsPage: React.FC<ProjectSprintsPageProps> = ({ sprintAPI }) =>
   const [selectedSprintId, setSelectedSprintId] = useState<number | null>(null);
   const [createOpen, setCreateOpen] = useState(false);
 
+  const calculateSprintDuration = (start: string, end: string) => {
+    const startDate = new Date(start);
+    const endDate = new Date(end);
+    const diffMs = endDate.getTime() - startDate.getTime();
+    return Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+};
+
+
   const reloadSprints = async () => {
     if (
       projectIdNum === undefined ||
@@ -257,6 +265,12 @@ const ProjectSprintsPage: React.FC<ProjectSprintsPageProps> = ({ sprintAPI }) =>
                     </div>
                     <div className="text-white/50 text-xs mt-3">
                       {String(s.start_date)} — {String(s.end_date)}
+                    </div>
+                    <div className="text-white/60 text-xs mt-1">
+                      Duration: 
+                        {calculateSprintDuration( String(s.start_date),
+                          String(s.end_date)
+                          )} days
                     </div>
 
                     <div className="mt-4">

@@ -90,6 +90,7 @@ export class TaskService implements ITaskService {
         });
 
         const savedTask = await this.taskRepository.save(newTask);
+        await this.taskVersionService.createVersionSnapshot(savedTask);
         this.notifyService.sendNotification(
             [createTaskDTO.assignedTo],
             "New task assigned",

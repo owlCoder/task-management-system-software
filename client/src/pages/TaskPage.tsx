@@ -68,6 +68,7 @@ const TaskPage: React.FC<TaskListPageProps> = ({ projectId }) => {
     await api.updateTaskStatus(taskId, newStatus, fileId);
     
   } catch (err) {
+    toast.error("Failed to update task status. Please try again.");
     console.error("Update failed:", err);
     setTasks(originalTasks);
   }

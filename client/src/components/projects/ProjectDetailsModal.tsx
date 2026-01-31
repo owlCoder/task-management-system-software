@@ -161,25 +161,7 @@ export const ProjectDetailsModal: React.FC<Props> = ({
                         </p>
                     </div>
 
-                    {/* Sprint Information */}
-                    <div className="mb-4 grid grid-cols-2 gap-4">
-                        <div>
-                            <h3 className="text-xs uppercase tracking-wider text-white/60 mb-1">
-                                Number of Sprints
-                            </h3>
-                            <p className="text-sm text-white font-mono">
-                                {project.sprint_count} sprints
-                            </p>
-                        </div>
-                        <div>
-                            <h3 className="text-xs uppercase tracking-wider text-white/60 mb-1">
-                                Sprint Duration
-                            </h3>
-                            <p className="text-sm text-white font-mono">
-                                {project.sprint_duration} days
-                            </p>
-                        </div>
-                    </div>
+                   
 
                     {/* Weekly Hours */}
                     <div className="mb-4">
@@ -201,18 +183,7 @@ export const ProjectDetailsModal: React.FC<Props> = ({
                         </p>
                     </div>
 
-                    {/* Calculated Total Duration */}
-                    <div className="mb-4 p-4 bg-white/5 rounded-xl border border-white/10">
-                        <h3 className="text-xs uppercase tracking-wider text-white/60 mb-2">
-                            Estimated Project Duration
-                        </h3>
-                        <p className="text-lg text-white font-semibold">
-                            {project.sprint_count * project.sprint_duration} days
-                            <span className="text-sm text-white/60 ml-2">
-                                ({Math.round((project.sprint_count * project.sprint_duration) / 7)} weeks)
-                            </span>
-                        </p>
-                    </div>
+                   
                 </div>
 
                 {/* Footer */}

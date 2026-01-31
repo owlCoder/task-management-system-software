@@ -243,7 +243,7 @@ export const TaskDetailPage: React.FC<TaskDetailPageProps> = ({
               <TaskCommentList comments={comments} onDelete={handleDeleteComments} />
               {task.task_status!== TaskStatus.COMPLETED &&  <TaskCommentInput onSubmit={handleAddComments} />}
 
-              {task.task_status!== TaskStatus.COMPLETED &&  view === "upload" && (
+              {role !== UserRole.PROJECT_MANAGER && task.task_status!== TaskStatus.COMPLETED &&  view === "upload" && (
                 <FileUpload
                   setFile={(file) => {
                     setSelectedFile(file);

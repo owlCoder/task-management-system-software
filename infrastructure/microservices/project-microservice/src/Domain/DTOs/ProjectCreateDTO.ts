@@ -9,7 +9,5 @@ export interface ProjectCreateDTO {
     allowed_budget: number;
     creator_username?: string;
     start_date?: string | null;
-    sprint_count: number;
-    sprint_duration: number;
     status: ProjectStatus;
 }

@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import logoImageUrl from "../../../../public/logo.png";
 import { useAuth } from "../../../hooks/useAuthHook";
+import { UserRole } from "../../../enums/UserRole";
 
 const Sidebar: React.FC = () => {
   const { user, logout } = useAuth();
@@ -14,6 +15,7 @@ const Sidebar: React.FC = () => {
   };
 
   const isAdmin = user?.role === "Admin";
+  const isProjectManager = user?.role === UserRole.PROJECT_MANAGER;
 
   return (
     <aside
@@ -43,7 +45,7 @@ const Sidebar: React.FC = () => {
         </Link>
         )}
 
-        {!isAdmin && (
+        {!isAdmin && !isProjectManager &&(
           <Link
           to="/analytics"
           className="w-full px-4 py-3 rounded-lg text-sm font-semibold text-white/80 bg-white/5 border border-white/10 hover:border-white/30 hover:text-white hover:bg-white/10 transition text-center"
@@ -52,7 +54,7 @@ const Sidebar: React.FC = () => {
         </Link>
         )}
 
-        {!isAdmin && (
+        {!isAdmin &&  !isProjectManager &&(
           <Link
           to="/files"
           className="w-full px-4 py-3 rounded-lg text-sm font-semibold text-white/80 bg-white/5 border border-white/10 hover:border-white/30 hover:text-white hover:bg-white/10 transition text-center"
