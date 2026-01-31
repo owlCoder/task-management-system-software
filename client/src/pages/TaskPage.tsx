@@ -43,6 +43,7 @@ const TaskPage: React.FC<TaskListPageProps> = ({ projectId }) => {
   const api = new TaskAPI(import.meta.env.VITE_GATEWAY_URL, token);
   const selectedTask = tasks.find((t) => t.task_id === selectedtaskId);
   const [detailRefreshKey, setDetailRefreshKey] = useState(0);
+  const isPM = user?.role === "Project Manager";
   const isWorker =
     user?.role === "Animation Worker" ||
     user?.role === "Audio & Music Stagist";
@@ -387,7 +388,7 @@ const TaskPage: React.FC<TaskListPageProps> = ({ projectId }) => {
                         key={task.task_id}
                         task={task}
                         onSelect={() => setSelectedTaskId(task.task_id)}
-                        onStatusChange={handleStatusChange}
+                        onStatusChange={!isPM ? handleStatusChange : undefined}
                         onSendToReview={handleSendToReview}
                         users={users}
                       />

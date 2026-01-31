@@ -2,6 +2,7 @@ import React from "react";
 import { TaskColumnProps } from "../../types/props";
 import { TaskStatus } from "../../enums/TaskStatus";
 import TaskListItem from "./TaskListItem";
+import { useAuth } from "../../hooks/useAuthHook";
 
 const TaskColumn: React.FC<TaskColumnProps> = ({
   title,
@@ -13,12 +14,16 @@ const TaskColumn: React.FC<TaskColumnProps> = ({
   users,
 }) => {
   const columnTasks = tasks.filter((task) => task.task_status === status);
+  const {user} = useAuth();
+  const isPM = user?.role === "Project Manager";
 
   const handleDragOver = (e: React.DragEvent) => {
+    if(isPM) return;
     e.preventDefault();
   };
 
   const handleDrop = (e: React.DragEvent) => {
+    if(isPM) return;
     e.preventDefault();
     const taskId = e.dataTransfer.getData("taskId");
     if (taskId) {
@@ -64,15 +69,20 @@ const TaskColumn: React.FC<TaskColumnProps> = ({
           columnTasks.map((task) => (
             <div
               key={task.task_id}
-              draggable={true}
-              onDragStart={(e) =>
-                e.dataTransfer.setData("taskId", task.task_id.toString())
+              draggable={!isPM}
+              onDragStart={(e) => {
+                if(isPM) {
+                  e.preventDefault();
+                  return;
+                }
+
+                e.dataTransfer.setData("taskId", task.task_id.toString());
+              }
               }
               className={`transition-all duration-300 ${
-                selectedTaskId === task.task_id
-                  ? "ring-2 ring-blue-500/50 scale-[1.02] z-10"
-                  : ""
-              }`}
+                selectedTaskId === task.task_id ? "..." : ""
+              } ${isPM ? "cursor-default" : "cursor-grab active:cursor-grabbing"}`}
+
             >
               <TaskListItem task={task} onSelect={onSelect} users={users} />
             </div>

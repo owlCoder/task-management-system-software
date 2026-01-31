@@ -3,11 +3,17 @@ import { TaskHeaderProps } from "../../types/props";
 import { TaskStatus } from "../../enums/TaskStatus";
 import StatusDropdown from "./StatusDropdown";
 import { TaskAPI } from "../../api/task/TaskAPI";
+import { useAuth } from "../../hooks/useAuthHook";
+
 export const TaskHeader: React.FC<TaskHeaderProps> = ({
   task,
   token,
   onStatusUpdate,
 }) => {
+
+  const {user} = useAuth();
+  const isPM = user?.role === "Project Manager";
+
   const handleStatusChange = async (newStatus: TaskStatus) => {
     try {
       const api = new TaskAPI(import.meta.env.VITE_GATEWAY_URL, token);
@@ -30,14 +36,28 @@ export const TaskHeader: React.FC<TaskHeaderProps> = ({
       </div>
 
       <div className="flex flex-col items-end gap-2">
-        <label className="text-[9px] font-bold text-white/20 uppercase tracking-widest mr-2">
-          Change Status
-        </label>
-
-        <StatusDropdown
-          currentStatus={task.task_status as TaskStatus}
-          onStatusChange={handleStatusChange}
-        />
+        {!isPM && (
+          <>
+            <label className="text-[9px] font-bold text-white/20 uppercase tracking-widest mr-2">
+              Change Status
+            </label>
+            <StatusDropdown
+              currentStatus={task.task_status as TaskStatus}
+              onStatusChange={handleStatusChange}
+            />
+          </>
+        )}
+        
+        {isPM && (
+          <div className="flex flex-col items-end">
+             <label className="text-[9px] font-bold text-white/20 uppercase tracking-widest mr-2">
+              Current Status
+            </label>
+            <span className="text-sm font-semibold text-blue-400">
+              {task.task_status}
+            </span>
+          </div>
+        )}
       </div>
     </div>
   );

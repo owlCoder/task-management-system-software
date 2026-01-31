@@ -4,13 +4,15 @@ import { Task } from "../Domain/models/Task";
 import { ITaskVersionService } from "../Domain/services/ITaskVersionService";
 import { TaskVersionDTO } from "../Domain/DTOs/TaskVersionDTO";
 import { taskVersionToDTO } from "../Utils/Converters/TaskVersionConverter";
+import { Result } from "../Domain/types/Result";
+import { ErrorCode } from "../Domain/enums/ErrorCode";
 
 export class TaskVersionService implements ITaskVersionService {
   constructor(
     private readonly taskVersionRepository: Repository<TaskVersion>
   ) {}
 
-  async createVersionSnapshot(task: Task): Promise<TaskVersionDTO> {
+  async createVersionSnapshot(task: Task): Promise<Result<TaskVersionDTO>> {
     const last = await this.taskVersionRepository.findOne({
       where: { task_id: task.task_id },
       order: { version_number: "DESC" },
@@ -33,24 +35,24 @@ export class TaskVersionService implements ITaskVersionService {
     });
 
     const saved = await this.taskVersionRepository.save(version);
-    return taskVersionToDTO(saved);
+    return { success: true, data: taskVersionToDTO(saved)};
   }
 
-  async getVersionsForTask(task_id: number): Promise<TaskVersionDTO[]> {
+  async getVersionsForTask(task_id: number): Promise<Result<TaskVersionDTO[]>> {
     const versions = await this.taskVersionRepository.find({
       where: { task_id },
       order: { version_number: "ASC" },
     });
-    return versions.map(taskVersionToDTO);
+    return { success: true, data: versions.map(taskVersionToDTO)};
   }
 
-  async getVersionById(version_id: number): Promise<TaskVersionDTO> {
+  async getVersionById(version_id: number): Promise<Result<TaskVersionDTO>> {
     const version = await this.taskVersionRepository.findOne({
       where: { version_id },
     });
     if (!version) {
-      throw new Error(`Task version with id ${version_id} not found`);
+      return { success: false, errorCode: ErrorCode.VERSION_NOT_FOUND, message: `Task version with id ${version_id} not found`};
     }
-    return taskVersionToDTO(version);
+    return { success: true, data: taskVersionToDTO(version)};
   }
 }

@@ -74,12 +74,17 @@ export class TaskController {
             const result = await this.taskService.addTaskForSprint(sprintId, createTask, user_id);
 
             if (result.success) {
+                this.siemService.sendEvent(
+                    generateEvent("task-microservice", req, 200, "Request successful | Task created")
+                );
                 res.status(200).json(taskToTaskDTO(result.data));
             } else {
                 res.status(result.errorCode).json({ message: result.message });
-                this.siemService.sendEvent(
-                    generateEvent("task-microservice", req, result.errorCode, result.message),
-                );
+                if(result.errorCode != 400){
+                    this.siemService.sendEvent(
+                        generateEvent("task-microservice", req, result.errorCode, result.message),
+                    );
+                }
             }
 
         } catch (error) {
@@ -110,9 +115,11 @@ export class TaskController {
                 res.status(200).json(taskToTaskDTO(result.data));
             } else {
                 res.status(result.errorCode).json({ message: result.message });
-                this.siemService.sendEvent(
-                    generateEvent("task-microservice", req, result.errorCode, result.message),
-                );
+                if(result.errorCode != 400) {
+                    this.siemService.sendEvent(
+                        generateEvent("task-microservice", req, result.errorCode, result.message),
+                    );
+                }
             }
 
         } catch (error) {
@@ -143,9 +150,11 @@ export class TaskController {
                 res.status(200).json(result.data.map(taskToTaskDTO));
             } else {
                 res.status(result.errorCode).json({ message: result.message });
-                this.siemService.sendEvent(
-                    generateEvent("task-microservice", req, result.errorCode, result.message)
-                );
+                if(result.errorCode != 400) {
+                    this.siemService.sendEvent(
+                        generateEvent("task-microservice", req, result.errorCode, result.message)
+                    );
+                }
             }
 
         } catch (error) {
@@ -179,9 +188,11 @@ export class TaskController {
                 res.status(200).json(result.data.map(taskToTaskDTO));
             } else {
                 res.status(result.errorCode).json({ message: result.message });
-                this.siemService.sendEvent(
-                generateEvent("task-microservice", req, result.errorCode, result.message),
-                );
+                if(result.errorCode != 400) {
+                    this.siemService.sendEvent(
+                        generateEvent("task-microservice", req, result.errorCode, result.message),
+                    );
+                }
             }
         } catch(error) {
             res.status(500).json({ message: "Internal server error" });
@@ -218,9 +229,11 @@ export class TaskController {
                 res.status(200).json(commentToCommentDTO(result.data, taskId));
             } else {
                 res.status(result.errorCode).json({ message: result.message });
-                this.siemService.sendEvent(
-                    generateEvent("task-microservice", req, result.errorCode, result.message),
-                );
+                if(result.errorCode != 400) {
+                    this.siemService.sendEvent(
+                        generateEvent("task-microservice", req, result.errorCode, result.message),
+                    );
+                }
             }
 
         } catch (error) {
@@ -260,9 +273,11 @@ export class TaskController {
                 res.status(200).json(taskToTaskDTO(result.data));
             } else {
                 res.status(result.errorCode).json({ message: result.message });
-                this.siemService.sendEvent(
-                    generateEvent("task-microservice", req, result.errorCode, result.message),
-                );
+                if(result.errorCode != 400) {
+                    this.siemService.sendEvent(
+                        generateEvent("task-microservice", req, result.errorCode, result.message),
+                    );
+                }
             }
 
         } catch (error) {
@@ -300,11 +315,16 @@ export class TaskController {
 
             if (result.success) {
                 res.status(200).json(taskToTaskDTO(result.data));
+                this.siemService.sendEvent(
+                    generateEvent("task-microservice", req, 200, `Request successful | Task Status updated`)
+                );
             } else {
                 res.status(result.errorCode).json({ message: result.message });
-                this.siemService.sendEvent(
-                    generateEvent("task-microservice", req, result.errorCode, result.message),
-                );
+                if(result.errorCode != 400) {
+                    this.siemService.sendEvent(
+                        generateEvent("task-microservice", req, result.errorCode, result.message),
+                    );
+                }
             }
 
         } catch (error) {
@@ -335,12 +355,17 @@ export class TaskController {
             const result = await this.taskService.deleteTask(taskId, user_id);
 
             if (result.success) {
+                this.siemService.sendEvent(
+                    generateEvent("task-microservice", req, 204, `Task ${taskId} deleted by user ${user_id}`)
+                );
                 res.status(204).json();
             } else {
                 res.status(result.errorCode).json({ message: result.message });
-                this.siemService.sendEvent(
-                    generateEvent("task-microservice", req, result.errorCode, result.message),
-                );
+                if(result.errorCode != 400) {
+                    this.siemService.sendEvent(
+                        generateEvent("task-microservice", req, result.errorCode, result.message),
+                    );
+                }
             }
 
         } catch (error) {
@@ -374,9 +399,11 @@ export class TaskController {
                 res.status(204).json();
             } else {
                 res.status(result.errorCode).json({ message: result.message });
-                this.siemService.sendEvent(
-                    generateEvent("task-microservice", req, result.errorCode, result.message),
-                );
+                if(result.errorCode != 400) {
+                    this.siemService.sendEvent(
+                        generateEvent("task-microservice", req, result.errorCode, result.message),
+                    );
+                }
             }
 
         } catch (error) {

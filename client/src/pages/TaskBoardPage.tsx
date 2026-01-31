@@ -1,15 +1,13 @@
 import React, { useEffect, useState } from "react";
 import Sidebar from "../components/dashboard/sidebar/Sidebar";
-//import TaskListItem from "../components/task/TaskListItem";
 import { TaskDTO } from "../models/task/TaskDTO";
 import { TaskAPI } from "../api/task/TaskAPI";
 import CreateTaskModal from "../components/task/CreateTaskModal";
 import EditTaskModal from "../components/task/EditTaskModal";
 import TaskBoardListPreview from "../components/task/TaskBoardListPreview";
-// import { TaskDetailPage } from "./TaskDetailPage";
-// import EditTaskModal from "../components/task/EditTaskModal";
 import { TaskStatus } from "../enums/TaskStatus";
 import { TaskBoardPageProps } from "../types/props";
+import { useAuth } from "../hooks/useAuthHook";
 
 const TaskBoardPage: React.FC<TaskBoardPageProps> = ({ projectId, token }) => {
   const [tasks, setTasks] = useState<TaskDTO[]>([]);
@@ -19,17 +17,21 @@ const TaskBoardPage: React.FC<TaskBoardPageProps> = ({ projectId, token }) => {
   const [editOpen, setEditOpen] = useState(false);
   const api = new TaskAPI(import.meta.env.VITE_GATEWAY_URL, token);
   const selectedTask = tasks.find((t) => t.task_id === selectedtaskId);
+  const {user} = useAuth();
+  const isPM = user?.role === "Project Manager";
 
   const handleStatusChange = async (taskId: number, newStatus: TaskStatus) => {
-  const taskToUpdate = tasks.find((t) => t.task_id === taskId);
-  if (!taskToUpdate) return;
+    if(isPM) return;
+    
+    const taskToUpdate = tasks.find((t) => t.task_id === taskId);
+    if (!taskToUpdate) return;
 
-  const originalTasks = [...tasks];
+    const originalTasks = [...tasks];
 
-  setTasks((prev) =>
-    prev.map((t) =>
-      t.task_id === taskId ? { ...t, task_status: newStatus } : t
-    )
+    setTasks((prev) =>
+      prev.map((t) =>
+        t.task_id === taskId ? { ...t, task_status: newStatus } : t
+      )
   );
 
   try {
@@ -55,10 +57,6 @@ const TaskBoardPage: React.FC<TaskBoardPageProps> = ({ projectId, token }) => {
 
     load();
   }, [projectId]);
-
-  // useEffect(() => {
-  //   console.log("SELECTED TASK ID STATE:", selectedtaskId);
-  // }, [selectedtaskId]);
 
   if (loading) {
     return <div className="text-white p-6">Loading tasks...</div>;
@@ -171,20 +169,6 @@ const TaskBoardPage: React.FC<TaskBoardPageProps> = ({ projectId, token }) => {
             </div>
           </header>
 
-          {/*<section className="bg-white/5 backdrop-blur-xl rounded-2xl p-6 shadow-lg border border-white/10 flex-1 overflow-y-auto styled-scrollbar">
-            {tasks.length === 0 ? (
-              <TaskListPreview />
-            ) : (
-              <div className="flex flex-col gap-3">
-                {tasks.map((task) => (
-                  <TaskListItem key={task.task_id} task={task} />
-                ))}
-              </div>
-            )}
-          </section>
-        </div>
-      </main>
-    </div>*/}
 
           <section
             className="bg-white/5 backdrop-blur-xl rounded-2xl p-6 shadow-lg border border-white/10 flex-1 overflow-y-auto styled-scrollbar"
