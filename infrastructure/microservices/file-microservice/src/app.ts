@@ -12,6 +12,11 @@ import { Db } from './Database/DbConnectionPool';
 import { UploadedFile } from './Domain/models/UploadedFile';
 import { Repository } from 'typeorm';
 import dotenv from 'dotenv';
+import { ISIEMService } from './siem/Domen/services/ISIEMService';
+import { SIEMService } from './siem/Services/SIEMService';
+import { LogerService } from "./Services/LogerService";
+
+
 
 dotenv.config({ quiet: true });
 
@@ -41,9 +46,12 @@ app.use(express.urlencoded({ extended: true }));
   const fileTypeValidationService = new FileTypeValidationService();
   const fileMapper = new FileMapper();
   const fileService = new FileService(fileRepository, fileStorageService, fileMapper);
+  const logger = new LogerService();
+
+  const siemService = new SIEMService(logger);
 
   // WebAPI routes
-  const fileController = new FileController(fileService, roleValidationService, fileTypeValidationService, fileMapper);
+  const fileController = new FileController(fileService, roleValidationService, fileTypeValidationService, fileMapper,siemService);
 
   // Registering routes
   app.use('/api/v1', fileController.getRouter());
