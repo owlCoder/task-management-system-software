@@ -251,11 +251,10 @@ const ProjectSprintsPage: React.FC<ProjectSprintsPageProps> = ({ sprintAPI }) =>
                         prev === s.sprint_id ? null : s.sprint_id
                       )
                     }
-                    onDoubleClick={() => openTasks(s.sprint_id)}
                     className={`text-left bg-white/10 backdrop-blur-xl border border-white/15 rounded-2xl p-5 hover:bg-white/15 transition shadow-lg
                       ${selected ? "ring-2 ring-white/40" : ""}
                     `}
-                    title="Click to select. Double click to open tasks."
+                    title="Click to select."
                   >
                     <div className="text-white font-semibold text-lg">
                       {s.sprint_title}
@@ -268,15 +267,34 @@ const ProjectSprintsPage: React.FC<ProjectSprintsPageProps> = ({ sprintAPI }) =>
                     </div>
                     <div className="text-white/60 text-xs mt-1">
                       Duration: 
-                        {calculateSprintDuration( String(s.start_date),
-                          String(s.end_date)
-                          )} days
+                        {calculateSprintDuration( String(s.start_date), String(s.end_date))} 
+                        days
                     </div>
 
                     <div className="mt-4">
                       <span className="text-white/70 text-xs">
-                        {selected ? "Selected" : "Double click to open tasks"}
+                        {selected ? "Selected" : "Use the button below to open tasks"}
                       </span>
+                    </div>
+
+                    <div className="mt-3">
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();      
+                          openTasks(s.sprint_id);   
+                        }}
+                        className="
+                          w-full h-10 rounded-xl
+                          bg-white/10 border border-white/15
+                          text-white/80 font-semibold
+                          hover:bg-gradient-to-t hover:from-[var(--palette-medium-blue)] hover:to-[var(--palette-deep-blue)]
+                          transition-all duration-300
+                          cursor-pointer
+                        "
+                      >
+                        View Tasks
+                      </button>
                     </div>
                   </button>
                 );
