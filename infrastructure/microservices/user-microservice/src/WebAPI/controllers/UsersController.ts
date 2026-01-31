@@ -56,7 +56,6 @@ export class UsersController {
       upload.single("image_file"),
       this.updateUser.bind(this),
     );
-    this.router.put("/users/:id/working-hours", this.setWeeklyHours.bind(this));
     this.router.get("/user-roles", this.getAllUserRoles.bind(this));
     this.router.get(
       "/user-roles/:impact_level",
@@ -76,20 +75,14 @@ export class UsersController {
       const result = await this.usersService.getAllUsers();
 
       if (result.success) {
-        this.siemService.sendEvent(
-          generateEvent(
-            "user-microservice",
-            req,
-            200,
-            "Request successful | All users fetched",
-          ),
-        );
         res.status(200).json(result.data);
       } else {
         this.logger.log(result.error);
-        this.siemService.sendEvent(
-          generateEvent("user-microservice", req, result.code, result.error),
-        );
+        if (result.code != 400 ) {
+          this.siemService.sendEvent(
+            generateEvent("user-microservice", req, result.code, result.error)
+          );
+        }
         res.status(result.code).json(result.error);
       }
     } catch (err) {
@@ -185,16 +178,15 @@ export class UsersController {
       this.logger.log(`Fetching users with IDs ${idArray}`);
       const result = await this.usersService.getUsersByIds(idArray);
       if (result.success) {
-        this.siemService.sendEvent(
-          generateEvent("user-microservice", req, 200, "Request successful"),
-        );
         res.status(200).json(result.data);
       } else {
         this.logger.log(result.error);
 
-        this.siemService.sendEvent(
+        if(result.code != 400) {
+          this.siemService.sendEvent(
           generateEvent("user-microservice", req, result.code, result.error),
-        );
+          );
+        }
 
         res.status(result.code).json(result.error);
       }
@@ -230,7 +222,7 @@ export class UsersController {
           userData.image_key = uploadResult.key;
           userData.image_url = uploadResult.url;
         } catch (uploadError) {
-          this.siemService.sendEvent(
+            this.siemService.sendEvent(
             generateEvent(
               "user-microservice",
               req,
@@ -258,14 +250,14 @@ export class UsersController {
       const result = await this.usersService.createUser(userData);
 
       if (result.success) {
-        this.siemService.sendEvent(
-          generateEvent(
-            "user-microservice",
-            req,
-            201,
-            "Request successful | New user created",
-          ),
-        );
+          this.siemService.sendEvent(
+            generateEvent(
+              "user-microservice",
+              req,
+              201,
+              "Request successful | New user created",
+            ),
+          );
 
         res.status(201).json(result.data);
       } else {
@@ -274,14 +266,16 @@ export class UsersController {
         }
         
         this.logger.log(result.error);
-        this.siemService.sendEvent(
+        if(result.code != 400){
+          this.siemService.sendEvent(
           generateEvent("user-microservice", req, result.code, result.error),
         );
         res.status(result.code).json(result.error);
+        }
       }
     } catch (err) {
       this.logger.log((err as Error).message);
-      this.siemService.sendEvent(
+        this.siemService.sendEvent(
         generateEvent("user-microservice", req, 500, (err as Error).message),
       );
       res.status(500).json({ message: (err as Error).message });
@@ -310,13 +304,15 @@ export class UsersController {
       if (result.success === false) {
         this.logger.log(result.error);
 
-        this.siemService.sendEvent(
+        if(result.code != 400){
+          this.siemService.sendEvent(
           generateEvent("user-microservice", req, result.code, result.error),
         );
+        }
 
         res.status(result.code).json(result.error);
       } else {
-        this.siemService.sendEvent(
+          this.siemService.sendEvent(
           generateEvent(
             "user-microservice",
             req,
@@ -328,7 +324,7 @@ export class UsersController {
       }
     } catch (err) {
       this.logger.log((err as Error).message);
-      this.siemService.sendEvent(
+        this.siemService.sendEvent(
         generateEvent("user-microservice", req, 500, (err as Error).message),
       );
       res.status(500).json({ message: (err as Error).message });
@@ -369,7 +365,7 @@ export class UsersController {
           updateData.image_key = uploadResult.key;
           updateData.image_url = uploadResult.url;
         } catch (uploadError) {
-          this.siemService.sendEvent(
+            this.siemService.sendEvent(
             generateEvent(
               "user-microservice",
               req,
@@ -391,11 +387,6 @@ export class UsersController {
         if (updateData.image_key) {
           await this.storageService.deleteImage(updateData.image_key);
         }
-
-        this.siemService.sendEvent(
-          generateEvent("user-microservice", req, 400, rezultat.poruka!),
-        );
-
         res.status(400).json({ message: rezultat.poruka });
         return;
       }
@@ -404,7 +395,7 @@ export class UsersController {
       const result = await this.usersService.updateUserById(id, updateData);
 
       if (result.success) {
-        this.siemService.sendEvent(
+          this.siemService.sendEvent(
           generateEvent(
             "user-microservice",
             req,
@@ -419,62 +410,23 @@ export class UsersController {
         }
         this.logger.log(result.error);
 
-        this.siemService.sendEvent(
+       if(result.code != 400){
+         this.siemService.sendEvent(
           generateEvent("user-microservice", req, result.code, result.error),
         );
+       }
 
         res.status(result.code).json(result.error);
       }
     } catch (err) {
       this.logger.log((err as Error).message);
-      this.siemService.sendEvent(
+        this.siemService.sendEvent(
         generateEvent("user-microservice", req, 500, (err as Error).message),
       );
       res.status(500).json({ message: (err as Error).message });
     }
   }
 
-  /**
-   * PUT /api/v1/users/:id/working-hours
-   * @param {id and weekly_working_hours} req.body - ID of user that you want to update, and weekly_working_hours
-   * @returns {UserDTO} - JSON format return
-   * @see {@link UserDTO} for input structure
-   */
-
-  private async setWeeklyHours(req: Request, res: Response): Promise<void> {
-    try {
-      const id = parseInt(req.params.id as string, 10);
-
-      if (isNaN(id)) {
-        res.status(400).json({ message: "The passed id is not a number" });
-        return;
-      }
-
-      const { weekly_working_hours } = req.body;
-
-      if (isNaN(weekly_working_hours)) {
-        res
-          .status(400)
-          .json({ message: "The passed weekly_working_hours is not a number" });
-        return;
-      }
-
-      this.logger.log("Update user's weekly_working_hours_sum");
-      const result = await this.usersService.setWeeklyHours(
-        id,
-        weekly_working_hours,
-      );
-      if (result.success) {
-        res.status(200).json(result.data);
-      } else {
-        this.logger.log(result.error);
-        res.status(result.code).json(result.error);
-      }
-    } catch (err) {
-      this.logger.log((err as Error).message);
-      res.status(500).json({ message: (err as Error).message });
-    }
-  }
 
   /**
    * GET /api/v1/user-roles
@@ -534,6 +486,7 @@ export class UsersController {
       res.status(500).json({ message: (err as Error).message });
     }
   }
+
 
   public getRouter(): Router {
     return this.router;

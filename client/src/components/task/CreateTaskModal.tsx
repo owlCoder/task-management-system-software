@@ -140,7 +140,7 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
       onClose();
     } catch (err) {
       console.error("Failed to create task:", err);
-      toast.error((err as any)?.message ?? "Failed to create task!");
+      toast.error((err as Error)?.message ?? "Failed to create task!");
     } finally {
       setLoading(false);
     }

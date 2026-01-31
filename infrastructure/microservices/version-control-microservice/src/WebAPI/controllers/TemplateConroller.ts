@@ -59,15 +59,14 @@ export class TemplateController {
             const result = await this.templateService.getAllTemplates();
 
             if(result.success) {
-                this.siemService.sendEvent(
-                    generateEvent("version-control-microservice", req, 200, "Request successful | All templates fetched"),
-                );
                 res.status(200).json(result.data);
             } else {
                 this.logger.log(result.error);
-                this.siemService.sendEvent(
-                    generateEvent("version-control-microservice", req, result.code, result.error),
-                );
+                if(result.code != 400){
+                    this.siemService.sendEvent(
+                        generateEvent("version-control-microservice", req, result.code, result.error),
+                    );
+                }
                 res.status(errorCodeToHttpStatus(result.code)).json(result.error);
             }
         } catch (err) {
@@ -99,9 +98,11 @@ export class TemplateController {
                 res.status(201).json(result.data);
             } else {
                 this.logger.log(result.error);
-                this.siemService.sendEvent(
-                    generateEvent("version-control-microservice", req, result.code, result.error)
-                );
+                if(result.code != 400){
+                    this.siemService.sendEvent(
+                        generateEvent("version-control-microservice", req, result.code, result.error)
+                    );
+                }
                 res.status(errorCodeToHttpStatus(result.code)).json(result.error);
             }
         } catch (err) {
@@ -138,9 +139,11 @@ export class TemplateController {
                 res.status(201).json(result.data);
             } else {
                 this.logger.log(result.error);
-                this.siemService.sendEvent(
-                    generateEvent("version-control-microservice", req, result.code, result.error)
-                );
+                if(result.code != 400) {
+                    this.siemService.sendEvent(
+                        generateEvent("version-control-microservice", req, result.code, result.error)
+                    );
+                }
                 res.status(errorCodeToHttpStatus(result.code)).json({message: result.error});
             }
         } catch (err) {
@@ -176,20 +179,25 @@ export class TemplateController {
 
         if (result.success) {
             this.siemService.sendEvent(
-                generateEvent("version-control-microservices", req, 204, "Request successful | Dependency added")
+                generateEvent("version-control-microservice", req, 204, "Request successful | Dependency added")
             );
             res.status(204).send(); 
         } else {
             this.logger.log(result.error);
-            this.siemService.sendEvent(
-                generateEvent("version-control-microservice", req, result.code, result.error)
-            );
+            if(result.code != 400) {
+                this.siemService.sendEvent(
+                    generateEvent("version-control-microservice", req, result.code, result.error)
+                );
+            }
             res.status(errorCodeToHttpStatus(result.code)).json({ error: result.error });
         }
     } catch (err) {
         this.logger.log((err as Error).message);
+            this.siemService.sendEvent(
+                generateEvent("version-control-microservice", req, 500, (err as Error).message)
+            );
         res.status(500).json({ message: (err as Error).message });
-    }
+        }
     }
 
 }
