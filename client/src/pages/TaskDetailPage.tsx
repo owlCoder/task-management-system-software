@@ -68,10 +68,10 @@ export const TaskDetailPage: React.FC<TaskDetailPageProps> = ({
       if (!userId) return;
       const file_id=await fileApi.uploadFile(token,selectedFile,userId);
 
-      apiTask.updateTaskStatus(taskId, TaskStatus.IN_PROGRESS,file_id)
+      apiTask.updateTaskStatus(taskId, TaskStatus.COMPLETED,file_id)
       .then(() => {
-        setTask(prev => prev ? {...prev, task_status: TaskStatus.IN_PROGRESS} : null);
-        onStatusUpdate?.(taskId, TaskStatus.IN_PROGRESS);
+        setTask(prev => prev ? {...prev, task_status: TaskStatus.COMPLETED} : null);
+        onStatusUpdate?.(taskId, TaskStatus.COMPLETED);
       })
       .catch(err => {
         console.error("Failed to update task status:", err);
