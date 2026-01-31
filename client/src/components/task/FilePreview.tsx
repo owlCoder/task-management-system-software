@@ -22,9 +22,13 @@ export const FilePreview: React.FC<FilePreviewProps> = ({
 
     if (role === UserRole.ANIMATION_WORKER && (isImage || isVideo)) {
       setIsValid(true);
-    } else {
+    } else if (role === UserRole.AUDIO_MUSIC_STAGIST && isAudio) {
+      setIsValid(true);
+    } 
+    else {
       setIsValid(false);
     }
+    
   }, [file, role]);
 
   if (!file) return null;
@@ -78,7 +82,14 @@ export const FilePreview: React.FC<FilePreviewProps> = ({
             />
           )}
 
-          {isAudio && <audio controls className="w-full px-4" />}
+        {isAudio && (
+          <audio
+            controls
+            src={URL.createObjectURL(file)}
+            className="w-full px-4"
+          />
+        )}
+
         </div>
 
         <div className="flex items-center justify-between">

@@ -65,12 +65,13 @@ export const TaskDetailPage: React.FC<TaskDetailPageProps> = ({
     if (!selectedFile || !task) return;
 
     try {
+      if (!userId) return;
       const file_id=await fileApi.uploadFile(token,selectedFile,userId);
 
-      apiTask.updateTaskStatus(taskId, TaskStatus.COMPLETED,file_id)
+      apiTask.updateTaskStatus(taskId, TaskStatus.IN_PROGRESS,file_id)
       .then(() => {
-        setTask(prev => prev ? {...prev, task_status: TaskStatus.COMPLETED} : null);
-        onStatusUpdate?.(taskId, TaskStatus.COMPLETED);
+        setTask(prev => prev ? {...prev, task_status: TaskStatus.IN_PROGRESS} : null);
+        onStatusUpdate?.(taskId, TaskStatus.IN_PROGRESS);
       })
       .catch(err => {
         console.error("Failed to update task status:", err);
@@ -240,8 +241,11 @@ export const TaskDetailPage: React.FC<TaskDetailPageProps> = ({
                 <TaskVersionDiff versions={versions} />
               )}
               
-              <TaskCommentList comments={comments} onDelete={handleDeleteComments} />
-              {task.task_status!== TaskStatus.COMPLETED &&  <TaskCommentInput onSubmit={handleAddComments} />}
+              {role !== UserRole.ANIMATION_WORKER && role !== UserRole.AUDIO_MUSIC_STAGIST &&
+                <TaskCommentList comments={comments} onDelete={handleDeleteComments} />}
+              {role !== UserRole.ANIMATION_WORKER && role !== UserRole.AUDIO_MUSIC_STAGIST && 
+                task.task_status!== TaskStatus.COMPLETED &&  
+                  <TaskCommentInput onSubmit={handleAddComments} />}
 
               {role !== UserRole.PROJECT_MANAGER && task.task_status!== TaskStatus.COMPLETED &&  view === "upload" && (
                 <FileUpload
@@ -269,7 +273,8 @@ export const TaskDetailPage: React.FC<TaskDetailPageProps> = ({
         </div>
 
         <div className="px-6 py-4 border-t border-white/10 flex justify-end gap-3">
-          {onEdit && (
+          {role !== UserRole.ANIMATION_WORKER && role !== UserRole.AUDIO_MUSIC_STAGIST && 
+           onEdit && (
             <button
               onClick={onEdit}
               className="px-6 py-2 rounded-lg text-sm font-semibold

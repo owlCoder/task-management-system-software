@@ -16,6 +16,9 @@ const Sidebar: React.FC = () => {
 
   const isAdmin = user?.role === "Admin";
   const isProjectManager = user?.role === UserRole.PROJECT_MANAGER;
+  const isAnalyticsAndDevelManager = user?.role === UserRole.ANALYTICS_DEVELOPMENT_MANAGER;
+  const isAnimationWorker = user?.role === UserRole.ANIMATION_WORKER;
+  const isAudioWorker = user?.role === UserRole.AUDIO_MUSIC_STAGIST;
 
   return (
     <aside
@@ -36,7 +39,7 @@ const Sidebar: React.FC = () => {
 
       {/* Middle: Buttons */}
       <nav className="flex-1 flex flex-col items-stretch gap-4 mt-2 overflow-y-auto styled-scrollbar pr-2">
-        {!isAdmin && (
+        {!isAdmin && !isAnalyticsAndDevelManager &&(
           <Link
           to="/projects"
           className="w-full px-4 py-3 rounded-lg text-sm font-semibold text-white/80 bg-white/5 border border-white/10 hover:border-white/30 hover:text-white hover:bg-white/10 transition text-center"
@@ -45,7 +48,7 @@ const Sidebar: React.FC = () => {
         </Link>
         )}
 
-        {!isAdmin && !isProjectManager &&(
+        {!isAdmin && !isProjectManager && !isAnimationWorker && !isAudioWorker &&(
           <Link
           to="/analytics"
           className="w-full px-4 py-3 rounded-lg text-sm font-semibold text-white/80 bg-white/5 border border-white/10 hover:border-white/30 hover:text-white hover:bg-white/10 transition text-center"
@@ -54,7 +57,7 @@ const Sidebar: React.FC = () => {
         </Link>
         )}
 
-        {!isAdmin &&  !isProjectManager &&(
+        {!isAdmin &&  !isProjectManager && !isAnalyticsAndDevelManager &&(
           <Link
           to="/files"
           className="w-full px-4 py-3 rounded-lg text-sm font-semibold text-white/80 bg-white/5 border border-white/10 hover:border-white/30 hover:text-white hover:bg-white/10 transition text-center"

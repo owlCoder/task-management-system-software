@@ -16,8 +16,6 @@ const isProjectManager = (role?: string) => role === "Project Manager";
 const isAnalyst = (role?: string) => role === "Analytics & Development Manager";
 
 const canManageProjects = (role?: string) => isProjectManager(role);
-const canSeeAllProjects = (role?: string) =>
-    isProjectManager(role) || isAnalyst(role);
 
 export const ProjectsPage: React.FC = () => {
     const { user } = useAuth();

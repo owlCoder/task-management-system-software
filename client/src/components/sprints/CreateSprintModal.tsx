@@ -161,6 +161,7 @@ const CreateSprintModal: React.FC<CreateSprintModalProps> = ({
               </h3>
               <input
                 type="date"
+                min={new Date().toISOString().split("T")[0]}
                 value={formData.end_date}
                 onChange={(e) =>
                   setFormData((p) => ({ ...p, end_date: e.target.value }))

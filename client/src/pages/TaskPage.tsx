@@ -15,7 +15,6 @@ import TaskSortSelect from "../components/task/TaskSortSelect";
 import { SortOption } from "../types/SortOption";
 import { TaskDetailPage } from "./TaskDetailPage";
 import TaskBoardListPreview from "../components/task/TaskBoardListPreview";
-//import { UpdateTaskDTO } from "../models/task/UpdateTaskDTO";
 import { TaskStatus } from "../enums/TaskStatus";
 import { TaskListPageProps } from "../types/props";
 import { useAuth } from "../hooks/useAuthHook";
@@ -25,7 +24,7 @@ import type { AxiosError } from "axios";
 import { VersionControlAPI } from "../api/version/VersionControlAPI";
 
 const TaskPage: React.FC<TaskListPageProps> = ({ projectId }) => {
-  const { token } = useAuth();
+  const { token , user} = useAuth();
   if (!token) return null;
 
   const { projectId: projectIdParam, sprintId } = useParams();
@@ -44,6 +43,10 @@ const TaskPage: React.FC<TaskListPageProps> = ({ projectId }) => {
   const api = new TaskAPI(import.meta.env.VITE_GATEWAY_URL, token);
   const selectedTask = tasks.find((t) => t.task_id === selectedtaskId);
   const [detailRefreshKey, setDetailRefreshKey] = useState(0);
+  const isWorker =
+    user?.role === "Animation Worker" ||
+    user?.role === "Audio & Music Stagist";
+
   const handleDetailStatusUpdate = (taskId: number, newStatus: TaskStatus) => {
     setTasks((prev) =>
       prev.map((t) =>
@@ -260,7 +263,7 @@ const TaskPage: React.FC<TaskListPageProps> = ({ projectId }) => {
               </div>
 
               <div className="flex flex-wrap gap-2">
-                <button
+              {!isWorker && <button
                   type="button"
                   className="
                 group
@@ -293,6 +296,7 @@ const TaskPage: React.FC<TaskListPageProps> = ({ projectId }) => {
                     Create Task
                   </span>
                 </button>
+              }
 
                 <button
                   type="button"
