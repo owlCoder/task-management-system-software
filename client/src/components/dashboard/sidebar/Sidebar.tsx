@@ -13,6 +13,8 @@ const Sidebar: React.FC = () => {
     navigate("/auth");
   };
 
+  const isAdmin = user?.role === "Admin";
+
   return (
     <aside
       className={`w-56 h-screen bg-white/10 backdrop-blur-xl border-r border-white/20 shadow-[4px_0_25px_rgba(0,0,0,0.25)] p-4 flex flex-col justify-between rounded-tr-xl rounded-br-xl overflow-hidden`}
@@ -32,26 +34,32 @@ const Sidebar: React.FC = () => {
 
       {/* Middle: Buttons */}
       <nav className="flex-1 flex flex-col items-stretch gap-4 mt-2 overflow-y-auto styled-scrollbar pr-2">
-        <Link
+        {!isAdmin && (
+          <Link
           to="/projects"
           className="w-full px-4 py-3 rounded-lg text-sm font-semibold text-white/80 bg-white/5 border border-white/10 hover:border-white/30 hover:text-white hover:bg-white/10 transition text-center"
         >
           Projects
         </Link>
+        )}
 
-        <Link
+        {!isAdmin && (
+          <Link
           to="/analytics"
           className="w-full px-4 py-3 rounded-lg text-sm font-semibold text-white/80 bg-white/5 border border-white/10 hover:border-white/30 hover:text-white hover:bg-white/10 transition text-center"
         >
           Analytics
         </Link>
+        )}
 
-        <Link
+        {!isAdmin && (
+          <Link
           to="/files"
           className="w-full px-4 py-3 rounded-lg text-sm font-semibold text-white/80 bg-white/5 border border-white/10 hover:border-white/30 hover:text-white hover:bg-white/10 transition text-center"
         >
           Files
         </Link>
+        )}
 
         <Link
           to="/notifications"
@@ -69,7 +77,7 @@ const Sidebar: React.FC = () => {
         </Link>
         )}
 
-        {user?.role === "Admin" && (
+        {isAdmin && (
           <Link
           to="/users"
           className="w-full px-4 py-3 rounded-lg text-sm font-semibold text-white/80 bg-white/5 border border-white/10 hover:border-white/30 hover:text-white hover:bg-white/10 transition text-center"

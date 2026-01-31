@@ -35,11 +35,9 @@ export const TaskDetailPage: React.FC<TaskDetailPageProps> = ({
   const [task, setTask] = useState<TaskDTO | null>(null);
   const [role, setRole] = useState<UserRole | null>(null);
   const [userId, setUserId] = useState<number>(0);
-  const [isTaskDone,setIsTaskDone] = useState(false);
   const [comments, setComments] = useState<CommentDTO[]>([]);
   const [versions, setVersions] = useState<TaskVersionDTO[]>([]);
   const [versionsError, setVersionsError] = useState<string | null>(null);
-  const [uploadedFileId, setUploadedFileId] = useState<number>(0);
   const [reviewHistory, setReviewHistory] = useState<ReviewHistoryItemDTO[]>([]);
   const [reviewHistoryLoading, setReviewHistoryLoading] = useState(false);
   const [reviewHistoryError, setReviewHistoryError] = useState<string | null>(null);
@@ -64,27 +62,12 @@ export const TaskDetailPage: React.FC<TaskDetailPageProps> = ({
   };
 
   const handleUpload = async () => {
-    if (!selectedFile) return;
+    if (!selectedFile || !task) return;
 
     try {
       const file_id=await fileApi.uploadFile(token,selectedFile,userId);
 
-      setUploadedFileId(file_id);
-      setIsTaskDone(true);
-      setUploadedFileName(selectedFile.name);
-      setView("upload");
-    } catch (e) {
-      console.error(e);
-      alert("Upload failed");
-    }
-  };
-
-  useEffect(() => {
-    if(!isTaskDone) return;
-    if(!task) return;
-    if(task.task_status === TaskStatus.COMPLETED) return; 
-
-    apiTask.updateTaskStatus(taskId, TaskStatus.COMPLETED,uploadedFileId)
+      apiTask.updateTaskStatus(taskId, TaskStatus.COMPLETED,file_id)
       .then(() => {
         setTask(prev => prev ? {...prev, task_status: TaskStatus.COMPLETED} : null);
         onStatusUpdate?.(taskId, TaskStatus.COMPLETED);
@@ -93,8 +76,13 @@ export const TaskDetailPage: React.FC<TaskDetailPageProps> = ({
         console.error("Failed to update task status:", err);
       });
 
-  }, [isTaskDone, taskId]) 
-
+      setUploadedFileName(selectedFile.name);
+      setView("upload");
+    } catch (e) {
+      console.error(e);
+      alert("Upload failed");
+    }
+  };
 
   const handleAddComments = async (text: string) => {
     const trimmed = text.trim();

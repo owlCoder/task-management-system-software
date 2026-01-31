@@ -65,7 +65,6 @@ export class TaskController {
             }
 
             const createTask = req.body as CreateTaskDTO;
-            console.log(createTask);
             const dtoValidation = validateCreateTask(createTask);
             if (!dtoValidation.isValid) {
                 res.status(400).json({ message: dtoValidation.message });

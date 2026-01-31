@@ -1,6 +1,6 @@
-import {Entity,PrimaryGeneratedColumn,Column,ManyToOne,JoinColumn,OneToMany} from "typeorm";
+import {Entity,PrimaryGeneratedColumn,Column} from "typeorm";
 
-@Entity("reviewComments")
+@Entity("review_comments")
 export class ReviewComment {
   @PrimaryGeneratedColumn()
   commentId!: number;

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useAuth } from "../../hooks/useAuthHook";
-import { IUserAPI } from "../../api/users/IUserAPI";
+import { UserListProps } from "../../types/props/UserListProps";
 import { UserDTO } from "../../models/users/UserDTO";
 import { AddUserForm } from "./AddUserForm";
 import { EditUserForm } from "./EditUserForm";
@@ -9,9 +9,6 @@ import { UserRole } from "../../enums/UserRole";
 import { confirmToast } from "../toast/toastHelper";
 import toast from "react-hot-toast";
 
-type UserListProps = {
-  userAPI: IUserAPI;
-};
 
 export const UserList: React.FC<UserListProps> = ({ userAPI }) => {
   const { user: authUser, token } = useAuth();
@@ -150,17 +147,21 @@ export const UserList: React.FC<UserListProps> = ({ userAPI }) => {
                     <span className="font-semibold text-white text-lg text-center">{u.username}</span>
                     <span className="text-sm text-white/50 mb-4 text-center">{u.role_name}</span>
                     <div className="flex gap-2 mt-auto">
-                      <button
-                        className="px-4 py-1.5 bg-white/30 hover:bg-white hover:text-black text-white text-xs font-bold rounded-full border border-white/10 transition-all"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setSelectedUser(u);
-                          setIsEditing(true);
-                          setShowAddForm(false);
-                        }}
-                      >
-                        Edit
-                      </button>
+                      {/* Edit Button Logic */}
+                      {(Number(authUser?.id) === Number(u.user_id) || 
+                        (u.role_name !== UserRole.ADMIN && u.role_name !== UserRole.SYS_ADMIN)) && (
+                        <button
+                          className="px-4 py-1.5 bg-white/30 hover:bg-white hover:text-black text-white text-xs font-bold rounded-full border border-white/10 transition-all"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedUser(u);
+                            setIsEditing(true);
+                            setShowAddForm(false);
+                          }}
+                        >
+                          Edit
+                        </button>
+                      )}
                       {authUser?.id !== u.user_id && u.role_name !== UserRole.ADMIN && u.role_name !== UserRole.SYS_ADMIN && (
                         <button
                           className="px-4 py-1.5 bg-red-500/20 hover:bg-red-600 text-red-200 hover:text-white text-xs font-bold rounded-full border border-red-500/20 transition-all"

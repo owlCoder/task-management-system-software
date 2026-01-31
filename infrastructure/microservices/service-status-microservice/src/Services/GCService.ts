@@ -1,12 +1,12 @@
 import { Db } from "../Database/DbConnectionPool";
 import { EOperationalStatus } from "../Domain/enums/EOperationalStatus";
-import { IGC_Service } from "../Domain/Services/IGC_Service";
+import { IGC_Service } from "../Domain/Services/IGCService";
 import { ILoggerService } from "../Domain/Services/ILoggerService";
-import { Measurement_Service } from "./Measurement_Service";
+import { Measurement_Service } from "./measurementService";
 
-const GC_INTERVAL = 60_000 * 60;
-const RETENTION_OK = 60_000 * 60 * 24 * 14;
-const RETENTION_DOWN = 60_000 * 60 * 24 * 28;
+const gcIinterval = 60_000 * 60;
+const retenationOk = 60_000 * 60 * 24 * 14;
+const retenationDown = 60_000 * 60 * 24 * 28;
 
 
 export class GarbageCollector_Service implements IGC_Service {
@@ -21,7 +21,7 @@ export class GarbageCollector_Service implements IGC_Service {
         this.intervalId = setInterval(() => {
             this.collect().catch(err =>
                 this.LoggerService.warn("GC_SERVICE", (err as Error).stack ?? (err as Error).message));
-        }, GC_INTERVAL);
+        }, gcIinterval);
     }
 
     async stop(): Promise<void> {
@@ -31,9 +31,9 @@ export class GarbageCollector_Service implements IGC_Service {
     }
 
     async collect(): Promise<void> {
-        const deletedDown = await this.measurementService.deleteOldMeasurements(EOperationalStatus.Down, RETENTION_DOWN);
+        const deletedDown = await this.measurementService.deleteOldMeasurements(EOperationalStatus.Down, retenationDown);
 
-        const deletedOk = await this.measurementService.deleteOldNonDownMeasurements(RETENTION_OK);
+        const deletedOk = await this.measurementService.deleteOldNonDownMeasurements(retenationOk);
 
         const totalDeleted = deletedDown + deletedOk;
 

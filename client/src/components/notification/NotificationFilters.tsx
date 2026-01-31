@@ -43,10 +43,10 @@ const NotificationFilters: React.FC<NotificationFiltersProps> = ({
     "bg-white/5 text-white/30 border-white/10 cursor-not-allowed";
 
   return (
-    <div className={`flex items-center justify-between gap-4 ${className}`}>
+    <div className={`flex flex-wrap items-center justify-between gap-3 ${className}`}>
       
       {/* filter all and unread */}
-      <div className="flex items-center gap-2 flex-nowrap">
+      <div className="flex items-center gap-2 flex-wrap">
         <button
           onClick={() => onFilterChange('all')}
           className={`${controlButtonBase} ${
@@ -72,7 +72,7 @@ const NotificationFilters: React.FC<NotificationFiltersProps> = ({
       </div>
 
       {/* right side - sort, select all, mark as read/unread, delete */}
-      <div className="flex items-center gap-2 flex-nowrap">
+      <div className="flex items-center gap-2 flex-wrap">
         
         {/* sort dropdown */}
         <div className="relative">
@@ -165,6 +165,11 @@ const NotificationFilters: React.FC<NotificationFiltersProps> = ({
             />
           </svg>
           Mark as Read
+          {selectedCount > 0 && (
+            <span className="absolute -top-1 -right-1 min-w-[1.25rem] h-5 px-1.5 rounded-full text-xs font-bold bg-rose-500 text-white flex items-center justify-center shadow">
+              {selectedCount}
+            </span>
+          )}
         </button>
 
         {/* mark as unread */}

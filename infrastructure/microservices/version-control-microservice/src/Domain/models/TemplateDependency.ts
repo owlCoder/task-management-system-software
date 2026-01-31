@@ -1,7 +1,7 @@
-import {Entity,PrimaryGeneratedColumn,Column,ManyToOne, JoinColumn,OneToMany,CreateDateColumn} from "typeorm";
+import {Entity,PrimaryGeneratedColumn,ManyToOne, JoinColumn} from "typeorm";
 import { TaskTemplate } from "./TaskTemplate";
 
-@Entity("TemplateDependencies")
+@Entity("template_dependencies")
 export class TemplateDependency {
     @PrimaryGeneratedColumn()
     id!: number;

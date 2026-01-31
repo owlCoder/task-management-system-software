@@ -10,20 +10,15 @@ export class LoggerService implements ILoggerService {
         this.log('info', code, msg);
     }
 
-
     warn(code: string,  msg: string): void {
         this.log('warn',  code, msg);
     }
-
 
     err( code: string, msg: string): void {
         this.log('error', code, msg);
     }
 
-
     private log(level: 'info' | 'warn' | 'error', code: string, msg: string): void {
-        this.logger[level]({
-            code: code || 'UNKNOWN',
-           }, msg || "No message provided");
+        this.logger[level]({code: code || 'UNKNOWN',}, msg || "No message provided");
     }
 }

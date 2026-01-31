@@ -1,63 +1,50 @@
 import React from "react";
-import { UserDTO } from "../../models/users/UserDTO";
-
-type UserDetailProps = {
-  user: UserDTO;
-  onClose: () => void;
-};
+import { UserDetailProps } from "../../types/props/UserDetailProps";
 
 export const UserDetail: React.FC<UserDetailProps> = ({ user, onClose }) => {
   const hasImage = user.image_url && user.image_url.trim() !== "";
 
   return (
-    <div className="p-8 rounded-[2.5rem] bg-white/15 backdrop-blur-2xl border border-white/20 w-full max-w-md mx-auto shadow-[0_20px_50px_rgba(0,0,0,0.3)] relative overflow-hidden">
+    <div className="p-8 rounded-[2.5rem] bg-white/10 backdrop-blur-3xl border border-white/20 w-full max-w-md mx-auto shadow-[0_32px_64px_rgba(0,0,0,0.5)] relative overflow-hidden group">
+      <div className="absolute -top-10 -right-10 w-32 h-32 bg-blue-500/20 rounded-full blur-3xl group-hover:bg-blue-500/30 transition-colors duration-500"></div>
+      <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-purple-500/10 rounded-full blur-3xl"></div>
       
-      <div className="absolute -top-24 -right-24 w-48 h-48 bg-blue-400/10 rounded-full blur-3xl"></div>
-      
-      <h3 className="text-2xl font-bold mb-8 text-white text-center tracking-tight">User Details</h3>
+      <div className="flex justify-between items-center mb-6">
+        <h3 className="text-xl font-semibold text-white/90">User Profile</h3>
+      </div>
 
-      <div className="flex justify-center mb-8">
-        <div className="w-28 h-28 rounded-full border-2 border-white/40 shadow-xl flex items-center justify-center bg-white/10 relative overflow-hidden">
-          {hasImage ? (
-            <img 
-              src={user.image_url} 
-              alt={user.username}
-              className="w-full h-full object-cover"
-            />
-          ) : (
-            <span className="text-5xl font-extrabold text-white/90 uppercase select-none">
-              {user.username.charAt(0)}
-            </span>
-          )}
+      <div className="flex flex-col items-center mb-8">
+        <div className="relative p-1 rounded-full bg-gradient-to-tr from-blue-500/50 to-purple-500/50 mb-4">
+            <div className="w-24 h-24 rounded-full border-2 border-[#0f172a] shadow-2xl flex items-center justify-center bg-slate-800 overflow-hidden">
+            {hasImage ? (
+                <img src={user.image_url} alt={user.username} className="w-full h-full object-cover" />
+            ) : (
+                <span className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-br from-white to-white/40 uppercase">
+                {user.username.charAt(0)}
+                </span>
+            )}
+            </div>
         </div>
+        <h2 className="text-2xl font-bold text-white mb-1">{user.username}</h2>
+        <span className="px-3 py-1 rounded-full bg-blue-500/20 border border-blue-500/30 text-blue-300 text-[10px] font-black uppercase tracking-widest">
+            {user.role_name.replace(/_/g, " ")}
+        </span>
       </div>
 
-      <div className="flex flex-col gap-4 relative z-10">
-        {[
-          { label: "Username", value: user.username },
-          { label: "Email", value: user.email },
-          { label: "Role", value: user.role_name.replace(/_/g, " ") },
-          { label: "Weekly Hours", value: `${user.weekly_working_hour_sum || 0} h` }
-        ].map((item, idx) => (
-          <div key={idx} className="bg-white/5 p-4 rounded-2xl border border-white/10 transition-all hover:bg-white/10">
-            <span className="text-[10px] uppercase tracking-[0.2em] text-blue-300/80 font-bold block mb-1">
-              {item.label}
-            </span>
-            <span className="text-lg font-medium text-white break-all">
-              {item.value}
-            </span>
-          </div>
-        ))}
+      <div className="space-y-3 relative z-10">
+        <div className="bg-white/5 p-4 rounded-2xl border border-white/5 transition-all hover:bg-white/[0.08] hover:border-white/10">
+            <span className="text-[10px] uppercase tracking-widest text-white/30 font-bold block mb-1">Email Address</span>
+            <span className="text-base font-medium text-white/90 break-all">{user.email}</span>
+        </div>
+        
       </div>
 
-      <div className="flex justify-center mt-8">
-        <button
-          onClick={onClose}
-          className="w-full py-4 rounded-2xl bg-white/10 hover:bg-white/20 text-white font-bold border border-white/20 transition-all active:scale-95 shadow-lg"
-        >
-          Close
-        </button>
-      </div>
+      <button
+        onClick={onClose}
+        className="w-full mt-8 py-4 rounded-2xl bg-gradient-to-r from-blue-600/80 to-blue-500/80 hover:from-blue-600 hover:to-blue-500 text-white font-bold transition-all active:scale-[0.98] shadow-[0_10px_20px_rgba(59,130,246,0.3)]"
+      >
+        Close
+      </button>
     </div>
   );
 };
