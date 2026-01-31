@@ -1,6 +1,9 @@
+// Domain DTOs
 import { GoogleUserInfoDTO } from "../DTOs/GoogleUserInfoDTO";
 import { LoginUserDTO } from "../DTOs/LoginUserDTO";
 import { SiemLoginUserDTO } from "../DTOs/SiemLoginUserDTO";
+
+// Domain types
 import { LoginResponseType } from "../types/LoginResponse";
 
 export interface IAuthService {

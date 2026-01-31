@@ -1,3 +1,4 @@
+// Domain models
 import { UserRole } from "../models/UserRole";
 
 export class UserDTO {

@@ -81,7 +81,6 @@ const initLogger = new LogerService(LoggingServiceEnum.APP_SERVICE);
   // Services
   const authLogger = new LogerService(LoggingServiceEnum.AUTH_SERVICE);
   const emailLogger = new LogerService(LoggingServiceEnum.EMAIL_SERVICE);
-  // const roleLogger = new LogerService(LoggingServiceEnum.ROLE_SERVICE);
   const sessionLogger = new LogerService(LoggingServiceEnum.SESSION_SERVICE);
   const otpVerificationLogger = new LogerService(LoggingServiceEnum.OTP_VERIFICATION_SERVICE);
   const emailHealthCheckerLogger = new LogerService(LoggingServiceEnum.EMAIL_HEALTH_CHECKER_SERVICE);

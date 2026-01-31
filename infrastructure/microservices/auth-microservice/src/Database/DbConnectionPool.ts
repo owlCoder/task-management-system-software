@@ -1,6 +1,9 @@
+// External libraries
+import dotenv from "dotenv";
 import "reflect-metadata";
 import { DataSource } from "typeorm";
-import dotenv from "dotenv";
+
+// Domain models
 import { User } from "../Domain/models/User";
 import { UserRole } from "../Domain/models/UserRole";
 

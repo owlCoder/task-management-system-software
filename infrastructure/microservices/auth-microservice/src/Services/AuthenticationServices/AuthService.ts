@@ -1,15 +1,24 @@
+// External libraries
 import bcrypt from "bcryptjs";
+
+// Domain services
 import { IAuthService } from "../../Domain/services/IAuthService";
-import { LoginUserDTO } from "../../Domain/DTOs/LoginUserDTO";
-import { SiemLoginUserDTO } from "../../Domain/DTOs/SiemLoginUserDTO";
-import { LoginResponseType } from "../../Domain/types/LoginResponse";
 import { IEmailService } from "../../Domain/services/IEmailService";
 import { ILogerService } from "../../Domain/services/ILogerService";
-import { SeverityEnum } from "../../Domain/enums/SeverityEnum";
-import { IUserRepository } from "../../Domain/services/IUserRepository";
 import { ILoginStrategy } from "../../Domain/services/ILoginStrategy";
-import { GoogleUserInfoDTO } from "../../Domain/DTOs/GoogleUserInfoDTO";
 import { IRoleRepository } from "../../Domain/services/IRoleRepository";
+import { IUserRepository } from "../../Domain/services/IUserRepository";
+
+// Domain DTOs
+import { GoogleUserInfoDTO } from "../../Domain/DTOs/GoogleUserInfoDTO";
+import { LoginUserDTO } from "../../Domain/DTOs/LoginUserDTO";
+import { SiemLoginUserDTO } from "../../Domain/DTOs/SiemLoginUserDTO";
+
+// Domain enums
+import { SeverityEnum } from "../../Domain/enums/SeverityEnum";
+
+// Domain types
+import { LoginResponseType } from "../../Domain/types/LoginResponse";
 import { LoginTokenClaims } from "../../Domain/types/LoginTokenClaims";
 
 export class AuthService implements IAuthService {

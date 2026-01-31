@@ -1,25 +1,41 @@
+// External libraries
 import { Request, Response, Router } from 'express';
-import { ILogerService } from '../../Domain/services/ILogerService';
+
+// Domain services
 import { IAuthService } from '../../Domain/services/IAuthService';
+import { IGoogleIdTokenVerifier } from '../../Domain/services/IGoogleIdTokenVerifier';
+import { IJWTTokenService } from '../../Domain/services/IJWTTokenService';
+import { ILogerService } from '../../Domain/services/ILogerService';
+import { IOTPVerificationService } from '../../Domain/services/IOTPVerificationService';
+import { ISIEMService } from '../../siem/Domen/services/ISIEMService';
+import { ITokenNamingStrategy } from '../../Domain/strategies/ITokenNamingStrategy';
+
+// Domain DTOs
 import { LoginUserDTO } from '../../Domain/DTOs/LoginUserDTO';
 import { SiemLoginUserDTO } from '../../Domain/DTOs/SiemLoginUserDTO';
-import { validateLoginData } from '../validators/AuthValidators/LoginValidator';
-import { validateSiemLoginData } from '../validators/AuthValidators/SiemLoginValidator';
+
+// Domain enums
 import { SeverityEnum } from '../../Domain/enums/SeverityEnum';
+
+// Domain models
+import { BrowserData } from '../../Domain/models/BrowserData';
+
+// Helpers
+import { ErrorHelper } from '../../helpers/ErrorHelper';
+import { TokenHelper } from '../../helpers/TokenHelper';
+
+// Services
+import { GoogleIdTokenVerifier } from '../../Services/Google/GoogleTokenVerifier';
+
+// Siem
+import { generateEvent } from '../../siem/Domen/Helpers/generate/GenerateEvent';
+
+// WebAPI
+import { validateGoogleLoginData } from '../validators/GoogleLoginValidator';
+import { validateLoginData } from '../validators/AuthValidators/LoginValidator';
 import { validateOTPResendData } from '../validators/OTPValidators/OtpResendValidator';
 import { validateOTPVerificationData } from '../validators/OTPValidators/OtpVerificationValidator';
-import { BrowserData } from '../../Domain/models/BrowserData';
-import { IOTPVerificationService } from '../../Domain/services/IOTPVerificationService';
-import { TokenHelper } from '../../helpers/TokenHelper';
-import { ErrorHelper } from '../../helpers/ErrorHelper';
-import { ITokenNamingStrategy } from '../../Domain/strategies/ITokenNamingStrategy';
-import { JWTTokenService } from '../../Services/JWTTokenServices/JWTTokenService';
-import { IJWTTokenService } from '../../Domain/services/IJWTTokenService';
-import { validateGoogleLoginData } from '../validators/GoogleLoginValidator';
-import { GoogleIdTokenVerifier } from '../../Services/Google/GoogleTokenVerifier';
-import { IGoogleIdTokenVerifier } from '../../Domain/services/IGoogleIdTokenVerifier';
-import { ISIEMService } from '../../siem/Domen/services/ISIEMService';
-import { generateEvent } from '../../siem/Domen/Helpers/generate/GenerateEvent';
+import { validateSiemLoginData } from '../validators/AuthValidators/SiemLoginValidator';
 
 export class AuthController {
   private router: Router;
@@ -308,7 +324,7 @@ export class AuthController {
             500,
             "JWT generation failed for OTP verification",
           ),
-      );
+        );
         this.errorHelper.handleJWTError(res, error);
       }
     } else {

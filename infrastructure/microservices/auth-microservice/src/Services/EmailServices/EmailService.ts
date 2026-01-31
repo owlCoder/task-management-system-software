@@ -1,12 +1,23 @@
+// External libraries
 import axios from "axios";
+
+// Domain models
 import { User } from "../../Domain/models/User";
-import { ILogerService } from "../../Domain/services/ILogerService";
-import { SeverityEnum } from "../../Domain/enums/SeverityEnum";
+
+// Domain services
 import { IEmailService } from "../../Domain/services/IEmailService";
 import { IHealthChecker } from "../../Domain/services/IHealthChecker";
-import { EmailTemplates } from "./EmailTemplates";
-import { buildEmailServiceUrl } from "./EmailUrlHelper";
+import { ILogerService } from "../../Domain/services/ILogerService";
+
+// Domain DTOs
 import { UserDTO } from "../../Domain/DTOs/UserDTO";
+
+// Domain enums
+import { SeverityEnum } from "../../Domain/enums/SeverityEnum";
+
+// Services
+import { buildEmailServiceUrl } from "./EmailUrlHelper";
+import { EmailTemplates } from "./EmailTemplates";
 
 export class EmailService implements IEmailService {
   private readonly emailServiceUrl: string = buildEmailServiceUrl();

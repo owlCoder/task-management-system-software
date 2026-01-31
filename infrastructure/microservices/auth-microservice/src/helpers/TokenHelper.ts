@@ -2,7 +2,6 @@ import { LoginTokenClaims } from '../Domain/types/LoginTokenClaims';
 import { AuthTokenClaims } from '../Domain/types/AuthTokenClaims';
 import { ITokenNamingStrategy } from '../Domain/strategies/ITokenNamingStrategy';
 import { TokenAuthResponse, AuthResponse } from '../Domain/types/AuthResponseTypes';
-import { JWTTokenService } from '../Services/JWTTokenServices/JWTTokenService';
 import { IJWTTokenService } from '../Domain/services/IJWTTokenService';
 
 /**

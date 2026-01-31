@@ -1,4 +1,7 @@
+// External libraries
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+
+// Domain models
 import { User } from "./User";
 
 /** 

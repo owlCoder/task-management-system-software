@@ -1,7 +1,12 @@
+// Database
 import { Db } from "./DbConnectionPool";
-import { LogerService } from "../Services/LogerServices/LogerService";
+
+// Domain enums
 import { LoggingServiceEnum } from "../Domain/enums/LoggingServiceEnum";
 import { SeverityEnum } from "../Domain/enums/SeverityEnum";
+
+// Services
+import { LogerService } from "../Services/LogerServices/LogerService";
 
 let initialization_attempts = 0;
 let timeout = 5000;

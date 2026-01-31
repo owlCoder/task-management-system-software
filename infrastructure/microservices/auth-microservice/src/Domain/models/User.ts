@@ -1,10 +1,13 @@
+// External libraries
 import {
-  Entity,
-  PrimaryGeneratedColumn,
   Column,
-  ManyToOne,
+  Entity,
   JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
 } from "typeorm";
+
+// Domain models
 import { UserRole } from "./UserRole";
 
 /** 
