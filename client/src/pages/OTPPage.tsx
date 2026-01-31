@@ -1,13 +1,24 @@
 import React, { useRef, useState } from "react";
 import { Navigate, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuthHook";
+import { IAuthAPI } from "../api/auth/IAuthAPI";
+import type { VerifyOtpDTO } from "../models/auth/OtpDTO";
+import type { OtpSessionDTO } from "../models/auth/OtpDTO";
 
 const backgroundImageUrl = new URL(
   "../../public/pozadina.png",
   import.meta.url
 ).href;
 
-export const OtpPage: React.FC = () => {
+type OtpPageProps = {
+  authAPI: IAuthAPI;
+};
+
+type OtpState = {
+   session: OtpSessionDTO 
+};
+
+export const OtpPage: React.FC<OtpPageProps> = ({ authAPI }) => {
   const [otp, setOtp] = useState<string[]>(Array(8).fill(""));
   const [error, setError] = useState("");
   const inputsRef = useRef<Array<HTMLInputElement | null>>([]);
@@ -16,7 +27,7 @@ export const OtpPage: React.FC = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
 
-  const session = (location.state as any)?.session;
+  const session = (location.state as OtpState | null)?.session;
 
   if (!session) {
     return <Navigate to="/auth" replace />;
@@ -37,35 +48,33 @@ export const OtpPage: React.FC = () => {
   };
 
   const onVerify = async () => {
-  if (otpValue.length !== 8) return;
+    if (otpValue.length !== 8) return;
 
-  try {
-    setError("");
+    try {
+      setError("");
 
-    const res = await fetch(`${import.meta.env.VITE_GATEWAY_URL}/verify-otp`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ session, code: otpValue }),
-    });
+      const payload: VerifyOtpDTO = { ...session, otp: otpValue };
+      const data = await authAPI.verifyOtp(payload);
 
-    const data = await res.json().catch(() => ({}));
+      if (!data?.success) {
+        throw new Error(data?.message || "Invalid OTP");
+      }
 
-    if (!res.ok) {
-      throw new Error(data?.message || `HTTP ${res.status}`);
+      const token = data?.token;
+
+      if (token) {
+        login(token);
+        navigate("/mainwindow");
+        return;
+      }
+
+      setError("Verification passed, but no token received.");
+    } catch {
+      console.error("OTP verification failed");
+      setError("Verification failed.");
     }
+  };
 
-    if(data?.token) {
-      login(data.token);
-      navigate("/mainwindow");
-      return;
-    }
-        
-    setError("Verification has passed. But no token received.");
-
-  } catch (e: any) {
-    setError(e?.message || "Verification failed.");
-  }
-};
 
   return (
     <div

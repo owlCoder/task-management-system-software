@@ -9,7 +9,7 @@ import {
 import { Measurement } from "./Measurement";
 
 
-@Entity("Microservices")
+@Entity("microservices")
 export class Microservice {
     @PrimaryGeneratedColumn()
     ID_microservice!: number;

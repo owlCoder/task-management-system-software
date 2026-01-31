@@ -1,7 +1,6 @@
 import pino from "pino";
 import pretty from "pino-pretty";
 
-
 const stream = pretty({
   	colorize: true,
   	translateTime: 'SYS:dd-mm-yyyy HH:MM:ss.l',

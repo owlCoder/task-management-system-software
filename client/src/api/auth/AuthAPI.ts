@@ -4,6 +4,7 @@ import { RegistrationUserDTO } from "../../models/auth/RegistrationUserDTO";
 import { IAuthAPI } from "./IAuthAPI";
 import { AuthResponseType } from "../../types/AuthResponseType";
 import { GoogleLoginRequest } from "../../models/auth/GoogleUserInfo";
+import { VerifyOtpDTO, ResendOtpDTO } from "../../models/auth/OtpDTO";
 
 export class AuthAPI implements IAuthAPI {
   private readonly axiosInstance: AxiosInstance;
@@ -14,6 +15,25 @@ export class AuthAPI implements IAuthAPI {
       headers: { "Content-Type": "application/json" },
     });
   }
+
+  async verifyOtp(data: VerifyOtpDTO): Promise<AuthResponseType> {
+    try {
+      return (await this.axiosInstance.post("/verify-otp", data)).data;
+    } catch (error) {
+      console.error("Error during OTP verify:", error);
+      throw error;
+    }
+  }
+
+  async resendOtp(data: ResendOtpDTO): Promise<AuthResponseType> {
+    try {
+      return (await this.axiosInstance.post("/resend-otp", data)).data;
+    } catch (error) {
+      console.error("Error during OTP resend:", error);
+      throw error;
+    }
+  }
+
 
   async login(data: LoginUserDTO): Promise<AuthResponseType> {
     try {

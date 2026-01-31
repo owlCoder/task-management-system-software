@@ -30,8 +30,6 @@ export class MailsController {
         await this.SendService.SendMessage(mailData);
       else
       {
-        this.siemService.sendEvent(generateEvent("mail-microservice", req, 400, "Problem with mail parameters (sender, header od body!)",),);
-
         this.LoggerService.warn("PARAMS_MISSING","Problem with mail parameters (sender, header od body!)");
 
         res.status(400).json({ message :"Problem with mail parameters (sender, header od body!)"});

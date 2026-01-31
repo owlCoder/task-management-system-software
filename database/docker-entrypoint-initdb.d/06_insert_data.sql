@@ -13,3 +13,14 @@ INSERT INTO users_db.users (username, password_hash, user_role_id, email, is_del
   ('analdevman', '$2b$10$kHxPuZYdGRQm.dbzv/G0DeKplULcBFurtz68ayk3PSoJupVTOqs4a', 4, 'anal@dev.man', 0, 0, NULL, NULL, NULL),
   ('audiomusicstrat', '$2b$10$gPCdq..V00zJUzs.N.cxPu3UnpyEKmwGZX2b8Ewas32eei0z4hC/.', 5, 'audio@music.strat', 0, 0, NULL, NULL, NULL),
   ('animeworker', '$2b$10$q7ZdCC8AVEaHxmaYNdMZge1Q/LCspAAi23ep5S3ayNV23r5thyaJW', 6, 'anime@work.er', 0, 0, NULL, NULL, NULL);
+
+  INSERT INTO service_status_db.microservices (microservice_name) VALUES
+  ('AUTH_SERVICE'),
+  ('ANALYTICS_SERVICE'),
+  ('FILE_SERVICE'),
+  ('MAIL_SERVICE'),
+  ('NOTIFICATION_SERVICE'),
+  ('PROJECT_SERVICE'),
+  ('TASK_SERVICE'),
+  ('USER_SERVICE'),
+  ('VERSION_CONTROL_SERVICE');

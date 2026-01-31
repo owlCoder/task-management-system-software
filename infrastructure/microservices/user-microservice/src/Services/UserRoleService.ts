@@ -31,6 +31,14 @@ export class UserRoleService implements IUserRoleService {
   async getUserRoleByImpactLevel(
     impact_level: number
   ): Promise<Result<UserRoleDTO[]>> {
+
+    if(impact_level < 5) {
+      return {
+        success: false,
+        code: ErrorCode.FORBIDDEN,
+        error: "You are not authorized for this action"
+      };
+    }
     const roles = await this.userRoleRepository.find({
       where: { impact_level: MoreThan(impact_level) },
     });

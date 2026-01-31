@@ -1,18 +1,22 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Sidebar from "../components/dashboard/sidebar/Sidebar";
-import { sprintAPI } from "../api/sprint/SprintAPI";
+import { ISprintAPI } from "../api/sprint/ISprintAPI";
 import type { SprintDTO } from "../models/sprint/SprintDto";
 import { useAuth } from "../hooks/useAuthHook";
 import toast from "react-hot-toast";
 import { confirmToast } from "../components/toast/toastHelper";
 import CreateSprintModal from "../components/sprints/CreateSprintModal";
 
+type ProjectSprintsPageProps = {
+  sprintAPI: ISprintAPI;
+};
+
 const canManageSprints = (role?: string): boolean => {
   return role === "Project Manager";
 };
 
-const ProjectSprintsPage: React.FC = () => {
+const ProjectSprintsPage: React.FC<ProjectSprintsPageProps> = ({ sprintAPI }) => {
   const navigate = useNavigate();
   const { projectId } = useParams();
   const { user } = useAuth();
@@ -273,6 +277,7 @@ const ProjectSprintsPage: React.FC = () => {
         onClose={() => setCreateOpen(false)}
         projectId={projectIdNum as number}
         onCreated={reloadSprints}
+        sprintAPI={sprintAPI}
       />
     </div>
   );

@@ -20,7 +20,7 @@ export class OtpLoginStrategy implements ILoginStrategy {
   ) {}
 
   async authenticate(user: UserDTO): Promise<LoginResponseType> {
-    const otpCode = this.otpGenerator.generateOTP();
+    const otpCode = String(this.otpGenerator.generateOTP());
     const dateCreated = new Date();
     const sessionData: LoginData = { userId: user.user_id, otpCode: otpCode, dateCreated: dateCreated };
     const sessionId = uuidv4();

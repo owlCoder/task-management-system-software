@@ -20,6 +20,7 @@ import { NotificationAPI } from "./api/notification/NotificationAPI";
 import ReviewInboxPage from "./pages/ReviewInboxPage";
 import StatusesPage from "./pages/StatusesPage";
 import ProjectSprintsPage from "./pages/ProjectSprintPage";
+import { sprintAPI } from "./api/sprint/SprintAPI";
 
 const auth_api: IAuthAPI = new AuthAPI();
 const notification_API: INotificationAPI = new NotificationAPI(import.meta.env.VITE_GATEWAY_URL);
@@ -59,9 +60,9 @@ function App() {
         <Route path="/files" element={<FilePage />} />
         <Route path="/mainwindow" element={<MainWindow />} />
         <Route path="/" element={<AuthPage authAPI={auth_api} />} />
-        <Route path="/otp" element={<OtpPage />} />
+        <Route path="/otp" element={<OtpPage authAPI={auth_api} />} />
         <Route path="/reviews" element={<ReviewInboxPage />} />
-        <Route path="/projects/:projectId/sprints" element={<ProjectSprintsPage />} />
+        <Route path="/projects/:projectId/sprints" element={<ProjectSprintsPage sprintAPI={sprintAPI} />}/>
         <Route path="/projects/:projectId/sprints/:sprintId/tasks" element={<TaskPage />} />
         <Route
           path="/users"

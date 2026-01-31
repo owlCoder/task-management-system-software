@@ -1,10 +1,20 @@
 import React, { useState, useRef, useEffect } from "react";
-//import { IAuthAPI } from "../../api/auth/IAuthAPI";
 import { LoginUserDTO } from "../../models/auth/LoginUserDTO";
 import { useAuth } from "../../hooks/useAuthHook";
 import { useNavigate } from "react-router-dom";
 import logoImage from "../../../public/logo.png";
 import { LoginFormProps } from "../../types/LoginFormProps";
+import type { AuthResponseType } from "../../types/AuthResponseType";
+import type { WindowWithGoogle } from "../../types/GoogleType";
+
+type LoginResponseType = AuthResponseType & {
+  otp_required?: boolean;
+  session?: string;
+};
+
+type GoogleResponse = {
+  credential: string;
+};
 
 export const LoginForm: React.FC<LoginFormProps> = ({
   authAPI,
@@ -54,7 +64,8 @@ export const LoginForm: React.FC<LoginFormProps> = ({
 
     try {
       const res = await authAPI.login(formData);
-      const r: any = res;
+      const r = res as LoginResponseType;
+
       if(!r.success) {
         setError(r.message || "Login failed");
         return;
@@ -72,11 +83,9 @@ export const LoginForm: React.FC<LoginFormProps> = ({
       }
 
       setError("No token/session received.");
-    } catch (err: any) {
-      setError(
-        err.response?.data?.message ||
-          "There was an error during login. Please try again."
-      );
+    }  catch (err) {
+      console.error("Failed to login:", err);
+      setError("There was an error during login. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -84,50 +93,51 @@ export const LoginForm: React.FC<LoginFormProps> = ({
 
 
   useEffect(() => {
-  const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
-  if (!clientId) return;
+    const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+    if (!clientId) return;
+    const t = setInterval(() => {
+      const googleWin = (window as WindowWithGoogle).google;
 
-  const t = setInterval(() => {
-    const googleAny = (window as any).google;
 
-    if (googleInitializedRef.current) {
-      clearInterval(t);
-      return;
-    }
+      if (googleInitializedRef.current) {
+        clearInterval(t);
+        return;
+      }
 
-    if (!googleAny?.accounts?.id) return;
+      if (!googleWin?.accounts?.id) return;
 
-    googleAny.accounts.id.initialize({
-      client_id: clientId,
-      ux_mode: "popup",
-      auto_select: false,
-      cancel_on_tap_outside: true,
-      callback: async (response: any) => {
-        setError("");
-        try {
-          const data = await authAPI.googleLogin({ idToken: response.credential });
+      googleWin.accounts.id.initialize({
+        client_id: clientId,
+        ux_mode: "popup",
+        auto_select: false,
+        cancel_on_tap_outside: true,
+        callback: async (response: GoogleResponse) => {
+          setError("");
+          try {
+            const data = await authAPI.googleLogin({ idToken: response.credential });
 
-          if (data.success) {
+            if (data.success) {
 
-            if (data.token) {
-               login(data.token);
-               navigate("/mainwindow");
+              if (data.token) {
+                login(data.token);
+                navigate("/mainwindow");
+              } else {
+                console.log("Logged in via Google", data);
+              }
             } else {
-               console.log("Logged in via Google", data);
+              setError(data.message || "Google login failed");
             }
-          } else {
-            setError(data.message || "Google login failed");
+          } catch (err) {
+            console.error("Google login failed:", err);
+            setError("Network error during Google login");
           }
-        } catch (err: any) {
-          console.error(err);
-          setError(err.response?.data?.message || "Network error during Google login");
-        }
-      },
-    });
+        },
+      }
+    );
 
     if (googleBtnDivRef.current) {
       const parentWidth = googleBtnDivRef.current.parentElement?.clientWidth ?? 390;
-      googleAny.accounts.id.renderButton(googleBtnDivRef.current, {
+      googleWin.accounts.id.renderButton(googleBtnDivRef.current, {
         theme: "outline",
         size: "large",
         text: "continue_with",
@@ -148,8 +158,6 @@ export const LoginForm: React.FC<LoginFormProps> = ({
   !isLoading &&
   validateUsername(formData.username) === "" &&
   validatePassword(formData.password) === "";
-
-
 
   return (
     <form className="w-full" onSubmit={handleSubmit}>
