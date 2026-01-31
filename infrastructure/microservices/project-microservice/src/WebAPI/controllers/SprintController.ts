@@ -6,6 +6,8 @@ import { ReqParams } from "../../Domain/types/ReqParams";
 import { ILogerService } from "../../Domain/services/ILogerService";
 import { ISIEMService } from "../../Siem/Domain/Services/ISIEMService";
 import { sendSiemEvent } from "../../Utils/WebAPI/SIEMFilter";
+import { checkProjectManagerPermission } from "../../Utils/WebAPI/checkProjectManagerPermission";
+import { IProjectUserService } from "../../Domain/services/IProjectUserService";
 
 
 export class SprintController {
@@ -14,7 +16,8 @@ export class SprintController {
     constructor(
         private readonly sprintService: ISprintService,
         private readonly logger: ILogerService,
-        private readonly siemService: ISIEMService ) {
+        private readonly siemService: ISIEMService,
+        private readonly projectUserService: IProjectUserService ) {
             this.router = Router();
             this.initializeRoutes();
     }
@@ -39,6 +42,25 @@ export class SprintController {
             if (isNaN(projectId)) {
                 sendSiemEvent(this.siemService, req, 400, "Invalid project ID", true);
                 res.status(400).json({ message: "Invalid project ID" });
+                return;
+            }
+
+            //Check permission for Project Manager
+            const hasPermission = await checkProjectManagerPermission(
+                req,
+                this.projectUserService,
+                projectId
+            );
+            if (!hasPermission) {
+                this.logger.log(`Permission denied for creating sprint in project ID ${projectId}`);
+                sendSiemEvent(
+                    this.siemService, 
+                    req, 
+                    403, 
+                    "Permission denied", 
+                    true
+                );
+                res.status(403).json({ message: "Permission denied" });
                 return;
             }
 
@@ -167,6 +189,40 @@ export class SprintController {
                 return;
             }
 
+            //Fetch sprint to get project ID
+            const sprintResult = await this.sprintService.getSprintById(sprintId);
+            if(!sprintResult.success) {
+                this.logger.log(`Failed to fetch sprint before update: ${sprintResult.error}`);
+                sendSiemEvent(
+                    this.siemService,
+                    req,
+                    sprintResult.code,
+                    sprintResult.error,
+                    true
+                )
+                res.status(sprintResult.code).json({ message: sprintResult.error });
+                return;
+            }
+            const sprint = sprintResult.data;
+
+            //Check permission for Project Manager
+            const hasPermission = await checkProjectManagerPermission(
+                req,
+                this.projectUserService,
+                sprint.project_id
+            );
+            if(!hasPermission) {
+                sendSiemEvent(
+                    this.siemService, 
+                    req, 
+                    403, 
+                    `Forbidden | Project Manager has no access to project ${sprint.project_id}`,
+                    true
+                );
+                res.status(403).json({ message: "Permission denied" });
+                return;
+            }
+
             const data = req.body as SprintUpdateDTO;
 
             this.logger.log(`Updating sprint ID ${sprintId} with data: ${JSON.stringify(data)}`);
@@ -205,6 +261,40 @@ export class SprintController {
             if (isNaN(sprintId)) {
                 sendSiemEvent(this.siemService, req, 400, "Invalid sprint ID", true);
                 res.status(400).json({ message: "Invalid sprint ID" });
+                return;
+            }
+
+            //Fetch sprint to get project ID
+            const sprintResult = await this.sprintService.getSprintById(sprintId);
+            if(!sprintResult.success) {
+                this.logger.log(`Failed to fetch sprint before deletion: ${sprintResult.error}`);
+                sendSiemEvent(
+                    this.siemService,
+                    req,
+                    sprintResult.code,
+                    sprintResult.error,
+                    true
+                )
+                res.status(sprintResult.code).json({ message: sprintResult.error });
+                return;
+            }
+            const sprint = sprintResult.data;
+
+            //Check permission for Project Manager
+            const hasPermission = await checkProjectManagerPermission(
+                req,
+                this.projectUserService,
+                sprint.project_id
+            );
+            if(!hasPermission) {
+                sendSiemEvent(
+                    this.siemService, 
+                    req, 
+                    403, 
+                    `Forbidden | Project Manager has no access to project ${sprint.project_id}`,
+                    true
+                );
+                res.status(403).json({ message: "Permission denied" });
                 return;
             }
 

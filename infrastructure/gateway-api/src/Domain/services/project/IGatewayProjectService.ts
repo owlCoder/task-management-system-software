@@ -14,14 +14,14 @@ export interface IGatewayProjectService {
     getAllProjects(): Promise<Result<ProjectDTO[]>>;
     getProjectsFromUser(userId: number): Promise<Result<ProjectDTO[]>>;
     createProject(req: Request): Promise<Result<ProjectDTO>>;
-    updateProject(projectId: number, req: Request): Promise<Result<ProjectDTO>>;
-    deleteProject(projectId: number): Promise<Result<void>>;
+    updateProject(projectId: number, req: Request, senderId: number): Promise<Result<ProjectDTO>>;
+    deleteProject(projectId: number, senderId: number): Promise<Result<void>>;
 
     getSprintsByProject(projectId: number): Promise<Result<SprintDTO[]>>;
     getSprintById(sprintId: number): Promise<Result<SprintDTO>>;
-    createSprint(projectId: number, data: SprintCreateDTO): Promise<Result<SprintDTO>>;
-    updateSprint(sprintId: number, data: SprintUpdateDTO): Promise<Result<SprintDTO>>;
-    deleteSprint(sprintId: number): Promise<Result<void>>;
+    createSprint(projectId: number, data: SprintCreateDTO, senderId: number): Promise<Result<SprintDTO>>;
+    updateSprint(sprintId: number, data: SprintUpdateDTO, senderId: number): Promise<Result<SprintDTO>>;
+    deleteSprint(sprintId: number, senderId: number): Promise<Result<void>>;
 
     getUsersFromProject(projectId: number): Promise<Result<ProjectUserDTO[]>>;
     assignUserToProject(projectId: number, data: ProjectUserAssignDTO): Promise<Result<ProjectUserDTO>>;

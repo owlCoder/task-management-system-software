@@ -6,7 +6,6 @@ import { ReqParams } from "../../Domain/types/ReqParams";
 import { ILogerService } from "../../Domain/services/ILogerService";
 import { ISIEMService } from "../../Siem/Domain/Services/ISIEMService";
 import { sendSiemEvent } from "../../Utils/WebAPI/SIEMFilter";
-import { send } from "process";
 
 export class ProjectUserController {
     private readonly router: Router;

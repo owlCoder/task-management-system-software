@@ -117,7 +117,7 @@ export class GatewayProjectService implements IGatewayProjectService {
      * - On success returns data as {@link ProjectDTO}.
      * - On failure returns status code and error message.
      */
-    async updateProject(projectId: number, req: Request): Promise<Result<ProjectDTO>> {
+    async updateProject(projectId: number, req: Request, senderId: number): Promise<Result<ProjectDTO>> {
         return await makeAPIUploadStreamCall<ProjectDTO, Request>(this.projectClient, this.errorHandlingService, {
             serviceName: SERVICES.PROJECT,
             method: HTTP_METHODS.PUT,
@@ -125,7 +125,8 @@ export class GatewayProjectService implements IGatewayProjectService {
             data: req,
             headers: {
                 "Content-Type": req.headers["content-type"]!,
-                ...(req.headers["content-length"] && { 'Content-Length': req.headers["content-length"] })
+                ...(req.headers["content-length"] && { 'Content-Length': req.headers["content-length"] }),
+                "X-Sender-ID": senderId.toString()
             },
             timeout: 20000
         });
@@ -138,11 +139,14 @@ export class GatewayProjectService implements IGatewayProjectService {
      * - On success returns void.
      * - On failure returns status code and error message.
      */
-    async deleteProject(projectId: number): Promise<Result<void>> {
+    async deleteProject(projectId: number, senderId: number): Promise<Result<void>> {
         return await makeAPICall<void>(this.projectClient, this.errorHandlingService, {
             serviceName: SERVICES.PROJECT,
             method: HTTP_METHODS.DELETE,
-            url: PROJECT_ROUTES.DELETE_PROJECT(projectId)
+            url: PROJECT_ROUTES.DELETE_PROJECT(projectId),
+            headers: {
+                "X-Sender-ID": senderId.toString()
+            }
         });
     }
 
@@ -184,12 +188,15 @@ export class GatewayProjectService implements IGatewayProjectService {
      * - On success returns data as {@link SprintDTO}.
      * - On failure returns status code and error message.
      */
-    async createSprint(projectId: number, data: SprintCreateDTO): Promise<Result<SprintDTO>> {
+    async createSprint(projectId: number, data: SprintCreateDTO, senderId: number): Promise<Result<SprintDTO>> {
         return await makeAPICall<SprintDTO, SprintCreateDTO>(this.projectClient, this.errorHandlingService, {
             serviceName: SERVICES.PROJECT,
             method: HTTP_METHODS.POST,
             url: PROJECT_ROUTES.CREATE_SPRINT_FOR_PROJECT(projectId),
-            data: data
+            data: data,
+            headers: {
+                "X-Sender-ID": senderId.toString()
+            }
         });
     }
 
@@ -201,12 +208,15 @@ export class GatewayProjectService implements IGatewayProjectService {
      * - On success returns data as {@link SprintDTO}.
      * - On failure returns status code and error message.
      */
-    async updateSprint(sprintId: number, data: SprintUpdateDTO): Promise<Result<SprintDTO>> {
+    async updateSprint(sprintId: number, data: SprintUpdateDTO, senderId: number): Promise<Result<SprintDTO>> {
         return await makeAPICall<SprintDTO, SprintUpdateDTO>(this.projectClient, this.errorHandlingService, {
             serviceName: SERVICES.PROJECT,
             method: HTTP_METHODS.PUT,
             url: PROJECT_ROUTES.UPDATE_SPRINT(sprintId),
-            data: data
+            data: data,
+            headers: {
+                "X-Sender-ID": senderId.toString()
+            }
         });
     }
 
@@ -217,11 +227,14 @@ export class GatewayProjectService implements IGatewayProjectService {
      * - On success returns void.
      * - On failure returns status code and error message.
      */
-    async deleteSprint(sprintId: number): Promise<Result<void>> {
+    async deleteSprint(sprintId: number, senderId: number): Promise<Result<void>> {
         return await makeAPICall<void>(this.projectClient, this.errorHandlingService, {
             serviceName: SERVICES.PROJECT,
             method: HTTP_METHODS.DELETE,
-            url: PROJECT_ROUTES.DELETE_SPRINT(sprintId)
+            url: PROJECT_ROUTES.DELETE_SPRINT(sprintId),
+            headers: {
+                "X-Sender-ID": senderId.toString()
+            }
         });
     }
 

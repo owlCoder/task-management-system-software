@@ -11,7 +11,7 @@ import { ReqParams } from "../../Domain/types/ReqParams";
 import { ILogerService } from "../../Domain/services/ILogerService";
 import { ISIEMService } from "../../Siem/Domain/Services/ISIEMService";
 import { sendSiemEvent } from "../../Utils/WebAPI/SIEMFilter";
-import { send } from "process";
+import { checkProjectManagerPermission } from "../../Utils/WebAPI/checkProjectManagerPermission";
 
 const upload = multer({
     storage: multer.memoryStorage(),
@@ -287,11 +287,27 @@ export class ProjectController {
      * @see {@link ProjectDTO}
      */
     private async updateProject(req: Request<ReqParams<'id'>>, res: Response): Promise<void> {
+        console.log("HEADERS IN PROJECT MS /updateProject:", req.headers);
         try {
             const id = parseInt(req.params.id, 10);
             if (isNaN(id)) {
                 sendSiemEvent(this.siemService, req, 400, "Invalid project ID", true);
                 res.status(400).json({ message: "Invalid project ID" });
+                return;
+            }
+
+            // Check permissions for Project Manager
+
+            const hasPermission = await checkProjectManagerPermission(req, this.projectUserService, id);
+            if(!hasPermission) {
+                sendSiemEvent(
+                    this.siemService,
+                    req,
+                    403,
+                    `Forbidden | Project Manager has no access to project ${id}`,
+                    true
+                );
+                res.status(403).json({ message: "Forbidden: You don't have permission to modify this project" });
                 return;
             }
 
@@ -377,6 +393,20 @@ export class ProjectController {
             if (isNaN(id)) {
                 sendSiemEvent(this.siemService, req, 400, "Invalid project ID", true);
                 res.status(400).json({ message: "Invalid project ID" });
+                return;
+            }
+
+            // Check permissions for Project Manager
+            const hasPermission = await checkProjectManagerPermission(req, this.projectUserService, id);
+            if(!hasPermission) {
+                sendSiemEvent(
+                    this.siemService,
+                    req,
+                    403,
+                    `Forbidden | Project Manager has no access to project ${id}`,
+                    true
+                );
+                res.status(403).json({ message: "Forbidden: You don't have permission to delete this project" });
                 return;
             }
 

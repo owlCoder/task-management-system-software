@@ -73,7 +73,7 @@ app.use(express.json());
     const siemService = new SIEMService(logerService);
     const projectController = new ProjectController(projectService, storageService, projectUserService, logerService, siemService);
     const projectUserController = new ProjectUserController(projectUserService, logerService, siemService);
-    const sprintController = new SprintController(sprintService, logerService, siemService);
+    const sprintController = new SprintController(sprintService, logerService, siemService, projectUserService);
 
     // Routes
     app.use("/api/v1", projectController.getRouter());

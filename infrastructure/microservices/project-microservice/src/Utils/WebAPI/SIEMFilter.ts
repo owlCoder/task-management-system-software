@@ -1,4 +1,3 @@
-// src/Utils/WebAPI/sendSiemEvent.ts
 import { Request } from "express";
 import { ISIEMService } from "../../Siem/Domain/Services/ISIEMService";
 import { generateEvent } from "../../Siem/Domain/Helpers/Generate/GenerateEvent";

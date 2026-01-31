@@ -246,4 +246,22 @@ export class ProjectUserService implements IProjectUserService {
 
         return { success: true, data: undefined };
     }
+
+    async isUserOnProject(project_id: number, user_id: number): Promise<Result<boolean>> {
+        try {
+            const count = await this.projectUserRepository.count({
+                where: { project: {project_id }, user_id}
+            });
+            return {
+                success: true,
+                data: count > 0,
+            };
+        } catch (err) {
+            return {
+                success: false,
+                code: ErrorCode.INTERNAL_ERROR,
+                error: (err as Error).message,
+            }
+        } 
+    }
 }

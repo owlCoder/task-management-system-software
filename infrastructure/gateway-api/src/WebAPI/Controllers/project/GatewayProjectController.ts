@@ -146,8 +146,9 @@ export class GatewayProjectController {
             return;
         }
         const projectId = parseInt(req.params.projectId, 10);
+        const senderId = req.user!.id;
 
-        const result = await this.gatewayProjectService.updateProject(projectId, req);
+        const result = await this.gatewayProjectService.updateProject(projectId, req, senderId);
         handleResponse(res, result);
     }
 
@@ -161,8 +162,9 @@ export class GatewayProjectController {
      */
     private async deleteProject(req: Request<ReqParams<'projectId'>>, res: Response): Promise<void> {
         const projectId = parseInt(req.params.projectId, 10);
+        const senderId = req.user!.id;
 
-        const result = await this.gatewayProjectService.deleteProject(projectId);
+        const result = await this.gatewayProjectService.deleteProject(projectId, senderId);
         handleEmptyResponse(res, result);
     }
 
@@ -207,8 +209,9 @@ export class GatewayProjectController {
     private async createSprint(req: Request<ReqParams<'projectId'>>, res: Response): Promise<void> {
         const projectId = parseInt(req.params.projectId, 10);
         const data = req.body as SprintCreateDTO;
+        const senderId = req.user!.id;
 
-        const result = await this.gatewayProjectService.createSprint(projectId, data);
+        const result = await this.gatewayProjectService.createSprint(projectId, data, senderId);
         handleResponse(res, result, 201);
     }
 
@@ -223,8 +226,9 @@ export class GatewayProjectController {
     private async updateSprint(req: Request<ReqParams<'sprintId'>>, res: Response): Promise<void> {
         const sprintId = parseInt(req.params.sprintId, 10);
         const data = req.body as SprintUpdateDTO;
+        const senderId = req.user!.id;
 
-        const result = await this.gatewayProjectService.updateSprint(sprintId, data);
+        const result = await this.gatewayProjectService.updateSprint(sprintId, data, senderId);
         handleResponse(res, result);
     }
 
@@ -238,8 +242,9 @@ export class GatewayProjectController {
      */
     private async deleteSprint(req: Request<ReqParams<'sprintId'>>, res: Response): Promise<void> {
         const sprintId = parseInt(req.params.sprintId, 10);
+        const senderId = req.user!.id;
 
-        const result = await this.gatewayProjectService.deleteSprint(sprintId);
+        const result = await this.gatewayProjectService.deleteSprint(sprintId, senderId);
         handleEmptyResponse(res, result);
     }
 
