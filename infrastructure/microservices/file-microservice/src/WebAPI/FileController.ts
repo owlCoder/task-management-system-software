@@ -7,6 +7,9 @@ import { IFileTypeValidationService } from "../Domain/services/IFileTypeValidati
 import { UserRole } from "../Domain/enums/UserRole";
 import { IFileMapper } from "../Utils/converters/IFileMapper";
 import * as path from "path";
+import { ILogerService } from "../Domain/services/ILogerService";
+import { ISIEMService } from "../siem/Domen/services/ISIEMService";
+import { generateEvent } from "../siem/Domen/Helpers/generate/GenerateEvent";
 
 const FILE_SIZE_LIMIT_MB = parseInt(process.env.FILE_SIZE_LIMIT_MB || "10");
 const FILE_SIZE_LIMIT = FILE_SIZE_LIMIT_MB * 1024 * 1024; // Convert MB to bytes
@@ -19,7 +22,8 @@ export class FileController {
         private fileService: IFileService,
         private roleValidationService: IRoleValidationService,
         private fileTypeValidationService: IFileTypeValidationService,
-        private fileMapper: IFileMapper
+        private fileMapper: IFileMapper,
+        private readonly siemService: ISIEMService,
     ) {
         this.router = Router();
         this.upload = multer({
@@ -131,11 +135,17 @@ export class FileController {
             const result = await this.fileService.createFile(createFileDTO);
 
             if (result.success) {
+                this.siemService.sendEvent( generateEvent("file-microservice",req,
+                    201,"Successfully uploaded file")
+                );
                 res.status(201).json( result.data );
             } else {
                 res.status(500).json({ message: result.error });
             }
         } catch (error) {
+            this.siemService.sendEvent( generateEvent("file-microservice",req,
+                500,(error as Error).message)
+            );
             res.status(500).json({
                 message: `Upload failed: ${
                     error instanceof Error ? error.message : "Unknown error"
@@ -163,6 +173,9 @@ export class FileController {
             const result = await this.fileService.retrieveFile(fileId);
 
             if (result.success && result.data) {
+                this.siemService.sendEvent( generateEvent("file-microservice",req,
+                    200,"Successfully dowloaded file")
+                );
                 res.setHeader("Content-Type", result.data.fileType);
                 res.setHeader(
                     "Content-Disposition",
@@ -175,6 +188,9 @@ export class FileController {
                 });
             }
         } catch (error) {
+            this.siemService.sendEvent( generateEvent("file-microservice",req,
+                500,(error as Error).message)
+            );
             res.status(500).json({
                 message: `Download failed: ${
                     error instanceof Error ? error.message : "Unknown error"
@@ -201,11 +217,20 @@ export class FileController {
             const result = await this.fileService.deleteFile(fileId);
 
             if (result.success) {
+                this.siemService.sendEvent( generateEvent("file-microservice",req,
+                    200,"Successfully deleted file")
+                );
                 res.status(200).json(result.data);
             } else {
+                this.siemService.sendEvent( generateEvent("file-microservice",req,
+                    500,"Delete file failed")
+                );
                 res.status(500).json({ message: result.error });
             }
         } catch (error) {
+            this.siemService.sendEvent( generateEvent("file-microservice",req,
+                500,(error as Error).message)
+            );
             res.status(500).json({
                 message: `Delete failed: ${
                     error instanceof Error ? error.message : "Unknown error"
@@ -259,9 +284,15 @@ export class FileController {
             if (result.success) {
                 res.status(200).json(result.data );
             } else {
+                this.siemService.sendEvent( generateEvent("file-microservice",req,
+                    500,"Get file by aythor was not successfull")
+                );
                 res.status(500).json({ message: result.error });
             }
         } catch (error) {
+            this.siemService.sendEvent( generateEvent("file-microservice",req,
+                500,(error as Error).message)
+            );
             res.status(500).json({
                 message: `Failed to get files: ${
                     error instanceof Error ? error.message : "Unknown error"
@@ -297,6 +328,9 @@ export class FileController {
                 });
             }
         } catch (error) {
+            this.siemService.sendEvent( generateEvent("file-microservice",req,
+                500,(error as Error).message)
+            );
             res.status(500).json({
                 message: `Failed to get metadata: ${
                     error instanceof Error ? error.message : "Unknown error"

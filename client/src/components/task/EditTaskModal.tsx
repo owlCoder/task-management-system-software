@@ -7,6 +7,7 @@ import { ProjectUserDTO } from "../../models/project/ProjectUserDTO";
 import { TaskStatus } from "../../enums/TaskStatus";
 import StatusDropdown from "./StatusDropdown";
 import toast from "react-hot-toast";
+import { useAuth } from "../../hooks/useAuthHook";
 
 const EditTaskModal: React.FC<EditTaskModalProps> = ({
   open,
@@ -24,6 +25,8 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({
   const [assignedTo, setAssignedTo] = useState<number | undefined>(undefined);
   const [users, setUsers] = useState<ProjectUserDTO[]>([]);
   const [loading, setLoading] = useState(false);
+  const {user} = useAuth();
+  const isPM = user?.role === "Project Manager";
 
   const api = new TaskAPI(import.meta.env.VITE_GATEWAY_URL, token);
 
@@ -129,12 +132,23 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({
             </span>
           </div>
 
-          <div className="flex flex-col items-end gap-2">
-            <label className="text-[9px] font-bold text-white/20 uppercase tracking-widest mr-2">
-              Status
-            </label>
-            <StatusDropdown currentStatus={status} onStatusChange={setStatus} />
-          </div>
+          {!isPM ? (
+            <div className="flex flex-col items-end gap-2">
+              <label className="text-[9px] font-bold text-white/20 uppercase tracking-widest mr-2">
+                Status
+              </label>
+              <StatusDropdown currentStatus={status} onStatusChange={setStatus} />
+            </div>
+          ) : (
+            <div className="flex flex-col items-end gap-2">
+              <label className="text-[9px] font-bold text-white/20 uppercase tracking-widest mr-2">
+                Status 
+              </label>
+              <span className="text-sm font-bold text-blue-400 bg-blue-400/10 px-3 py-1 rounded-md border border-blue-400/20">
+                {status}
+              </span>
+            </div>
+          )}
         </div>
 
         {/* Content */}

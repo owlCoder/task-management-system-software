@@ -74,6 +74,10 @@ export class TaskService implements ITaskService {
             return projectWorkersResult;
         }
 
+        if (!projectWorkersResult.data.some((u) => u.user_id === user_id)) {
+            return { success: false, errorCode: ErrorCode.FORBIDDEN, message: "You are not assigned to this project" };
+        }
+
         if (!projectWorkersResult.data.some((projectUser) => projectUser.user_id === createTaskDTO.assignedTo)) {
             return { success: false, errorCode: ErrorCode.FORBIDDEN, message: "User is not assigned to this project" };
         }
@@ -129,10 +133,6 @@ export class TaskService implements ITaskService {
             return projectWorkersResult;
         }
 
-        if (!projectWorkersResult.data.some((projectUser) => projectUser.user_id === user_id)) {
-            return { success: false, errorCode: ErrorCode.FORBIDDEN, message: "User is not assigned to this project" };
-        }
-
         if (workerResult.data.role_name === UserRole.ANIMATION_WORKER || workerResult.data.role_name === UserRole.AUDIO_MUSIC_STAGIST) {
             return { success: false, errorCode: ErrorCode.FORBIDDEN, message: "User is not assigned to this task" };
         }
@@ -161,8 +161,10 @@ export class TaskService implements ITaskService {
             return projectWorkersResult;
         }
 
-        if (!projectWorkersResult.data.some((projectUser) => projectUser.user_id === user_id)) {
-            return { success: false, errorCode: ErrorCode.FORBIDDEN, message: "User is not assigned to this project" };
+        const requestUser = projectWorkersResult.data.find(u => u.user_id === user_id);
+
+        if (!requestUser || requestUser.role_name !== UserRole.PROJECT_MANAGER) {
+            return { success: false, errorCode: ErrorCode.FORBIDDEN, message: "Only project manager assigned to this project can edit task."};
         }
 
         if (updateTaskDTO.title !== undefined) task.title = updateTaskDTO.title;
@@ -209,7 +211,7 @@ export class TaskService implements ITaskService {
             return { success: false, errorCode: ErrorCode.TASK_NOT_FOUND, message: "Task not found"};
         }
 
-        if(user_id != task.worker_id && user_id != task.project_manager_id) {
+        if(user_id != task.worker_id && user_id) {
             return { success: false, errorCode: ErrorCode.FORBIDDEN, message: "You are not authorized to change this task's status" };
         }
 
