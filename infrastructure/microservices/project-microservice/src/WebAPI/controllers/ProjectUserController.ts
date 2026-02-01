@@ -23,6 +23,7 @@ export class ProjectUserController {
         this.router.post("/projects/:id/users", this.assignUser.bind(this));
         this.router.get("/projects/:id/users", this.getUsersForProject.bind(this));
         this.router.delete("/projects/:id/users/:userId", this.removeUser.bind(this));
+        this.router.get("/project-users", this.getProjectUsersAddedAfter.bind(this));
     }
 
     /**
@@ -160,6 +161,54 @@ export class ProjectUserController {
             this.logger.log((err as Error).message);
             sendSiemEvent(this.siemService, req, 500, (err as Error).message, true);
             res.status(500).json({ message: (err as Error).message });
+        }
+    }
+
+    /**
+     * GET /api/v1/project-users?added_after=...
+     * Vraća sve project_users gde je added_at > added_after.
+     */
+    private async getProjectUsersAddedAfter(req: Request, res: Response): Promise<void> {
+        try {
+            const { added_after } = req.query as { added_after?: string };
+
+            if (!added_after) {
+                sendSiemEvent(this.siemService, req, 400, "Query param 'added_after' is required", false);
+                res.status(400).json({ message: "Query param 'added_after' is required" });
+                return;
+            }
+
+            const date = new Date(added_after);
+            if (isNaN(date.getTime())) {
+                sendSiemEvent(this.siemService, req, 400, "Invalid 'added_after' datetime", false);
+                res.status(400).json({ message: "Invalid 'added_after' datetime" });
+                return;
+            }
+
+            this.logger.log(`Fetching project users added after ${added_after}`);
+
+            const result = await this.projectUserService.getProjectUsersAddedAfter(date);
+
+            if (result.success) {
+                sendSiemEvent(
+                    this.siemService,
+                    req,
+                    200,
+                    `Request successful | Project users added after ${added_after} fetched`,
+                    false
+                );
+                res.status(200).json(result.data);
+            } else {
+                this.logger.log(`Failed to fetch project users added after: ${result.error}`);
+                sendSiemEvent(this.siemService, req, result.code, result.error, false);
+                res.status(result.code).json({ message: result.error });
+            }
+
+        } catch (err) {
+            const msg = (err as Error).message;
+            this.logger.log(msg);
+            sendSiemEvent(this.siemService, req, 500, msg, false);
+            res.status(500).json({ message: msg });
         }
     }
 

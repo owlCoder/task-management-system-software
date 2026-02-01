@@ -9,4 +9,5 @@ export interface IProjectUserService {
     getUserIdsForProject(project_id: number): Promise<Result<number[]>>;
     updateWeeklyHoursForAllUsers(project_id: number, oldHours: number, newHours: number): Promise<Result<void>>;
     isUserOnProject(project_id: number, user_id: number): Promise<Result<boolean>>;
+    getProjectUsersAddedAfter(date: Date): Promise<Result<ProjectUserDTO[]>>;
 }

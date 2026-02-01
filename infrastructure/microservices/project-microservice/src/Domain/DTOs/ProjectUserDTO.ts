@@ -5,5 +5,5 @@ export interface ProjectUserDTO {
     weekly_hours: number;
     username?:  string;
     role_name?: string;  
-    image_url?: string; //
+    image_url?: string;
 }

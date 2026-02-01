@@ -1,4 +1,4 @@
-import { FindOptionsWhere, Repository } from "typeorm";
+import { FindOptionsWhere, MoreThan, Repository } from "typeorm";
 import axios, { AxiosInstance } from "axios";
 import { ProjectUserAssignDTO } from "../Domain/DTOs/ProjectUserAssignDTO";
 import { ProjectUserDTO } from "../Domain/DTOs/ProjectUserDTO";
@@ -263,5 +263,58 @@ export class ProjectUserService implements IProjectUserService {
                 error: (err as Error).message,
             }
         } 
+    }
+
+    async getProjectUsersAddedAfter(date: Date): Promise<Result<ProjectUserDTO[]>> {
+        try {
+            const list = await this.projectUserRepository.find({
+                where: { added_at: MoreThan(date) },
+                relations: ["project"],
+            });
+
+            if(list.length === 0) {
+                return { success: true, data: [] }
+            }
+
+            const userIds = list.map(pu => pu.user_id);
+
+            try {
+                const response = await this.userClient.get<UserDTO[]>(`/users/ids`, {
+                    params: { ids: userIds.join(",") },
+                });
+
+                const users = response.data;
+                const userMap = new Map<number, UserDTO>();
+                users.forEach(u => userMap.set(u.user_id, u));
+
+                const dtos: ProjectUserDTO[] = list.map(pu => {
+                    const dto = ProjectUserMapper.toDTO(pu);
+                    const user = userMap.get(pu.user_id);
+
+                    dto.username = user ? user.username : `User ${pu.user_id}`;
+                    dto.role_name = user ? user.role_name : "Unknown";
+                    dto.image_url = user?.image_url || undefined;
+
+                    return dto;
+                });
+
+                return { success: true, data: dtos };
+            } catch (error: unknown) {
+                if(axios.isAxiosError(error)) {
+                    console.error("Axios error fetching users by ids:", error.message);
+                } else {
+                    console.error("Unexpected error fetching users by ids:", error);
+                }
+                const dtos = list.map(pu => ProjectUserMapper.toDTO(pu));
+                return { success: true, data: dtos };
+            }
+        } catch (err) {
+            console.error("getProjectUsersAddedAfter error:", err);
+            return {
+                success: false,
+                code: ErrorCode.INTERNAL_ERROR,
+                error: (err as Error).message,
+            };
+        }
     }
 }
