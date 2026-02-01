@@ -20,6 +20,8 @@ import { ISIEMService } from "./siem/Domen/services/ISIEMService";
 import { SIEMService } from "./siem/Services/SIEMService";
 import { IBusinessInsightsService } from "./Services/external-services/IBusinessInsightsService";
 import { BusinessInsightsService } from "./Services/external-services/BusinessInsightsService";
+import { ILLMAnalyticsService } from "./Services/external-services/ILLMAnalyticsService";
+import { LLMAnalyticsService } from "./Services/external-services/LLMAnalyticsService";
 
 dotenv.config({ quiet: true });
 
@@ -147,12 +149,14 @@ export async function initApp(): Promise<express.Express> {
     new FinancialAnalyticsService(projectServiceClient, taskServiceClient);
   const loggerService: ILogerService = new LogerService();
   const siemService: ISIEMService = new SIEMService(loggerService);
+  const llmAnalyticsService : ILLMAnalyticsService = new LLMAnalyticsService();
 
   const businessInsightsService: IBusinessInsightsService =
     new BusinessInsightsService(
       projectAnalyticsService,
       financialAnalyticsService,
-      projectServiceClient
+      projectServiceClient,
+      llmAnalyticsService
     );
 
   // Controller

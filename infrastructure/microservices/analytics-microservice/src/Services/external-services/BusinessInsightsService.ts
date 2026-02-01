@@ -3,13 +3,15 @@ import { IFinancialAnalyticsService } from "../../Domain/services/IFinancialAnal
 import { IProjectAnalyticsService } from "../../Domain/services/IProjectAnalyticsService";
 import { IBusinessInsightsService } from "./IBusinessInsightsService";
 import { IProjectServiceClient } from "./IProjectServiceClient";
+import { ILLMAnalyticsService } from "./ILLMAnalyticsService";
+import { BusinessInsightsDto } from "../../Domain/DTOs/BusinessInsightsDto";
 
 export class BusinessInsightsService implements IBusinessInsightsService {
     constructor(
-        // private readonly llmAnalyticsService: ILLMAnalyticsService, // TODO ILLMAnalyticsService & LLMAnalyticsService
         private readonly projectAnalyticsService: IProjectAnalyticsService,
         private readonly financialAnalyticsService: IFinancialAnalyticsService,
-        private readonly projectServiceClient: IProjectServiceClient
+        private readonly projectServiceClient: IProjectServiceClient,
+        private readonly llmAnalyticsService: ILLMAnalyticsService
     ) {}
 
     private async buildLLMInput(
@@ -80,12 +82,17 @@ export class BusinessInsightsService implements IBusinessInsightsService {
             return input;
     }
 
-    // TODO (Backend B): promeniti povratni tip u BusinessInsightsDto, pozvati LLM servis
-    // preko llmAnalyticsService.analyze(input) i mapirati rezultat na BusinessInsightsDto
     
-    public async generateInsights(from: string, to: string, services: string[] = []): Promise<any> {
+    public async generateInsights(from: string, to: string, services: string[] = []): Promise<BusinessInsightsDto> {
         const input = await this.buildLLMInput(from, to, services);
-        console.log("LLM INPUT:", JSON.stringify(input, null, 2));
-        return input;
+        const llmOutput = await this.llmAnalyticsService.analyze(input);
+        return {
+            time_window_from: from,
+            time_window_to: to,
+            generated_at: new Date().toISOString(),
+            summary: llmOutput.summary,
+            recommendations: llmOutput.recommendations,
+            issues: llmOutput.issues
+        };
     }
 }

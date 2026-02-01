@@ -68,7 +68,7 @@ export class SprintController {
             const dto: SprintCreateDTO = {
                 project_id: projectId,
                 ...body,
-                story_points: (body as any).story_points ?? 0,
+                story_points: body.story_points ?? 0,
             };
 
             this.logger.log(`Creating sprint for project ID ${projectId} with data: ${JSON.stringify(dto)}`);

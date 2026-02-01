@@ -99,8 +99,8 @@ export class  ReviewService implements IReviewService {
         const authorMap = new Map<number, string>();
         if (authorResult.success) {
             for (const u of authorResult.data) {
-                const id = Number(u.user_id ?? u.id);
-                const name = u.username ?? u.user_name;
+                const id = Number(u.user_id ?? u.user_id);
+                const name = u.username ?? u.username;
                 if (Number.isFinite(id) && name) {
                     authorMap.set(id, name);
                 }

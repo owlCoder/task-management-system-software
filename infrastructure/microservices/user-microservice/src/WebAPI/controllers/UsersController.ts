@@ -166,7 +166,7 @@ export class UsersController {
     try {
       const idArray: number[] = parseIds(req.query.ids?.toString());
 
-      idArray.forEach((element: any) => {
+      idArray.forEach((element: number) => {
         if (isNaN(element)) {
           res
             .status(400)

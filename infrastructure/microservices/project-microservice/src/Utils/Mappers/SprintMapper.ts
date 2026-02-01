@@ -5,7 +5,7 @@ export const SprintMapper = {
   toDTO(s: Sprint): SprintDTO {
     return {
       sprint_id: s.sprint_id,
-      project_id: (s.project as any).project_id,
+      project_id: s.project?.project_id ?? 0,
       sprint_title: s.sprint_title,
       sprint_description: s.sprint_description,
       start_date: s.start_date,

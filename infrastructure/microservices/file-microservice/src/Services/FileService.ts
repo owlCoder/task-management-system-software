@@ -8,7 +8,7 @@ import { UploadedFile } from "../Domain/models/UploadedFile";
 import { IFileMapper } from "../Utils/converters/IFileMapper";
 import { determineFileType } from "../helpers/FileTypeHelper";
 import { v4 as uuidv4 } from "uuid";
-import { Repository } from "typeorm";
+import { FindManyOptions, Repository } from "typeorm";
 
 export class FileService implements IFileService {
   constructor(
@@ -128,7 +128,7 @@ export class FileService implements IFileService {
     limit?: number,
   ): Promise<Result<UploadedFileDTO[]>> {
     try {
-      const queryOptions: any = {
+      const queryOptions: FindManyOptions<UploadedFile> = {
         where: { author_id: authorId },
         order: { file_id: "DESC" },
       };

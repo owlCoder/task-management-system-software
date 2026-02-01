@@ -26,7 +26,7 @@ export class ErrorHelper {
    * @param error - Error object or message
    * @param context - Context where the error occurred
    */
-  handleServerError(res: Response, error: any, context: string): void {
+  handleServerError(res: Response, error: unknown, context: string): void {
     this.logger.log(SeverityEnum.ERROR, `${context} error: ${error}`);
     res.status(500).json({ success: false, message: "Server error" });
   }
@@ -37,7 +37,7 @@ export class ErrorHelper {
    * @param error - Error object or message
    * @param context - Optional context for the error
    */
-  handleJWTError(res: Response, error: any, context: string = ""): void {
+  handleJWTError(res: Response, error: unknown, context: string = ""): void {
     this.logger.log(SeverityEnum.ERROR, `JWT generation error${context ? ` for ${context}` : ''}: ${error}`);
     res.status(500).json({ success: false, message: "Server error" });
   }

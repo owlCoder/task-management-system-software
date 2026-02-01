@@ -34,10 +34,7 @@ export class AnalyticsController {
         this.router.get('/analytics/profit-margin/:projectId', this.getProfitMargin.bind(this));
         this.router.get('/analytics/projects-last-30-days', this.getProjectsLast30Days.bind(this));
         this.router.get('/analytics/workers-last-30-days', this.getWorkersLast30Days.bind(this));
-
-        // TODO (Backend B): ili obrisati ovaj debug endpoint ili zameniti ga pravim
-        // /analytics/business-insights endpointom kada LLM integracija bude gotova
-        this.router.get("/analytics/business-insights-debug", this.getBusinessInsightsDebug.bind(this));
+        this.router.get('/analytics/business-insights', this.getBusinessInsights.bind(this));
 
     }
 
@@ -368,10 +365,7 @@ export class AnalyticsController {
         }
     }
 
-
-    // Privremeni debug endpoint koji samo vraca LLM input (BusinessLLMInputDto)
-    // Koristiti pravu generateInsights implementaciju i vracati BusinessInsightsDto
-    async getBusinessInsightsDebug(req: Request, res: Response): Promise<void> {
+    async getBusinessInsights(req: Request, res: Response): Promise<void> {
         try {
             const { from, to, services} = req.query as {
                 from?: string;

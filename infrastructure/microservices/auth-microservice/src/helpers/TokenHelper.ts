@@ -20,7 +20,7 @@ export class TokenHelper {
    */
   private createTokenResponse(username: string, token: string, message: string, includeOTPRequired?: boolean): TokenAuthResponse {
     const tokenName = this.tokenNamingStrategy.getTokenName(username);
-    const response: any = {
+    const response: TokenAuthResponse = {
       success: true,
       message,
       otp_required: includeOTPRequired ?? false

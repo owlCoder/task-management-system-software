@@ -1,4 +1,4 @@
-import axios, {AxiosInstance} from "axios";
+import axios, {AxiosError, AxiosInstance} from "axios";
 import { ITaskServiceClient } from "../../Domain/services/external-services/ITaskServiceClient";
 import { Result } from "../../Domain/types/Result";
 import { ErrorCode } from "../../Domain/enums/ErrorCode";
@@ -25,14 +25,13 @@ export class TaskServiceClient implements ITaskServiceClient{
         });
 
         return { success: true, data: response.data }; 
-    } catch (error: any) {
-
-        if (error.response?.status === 404) {
+    } catch (error) {
+        
+        if (error instanceof AxiosError &&  error.response?.status === 404) {
             return { success: false, code: ErrorCode.NOT_FOUND, error: "Sprint not found" };
         }
         
-        const errorMessage = error.response?.data?.message || "Failed to create task";
-        return { success: false, code: ErrorCode.INTERNAL_ERROR, error: errorMessage };
+        return { success: false, code: ErrorCode.INTERNAL_ERROR, error: "Failed to create task" };
     }
 }
 }

@@ -1,9 +1,10 @@
 import {  VALID_NOTIFICATION_TYPES, isValidNotificationType } from '../../Utils/ValidNotificationHelpers/ValidNotificationType';
+import { NotificationCreateDTO } from '../../Domain/DTOs/NotificationCreateDTO';
 
 export class NotificationValidation {
 
   //null ako je validno, ili error poruka ako nije
-  static validateCreateDTO(data: any): string | null {
+  static validateCreateDTO(data: NotificationCreateDTO): string | null {
     if (!data) {
       return 'Request body is required';
     }
@@ -42,7 +43,7 @@ export class NotificationValidation {
   }
 
   // null ako je validno, ili error poruka ako nije
-  static validateId(id: any): string | null {
+  static validateId(id: string): string | null {
     const parsedId = parseInt(id);
     
     if (isNaN(parsedId) || parsedId <= 0) {
@@ -53,7 +54,7 @@ export class NotificationValidation {
   }
 
   // null ako je validno, ili error poruka ako nije
-  static validateIdsArray(ids: any): string | null {
+  static validateIdsArray(ids: number[]): string | null {
     console.log(' VALIDATION - validateIdsArray called with:', ids);
     console.log(' VALIDATION - typeof ids:', typeof ids);
     console.log(' VALIDATION - Array.isArray(ids):', Array.isArray(ids));
