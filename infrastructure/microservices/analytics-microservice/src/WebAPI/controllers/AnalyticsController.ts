@@ -5,6 +5,7 @@ import { ILogerService } from "../../Domain/services/ILogerService";
 import { ISIEMService } from "../../siem/Domen/services/ISIEMService";
 import { generateEvent } from "../../siem/Domen/Helpers/generate/GenerateEvent";
 import { parseId } from "../../helpers/RequestParams";
+import { IBusinessInsightsService } from "../../Services/external-services/IBusinessInsightsService";
 
 export class AnalyticsController {
     private readonly router: Router;
@@ -13,7 +14,8 @@ export class AnalyticsController {
         private projectAnalyticsService: IProjectAnalyticsService,
         private financialAnalyticsService: IFinancialAnalyticsService,
         private readonly logger: ILogerService,
-        private readonly siemService: ISIEMService
+        private readonly siemService: ISIEMService,
+        private readonly businessInsightsService: IBusinessInsightsService
     ) {
         this.router = Router();
         this.initializeRoutes();
@@ -32,6 +34,10 @@ export class AnalyticsController {
         this.router.get('/analytics/profit-margin/:projectId', this.getProfitMargin.bind(this));
         this.router.get('/analytics/projects-last-30-days', this.getProjectsLast30Days.bind(this));
         this.router.get('/analytics/workers-last-30-days', this.getWorkersLast30Days.bind(this));
+
+        // TODO (Backend B): ili obrisati ovaj debug endpoint ili zameniti ga pravim
+        // /analytics/business-insights endpointom kada LLM integracija bude gotova
+        this.router.get("/analytics/business-insights-debug", this.getBusinessInsightsDebug.bind(this));
 
     }
 
@@ -409,6 +415,39 @@ export class AnalyticsController {
                 generateEvent("analytics-microservice", req, 500, (error as Error).message)
             );
             res.status(500).json({ message: (error as Error).message });
+        }
+    }
+
+
+    // Privremeni debug endpoint koji samo vraca LLM input (BusinessLLMInputDto)
+    // Koristiti pravu generateInsights implementaciju i vracati BusinessInsightsDto
+    async getBusinessInsightsDebug(req: Request, res: Response): Promise<void> {
+        try {
+            const { from, to, services} = req.query as {
+                from?: string;
+                to?: string;
+                services?: string;
+            };
+
+            if(!from || !to) {
+                const message = "Query params 'from' and 'to' are required (ISO dates)";
+                this.logger.log(message);
+                res.status(400).json({ message });
+                return;
+            }
+
+            const serviceArray =
+                services && services.length > 0
+                ? services.split(".").map(s => s.trim()).filter(Boolean)
+                : [];
+            
+            const result = await this.businessInsightsService.generateInsights(from, to, serviceArray);
+
+            res.status(200).json(result);
+        } catch(err) {
+            const msg = (err as Error).message;
+            this.logger.log(msg);
+            res.status(500).json({ msg });
         }
     }
 

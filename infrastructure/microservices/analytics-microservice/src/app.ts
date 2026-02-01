@@ -18,6 +18,8 @@ import { ILogerService } from "./Domain/services/ILogerService";
 import { LogerService } from "./Services/LogerService";
 import { ISIEMService } from "./siem/Domen/services/ISIEMService";
 import { SIEMService } from "./siem/Services/SIEMService";
+import { IBusinessInsightsService } from "./Services/external-services/IBusinessInsightsService";
+import { BusinessInsightsService } from "./Services/external-services/BusinessInsightsService";
 
 dotenv.config({ quiet: true });
 
@@ -146,12 +148,20 @@ export async function initApp(): Promise<express.Express> {
   const loggerService: ILogerService = new LogerService();
   const siemService: ISIEMService = new SIEMService(loggerService);
 
+  const businessInsightsService: IBusinessInsightsService =
+    new BusinessInsightsService(
+      projectAnalyticsService,
+      financialAnalyticsService,
+      projectServiceClient
+    );
+
   // Controller
   const analyticsController = new AnalyticsController(
     projectAnalyticsService,
     financialAnalyticsService,
     loggerService,
-    siemService
+    siemService,
+    businessInsightsService
   );
 
   // Routes
