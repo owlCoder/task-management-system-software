@@ -38,7 +38,7 @@ export class SprintController {
      */
     private async createSprint(req: Request<ReqParams<'projectId'>>, res: Response): Promise<void> {
         try {
-            const projectId = parseInt(req.params.projectId, 10);
+            const projectId = parseInt(req.params.projectId as string, 10);
             if (isNaN(projectId)) {
                 sendSiemEvent(this.siemService, req, 400, "Invalid project ID", true);
                 res.status(400).json({ message: "Invalid project ID" });
@@ -103,7 +103,7 @@ export class SprintController {
      */
     private async getSprintsByProject(req: Request<ReqParams<'projectId'>>, res: Response): Promise<void> {
         try {
-            const projectId = parseInt(req.params.projectId, 10);
+            const projectId = parseInt(req.params.projectId as string, 10);
             if (isNaN(projectId)) {
                 sendSiemEvent(this.siemService, req, 400, "Invalid project ID", false);
                 res.status(400).json({ message: "Invalid project ID" });
@@ -142,7 +142,7 @@ export class SprintController {
      */
     private async getSprintById(req: Request<ReqParams<'id'>>, res: Response): Promise<void> {
         try {
-            const sprintId = parseInt(req.params.id, 10);
+            const sprintId = parseInt(req.params.id as string, 10);
             if (isNaN(sprintId)) {
                 sendSiemEvent(this.siemService, req, 400, "Invalid sprint ID", false);
                 res.status(400).json({ message: "Invalid sprint ID" });
@@ -182,7 +182,7 @@ export class SprintController {
      */
     private async updateSprint(req: Request<ReqParams<'id'>>, res: Response): Promise<void> {
         try {
-            const sprintId = parseInt(req.params.id, 10);
+            const sprintId = parseInt(req.params.id as string, 10);
             if (isNaN(sprintId)) {
                 sendSiemEvent(this.siemService, req, 400, "Invalid sprint ID", true);
                 res.status(400).json({ message: "Invalid sprint ID" });
@@ -257,7 +257,7 @@ export class SprintController {
      */
     private async deleteSprint(req: Request<ReqParams<'id'>>, res: Response): Promise<void> {
         try {
-            const sprintId = parseInt(req.params.id, 10);
+            const sprintId = parseInt(req.params.id as string, 10);
             if (isNaN(sprintId)) {
                 sendSiemEvent(this.siemService, req, 400, "Invalid sprint ID", true);
                 res.status(400).json({ message: "Invalid sprint ID" });

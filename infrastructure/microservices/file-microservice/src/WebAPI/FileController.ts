@@ -7,7 +7,6 @@ import { IFileTypeValidationService } from "../Domain/services/IFileTypeValidati
 import { UserRole } from "../Domain/enums/UserRole";
 import { IFileMapper } from "../Utils/converters/IFileMapper";
 import * as path from "path";
-import { ILogerService } from "../Domain/services/ILogerService";
 import { ISIEMService } from "../siem/Domen/services/ISIEMService";
 import { generateEvent } from "../siem/Domen/Helpers/generate/GenerateEvent";
 

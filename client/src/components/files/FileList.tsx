@@ -19,9 +19,6 @@ export const FileList = ({ onSelectFile, openDeleteModal }: FileListProps) => {
   const { token, user } = useAuth();
   const authorId = user?.id;
 
-if (!token || !authorId) {
-  return <div className="text-white/50">Not authenticated</div>;
-}
 
   const normalizeExt = (ext: string) =>
   ext.replace(".", "").toLowerCase();
@@ -82,6 +79,9 @@ useEffect(() => {
     fetchFiles();
   }, []);
 
+  if (!token || !authorId) {
+  return <div className="text-white/50">Not authenticated</div>;
+}
 
 const handleDownload = async () => {
   if (!selectedFileId || !token) return;

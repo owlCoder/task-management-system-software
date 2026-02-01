@@ -33,7 +33,7 @@ export class ReviewController {
 
   async sendReview(req: Request, res: Response): Promise<void> {
     try {
-      const taskId = Number(req.params.taskId);
+      const taskId = parseInt(req.params.taskId as string,10);
       if (isNaN(taskId)) {
         res.status(400).json({ message: "Invalid task ID" });
         return;
@@ -78,7 +78,7 @@ export class ReviewController {
 
   async approveReview(req: Request, res: Response): Promise<void> {
     try {
-      const taskId = Number(req.params.taskId);
+      const taskId = parseInt(req.params.taskId as string,10);
       if (isNaN(taskId)) {
         res.status(400).json({ message: "Invalid task ID" });
         return;
@@ -124,7 +124,7 @@ export class ReviewController {
 
   async rejectReview(req: Request, res: Response): Promise<void> {
     try {
-      const taskId = Number(req.params.taskId);
+      const taskId = parseInt(req.params.taskId as string,10);
       if (isNaN(taskId)) {
         res.status(400).json({ message: "Invalid task ID" });
         return;
@@ -202,7 +202,7 @@ export class ReviewController {
 
   async getCommentById(req: Request, res: Response): Promise<void> {
     try {
-      const commentId = Number(req.params.commentId);
+      const commentId = parseInt(req.params.commentId as string,10);
       if (isNaN(commentId)) {
         res.status(400).json({ message: "Invalid comment ID" });
         return;
@@ -229,7 +229,7 @@ export class ReviewController {
 
   async getReviewHistory(req: Request, res: Response): Promise<void> {
     try {
-      const taskId = Number(req.params.taskId);
+      const taskId = parseInt(req.params.taskId as string,10);
       if (isNaN(taskId)) {
         res.status(400).json({ message: "Invalid task ID" });
         return;
