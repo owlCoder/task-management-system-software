@@ -40,7 +40,7 @@ export class AnalyticsController {
 
     async getBurndownAnalytics(req: Request, res: Response): Promise<void> {
         try {
-            const sprintId = parseId((req.params.sprint_id as string));
+            const sprintId = parseId((req.params.sprintId as string));
 
             if (sprintId === null) {
                 const message = "Invalid sprint ID for Burndown";

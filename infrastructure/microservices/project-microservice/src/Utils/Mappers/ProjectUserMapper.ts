@@ -7,7 +7,8 @@ export const ProjectUserMapper = {
       pu_id: pu.pu_id,
       project_id: (pu.project).project_id,
       user_id: pu.user_id,
-      weekly_hours: pu.weekly_hours
+      weekly_hours: pu.weekly_hours,
+      added_at: pu.added_at
     };
   },
 };
