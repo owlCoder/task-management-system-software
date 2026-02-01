@@ -112,7 +112,7 @@ export class ProjectController {
      */
     private async getProjectsByUserId(req: Request<ReqParams<'userId'>>, res: Response): Promise<void> {
         try {
-            const userId = parseInt(req.params.userId, 10);
+            const userId = parseInt(req.params.userId as string, 10);
             if (isNaN(userId)) {
                 sendSiemEvent(this.siemService, req, 400, "Invalid user ID", false);
                 res.status(400).json({ message: "Invalid user ID" });
@@ -146,7 +146,7 @@ export class ProjectController {
      */
     private async getProjectById(req: Request<ReqParams<'id'>>, res: Response): Promise<void> {
         try {
-            const id = parseInt(req.params.id, 10);
+            const id = parseInt(req.params.id as string, 10);
             if (isNaN(id)) {
                 sendSiemEvent(this.siemService, req, 400, "Invalid project ID", false);
                 res.status(400).json({ message: "Invalid project ID" });
@@ -289,7 +289,7 @@ export class ProjectController {
     private async updateProject(req: Request<ReqParams<'id'>>, res: Response): Promise<void> {
         console.log("HEADERS IN PROJECT MS /updateProject:", req.headers);
         try {
-            const id = parseInt(req.params.id, 10);
+            const id = parseInt(req.params.id as string, 10);
             if (isNaN(id)) {
                 sendSiemEvent(this.siemService, req, 400, "Invalid project ID", true);
                 res.status(400).json({ message: "Invalid project ID" });
@@ -389,7 +389,7 @@ export class ProjectController {
      */
     private async deleteProject(req: Request<ReqParams<'id'>>, res: Response): Promise<void> {
         try {
-            const id = parseInt(req.params.id, 10);
+            const id = parseInt(req.params.id as string, 10);
             if (isNaN(id)) {
                 sendSiemEvent(this.siemService, req, 400, "Invalid project ID", true);
                 res.status(400).json({ message: "Invalid project ID" });
@@ -442,7 +442,7 @@ export class ProjectController {
      */
     private async projectExists(req: Request<ReqParams<'id'>>, res: Response): Promise<void> {
         try {
-            const id = parseInt(req.params.id, 10);
+            const id = parseInt(req.params.id as string, 10);
             if (isNaN(id)) {
                 sendSiemEvent(this.siemService, req, 400, "Invalid project ID", false);
                 res.status(400).json({ message: "Invalid project ID" });

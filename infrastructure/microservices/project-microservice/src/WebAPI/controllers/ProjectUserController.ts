@@ -35,7 +35,7 @@ export class ProjectUserController {
      */
     private async assignUser(req: Request<ReqParams<'id'>>, res: Response): Promise<void> {
         try {
-            const project_id = parseInt(req.params.id, 10);
+            const project_id = parseInt(req.params.id as string, 10);
             const username = req.body.username?.trim();
             const weekly_hours = parseInt(req.body.weekly_hours, 10);
 
@@ -89,7 +89,7 @@ export class ProjectUserController {
      */
     private async getUsersForProject(req: Request<ReqParams<'id'>>, res: Response): Promise<void> {
         try {
-            const project_id = parseInt(req.params.id, 10);
+            const project_id = parseInt(req.params.id as string, 10);
             if (isNaN(project_id)) {
                 sendSiemEvent(this.siemService, req, 400, "Invalid project ID", false);
                 res.status(400).json({ message: "Invalid project ID" });
@@ -129,8 +129,8 @@ export class ProjectUserController {
      */
     private async removeUser(req: Request<ReqParams<'id' | 'userId'>>, res: Response): Promise<void> {
         try {
-            const project_id = parseInt(req.params.id, 10);
-            const user_id = parseInt(req.params.userId, 10);
+            const project_id = parseInt(req.params.id as string, 10);
+            const user_id = parseInt(req.params.userId as string, 10);
 
             if (isNaN(project_id) || isNaN(user_id)) {
                 sendSiemEvent(this.siemService, req, 400, "Invalid project ID or user ID", true);
