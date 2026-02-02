@@ -4,7 +4,7 @@ import { IProjectAnalyticsService } from "../../Domain/services/IProjectAnalytic
 import { IBusinessInsightsService } from "./IBusinessInsightsService";
 import { IProjectServiceClient } from "./IProjectServiceClient";
 import { ILLMAnalyticsService } from "./ILLMAnalyticsService";
-import { BusinessInsightsDto } from "../../Domain/DTOs/BusinessInsightsDto";
+import { BusinessLLMOutputDTO } from "../../Domain/DTOs/BusinessLLMOutputDto";
 
 export class BusinessInsightsService implements IBusinessInsightsService {
     constructor(
@@ -83,16 +83,8 @@ export class BusinessInsightsService implements IBusinessInsightsService {
     }
 
     
-    public async generateInsights(from: string, to: string, services: string[] = []): Promise<BusinessInsightsDto> {
+    public async generateInsights(from: string, to: string, services: string[] = []): Promise<BusinessLLMOutputDTO> {
         const input = await this.buildLLMInput(from, to, services);
-        const llmOutput = await this.llmAnalyticsService.analyze(input);
-        return {
-            time_window_from: from,
-            time_window_to: to,
-            generated_at: new Date().toISOString(),
-            summary: llmOutput.summary,
-            recommendations: llmOutput.recommendations,
-            issues: llmOutput.issues
-        };
+        return await this.llmAnalyticsService.analyze(input);
     }
 }

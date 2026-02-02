@@ -149,7 +149,7 @@ export async function initApp(): Promise<express.Express> {
     new FinancialAnalyticsService(projectServiceClient, taskServiceClient);
   const loggerService: ILogerService = new LogerService();
   const siemService: ISIEMService = new SIEMService(loggerService);
-  const llmAnalyticsService : ILLMAnalyticsService = new LLMAnalyticsService();
+  const llmAnalyticsService : ILLMAnalyticsService = new LLMAnalyticsService(loggerService);
 
   const businessInsightsService: IBusinessInsightsService =
     new BusinessInsightsService(

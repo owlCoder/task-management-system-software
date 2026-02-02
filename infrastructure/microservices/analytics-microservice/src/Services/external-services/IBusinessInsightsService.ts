@@ -1,5 +1,5 @@
-import { BusinessInsightsDto } from "../../Domain/DTOs/BusinessInsightsDto";
+import { BusinessLLMOutputDTO } from "../../Domain/DTOs/BusinessLLMOutputDto";
 
 export interface IBusinessInsightsService {
-    generateInsights(from: string, to: string, services: string[]): Promise<BusinessInsightsDto>;
+    generateInsights(from: string, to: string, services: string[]): Promise<BusinessLLMOutputDTO>;
 }
