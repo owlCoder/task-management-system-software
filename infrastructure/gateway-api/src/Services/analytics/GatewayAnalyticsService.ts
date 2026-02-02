@@ -10,6 +10,7 @@ import { BudgetTrackingDTO } from "../../Domain/DTOs/analytics/BudgetTrackingDTO
 import { ResourceCostAllocationDTO } from "../../Domain/DTOs/analytics/ResourceCostAllocationDTO";
 import { ProfitMarginDTO } from "../../Domain/DTOs/analytics/ProfitMarginDTO";
 import { TimeSeriesPointDTO } from "../../Domain/DTOs/analytics/TimeSeriesPointDTO";
+import { BusinessLLMOutputDTO } from "../../Domain/DTOs/analytics/BusinessInsightsDTO";
 import { Result } from "../../Domain/types/common/Result";
 
 // Constants
@@ -147,6 +148,21 @@ export class GatewayAnalyticsService implements IGatewayAnalyticsService {
             serviceName: SERVICES.ANALYTICS,
             method: HTTP_METHODS.GET,
             url: ANALYTICS_ROUTES.WORKERS_LAST_30_DAYS,
+        });
+    }
+
+    /**
+     * Fetches AI-generated business insights.
+     * @param {string} from - Start date.
+     * @param {string} to - End date.
+     * @returns {Promise<Result<BusinessLLMOutputDTO>>}
+     */
+    async getBusinessInsights(from: string, to: string): Promise<Result<BusinessLLMOutputDTO>> {
+        return await makeAPICall<BusinessLLMOutputDTO, any, { from: string; to: string }>(this.analyticsClient, this.errorHandlingService, {
+            serviceName: SERVICES.ANALYTICS,
+            method: HTTP_METHODS.GET,
+            url: ANALYTICS_ROUTES.BUSINESS_INSIGHTS,
+            params: { from, to }
         });
     }
 

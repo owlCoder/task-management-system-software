@@ -7,4 +7,5 @@ export const ANALYTICS_ROUTES = Object.freeze({
     PROFIT_MARGIN_BY_PROJECT: (projectId: number) => `/analytics/profit-margin/${projectId}`,
     PROJECTS_LAST_30_DAYS: `/analytics/projects-last-30-days`,
     WORKERS_LAST_30_DAYS: `/analytics/workers-last-30-days`,
+    BUSINESS_INSIGHTS: `/analytics/business-insights`,
 } as const);

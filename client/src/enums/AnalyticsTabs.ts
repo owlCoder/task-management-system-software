@@ -1,4 +1,5 @@
 export type AnalyticsTab =
+    | "BUSINESS_INSIGHTS"
     | "BURNDOWN"
     | "BURNUP"
     | "VELOCITY"

@@ -6,6 +6,7 @@ import { BudgetTrackingDto } from "../../models/analytics/BudgetTrackingDto";
 import { ProfitMarginDto } from "../../models/analytics/ProfitMarginDto";
 import { ResourceCostAllocationDto } from "../../models/analytics/ResourceCostAllocationDto";
 import { TimeSeriesPointDto } from "../../models/analytics/TimeSeriesPointDto";
+import { BusinessLLMOutputDTO } from "../../models/analytics/BusinessInsightDto";
 
 type Id = string | number;
 
@@ -125,6 +126,20 @@ export class AnalyticsAPI implements IAnalyticsAPI {
       ).data;
     } catch (error) {
       console.error("Error fetching workers last 30 days:", error);
+      throw error;
+    }
+  }
+
+ async getBusinessInsights(from: string, to: string, token: string): Promise<BusinessLLMOutputDTO> {
+    try {
+      return (
+        await this.axiosInstance.get(`/analytics/business-insights`, {
+          params: { from, to },
+          headers: this.authHeaders(token),
+        })
+      ).data;
+    } catch (error) {
+      console.error("Error fetching business insights:", error);
       throw error;
     }
   }

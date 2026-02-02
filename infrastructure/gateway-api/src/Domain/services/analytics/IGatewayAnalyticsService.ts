@@ -5,6 +5,7 @@ import { ProfitMarginDTO } from "../../DTOs/analytics/ProfitMarginDTO";
 import { ResourceCostAllocationDTO } from "../../DTOs/analytics/ResourceCostAllocationDTO";
 import { TimeSeriesPointDTO } from "../../DTOs/analytics/TimeSeriesPointDTO";
 import { Result } from "../../types/common/Result";
+import { BusinessLLMOutputDTO } from "../../DTOs/analytics/BusinessInsightsDTO";
 
 export interface IGatewayAnalyticsService {
     getBurndownAnalyticsBySprintId(sprintId: number): Promise<Result<BurndownDTO>>;
@@ -15,5 +16,5 @@ export interface IGatewayAnalyticsService {
     getProfitMarginByProjectId(projectId: number): Promise<Result<ProfitMarginDTO>>;
     getProjectsLast30Days(): Promise<Result<TimeSeriesPointDTO[]>>;
     getWorkersLast30Days(): Promise<Result<TimeSeriesPointDTO[]>>;
-
+    getBusinessInsights(from: string, to: string): Promise<Result<BusinessLLMOutputDTO>>;
 }

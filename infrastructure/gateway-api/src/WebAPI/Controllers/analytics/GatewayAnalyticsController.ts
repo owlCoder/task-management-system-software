@@ -46,6 +46,7 @@ export class GatewayAnalyticsController {
         this.router.get('/analytics/profit-margin/:projectId', ...analyticsReadonlyAccess, this.getProfitMarginByProjectId.bind(this));
         this.router.get('/analytics/projects-last-30-days', ...analyticsReadonlyAccess, this.getProjectsLast30Days.bind(this));
         this.router.get('/analytics/workers-last-30-days', ...analyticsReadonlyAccess, this.getWorkersLast30Days.bind(this));
+        this.router.get('/analytics/business-insights', ...analyticsReadonlyAccess, this.getBusinessInsights.bind(this));
 
     }
 
@@ -164,6 +165,21 @@ export class GatewayAnalyticsController {
         const result = await this.gatewayAnalyticsService.getWorkersLast30Days();
         handleResponse(res, result);
     }
+
+    /**
+     * GET /api/v1/analytics/business-insights
+     * @param {Request} req - containing from and to in query.
+     * @param {Response} res 
+     */
+    private async getBusinessInsights(req: Request, res: Response): Promise<void> {
+        const from = req.query.from as string;
+        const to = req.query.to as string;
+
+        const result = await this.gatewayAnalyticsService.getBusinessInsights(from, to);
+        handleResponse(res, result);
+    }
+
+    
 
     public getRouter(): Router {
         return this.router;

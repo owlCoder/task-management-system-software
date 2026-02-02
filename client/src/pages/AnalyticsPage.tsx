@@ -13,6 +13,7 @@ import { VelocityAnalytics } from "../components/analytics/Velocity";
 import { BurnupAnalytics } from "../components/analytics/Burnup";
 import { BudgetAnalytics } from "../components/analytics/BudgetTracking";
 import { Last30DaysAnalytics } from "../components/analytics/Last30Days";
+import { BusinessInsights } from "../components/analytics/BusinessInsights";
 
 import { AnalyticsAPI } from "../api/analytics/AnalyticsAPI";
 import { BurndownDto } from "../models/analytics/BurndownDto";
@@ -22,13 +23,14 @@ import { ProfitMarginAnalytics } from "../components/analytics/ProfitMargin";
 import { ProfitMarginDto } from "../models/analytics/ProfitMarginDto";
 import { ResourceCostAllocation } from "../components/analytics/ResourceCostAllocation";
 import { ResourceCostAllocationDto } from "../models/analytics/ResourceCostAllocationDto";
-
+import { BusinessLLMOutputDTO } from "../models/analytics/BusinessInsightDto";
 
 
 type SprintOption = { sprint_id: number; sprint_title?: string };
 
 const TABS: { id: AnalyticsTab; label: string }[] = [
     { id: "LAST_30_DAYS", label: "Last 30 Days" },
+    { id: "BUSINESS_INSIGHTS", label: "AI Insights" },
     { id: "BURNDOWN", label: "Burndown" },
     { id: "BURNUP", label: "Burnup" },
     { id: "VELOCITY", label: "Velocity" },
@@ -50,6 +52,7 @@ export const AnalyticsPage: React.FC = () => {
     const [loadingSprints, setLoadingSprints] = useState(false);
     const [usernamesById, setUsernamesById] = useState<Record<number, string>>({});
 
+    const [businessInsights, setBusinessInsights] = useState<BusinessLLMOutputDTO | null>(null);
     const [burndown, setBurndown] = useState<BurndownDto | null>(null);
     const [burnup, setBurnup] = useState<BurnupDto | null>(null);
     const [velocity, setVelocity] = useState<number | null>(null);
@@ -244,6 +247,15 @@ export const AnalyticsPage: React.FC = () => {
 
                     setProjectsLast30Days(projects);
                     setWorkersLast30Days(workers);
+                } else if(activeTab === "BUSINESS_INSIGHTS"){
+                    const toDate = new Date().toISOString().split('T')[0];
+                    const fromDate = new Date();
+                    fromDate.setDate(fromDate.getDate() - 30);
+                    const fromDateStr = fromDate.toISOString().split('T')[0];
+
+                    const data = await analyticsAPI.getBusinessInsights(fromDateStr, toDate, token);
+                    
+                    setBusinessInsights(data);
                 }
 
 
@@ -318,7 +330,7 @@ export const AnalyticsPage: React.FC = () => {
                                 key={tab.id}
                                 onClick={() => setActiveTab(tab.id)}
                                 className={`rounded-2xl p-4 text-center font-semibold transition-all duration-300 border border-white/10 backdrop-blur-xl
-                  ${active
+                                    ${active
                                         ? "bg-gradient-to-t from-[var(--palette-medium-blue)] to-[var(--palette-deep-blue)] text-white shadow-lg scale-[1.03]"
                                         : "bg-white/5 text-white/60 hover:text-white hover:-translate-y-1"
                                     }`}
@@ -434,6 +446,13 @@ export const AnalyticsPage: React.FC = () => {
                             workers={workersLast30Days}
                             loading={loadingAnalytics}
                         />
+                    )}
+
+                    {activeTab === "BUSINESS_INSIGHTS" && (
+                    <BusinessInsights 
+                        data={businessInsights} 
+                        loading={loadingAnalytics} 
+                    />
                     )}
 
 
