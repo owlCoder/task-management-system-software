@@ -28,6 +28,8 @@ export function convertEventToSIEMPayload(event: SIEMEvent): SIEMPayload {
     const payload: SIEMPayload = {
         message: messageParts.join(' '),
         source: event.service,
+        userId: event.userId,
+        userRole: event.userRole,
         ipAddress: event.ip
     };
 
