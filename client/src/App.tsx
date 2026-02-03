@@ -13,7 +13,8 @@ import { FilePage } from "./pages/FilePage";
 import { OtpPage } from "./pages/OTPPage";
 import AnalyticsPage from "./pages/AnalyticsPage";
 import { Toaster } from 'react-hot-toast';
-import { socketManager } from "./api/notification/socketInstance";
+import toast from "react-hot-toast";
+import { socketEventService, socketManager } from "./api/notification/socketInstance";
 import { useAuth } from "./hooks/useAuthHook";
 import { INotificationAPI } from "./api/notification/INotificationAPI";
 import { NotificationAPI } from "./api/notification/NotificationAPI";
@@ -21,6 +22,8 @@ import ReviewInboxPage from "./pages/ReviewInboxPage";
 import StatusesPage from "./pages/StatusesPage";
 import ProjectSprintsPage from "./pages/ProjectSprintPage";
 import { sprintAPI } from "./api/sprint/SprintAPI";
+import { SocketEvents } from "./constants/SocketEvents";
+import type { Notification } from "./models/notification/NotificationCardDTO";
 
 const auth_api: IAuthAPI = new AuthAPI();
 const notification_API: INotificationAPI = new NotificationAPI(import.meta.env.VITE_GATEWAY_URL);
@@ -28,7 +31,7 @@ const notification_API: INotificationAPI = new NotificationAPI(import.meta.env.V
 const backgroundImageUrl = new URL("../public/bg2.png", import.meta.url).href;
 
 function App() {
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, token } = useAuth();
   const socketInitialized = useRef(false);
 
   useEffect(() => {
@@ -46,6 +49,52 @@ function App() {
       }
     };
   }, [isAuthenticated, user?.id]);
+
+  useEffect(() => {
+    if (!isAuthenticated || !user?.id) return;
+
+    const lastSeenKey = `notifications:lastSeen:${user.id}`;
+
+    const handleNotification = (notification: Notification) => {
+      toast.success(notification.title || "Dobili ste novu notifikaciju");
+      if (notification.createdAt) {
+        localStorage.setItem(lastSeenKey, notification.createdAt);
+      }
+    };
+
+    socketEventService.onNotificationCreated(handleNotification);
+
+    return () => {
+      socketEventService.removeListener(SocketEvents.NOTIFICATION_CREATED);
+    };
+  }, [isAuthenticated, user?.id]);
+
+  useEffect(() => {
+    if (!isAuthenticated || !user?.id || !token) return;
+
+    const lastSeenKey = `notifications:lastSeen:${user.id}`;
+    const lastSeen = localStorage.getItem(lastSeenKey);
+    const lastSeenTime = lastSeen ? new Date(lastSeen).getTime() : 0;
+
+    const checkNotifications = async () => {
+      try {
+        const notifications = await notification_API.getNotificationsByUserId(token, user.id);
+        const newOnes = notifications.filter((n) => new Date(n.createdAt).getTime() > lastSeenTime);
+
+        if (newOnes.length > 0) {
+          toast.success("Dobili ste novu notifikaciju");
+          const newest = newOnes
+            .map((n) => new Date(n.createdAt).getTime())
+            .reduce((a, b) => Math.max(a, b), lastSeenTime);
+          localStorage.setItem(lastSeenKey, new Date(newest).toISOString());
+        }
+      } catch (err) {
+        console.error("Failed to check notifications:", err);
+      }
+    };
+
+    checkNotifications();
+  }, [isAuthenticated, user?.id, token]);
 
   return (
     <div
