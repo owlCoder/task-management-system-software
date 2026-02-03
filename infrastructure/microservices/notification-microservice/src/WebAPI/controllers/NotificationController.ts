@@ -3,13 +3,17 @@ import { INotificationService } from '../../Domain/Services/INotificationService
 import { NotificationCreateDTO } from '../../Domain/DTOs/NotificationCreateDTO';
 import { NotificationValidation } from '../validators/NotificationValidation';
 import { mapErrorCodeToHttpStatus } from '../../Utils/converters/errorCodeMapper';
+import { ISIEMService } from '../../siem/Domain/services/ISIEMService';
+import { generateEvent } from '../../siem/Domain/Helpers/generate/GenerateEvent';
 
 export class NotificationController {
   
   private notificationService: INotificationService;
+  private siemService: ISIEMService;
 
-  constructor(notificationService: INotificationService) {
+  constructor(notificationService: INotificationService, siemService: ISIEMService) {
     this.notificationService = notificationService;
+    this.siemService = siemService;
   }
 
   async getNotificationById(req: Request<{ id: string }>, res: Response): Promise<void> {
@@ -31,6 +35,11 @@ export class NotificationController {
       if (!result.success) {
         const statusCode = mapErrorCodeToHttpStatus(result.errorCode);
         res.status(statusCode).json({ message: result.message });
+        if (statusCode > 400) {
+          this.siemService.sendEvent(
+            generateEvent("notification-microservice", req, statusCode, result.message)
+          );
+        }
         return;
       }
 
@@ -40,6 +49,14 @@ export class NotificationController {
         message: 'Error fetching notification',
         error: (error as Error).message
       });
+      this.siemService.sendEvent(
+        generateEvent(
+          "notification-microservice",
+          req,
+          500,
+          error instanceof Error ? error.message : "Error fetching notification"
+        )
+      );
     }
   }
 
@@ -62,6 +79,11 @@ export class NotificationController {
       if (!result.success) {
         const statusCode = mapErrorCodeToHttpStatus(result.errorCode);
         res.status(statusCode).json({ message: result.message });
+        if (statusCode > 400) {
+          this.siemService.sendEvent(
+            generateEvent("notification-microservice", req, statusCode, result.message)
+          );
+        }
         return;
       }
 
@@ -71,6 +93,14 @@ export class NotificationController {
         message: 'Error fetching user notifications',
         error: (error as Error).message
       });
+      this.siemService.sendEvent(
+        generateEvent(
+          "notification-microservice",
+          req,
+          500,
+          error instanceof Error ? error.message : "Error fetching user notifications"
+        )
+      );
     }
   }
 
@@ -93,6 +123,11 @@ export class NotificationController {
       if (!result.success) {
         const statusCode = mapErrorCodeToHttpStatus(result.errorCode);
         res.status(statusCode).json({ message: result.message });
+        if (statusCode > 400) {
+          this.siemService.sendEvent(
+            generateEvent("notification-microservice", req, statusCode, result.message)
+          );
+        }
         return;
       }
 
@@ -102,6 +137,14 @@ export class NotificationController {
         message: 'Error fetching unread count',
         error: (error as Error).message
       });
+      this.siemService.sendEvent(
+        generateEvent(
+          "notification-microservice",
+          req,
+          500,
+          error instanceof Error ? error.message : "Error fetching unread count"
+        )
+      );
     }
   }
 
@@ -119,6 +162,11 @@ export class NotificationController {
       if (!result.success) {
         const statusCode = mapErrorCodeToHttpStatus(result.errorCode);
         res.status(statusCode).json({ message: result.message });
+        if (statusCode > 400) {
+          this.siemService.sendEvent(
+            generateEvent("notification-microservice", req, statusCode, result.message)
+          );
+        }
         return;
       }
 
@@ -128,6 +176,14 @@ export class NotificationController {
         message: 'Error creating notification',
         error: (error as Error).message
       });
+      this.siemService.sendEvent(
+        generateEvent(
+          "notification-microservice",
+          req,
+          500,
+          error instanceof Error ? error.message : "Error creating notification"
+        )
+      );
     }
   }
 
@@ -150,6 +206,11 @@ export class NotificationController {
       if (!result.success) {
         const statusCode = mapErrorCodeToHttpStatus(result.errorCode);
         res.status(statusCode).json({ message: result.message });
+        if (statusCode > 400) {
+          this.siemService.sendEvent(
+            generateEvent("notification-microservice", req, statusCode, result.message)
+          );
+        }
         return;
       }
 
@@ -159,6 +220,14 @@ export class NotificationController {
         message: 'Error marking notification as read',
         error: (error as Error).message
       });
+      this.siemService.sendEvent(
+        generateEvent(
+          "notification-microservice",
+          req,
+          500,
+          error instanceof Error ? error.message : "Error marking notification as read"
+        )
+      );
     }
   }
 
@@ -181,6 +250,11 @@ export class NotificationController {
       if (!result.success) {
         const statusCode = mapErrorCodeToHttpStatus(result.errorCode);
         res.status(statusCode).json({ message: result.message });
+        if (statusCode > 400) {
+          this.siemService.sendEvent(
+            generateEvent("notification-microservice", req, statusCode, result.message)
+          );
+        }
         return;
       }
 
@@ -190,6 +264,14 @@ export class NotificationController {
         message: 'Error marking notification as unread',
         error: (error as Error).message
       });
+      this.siemService.sendEvent(
+        generateEvent(
+          "notification-microservice",
+          req,
+          500,
+          error instanceof Error ? error.message : "Error marking notification as unread"
+        )
+      );
     }
   }
 
@@ -210,6 +292,11 @@ export class NotificationController {
       if (!result.success) {
         const statusCode = mapErrorCodeToHttpStatus(result.errorCode);
         res.status(statusCode).json({ message: result.message });
+        if (statusCode > 400) {
+          this.siemService.sendEvent(
+            generateEvent("notification-microservice", req, statusCode, result.message)
+          );
+        }
         return;
       }
 
@@ -220,6 +307,14 @@ export class NotificationController {
         message: 'Error marking notifications as read',
         error: (error as Error).message
       });
+      this.siemService.sendEvent(
+        generateEvent(
+          "notification-microservice",
+          req,
+          500,
+          error instanceof Error ? error.message : "Error marking notifications as read"
+        )
+      );
     }
   }
 
@@ -243,6 +338,11 @@ export class NotificationController {
       if (!result.success) {
         const statusCode = mapErrorCodeToHttpStatus(result.errorCode);
         res.status(statusCode).json({ message: result.message });
+        if (statusCode > 400) {
+          this.siemService.sendEvent(
+            generateEvent("notification-microservice", req, statusCode, result.message)
+          );
+        }
         return;
       }
 
@@ -252,6 +352,14 @@ export class NotificationController {
         message: 'Error marking notifications as unread',
         error: (error as Error).message
       });
+      this.siemService.sendEvent(
+        generateEvent(
+          "notification-microservice",
+          req,
+          500,
+          error instanceof Error ? error.message : "Error marking notifications as unread"
+        )
+      );
     }
   }
 
@@ -274,6 +382,11 @@ export class NotificationController {
       if (!result.success) {
         const statusCode = mapErrorCodeToHttpStatus(result.errorCode);
         res.status(statusCode).json({ message: result.message });
+        if (statusCode > 400) {
+          this.siemService.sendEvent(
+            generateEvent("notification-microservice", req, statusCode, result.message)
+          );
+        }
         return;
       }
 
@@ -283,6 +396,14 @@ export class NotificationController {
         message: 'Error deleting notification',
         error: (error as Error).message
       });
+      this.siemService.sendEvent(
+        generateEvent(
+          "notification-microservice",
+          req,
+          500,
+          error instanceof Error ? error.message : "Error deleting notification"
+        )
+      );
     }
   }
 
@@ -300,6 +421,11 @@ export class NotificationController {
       if (!result.success) {
         const statusCode = mapErrorCodeToHttpStatus(result.errorCode);
         res.status(statusCode).json({ message: result.message });
+        if (statusCode > 400) {
+          this.siemService.sendEvent(
+            generateEvent("notification-microservice", req, statusCode, result.message)
+          );
+        }
         return;
       }
 
@@ -309,6 +435,14 @@ export class NotificationController {
         message: 'Error deleting notifications',
         error: (error as Error).message
       });
+      this.siemService.sendEvent(
+        generateEvent(
+          "notification-microservice",
+          req,
+          500,
+          error instanceof Error ? error.message : "Error deleting notifications"
+        )
+      );
     }
   }
 }

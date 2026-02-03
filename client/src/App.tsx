@@ -56,7 +56,7 @@ function App() {
     const lastSeenKey = `notifications:lastSeen:${user.id}`;
 
     const handleNotification = (notification: Notification) => {
-      toast.success(notification.title || "Dobili ste novu notifikaciju");
+      toast.success(notification.title || "You have a new notification");
       if (notification.createdAt) {
         localStorage.setItem(lastSeenKey, notification.createdAt);
       }
@@ -74,15 +74,21 @@ function App() {
 
     const lastSeenKey = `notifications:lastSeen:${user.id}`;
     const lastSeen = localStorage.getItem(lastSeenKey);
-    const lastSeenTime = lastSeen ? new Date(lastSeen).getTime() : 0;
 
-    const checkNotifications = async () => {
+    if (!lastSeen) {
+      localStorage.setItem(lastSeenKey, new Date().toISOString());
+      return;
+    }
+
+    const lastSeenTime = new Date(lastSeen).getTime();
+
+    const checkLatestNotification = async () => {
       try {
         const notifications = await notification_API.getNotificationsByUserId(token, user.id);
         const newOnes = notifications.filter((n) => new Date(n.createdAt).getTime() > lastSeenTime);
 
         if (newOnes.length > 0) {
-          toast.success("Dobili ste novu notifikaciju");
+          toast.success("You have a new notification");
           const newest = newOnes
             .map((n) => new Date(n.createdAt).getTime())
             .reduce((a, b) => Math.max(a, b), lastSeenTime);
@@ -93,7 +99,7 @@ function App() {
       }
     };
 
-    checkNotifications();
+    checkLatestNotification();
   }, [isAuthenticated, user?.id, token]);
 
   return (

@@ -1,15 +1,19 @@
 import { Router } from 'express';
 import { NotificationController } from './controllers/NotificationController';
 import { INotificationService } from '../Domain/Services/INotificationService';
+import { ISIEMService } from '../siem/Domain/services/ISIEMService';
 
 /**
  * Kreira Express Router sa svim notification rutama
  * @param notificationService - Injektovani NotificationService
  */
-export const createNotificationRoutes = (notificationService: INotificationService): Router => {
+export const createNotificationRoutes = (
+  notificationService: INotificationService,
+  siemService: ISIEMService
+): Router => {
   
   const router = Router();
-  const controller = new NotificationController(notificationService);
+  const controller = new NotificationController(notificationService, siemService);
 
 
   // BULK ROUTES - MORAJU BITI PRE :id RUTA!

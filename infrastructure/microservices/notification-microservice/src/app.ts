@@ -2,11 +2,15 @@ import express, { Application, Request, Response } from "express";
 import "reflect-metadata";
 import { createNotificationRoutes } from "./WebAPI/routes";
 import { INotificationService } from "./Domain/Services/INotificationService";
+import { ISIEMService } from "./siem/Domain/services/ISIEMService";
 import { corsMiddleware } from "./Middleware/CorsMiddleware";
 import { loggerMiddleware } from "./Middleware/LoggerMiddleware";
 import { notFoundHandler, errorHandler } from "./Middleware/ErrorMiddleware";
 
-export const createApp = (notificationService: INotificationService): Application => {
+export const createApp = (
+  notificationService: INotificationService,
+  siemService: ISIEMService
+): Application => {
   
   const app: Application = express();
 
@@ -31,7 +35,7 @@ export const createApp = (notificationService: INotificationService): Applicatio
 
   // notification routes
   // sve rute su pod /api prefiksom
-  const notificationRoutes = createNotificationRoutes(notificationService);
+  const notificationRoutes = createNotificationRoutes(notificationService, siemService);
   app.use("/api/v1", notificationRoutes);
 
   // ERROR HANDLING

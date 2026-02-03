@@ -11,6 +11,8 @@ import { NotificationMapper } from "./Utils/converters/NotificationMapper";
 import { SocketService } from "./WebSocket/SocketService";
 import { Db } from "./Database/DbConnectionPool";
 import { initializeDatabase, closeDatabase } from "./Database/InitializeConnection";
+import { SIEMService } from "./siem/Services/SIEMService";
+import { LogerService } from "./Service/LogerService";
 
 const PORT = process.env.PORT || 5003;
 
@@ -36,19 +38,23 @@ const startServer = async () => {
       notificationMapper
     );
 
-    // 5. Kreiraj Express aplikaciju
-    const app = createApp(notificationService);
+    // 5. SIEM
+    const siemLogger = new LogerService();
+    const siemService = new SIEMService(siemLogger);
 
-    // 6. Kreiraj HTTP server
+    // 6. Kreiraj Express aplikaciju
+    const app = createApp(notificationService, siemService);
+
+    // 7. Kreiraj HTTP server
     const httpServer = createServer(app);
 
-    // 7. Inicijalizuj WebSocket
+    // 8. Inicijalizuj WebSocket
     const socketService = new SocketService(httpServer);
 
-    // 8. Injektuj SocketService u NotificationService
+    // 9. Injektuj SocketService u NotificationService
     notificationService.setSocketService(socketService);
 
-    // 9. Pokreni server
+    // 10. Pokreni server
     httpServer.listen(PORT, () => {
       console.log("\x1b[32m╔════════════════════════════════════════╗\x1b[0m");
       console.log("\x1b[32m║    Notification Service Started        ║\x1b[0m");
