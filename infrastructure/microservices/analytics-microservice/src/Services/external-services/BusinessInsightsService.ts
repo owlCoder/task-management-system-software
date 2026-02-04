@@ -16,8 +16,7 @@ export class BusinessInsightsService implements IBusinessInsightsService {
 
     private async buildLLMInput(
         from: string,
-        to: string,
-        services: string[]
+        to: string
     ): Promise<BusinessLLMInputDto> {
         // 1) Activity metrics: poslednjih 30 dana
         const projectLast30 = await this.projectAnalyticsService.getProjectsStartedLast30Days();
@@ -72,8 +71,7 @@ export class BusinessInsightsService implements IBusinessInsightsService {
         }
 
         const input: BusinessLLMInputDto = {
-                time_window: { from, to },
-                services,
+                timeWindow: { from, to },
                 activity,
                 projects_performance: performanceMetrics,
                 projects_financials: financialMetrics
@@ -83,8 +81,8 @@ export class BusinessInsightsService implements IBusinessInsightsService {
     }
 
     
-    public async generateInsights(from: string, to: string, services: string[] = []): Promise<BusinessLLMOutputDTO> {
-        const input = await this.buildLLMInput(from, to, services);
+    public async generateInsights(from: string, to: string): Promise<BusinessLLMOutputDTO> {
+        const input = await this.buildLLMInput(from, to);
         return await this.llmAnalyticsService.analyze(input);
     }
 }

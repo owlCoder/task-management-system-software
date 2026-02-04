@@ -385,7 +385,7 @@ export class AnalyticsController {
                 ? services.split(".").map(s => s.trim()).filter(Boolean)
                 : [];
             
-            const result = await this.businessInsightsService.generateInsights(from, to, serviceArray);
+            const result = await this.businessInsightsService.generateInsights(from, to);
 
             res.status(200).json(result);
         } catch(err) {

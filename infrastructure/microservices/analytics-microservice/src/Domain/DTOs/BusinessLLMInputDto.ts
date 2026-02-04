@@ -21,11 +21,10 @@ export interface ActivityMetricsDto {
 }
 
 export interface BusinessLLMInputDto {
-  time_window: {
+  timeWindow: {
     from: string; // ISO string
     to: string;   // ISO string
   };
-  services: string[]; // npr. ["project-microservice","task-microservice"]
 
   activity: ActivityMetricsDto;
 
