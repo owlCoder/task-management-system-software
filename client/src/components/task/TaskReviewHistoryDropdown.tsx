@@ -41,7 +41,7 @@ export const TaskReviewHistoryDropdown: React.FC<Props> = ({
           </div>
         </div>
 
-        <span className="text-white/60 text-sm">{open ? "^" : "v"}</span>
+        <span className="text-white/60 text-sm">{open ? "▲" : "▼"}</span>
       </button>
 
       {open && (

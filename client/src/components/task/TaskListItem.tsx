@@ -49,7 +49,7 @@ const TaskListItem: React.FC<TaskListItemProps> = ({
 
       <div className="flex justify-between mt-3 text-xs text-white/50">
         <div className="flex gap-4">
-          <span>Cost: {task.estimated_cost}¥</span>
+          <span>Cost: {task.estimated_cost}$</span>
           <span className="text-white/50">Assigned to: {getWorkerName()}</span>
         </div>
         <span className="flex items-center gap-1">

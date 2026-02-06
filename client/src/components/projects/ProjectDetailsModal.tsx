@@ -4,6 +4,7 @@ import type { Props } from "../../types/props/ProjectDetailsModalProps";
 import { useNavigate } from "react-router-dom";
 import { getProjectStatusStyles } from "../../helpers/projectStatusHelper";
 
+
 const formatDate = (dateString: string | null): string => {
     if (!dateString) return "Not set";
     const date = new Date(dateString);
