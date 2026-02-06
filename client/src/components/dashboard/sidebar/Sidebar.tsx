@@ -110,7 +110,7 @@ const Sidebar: React.FC = () => {
               className="w-full h-full object-cover"
               style={{minWidth: '100%', minHeight: '100%'}}
               referrerPolicy="no-referrer"
-              crossOrigin="anonymous"
+              {...(user.image_url.includes('google') && { crossOrigin: "anonymous" })}
             />
           ) : (
             <span className="text-lg font-bold text-white">{user?.username?.charAt(0).toUpperCase()}</span>
