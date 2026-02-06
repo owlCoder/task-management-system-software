@@ -1,5 +1,35 @@
 import { ProjectStatus } from "../enums/ProjectStatus";
 
+export const getProjectStatusStyles = (status: ProjectStatus) => {
+    switch (status) {
+        case ProjectStatus.ACTIVE:
+            return {
+                container: "bg-black/40 text-[#4ade80] border-[#4ade80]/50",
+                dot: "bg-[#4ade80] shadow-[0_0_10px_#4ade80]",
+            };
+        case ProjectStatus.PAUSED:
+            return {
+                container: "bg-black/40 text-[#fbbf24] border-[#fbbf24]/50",
+                dot: "bg-[#fbbf24] shadow-[0_0_10px_#fbbf24]",
+            };
+        case ProjectStatus.COMPLETED:
+            return {
+                container: "bg-black/40 text-[#60a5fa] border-[#60a5fa]/50",
+                dot: "bg-[#60a5fa] shadow-[0_0_10px_#60a5fa]",
+            };
+        case ProjectStatus.NOT_STARTED:
+            return {
+                container: "bg-black/40 text-[#9ca3af] border-[#9ca3af]/50",
+                dot: "bg-[#9ca3af] shadow-[0_0_10px_#9ca3af]",
+            };
+        default:
+            return {
+                container: "bg-black/40 text-[#9ca3af] border-[#9ca3af]/50",
+                dot: "bg-[#9ca3af] shadow-[0_0_10px_#9ca3af]",
+            };
+    }
+};
+
 export const getProjectStatusColor = (status: ProjectStatus): string => {
     switch (status) {
         case ProjectStatus.ACTIVE:

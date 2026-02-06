@@ -1,23 +1,8 @@
 import React from "react";
-import { ProjectStatus } from "../../enums/ProjectStatus";
 import { hasProjectImage } from "../../helpers/image_url";
 import type { Props } from "../../types/props/ProjectCardProps";
 import { UserRole } from "../../enums/UserRole";
-
-const getStatusColor = (status: ProjectStatus): string => {
-    switch (status) {
-        case ProjectStatus.ACTIVE:
-            return "bg-green-500";
-        case ProjectStatus.PAUSED:
-            return "bg-yellow-500";
-        case ProjectStatus.COMPLETED:
-            return "bg-blue-500";
-        case ProjectStatus.NOT_STARTED:
-            return "bg-gray-500";
-        default:
-            return "bg-gray-500";
-    }
-};
+import { getProjectStatusStyles } from "../../helpers/projectStatusHelper";
 
 const canViewProjectDetails = (role?: string): boolean => {
     return role !== UserRole.ANALYTICS_DEVELOPMENT_MANAGER;
@@ -60,6 +45,7 @@ export const ProjectCard: React.FC<Props> = ({
             onView?.(project);
         }
     };
+    const statusStyles = getProjectStatusStyles(project.status);
 
     return (
         <article
@@ -98,10 +84,14 @@ export const ProjectCard: React.FC<Props> = ({
                     <div className="absolute top-2 right-2">
                         <span
                             className={`
-                                px-2 py-1 rounded-full text-xs font-semibold
-                                ${getStatusColor(project.status)} text-white
+                                inline-flex items-center gap-1.5
+                                px-2.5 py-1 rounded-full
+                                text-xs font-semibold
+                                border backdrop-blur-sm
+                                ${statusStyles.container}
                             `}
                         >
+                            <span className={`w-1.5 h-1.5 rounded-full ${statusStyles.dot}`} />
                             {project.status}
                         </span>
                     </div>

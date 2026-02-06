@@ -1,23 +1,8 @@
 import React from "react";
-import { ProjectStatus } from "../../enums/ProjectStatus";
 import { hasProjectImage } from "../../helpers/image_url";
 import type { Props } from "../../types/props/ProjectDetailsModalProps";
 import { useNavigate } from "react-router-dom";
-
-const getStatusColor = (status: ProjectStatus): string => {
-    switch (status) {
-        case ProjectStatus.ACTIVE:
-            return "bg-green-500";
-        case ProjectStatus.PAUSED:
-            return "bg-yellow-500";
-        case ProjectStatus.COMPLETED:
-            return "bg-blue-500";
-        case ProjectStatus.NOT_STARTED:
-            return "bg-gray-500";
-        default:
-            return "bg-gray-500";
-    }
-};
+import { getProjectStatusStyles } from "../../helpers/projectStatusHelper";
 
 const formatDate = (dateString: string | null): string => {
     if (!dateString) return "Not set";
@@ -51,6 +36,8 @@ export const ProjectDetailsModal: React.FC<Props> = ({
             onClose();
         }
     };
+    
+    const statusStyles = getProjectStatusStyles(project.status);
 
     return (
         <div
@@ -121,11 +108,14 @@ export const ProjectDetailsModal: React.FC<Props> = ({
                             </h3>
                             <span
                                 className={`
-                                    inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-semibold
-                                    ${getStatusColor(project.status)} text-white
+                                    inline-flex items-center gap-1.5
+                                    px-2.5 py-1 rounded-full
+                                    text-xs font-semibold
+                                    border backdrop-blur-sm
+                                    ${statusStyles.container}
                                 `}
                             >
-                                <span className="w-2 h-2 rounded-full bg-white/30"></span>
+                                <span className={`w-1.5 h-1.5 rounded-full ${statusStyles.dot}`} />
                                 {project.status}
                             </span>
                         </div>
