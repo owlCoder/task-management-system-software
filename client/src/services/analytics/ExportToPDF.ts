@@ -9,6 +9,7 @@ import { ResourceCostAllocationDto } from "../../models/analytics/ResourceCostAl
 import { ProjectDTO } from "../../models/project/ProjectDTO";
 import { imageToBase64 } from "../../helpers/imageToBase64";
 import { ChartSVGGenerator } from "../../helpers/chartsToSvg";
+import { toast } from "react-hot-toast";
 
 
 interface Last30DaysPayload {
@@ -65,12 +66,14 @@ export class AnalyticsExportService {
   private static async exportPDF(html: string, filename: string) {
     if (!window.electronAPI || !window.electronAPI.exportPdf) {
       console.error("Electron export API not available");
-      alert("PDF export is not available in this environment.");
+      // alert("PDF export is not available in this environment.");
+      toast.error("PDF export is not available in this environment.");
       return;
     }
 
     window.electronAPI.exportPdf({ html, filename });
-    alert("PDF export initiated. Check your Downloads folder.");
+    toast.success("PDF export initiated. Check your Downloads folder.");
+    // alert("PDF export initiated. Check your Downloads folder.");
   }
 
   private static async getLogoBase64(): Promise<string> {

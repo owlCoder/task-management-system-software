@@ -66,6 +66,7 @@ export const BudgetAnalytics: React.FC<BudgetAnalyticsProps> = ({
               domain={[minValue, maxValue]}
             />
             <Tooltip
+              cursor={{ fill: "rgba(255,255,255,0.07)" }}
               contentStyle={{
                 background: "rgba(231, 233, 241, 0.92)",
                 border: "1px solid rgba(255,255,255,0.12)",
@@ -76,7 +77,7 @@ export const BudgetAnalytics: React.FC<BudgetAnalyticsProps> = ({
                 return [formatMoney(Number(value)), "Cost"];
               }}
             />
-            <Bar dataKey="value">
+            <Bar dataKey="value" activeBar={false}>
               {chartData.map((entry, index) => (
                 <Cell key={`cell-${index}`} fill={entry.color} />
               ))}

@@ -70,7 +70,7 @@ export const BurndownAnalytics: React.FC<BurndownAnalyticsProps> = ({
             <div className="flex flex-col">
 
                 {!loading && data && (
-                    <div className="flex-1 overflow-y-auto max-h-[370px] flex flex-col gap-4">
+                    <div className="flex-1 overflow-y-auto styled-scrollbar max-h-[370px] flex flex-col gap-4">
                         {data.tasks.map((task) => (
                             <TaskProgress
                                 key={task.task_id}

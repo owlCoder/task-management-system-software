@@ -30,13 +30,13 @@ type SprintOption = { sprint_id: number; sprint_title?: string };
 
 const TABS: { id: AnalyticsTab; label: string }[] = [
     { id: "LAST_30_DAYS", label: "Last 30 Days" },
-    { id: "BUSINESS_INSIGHTS", label: "AI Insights" },
     { id: "BURNDOWN", label: "Burndown" },
     { id: "BURNUP", label: "Burnup" },
     { id: "VELOCITY", label: "Velocity" },
     { id: "BUDGET", label: "Budget" },
     { id: "PROFIT", label: "Profit Margin" },
     { id: "RESOURCES", label: "Resources" },
+    { id: "BUSINESS_INSIGHTS", label: "AI Insights" },
 ];
 
 export const AnalyticsPage: React.FC = () => {
@@ -106,7 +106,7 @@ export const AnalyticsPage: React.FC = () => {
         try {
             const toDate = new Date().toISOString();
             const fromDate = new Date();
-            fromDate.setHours(fromDate.getHours() - 6); 
+            fromDate.setHours(fromDate.getHours() - 6);
             const fromDateStr = fromDate.toISOString();
 
             const data = await analyticsAPI.getBusinessInsights(fromDateStr, toDate, token);
@@ -266,10 +266,10 @@ export const AnalyticsPage: React.FC = () => {
 
                     setProjectsLast30Days(projects);
                     setWorkersLast30Days(workers);
-                } else if(activeTab === "BUSINESS_INSIGHTS"){
+                } else if (activeTab === "BUSINESS_INSIGHTS") {
                     if (!businessInsights && !loadingAnalytics) {
                         setAnalyticsError(null);
-                    }           
+                    }
                 }
 
 
@@ -335,7 +335,7 @@ export const AnalyticsPage: React.FC = () => {
                 </section>
 
                 {/* TAB CARDS */}
-                <section className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-4 mb-8">
+                <section className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-8 gap-4 mb-8">
                     {TABS.map((tab) => {
                         const active = tab.id === activeTab;
 
@@ -357,7 +357,7 @@ export const AnalyticsPage: React.FC = () => {
 
                 {/* CONTENT CARD */}
                 <section
-                    className={` bg-white/5 backdrop-blur-xl rounded-2xl p-6 shadow-lg border border-white/10 ${activeTab === "LAST_30_DAYS" ? "min-h-[200px]" : "min-h-[200px] max-h-[575px] overflow-auto"}`}>
+                    className={` bg-white/5 backdrop-blur-xl rounded-2xl p-6 shadow-lg border border-white/10 ${activeTab === "LAST_30_DAYS" ? "min-h-[200px]" : "min-h-[200px] max-h-[575px] overflow-auto styled-scrollbar"}`}>
 
                     {analyticsError && <div className="text-red-400 mb-4">{analyticsError}</div>}
 
@@ -462,32 +462,32 @@ export const AnalyticsPage: React.FC = () => {
                         />
                     )}
 
-                {activeTab === "BUSINESS_INSIGHTS" && (
-                <div className="flex flex-col gap-4">
-                    {!businessInsights && !loadingAnalytics && (
-                        <div className="flex flex-col items-center justify-center p-12 border-2 border-dashed border-white/10 rounded-3xl bg-white/5">
-                            <div className="text-5xl mb-4 text-blue-500">✨</div>
-                            <h3 className="text-xl font-bold text-white mb-2">Ready for AI Insights?</h3>
-                            <p className="text-white/50 text-center mb-6 max-w-sm">
-                                AI will analyze the last 6 hours of your project data to give you strategic advice.
-                            </p>
-                            <button 
-                                onClick={handleAIAnalysis}
-                                className="bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-full font-bold shadow-lg shadow-blue-500/20 transition-all hover:scale-105 active:scale-95"
-                            >
-                                Run AI Analysis
-                            </button>
+                    {activeTab === "BUSINESS_INSIGHTS" && (
+                        <div className="flex flex-col gap-4">
+                            {!businessInsights && !loadingAnalytics && (
+                                <div className="flex flex-col items-center justify-center p-12 border-2 border-dashed border-white/10 rounded-3xl bg-white/5">
+                                    <div className="text-5xl mb-4 text-blue-500">✨</div>
+                                    <h3 className="text-xl font-bold text-white mb-2">Ready for AI Insights?</h3>
+                                    <p className="text-white/50 text-center mb-6 max-w-sm">
+                                        AI will analyze the last 6 hours of your project data to give you strategic advice.
+                                    </p>
+                                    <button
+                                        onClick={handleAIAnalysis}
+                                        className="bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-full font-bold shadow-lg shadow-blue-500/20 transition-all hover:scale-105 active:scale-95"
+                                    >
+                                        Run AI Analysis
+                                    </button>
+                                </div>
+                            )}
+
+                            {(businessInsights || loadingAnalytics) && (
+                                <BusinessInsights
+                                    data={businessInsights}
+                                    loading={loadingAnalytics}
+                                />
+                            )}
                         </div>
                     )}
-
-                    {(businessInsights || loadingAnalytics) && (
-                        <BusinessInsights 
-                            data={businessInsights} 
-                            loading={loadingAnalytics} 
-                        />
-                    )}
-                </div>
-            )}
 
 
                 </section>

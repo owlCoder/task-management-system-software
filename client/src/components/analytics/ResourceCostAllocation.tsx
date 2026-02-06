@@ -130,7 +130,7 @@ export const ResourceCostAllocation: React.FC<ResourceCostAllocationProps> = ({
       </div>
 
       {/* List: scroll INSIDE card */}
-      <div className="mt-3 max-h-[150px] overflow-auto pr-1">
+      <div className="mt-3 max-h-[150px] overflow-auto styled-scrollbar pr-1">
         <div className="space-y-2">
           {chartData.map((x: any) => (
             <div
@@ -158,7 +158,7 @@ export const ResourceCostAllocation: React.FC<ResourceCostAllocationProps> = ({
       </div>
       {data && (
         <ExportButton
-          onClick={() => AnalyticsExportService.exportResources({ project, data, usernamesById  })}
+          onClick={() => AnalyticsExportService.exportResources({ project, data, usernamesById })}
           label="Export Resource Cost Allocation for this project"
           classname="ml-4 mr-4"
         />
