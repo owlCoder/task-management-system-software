@@ -36,9 +36,6 @@ export const EditUserForm: React.FC<EditUserFormProps> = ({
         const roles = await userAPI.getUserRolesForCreation(token, impactLevel);
         setAvailableRoles(roles);
 
-        if(roles.length > 0) {
-          setFormData(prev => ({...prev, role_name: roles[0].role_name}));
-        }
       } catch (err) {
         console.error("Failed to load roles: ", err);
         toast.error("Error loading available roles.");
