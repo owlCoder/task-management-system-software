@@ -7,7 +7,7 @@ import { useNavigate } from "react-router-dom";
 const getStatusColor = (status: ProjectStatus): string => {
     switch (status) {
         case ProjectStatus.ACTIVE:
-            return "bg-green-500";
+            return "bg-green-700";
         case ProjectStatus.PAUSED:
             return "bg-yellow-500";
         case ProjectStatus.COMPLETED:
