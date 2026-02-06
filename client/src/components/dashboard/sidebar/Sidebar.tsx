@@ -102,22 +102,34 @@ const Sidebar: React.FC = () => {
 
       {/* Bottom: User info */}
       <div className="mt-6 pt-4 border-t border-white/10 flex items-center gap-3 relative">
-       <div className="w-9 h-9 rounded-full overflow-hidden flex items-center justify-center bg-white/10 shrink-0">
-        {user?.image_url ? (
-          <img
-            src={user.image_url}
-            alt={user.username}
-            className="w-full h-full object-cover"
-            style={{minWidth: '100%', minHeight: '100%'}}
-          />
-        ) : (
-          <span className="text-lg font-bold text-white">{user?.username?.charAt(0).toUpperCase()}</span>
-        )}
-      </div>
+        <div className="w-9 h-9 rounded-full overflow-hidden flex items-center justify-center bg-white/10 shrink-0">
+          {user?.image_url ? (
+            <img
+              src={user.image_url}
+              alt={user.username}
+              className="w-full h-full object-cover"
+              style={{minWidth: '100%', minHeight: '100%'}}
+              referrerPolicy="no-referrer"
+              {...(user.image_url.includes('google') && { crossOrigin: "anonymous" })}
+            />
+          ) : (
+            <span className="text-lg font-bold text-white">{user?.username?.charAt(0).toUpperCase()}</span>
+          )}
+        </div>
 
-        <div className="text-sm flex-1">
-          <div className="font-semibold text-white">{user?.username}</div>
-          <div className="text-xs text-white/70">{user?.role}</div>
+        <div className="text-sm flex-1 min-w-0">
+          <div 
+            className="font-semibold text-white truncate cursor-help" 
+            title={user?.username} // hover tooltip sa punim imenom
+          >
+            {user?.username}
+          </div>
+          <div 
+            className="text-xs text-white/70 truncate"
+            title={user?.role}
+          >
+            {user?.role}
+          </div>
         </div>
 
         {/* Logout icon */}
