@@ -19,11 +19,7 @@ export class SIEMService implements ISIEMService {
   private sendToSIEM(event: SIEMEvent): void {
     const payload = convertEventToSIEMPayload(event);
     this.siemClient.post("/parserEvents/log", payload).catch((err) => {
-      this.loggerService.err(
-        "SIEM",
-        "SEND_EVENT_FAILED",
-        event.url ?? "N/A",
-        event.method ?? "N/A",
+      this.loggerService.log(
         `Failed to send SIEM event: ${err instanceof Error ? err.message : "Unknown"}`,
       );
     });
