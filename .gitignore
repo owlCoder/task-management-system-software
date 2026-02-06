@@ -6,6 +6,4 @@ database/docker-compose.yml
 database/output.txt
 package-lock.json
 .vscode/
-client/dist-electron/main.js
-client/dist-electron/preload.mjs
 node_modules/

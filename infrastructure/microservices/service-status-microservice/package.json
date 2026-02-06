@@ -1,12 +1,12 @@
 {
-  "name": "microservice-users",
+  "name": "service-status-microservice",
   "version": "1.2.0",
   "main": "src/index.ts",
   "scripts": {
     "start": "ts-node src/index.ts",
     "dev": "nodemon src/index.ts",
     "build": "tsc",
-    "start:dist": "node dist/src/index.js",
+    "start:dist": "node dist/index.js",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

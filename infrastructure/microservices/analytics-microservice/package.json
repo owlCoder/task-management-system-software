@@ -1,5 +1,5 @@
 {
-  "name": "project-microservice",
+  "name": "analytics-microservice",
   "version": "1.2.0",
   "main": "src/index.ts",
   "scripts": {
