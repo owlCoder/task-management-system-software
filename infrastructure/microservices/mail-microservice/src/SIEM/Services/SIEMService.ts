@@ -3,12 +3,12 @@ import { createAxiosClient } from "../Domen/axios/client/AxiosClientFactory";
 import { ISIEMService } from "../Domen/services/ISIEMService";
 import { SIEMEvent } from "../Domen/model/SIEMEvent";
 import { convertEventToSIEMPayload } from "../Domen/Helpers/convertes/SIEMPayloadConverter";
-import { ILogerService } from "../Domen/services/ILogerService";
+import { ILoggerService } from "../../Domain/services/ILoggerService";
 
 export class SIEMService implements ISIEMService {
   private readonly siemClient: AxiosInstance;
 
-  constructor(private readonly loggerService: ILogerService) {
+  constructor(private readonly loggerService: ILoggerService) {
     this.siemClient = createAxiosClient(process.env.SIEM!);
   }
 
@@ -20,11 +20,9 @@ export class SIEMService implements ISIEMService {
     const payload = convertEventToSIEMPayload(event);
     this.siemClient.post("/parserEvents/log", payload).catch((err) => {
       this.loggerService.err(
-        "SIEM",
         "SEND_EVENT_FAILED",
-        event.url ?? "N/A",
-        event.method ?? "N/A",
-        `Failed to send SIEM event: ${err instanceof Error ? err.message : "Unknown"}`,
+        `[SIEM] url=${event.url ?? "N/A"} method=${event.method ?? "N/A"} | ${err instanceof Error ? err.message : "Unknown"
+        }`
       );
     });
   }

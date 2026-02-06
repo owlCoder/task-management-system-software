@@ -10,7 +10,6 @@ import { GarbageCollector_Service } from './Services/GCService';
 import { LoggerService } from './Services/LoggerService';
 import { logger } from './infrastructure/Logger';
 import { SIEMService } from './SIEM/Services/SIEMService';
-import { LogerService } from './SIEM/Services/LogerService';
 
 async function bootstrap() {
     const app = express();
@@ -25,8 +24,7 @@ async function bootstrap() {
     const loggerService = new LoggerService(logger);
 
     //SIEM
-    const siemLoger = new LogerService();
-    const SIEMservice = new SIEMService(siemLoger);
+    const SIEMservice = new SIEMService(loggerService);
 
     const healthService = new Health_Service(measurementService,microserviceService,loggerService);
 
