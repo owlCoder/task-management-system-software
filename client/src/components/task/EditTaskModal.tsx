@@ -206,7 +206,7 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({
               Estimated Cost
             </h3>
             <div className="flex items-center gap-2">
-              <span className="text-white/70 text-lg">$</span>
+              <span className="text-white/70 text-lg">¥</span>
               <input
                 type="number"
                 value={estimatedCost}

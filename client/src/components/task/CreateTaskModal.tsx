@@ -7,6 +7,7 @@ import { projectAPI } from "../../api/project/ProjectAPI";
 import { ProjectUserDTO } from "../../models/project/ProjectUserDTO";
 import { TaskTemplateAPI } from "../../api/template/TaskTemplateAPI";
 import { TaskTemplateDTO } from "../../models/task/TaskTemplateDTO";
+import { CreateTemplateDTO } from "../../models/task/CreateTemplateDTO";
 
 const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
   open,
@@ -33,6 +34,47 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
 
   const isProjectManager = (role?: string | null) =>
     normalizeRole(role) === "PROJECTMANAGER";
+
+
+  const handleSaveTemplate = async () => {
+    if (!title.trim() || !description.trim()) {
+      toast.error("Title and Description are required!");
+      return;
+    }
+
+    const selectedUser = users.find((u) => u.user_id === assignedTo);
+    const userRole = normalizeRole(selectedUser?.role_name);
+
+
+    let finalAttachmentType = "General"; 
+    
+    if (userRole === "ANIMATIONWORKER") {
+      finalAttachmentType = "Visual (Image/Video)";
+    } else if (userRole === "AUDIO&MUSICSTAGIST") {
+      finalAttachmentType = "Audio";
+    }
+
+    try {
+      setLoading(true);
+      const templatePayload: CreateTemplateDTO = {
+        template_title: title.trim(),
+        template_description: description.trim(),
+        estimated_cost: estimatedCost,
+        attachment_type: finalAttachmentType,
+        dependencies: []
+      };
+
+      await templateApi.createTemplate(templatePayload);
+      toast.success(`Template saved for ${finalAttachmentType} tasks!`);
+
+      const updated = await templateApi.getTemplates();
+      setTemplates(updated);
+    } catch (err: any) {
+      toast.error(err.message || "Failed to save template.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (open) {
@@ -137,6 +179,7 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
       await api.createTask(Number(sprintId), payload);
       toast.success("Task created successfully!");
       onCreated?.();
+      resetForm();
       onClose();
     } catch (err) {
       console.error("Failed to create task:", err);
@@ -144,6 +187,14 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
     } finally {
       setLoading(false);
     }
+  };
+
+  const resetForm = () => {
+    setTitle("");
+    setDescription("");
+    setEstimatedCost(0);
+    setAssignedTo(undefined);
+    setSelectedTemplateId("");
   };
 
   return (
@@ -270,6 +321,25 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
               </option>
             ))}
           </select>
+        </div>
+
+        <div className="mb-6 pt-2 border-t border-white/5">
+          <button
+            type="button"
+            onClick={handleSaveTemplate}
+            disabled={loading}
+            className="w-full py-2 flex items-center justify-center gap-2 rounded-lg border border-cyan-500/30 bg-cyan-500/10 text-cyan-300 text-[10px] uppercase tracking-[0.2em] hover:bg-cyan-500/20 transition-all duration-300 disabled:opacity-50 cursor-pointer group"
+          >
+            <svg 
+              className="w-3.5 h-3.5 group-hover:scale-110 transition-transform" 
+              fill="none" 
+              stroke="currentColor" 
+              viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
+            </svg>
+            Save as Template
+          </button>
         </div>
 
         {/* Buttons */}
