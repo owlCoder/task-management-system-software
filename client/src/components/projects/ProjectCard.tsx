@@ -166,7 +166,7 @@ export const ProjectCard: React.FC<Props> = ({
 
                 {/* Budget */}
                 <p className="text-white text-muted text-sm flex items-center gap-2">
-                    <svg
+                   <svg
                         width="14"
                         height="14"
                         viewBox="0 0 24 24"
@@ -177,8 +177,10 @@ export const ProjectCard: React.FC<Props> = ({
                         strokeLinejoin="round"
                         className="flex-shrink-0 opacity-80"
                     >
-                        <line x1="12" y1="1" x2="12" y2="23" />
-                        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+                        <path d="M6 3l6 9 6-9" />
+                        <path d="M12 12v8" />
+                        <path d="M8 12h8" />
+                        <path d="M8 16h8" />
                     </svg>
                     {project.allowed_budget.toLocaleString()}
                 </p>

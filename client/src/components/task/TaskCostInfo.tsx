@@ -9,7 +9,7 @@ export const TaskCostInfo: React.FC<TaskCostInfoProps> = ({ task }) => {
       </h3>
 
       <span className="text-xl font-bold text-white">
-        ${task.estimated_cost ?? 0}
+        ¥{task.estimated_cost ?? 0}
       </span>
     </div>
   );

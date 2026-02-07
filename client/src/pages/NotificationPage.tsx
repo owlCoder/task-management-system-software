@@ -159,6 +159,15 @@ const NotificationPage: React.FC<NotificationPageProps> = ({notificationAPI}) =>
     (notification) => !notification.isRead
   ).length;
 
+  // proveri da li medju selektovanim ima neprocitanih/procitanih
+  const selectedNotifs = allNotifications.filter((n) =>
+    selectedNotifications.includes(n.id)
+  );
+  const unreadSelectedCount = selectedNotifs.filter((n) => !n.isRead).length;
+  const readSelectedCount = selectedNotifs.filter((n) => n.isRead).length;
+  const hasUnreadSelected = unreadSelectedCount > 0;
+  const hasReadSelected = readSelectedCount > 0;
+
   // funkcija za obradu promene filtera
   const handleFilterChange = (filter: "all" | "unread") => {
     console.log(`Filter changed to: ${filter}`);
@@ -197,16 +206,23 @@ const NotificationPage: React.FC<NotificationPageProps> = ({notificationAPI}) =>
   // funkcija za mark as read
   const handleMarkAsRead = async () => {
     try {
-      await notificationAPI.markMultipleAsRead(token!,selectedNotifications);
+      // filtriraj samo neprocitane iz selektovanih
+      const unreadIds = allNotifications
+        .filter((n) => selectedNotifications.includes(n.id) && !n.isRead)
+        .map((n) => n.id);
 
-      // WebSocket će automatski ažurirati state!
+      if (unreadIds.length === 0) return;
+
+      await notificationAPI.markMultipleAsRead(token!, unreadIds);
+
+      // WebSocket automatski azurira state
       setAllNotifications(
         allNotifications.map((n) =>
-          selectedNotifications.includes(n.id) ? { ...n, isRead: true } : n
+          unreadIds.includes(n.id) ? { ...n, isRead: true } : n
         )
       );
 
-      const count = selectedNotifications.length;
+      const count = unreadIds.length;
       setSelectedNotifications([]);
       setIsAllSelected(false);
 
@@ -224,16 +240,23 @@ const NotificationPage: React.FC<NotificationPageProps> = ({notificationAPI}) =>
   // funkcija za mark as unread
   const handleMarkAsUnread = async () => {
     try {
-      await notificationAPI.markMultipleAsUnread(token!,selectedNotifications);
+      // filtriraj samo procitane iz selektovanih
+      const readIds = allNotifications
+        .filter((n) => selectedNotifications.includes(n.id) && n.isRead)
+        .map((n) => n.id);
+
+      if (readIds.length === 0) return;
+
+      await notificationAPI.markMultipleAsUnread(token!, readIds);
 
       // WebSocket ce automatski azurirati state!
       setAllNotifications(
         allNotifications.map((n) =>
-          selectedNotifications.includes(n.id) ? { ...n, isRead: false } : n
+          readIds.includes(n.id) ? { ...n, isRead: false } : n
         )
       );
 
-      const count = selectedNotifications.length;
+      const count = readIds.length;
       setSelectedNotifications([]);
       setIsAllSelected(false);
 
@@ -350,6 +373,10 @@ const NotificationPage: React.FC<NotificationPageProps> = ({notificationAPI}) =>
             onMarkAsRead={handleMarkAsRead}
             onMarkAsUnread={handleMarkAsUnread}
             onDeleteSelected={handleDeleteSelected}
+            hasUnreadSelected={hasUnreadSelected}
+            hasReadSelected={hasReadSelected}
+            unreadSelectedCount={unreadSelectedCount}
+            readSelectedCount={readSelectedCount}
           />
         </div>
 

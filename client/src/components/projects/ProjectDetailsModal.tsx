@@ -170,7 +170,7 @@ export const ProjectDetailsModal: React.FC<Props> = ({
                             Allowed Budget
                         </h3>
                         <p className="text-sm text-white font-mono">
-                            ${project.allowed_budget.toLocaleString()}
+                            ¥{project.allowed_budget.toLocaleString()}
                         </p>
                     </div>
 

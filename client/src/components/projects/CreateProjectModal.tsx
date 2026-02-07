@@ -346,7 +346,7 @@ export const CreateProjectModal: React.FC<Props> = ({
                     {/* Allowed Budget */}
                     <div>
                         <h3 className="text-xs uppercase tracking-wider text-white/60 mb-1">
-                            Allowed Budget ($) *
+                            Allowed Budget (¥) *
                         </h3>
                         <input
                             type="number"

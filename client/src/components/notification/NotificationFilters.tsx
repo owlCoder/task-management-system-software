@@ -13,6 +13,10 @@ const NotificationFilters: React.FC<NotificationFiltersProps> = ({
   onMarkAsRead,
   onMarkAsUnread,
   onDeleteSelected,
+  hasUnreadSelected,
+  hasReadSelected,
+  unreadSelectedCount,
+  readSelectedCount,
   className = ""
 }) => {
   const [isSortDropdownOpen, setIsSortDropdownOpen] = useState(false);
@@ -146,28 +150,28 @@ const NotificationFilters: React.FC<NotificationFiltersProps> = ({
         {/* mark as read */}
         <button
           onClick={onMarkAsRead}
-          disabled={selectedCount === 0}
+          disabled={selectedCount === 0 || !hasUnreadSelected}
           className={`${controlButtonBase} ${
-            selectedCount > 0 ? controlButtonActive : controlButtonDisabled
+            selectedCount > 0 && hasUnreadSelected ? controlButtonActive : controlButtonDisabled
           }`}
         >
-          <svg 
-            className="w-4 h-4" 
-            fill="none" 
-            stroke="currentColor" 
+          <svg
+            className="w-4 h-4"
+            fill="none"
+            stroke="currentColor"
             viewBox="0 0 24 24"
           >
-            <path 
-              strokeLinecap="round" 
-              strokeLinejoin="round" 
-              strokeWidth={2} 
-              d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" 
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
             />
           </svg>
           Mark as Read
-          {selectedCount > 0 && (
+          {unreadSelectedCount > 0 && (
             <span className="absolute -top-1 -right-1 min-w-[1.25rem] h-5 px-1.5 rounded-full text-xs font-bold bg-rose-500 text-white flex items-center justify-center shadow">
-              {selectedCount}
+              {unreadSelectedCount}
             </span>
           )}
         </button>
@@ -175,28 +179,28 @@ const NotificationFilters: React.FC<NotificationFiltersProps> = ({
         {/* mark as unread */}
         <button
           onClick={onMarkAsUnread}
-          disabled={selectedCount === 0}
+          disabled={selectedCount === 0 || !hasReadSelected}
           className={`${controlButtonBase} ${
-            selectedCount > 0 ? controlButtonActive : controlButtonDisabled
+            selectedCount > 0 && hasReadSelected ? controlButtonActive : controlButtonDisabled
           }`}
         >
-          <svg 
-            className="w-4 h-4" 
-            fill="none" 
-            stroke="currentColor" 
+          <svg
+            className="w-4 h-4"
+            fill="none"
+            stroke="currentColor"
             viewBox="0 0 24 24"
           >
-            <path 
-              strokeLinecap="round" 
-              strokeLinejoin="round" 
-              strokeWidth={2} 
-              d="M3 19v-8.93a2 2 0 01.89-1.664l7-4.666a2 2 0 012.22 0l7 4.666A2 2 0 0121 10.07V19M3 19a2 2 0 002 2h14a2 2 0 002-2M3 19l6.75-4.5M21 19l-6.75-4.5M3 10l6.75 4.5M21 10l-6.75 4.5m0 0l-1.14.76a2 2 0 01-2.22 0l-1.14-.76" 
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M3 19v-8.93a2 2 0 01.89-1.664l7-4.666a2 2 0 012.22 0l7 4.666A2 2 0 0121 10.07V19M3 19a2 2 0 002 2h14a2 2 0 002-2M3 19l6.75-4.5M21 19l-6.75-4.5M3 10l6.75 4.5M21 10l-6.75 4.5m0 0l-1.14.76a2 2 0 01-2.22 0l-1.14-.76"
             />
           </svg>
           Mark as Unread
-          {selectedCount > 0 && (
+          {readSelectedCount > 0 && (
             <span className="absolute -top-1 -right-1 min-w-[1.25rem] h-5 px-1.5 rounded-full text-xs font-bold bg-rose-500 text-white flex items-center justify-center shadow">
-              {selectedCount}
+              {readSelectedCount}
             </span>
           )}
         </button>

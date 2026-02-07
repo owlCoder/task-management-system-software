@@ -49,12 +49,17 @@ export class TemplateService implements ITemplateService{
 
     async createTemplate(data: CreateTemplateDTO, pm_id: number): Promise<Result<TaskTemplateDTO>> {
         const pmResult = await this.userService.getUserById(pm_id);
+        const normalizeRole = (role?: string | null) =>
+            role ? role.trim().toUpperCase().replace(/[\s_-]+/g, "") : "";
+
 
         if (!pmResult.success) {
             return { success: false, code: ErrorCode.NOT_FOUND, error: "User from header not found" };
         }
 
-        if (pmResult.data.role_name !== 'PROJECT_MANAGER') {
+        const pmRole = normalizeRole(pmResult.data.role_name);
+
+        if (pmRole !== 'PROJECTMANAGER') {
             return { success: false, code: ErrorCode.FORBIDDEN, error: "Only PMs can create templates" };
         }
 
