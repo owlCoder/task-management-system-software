@@ -4,18 +4,19 @@ import { AuthResponseType } from "../../Domain/types/AuthResponse";
 import { ILogerService } from "../../Domain/services/ILogerService";
 import { SeverityEnum } from "../../Domain/enums/SeverityEnum";
 import { IOTPVerificationService } from "../../Domain/services/IOTPVerificationService";
-import { IUserRepository } from "../../Domain/services/IUserRepository";
 import { IEmailService } from "../../Domain/services/IEmailService";
 import { ISessionStore } from "../../Domain/services/ISessionStore";
 import { IOTPGenerator } from "../../Domain/services/IOTPGenerator";
 import { LoginData } from "../../Domain/models/LoginData";
+import { Repository } from "typeorm";
+import { User } from "../../Domain/models/User";
 import { v4 as uuidv4 } from 'uuid';
 
 export class OTPVerificationService implements IOTPVerificationService {
   private readonly loginSessionExpirationMinutes: number = parseInt(process.env.LOGIN_SESSION_EXPIRATION_MINUTES || "5", 10);
 
   constructor(
-    private userRepository: IUserRepository,
+    private userRepository: Repository<User>,
     private emailService: IEmailService,
     private sessionService: ISessionStore,
     private otpGenerator: IOTPGenerator,

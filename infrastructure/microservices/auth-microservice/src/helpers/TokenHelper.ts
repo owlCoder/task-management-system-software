@@ -48,7 +48,7 @@ export class TokenHelper {
     }
 
     const token = this.jwtTokenService.generateJWTToken(userData);
-    const response: any = {
+    const response: TokenAuthResponse = {
       success: true,
       message,
       otp_required: includeOTPRequired ? userData.otp_required : false
@@ -96,9 +96,7 @@ export class TokenHelper {
       message
     };
   }
-  /**
- * Creates successful login response for Google authentication
- */
+
 /**
  * Creates successful login response for Google authentication
  */

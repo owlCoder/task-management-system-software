@@ -1,13 +1,16 @@
 // External libraries
 import bcrypt from "bcryptjs";
+import { Repository } from "typeorm";
 
 // Domain services
 import { IAuthService } from "../../Domain/services/IAuthService";
 import { IEmailService } from "../../Domain/services/IEmailService";
 import { ILogerService } from "../../Domain/services/ILogerService";
 import { ILoginStrategy } from "../../Domain/services/ILoginStrategy";
-import { IRoleRepository } from "../../Domain/services/IRoleRepository";
-import { IUserRepository } from "../../Domain/services/IUserRepository";
+
+// Domain models
+import { User } from "../../Domain/models/User";
+import { UserRole } from "../../Domain/models/UserRole";
 
 // Domain DTOs
 import { GoogleUserInfoDTO } from "../../Domain/DTOs/GoogleUserInfoDTO";
@@ -23,12 +26,12 @@ import { LoginTokenClaims } from "../../Domain/types/LoginTokenClaims";
 
 export class AuthService implements IAuthService {
   constructor(
-    private userRepository: IUserRepository,
+    private userRepository: Repository<User>,
     private passwordStrategy: ILoginStrategy,
     private otpStrategy: ILoginStrategy,
     private emailService: IEmailService,
     private readonly logger: ILogerService,
-    private userRoleRepository: IRoleRepository
+    private userRoleRepository: Repository<UserRole>
   ) { }
 
   /**
@@ -88,15 +91,22 @@ export class AuthService implements IAuthService {
     if (user == null) {
       const role = await this.userRoleRepository.findOne({ where: { role_name: "Project Manager" } });
       console.log(role);
+      if (!role) {
+        this.logger.log(SeverityEnum.ERROR, `Role "Project Manager" not found`);
+        return { authenticated: false };
+      }
       const newUser = this.userRepository.create({
         email: data.email,
         image_url: data.picture,
-        user_role: role?.user_role_id,
+        user_role: role,
         google_id: data.sub
       });
 
       user = await this.userRepository.save(newUser);
       this.logger.log(SeverityEnum.INFO, `New user registered via Google: ${data.email}`);
+    }
+    if (!user) {
+      return { authenticated: false };
     }
     else {
       if (user.is_deleted) {

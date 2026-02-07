@@ -101,7 +101,7 @@ try {
     foreach ($nodeProcess in $activeNodeProcesses) {
         if ($existingNodeProcessIds -notcontains $nodeProcess.Id) {
             try {
-                Stop-Process -Id $nodeProcess.Id -Force -ErrorAction SilentlyContinue
+                & taskkill /t /f /pid $nodeProcess.Id
                 Write-Host "Stopped residual node.exe (PID $($nodeProcess.Id))."
             } catch {
                 Write-Warning "Failed to stop node.exe PID $($nodeProcess.Id). Terminate it manually if it is still running."
@@ -113,7 +113,7 @@ try {
     foreach ($npmProcess in $activeNpmProcesses) {
         if ($existingNpmProcessIds -notcontains $npmProcess.Id) {
             try {
-                Stop-Process -Id $npmProcess.Id -Force -ErrorAction SilentlyContinue
+                & taskkill /t /f /pid $npmProcess.Id
                 Write-Host "Stopped residual npm.exe (PID $($npmProcess.Id))."
             } catch {
                 Write-Warning "Failed to stop npm.exe PID $($npmProcess.Id). Terminate it manually if it is still running."
