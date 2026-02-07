@@ -41,5 +41,6 @@ CREATE TABLE IF NOT EXISTS tasks_db.task_versions (
   total_hours_spent INT NULL,
   worker_id INT NULL,
   due_date DATETIME NULL,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT fk_task_versions_task FOREIGN KEY (task_id) REFERENCES tasks_db.tasks(task_id) ON DELETE CASCADE
 );
