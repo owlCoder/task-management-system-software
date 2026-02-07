@@ -18,8 +18,12 @@ export interface NotificationFiltersProps {
   isAllSelected: boolean;
   onSelectAll: () => void;
   selectedCount: number;
-  onMarkAsRead: () => void;        
-  onMarkAsUnread: () => void;      
+  onMarkAsRead: () => void;
+  onMarkAsUnread: () => void;
   onDeleteSelected: () => void;
+  hasUnreadSelected: boolean;
+  hasReadSelected: boolean;
+  unreadSelectedCount: number;
+  readSelectedCount: number;
   className?: string;
 }
