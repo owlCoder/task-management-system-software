@@ -15,7 +15,7 @@ export const Db = new DataSource({
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
   ssl: { rejectUnauthorized: false },
-  synchronize: true, // automatsko kreiranje tabela u bazi 
+  synchronize: false, // automatsko kreiranje tabela u bazi 
   logging: false, // debug sql gresaka
   entities: [Task, Comment, TaskVersion],
 });

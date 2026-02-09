@@ -12,7 +12,7 @@ export const Db = new DataSource({
   username: process.env.DB_USERNAME || "root",
   password: process.env.DB_PASSWORD || "",
   database: process.env.DB_DATABASE || "notification_service",
-  synchronize: true, // automatsko kreiranje tabela u bazi
+  synchronize: false, // automatsko kreiranje tabela u bazi
   logging: process.env.NODE_ENV === "development",
   entities: [Notification],
   migrations: [],

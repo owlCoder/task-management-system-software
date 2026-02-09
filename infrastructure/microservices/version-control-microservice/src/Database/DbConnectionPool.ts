@@ -16,7 +16,7 @@ export const Db = new DataSource({
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
   ssl: { rejectUnauthorized: false },
-  synchronize: true, //NE PALITE NIKAKO NA TRUE NIJE SVE SREDJENO
+  synchronize: false, //NE PALITE NIKAKO NA TRUE NIJE SVE SREDJENO
   logging: false,
   entities: [Review, ReviewComment, TaskTemplate, TemplateDependency],
 });
